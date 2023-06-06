@@ -1,4 +1,4 @@
-﻿namespace PatchManager.Core.SassyPatches;
+﻿namespace PatchManager.Core.SassyPatches.Interfaces;
 
 public interface ISelectable
 {
