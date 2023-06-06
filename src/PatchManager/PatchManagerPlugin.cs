@@ -52,7 +52,8 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         // Register Harmony patches
         Harmony.CreateAndPatchAll(typeof(PatchManagerPlugin).Assembly);
 
-        Patcher.LoadAssetsDelegate = AssetProviderPatch.LoadByLabel;
+        // Patcher.LoadAssetsDelegate = AssetProviderPatch.LoadByLabel;
+        // Patcher.IsLoaded = true;
     }
 
     public override void OnInitialized()
