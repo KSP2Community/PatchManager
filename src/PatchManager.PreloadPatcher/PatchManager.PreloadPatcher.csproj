@@ -11,7 +11,4 @@
     <ItemGroup>
       <Content Include="Directory.Build.props" />
     </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\PatchManager.Core\PatchManager.Core.csproj" />
-    </ItemGroup>
 </Project>

@@ -3,8 +3,6 @@ using BepInEx;
 using BepInEx.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using MonoMod.Utils;
-using PatchManager.Core.Preload;
 
 namespace PatchManager.PreloadPatcher;
 
