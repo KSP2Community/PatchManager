@@ -6,7 +6,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace PatchManager.Core.Preload;
 
-internal static class AssetProviderPatch
+public static class AssetProviderPatch
 {
     public static bool OldLoadByLabel(
         string label,
@@ -43,7 +43,7 @@ internal static class AssetProviderPatch
     // Why is this not a static method in the original class
     public static void LoadByLabel<T>(string label, Action<T> assetLoadCallback, Action<IList<T>> resultCallback) where T : UnityEngine.Object
     {
-        Logging.LogDebug($"LoadByLabel<{typeof(T).Name}>({label})");
+        Logging.LogInfo($"LoadByLabel<{typeof(T).Name}>({label})");
         // At some point we should inject our code above
         
         if (AssetProvider.IsComponent(typeof(T)))
