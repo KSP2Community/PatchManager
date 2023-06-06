@@ -5,8 +5,6 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using PatchManager.Core.Cache;
 using PatchManager.Core.Utility;
-using PatchManager.Core.Preload;
-using PatchManager.PreloadPatcher;
 using SpaceWarp;
 using SpaceWarp.API.Mods;
 using UnityEngine.AddressableAssets;
