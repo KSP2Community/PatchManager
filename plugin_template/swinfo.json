@@ -1,0 +1,23 @@
+﻿{
+  "spec": "1.2",
+  "mod_id": "PatchManager",
+  "author": "munix",
+  "name": "Patch Manager",
+  "description": "A mod for generic patching needs similar to KSP 1's Module Manager.",
+  "source": "https://github.com/jan-bures/PatchManager",
+  "version": "0.1.0",
+  "version_check": "https://raw.githubusercontent.com/jan-bures/PatchManager/main/plugin_template/swinfo.json",
+  "ksp2_version": {
+    "min": "0.1.2",
+    "max": "*"
+  },
+  "dependencies": [
+    {
+      "id": "com.github.x606.spacewarp",
+      "version": {
+        "min": "1.2.0",
+        "max": "*"
+      }
+    }
+  ]
+}
