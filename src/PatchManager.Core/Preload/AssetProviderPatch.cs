@@ -1,4 +1,5 @@
-﻿using KSP.Assets;
+﻿using JetBrains.Annotations;
+using KSP.Assets;
 using KSP.Game;
 using PatchManager.Core.Utility;
 using UnityEngine.AddressableAssets;
@@ -41,6 +42,7 @@ public static class AssetProviderPatch
     }
     
     // Why is this not a static method in the original class
+    [UsedImplicitly]
     public static void LoadByLabel<T>(string label, Action<T> assetLoadCallback, Action<IList<T>> resultCallback) where T : UnityEngine.Object
     {
         Logging.LogInfo($"LoadByLabel<{typeof(T).Name}>({label})");

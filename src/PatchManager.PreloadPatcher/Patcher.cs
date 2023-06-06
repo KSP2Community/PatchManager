@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -10,6 +11,7 @@ public static class Patcher
 {
     // internal static Func<string, Action<object>, Action<IList<object>>, bool> LoadAssetsDelegate { get; set; }
 
+    [UsedImplicitly]
     public static IEnumerable<string> TargetDLLs { get; } = new[]
     {
         "Assembly-CSharp.dll"
@@ -31,6 +33,7 @@ public static class Patcher
         return genericTypeRef;
     }
 
+    [UsedImplicitly]
     public static void Patch(ref AssemblyDefinition assemblyDefinition)
     {
         // Now we need to get the assembly that we want
