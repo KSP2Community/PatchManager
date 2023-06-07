@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Core", "src\Pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.PreloadPatcher", "src\PatchManager.PreloadPatcher\PatchManager.PreloadPatcher.csproj", "{8BD0F66F-7C47-477D-B519-0118A9F55428}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.SassyPatching", "src\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj", "{38D713EA-A57C-4C0E-9B72-09346D3034EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,5 +40,13 @@ Global
 		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
 		{8BD0F66F-7C47-477D-B519-0118A9F55428}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
 		{8BD0F66F-7C47-477D-B519-0118A9F55428}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Deploy|Any CPU.ActiveCfg = Deploy|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
+		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
 	EndGlobalSection
 EndGlobal

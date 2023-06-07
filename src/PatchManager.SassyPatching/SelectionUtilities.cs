@@ -1,4 +1,6 @@
-﻿namespace PatchManager.Core.SassyPatches;
+﻿using PatchManager.SassyPatching.Interfaces;
+
+namespace PatchManager.SassyPatching;
 
 internal static class SelectionUtilities
 {

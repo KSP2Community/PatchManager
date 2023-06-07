@@ -23,6 +23,7 @@
     <ItemGroup Label="DLL file references">
     </ItemGroup>
     <ItemGroup Label="NuGet package references">
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0" GeneratePathProperty="true" />
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
         <PackageReference Include="BepInEx.Core" Version="5.*" />
@@ -35,5 +36,6 @@
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Core/PatchManager.Core.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.PreloadPatcher/PatchManager.PreloadPatcher.csproj" Private="false" />
+        <ProjectReference Include="..\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" Private="false" />
     </ItemGroup>
 </Project>

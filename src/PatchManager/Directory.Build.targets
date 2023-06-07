@@ -27,6 +27,10 @@
               SourceFiles="$(SolutionDir)/README.md"
               DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/README.txt"/>
 
+        <!-- Copying libaries to build directory -->
+        <Copy SourceFiles="$(PkgAntlr4_Runtime_Standard)/lib/netstandard2.0/Antlr4.Runtime.Standard.dll"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/lib"/>
+        
         <!-- Copying compiled plugin to build directory -->
         <Message Text="Copying plugin DLLs to build directory"/>
         <ItemGroup Label="Plugin DLLs to be copied">
@@ -88,7 +92,8 @@
         <Copy Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="@(DistFolder)"
               DestinationFolder="$(KSP2DIR)/BepInEx/%(RecursiveDir)"/>
-
+        
+        
         <!-- Run game after deploy -->
         <Message Text="Run game" Condition="$(ConfigurationName) == DeployAndRun"/>
         <Exec Command="&quot;$(KSP2DIR)/KSP2_x64.exe&quot;" Condition="$(ConfigurationName) == DeployAndRun"/>

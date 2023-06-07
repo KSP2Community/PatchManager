@@ -1,4 +1,4 @@
-﻿namespace PatchManager.Core.SassyPatches;
+﻿namespace PatchManager.SassyPatching;
 
 public class Value
 {
