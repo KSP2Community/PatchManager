@@ -6,7 +6,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0" />
         <PackageReference Include="BepInEx.Core" Version="5.*" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all" />
         <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" Publicize="true" />
