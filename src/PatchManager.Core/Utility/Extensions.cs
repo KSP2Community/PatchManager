@@ -1,4 +1,6 @@
-﻿namespace PatchManager.Core.Utility;
+﻿using System.Text.RegularExpressions;
+
+namespace PatchManager.Core.Utility;
 
 internal static class Extensions
 {
@@ -11,4 +13,5 @@ internal static class Extensions
         key = keyValuePair.Key;
         value = keyValuePair.Value;
     }
+
 }

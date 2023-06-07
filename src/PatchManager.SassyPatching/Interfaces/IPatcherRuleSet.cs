@@ -1,4 +1,4 @@
-﻿namespace PatchManager.Core.SassyPatches.Interfaces;
+﻿namespace PatchManager.SassyPatching.Interfaces;
 
 
 // Essentially the ruleset requires ISelectable

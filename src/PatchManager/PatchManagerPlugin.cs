@@ -45,8 +45,15 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         Logging.Initialize(Logger);
 
         // Load plugin DLLs
-        Assembly.LoadFile(Path.Combine(Paths.PluginPath, ModGuid, "PatchManager.Core.dll"));
-
+        // Doing it this way won't allow people to put mods in subfolders
+        // Assembly.LoadFile(Path.Combine(Paths.PluginPath, ModGuid, "PatchManager.Core.dll"));
+        // Assembly.LoadFile(Path.Combine(Paths.PluginPath, ModGuid, ))
+        var path = new FileInfo(Assembly.GetExecutingAssembly().Location);
+        var dir = path.Directory!;
+        Assembly.LoadFile(Path.Combine(dir.FullName, "PatchManager.Core.dll"));
+        Assembly.LoadFile(Path.Combine(dir.FullName, "PatchManager.SassyPatching.dll"));
+        Assembly.LoadFile(Path.Combine(dir.FullName, "lib", "Antlr4.Runtime.Standard.dll"));
+        
         // Register Harmony patches
         Harmony.CreateAndPatchAll(typeof(PatchManagerPlugin).Assembly);
 

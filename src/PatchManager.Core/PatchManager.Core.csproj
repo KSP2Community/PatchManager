@@ -2,17 +2,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <!-- References -->
     <ItemGroup Label="NuGet package references">
-        <PackageReference Include="Antlr4" Version="4.6.6">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0" />
         <PackageReference Include="BepInEx.Core" Version="5.*" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all" />
         <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" Publicize="true" />
-    </ItemGroup>
-    <ItemGroup>
-      <Content Include="SassyPatchGrammar\sassy_lexer.g4" />
-      <Content Include="SassyPatchGrammar\sassy_parser.g4" />
     </ItemGroup>
 </Project>

@@ -29,7 +29,7 @@ top_level_else          : top_level_else_else | top_level_else_if;
 
 top_level_else_else     : PRE_ELSE LEFT_BRACE body=top_level_statement* RIGHT_BRACE;
 
-top_level_else_if       : PRE_ELSE_IF LEFT_BRACE body=top_level_statement* RIGHT_BRACE;
+top_level_else_if       : PRE_ELSE_IF cond=sub_expression LEFT_BRACE body=top_level_statement* RIGHT_BRACE els=top_level_else?;
 
 selection_block         : attributed_selector LEFT_BRACE selector_body RIGHT_BRACE;
 
@@ -84,7 +84,7 @@ sel_level_else          : sel_level_else_else | sel_level_else_if;
 
 sel_level_else_else     : PRE_ELSE LEFT_BRACE body=selector_statement* RIGHT_BRACE;
 
-sel_level_else_if       : PRE_ELSE_IF LEFT_BRACE body=selector_statement* RIGHT_BRACE;
+sel_level_else_if       : PRE_ELSE_IF cond=sub_expression LEFT_BRACE body=selector_statement* RIGHT_BRACE els=sel_level_else?;
 
 set_value               : SET expr=expression SEMICOLON;
 
@@ -162,7 +162,7 @@ argument                : key=VARIABLE COLON val=sub_expression #named_argument
 
 arg_decl_list           : (arg_decl? (COMMA arg_decl)*)? COMMA?;
 
-arg_decl                : name=VARIABLE                             #argument_without_default
+arg_decl                : name=VARIABLE                           #argument_without_default
                         | name=VARIABLE COLON val=sub_expression  #argument_with_default
                         ;
 
@@ -179,6 +179,6 @@ fn_level_else           : fn_level_else_else | fn_level_else_if;
 
 fn_level_else_else      : PRE_ELSE LEFT_BRACE body=function_statement* RIGHT_BRACE;
 
-fn_level_else_if        : PRE_ELSE_IF LEFT_BRACE body=function_statement* RIGHT_BRACE;
+fn_level_else_if        : PRE_ELSE_IF cond=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE els=fn_level_else?;
 
 fn_return               : RETURN sub_expression SEMICOLON;
