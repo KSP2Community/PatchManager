@@ -28,7 +28,8 @@
               DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/README.txt"/>
 
         <!-- Copying libaries to build directory -->
-        <Copy SourceFiles="$(PkgAntlr4_Runtime_Standard)/lib/netstandard2.0/Antlr4.Runtime.Standard.dll"
+        <Message Text="Copying plugin dependencies to build directory"/>
+        <Copy SourceFiles="$(NuGetPackageRoot)/Antlr4.Runtime.Standard/4.13.0/lib/netstandard2.0/Antlr4.Runtime.Standard.dll"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/lib"/>
         
         <!-- Copying compiled plugin to build directory -->

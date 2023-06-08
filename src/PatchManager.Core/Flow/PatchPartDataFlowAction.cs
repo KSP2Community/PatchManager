@@ -1,26 +1,37 @@
-﻿using PatchManager.Core.Utility;
-using KSP.Game.Flow;
+﻿using PatchManager.Core.Assets;
+using PatchManager.Shared;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace PatchManager.Core.Flow;
 
-public class PatchPartDataFlowAction : FlowAction
+/// <summary>
+/// Loads all part data from the game and replaces it with the data from the patch folder.
+/// </summary>
+public class PatchPartDataFlowAction : IAction
 {
     private const string Label = "parts_data";
 
     private readonly string _cachePath;
     private readonly string _patchesPath;
 
+    /// <inheritdoc/>
+    public string Name => "JSON Manager: patching part data";
+
+    /// <summary>
+    /// Creates an instance of the action.
+    /// </summary>
+    /// <param name="cachePath">Path to the folder where the patched files will be cached.</param>
+    /// <param name="patchesPath">Path to the folder from where patches will be loaded.</param>
     public PatchPartDataFlowAction(string cachePath, string patchesPath)
-        : base("JSON Manager: patching part data")
     {
         _cachePath = cachePath;
         _patchesPath = patchesPath;
     }
 
-    public override void DoAction(Action resolve, Action<string> reject)
+    /// <inheritdoc/>
+    public void DoAction(Action resolve, Action<string> reject)
     {
         try
         {
