@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Users/arall/PatchManager/src/PatchManager.Core/SassyPatchGrammar\sassy_lexer.g4 by ANTLR 4.12.0
+// Generated from C:/Users/arall/PatchManager/src/PatchManager.SassyPatching/SassyPatchGrammar\sassy_lexer.g4 by ANTLR 4.12.0
 
 // Unreachable code detected
 #pragma warning disable 0162

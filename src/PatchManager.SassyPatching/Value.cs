@@ -1,4 +1,8 @@
-﻿namespace PatchManager.SassyPatching;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+using HarmonyLib;
+
+namespace PatchManager.SassyPatching;
 
 public class IncorrectTypeException : Exception
 {
@@ -128,5 +132,45 @@ public class Value
     public static implicit operator Value(Dictionary<string, Value> d)
     {
         return new Value(ValueType.Dictionary, d);
+    }
+
+    public override string ToString()
+    {
+        if (IsNone)
+        {
+            return "null";
+        }
+
+        if (IsBoolean)
+        {
+            return Boolean.ToString();
+        }
+
+        if (IsNumber)
+        {
+            return Number.ToString(CultureInfo.InvariantCulture);
+        }
+
+        if (IsString)
+        {
+            return "'" + Regex.Escape(String) + "'";
+        }
+
+        if (IsList)
+        {
+            return "[" + String.Join(",",List.Select(x => x.ToString())) + "]";
+        }
+
+        if (IsDictionary)
+        {
+            return "{" + String.Join(",",Dictionary.Select(x => "'" + Regex.Escape(x.Key) + $"':{x.Value}")) + "}";
+        }
+
+        if (IsDeletion)
+        {
+            return "@delete";
+        }
+
+        return "<unknown>";
     }
 }

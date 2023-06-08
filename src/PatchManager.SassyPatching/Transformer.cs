@@ -18,23 +18,23 @@ namespace PatchManager.SassyPatching;
 
 public class Transformer : sassy_parserBaseVisitor<Node>
 {
-    private readonly ManualLogSource _logSource;
+    private readonly Action<string> _logError;
     public bool Errored;
-    public Transformer( ManualLogSource logSource)
+    public Transformer( Action<string> logError)
     {
-        _logSource = logSource;
+        _logError = logError;
     }
 
     private Node Error(Coordinate location, string error)
     {
-        _logSource.LogError($"{location.ToString()}: {error}");
+        _logError($"{location.ToString()}: {error}");
         Errored = true;
         return new ErrorNode(location, error);
     }
     
     public override Node VisitPatch(sassy_parser.PatchContext context) =>
         new SassyPatch(context.GetCoordinate(),
-            context.children.Select(Visit)
+            context.top_level_statement().Select(Visit)
                 .ToList());
 
     public override Node VisitImport_declaration(sassy_parser.Import_declarationContext context) =>

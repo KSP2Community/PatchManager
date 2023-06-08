@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.PreloadPatcher
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.SassyPatching", "src\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj", "{38D713EA-A57C-4C0E-9B72-09346D3034EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.SassyPatching.Tests", "src\PatchManager.SassyPatching.Tests\PatchManager.SassyPatching.Tests.csproj", "{95F3322B-A566-4BAB-8370-20C92EACDBC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,13 @@ Global
 		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
 		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
 		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.Deploy|Any CPU.ActiveCfg = Deploy|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
+		{95F3322B-A566-4BAB-8370-20C92EACDBC1}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
 	EndGlobalSection
 EndGlobal
