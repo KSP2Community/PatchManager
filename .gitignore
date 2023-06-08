@@ -14,8 +14,8 @@ _UpgradeReport_Files/
 [Ee]xternal_dlls/*
 ![Ee]xternal_dlls/PUT_EXTERNAL_DLLS_HERE
 
-# Rider
-*.csproj.DotSettings
+# Local testing files
+plugin_template/patches/*.json
 
 # User specific
 **/.idea/**/workspace.xml
