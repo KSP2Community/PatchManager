@@ -126,7 +126,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             Visit(context.attributed_selector()
                 .selector()) as Selector,
             context.selector_body()
-                .children.Select(Visit)
+                .selector_statement().Select(Visit)
                 .ToList());
 
     public override Node VisitRequire_mod(sassy_parser.Require_modContext context) =>
@@ -459,4 +459,10 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitMixin_include(sassy_parser.Mixin_includeContext context) =>
         new MixinInclude(context.GetCoordinate(), context.mixin.Text,
         context.args.children.Select(Visit).Cast<CallArgument>().ToList());
+
+    public override Node VisitArgument_without_default(sassy_parser.Argument_without_defaultContext context)
+        => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst());
+
+    public override Node VisitArgument_with_default(sassy_parser.Argument_with_defaultContext context)
+        => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst(),Visit(context.val));
 }

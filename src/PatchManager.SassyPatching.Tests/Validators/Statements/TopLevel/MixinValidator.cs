@@ -2,7 +2,7 @@
 
 namespace PatchManager.SassyPatching.Tests.Validators.Statements.TopLevel;
 
-public class FunctionValidator : ParseValidator<Function>
+public class MixinValidator : ParseValidator<Mixin>
 {
     public string Name;
     
@@ -10,7 +10,7 @@ public class FunctionValidator : ParseValidator<Function>
 
     public List<ParseValidator> Body;
 
-    public override bool Validate(Function node)
+    public override bool Validate(Mixin node)
     {
         if (node.Name != Name) return false;
         if (Arguments.Count != node.Arguments.Count) return false;
