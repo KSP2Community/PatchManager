@@ -4,6 +4,7 @@
 
     <!-- Build configuration -->
     <PropertyGroup>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <BaseOutputPath>$(PatcherBinPath)/$(MSBuildProjectName)</BaseOutputPath>
         <BaseIntermediateOutputPath>$(SolutionDir)build/obj/patcher/$(MSBuildProjectName)</BaseIntermediateOutputPath>
     </PropertyGroup>
