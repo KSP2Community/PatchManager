@@ -30,7 +30,7 @@ public static class ModuleManager
             .Where(type => typeof(IModule).IsAssignableFrom(type))
             .ToList();
 
-        if (modules.Count() != 1)
+        if (modules.Count != 1)
         {
             Logging.LogError(
                 $"Assembly {assembly.FullName} should contain a single class implementing {typeof(IModule).FullName}"
