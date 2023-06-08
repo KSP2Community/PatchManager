@@ -1492,6 +1492,18 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitFn_return([NotNull] sassy_parser.Fn_returnContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.mixin_include"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMixin_include([NotNull] sassy_parser.Mixin_includeContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.mixin_include"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMixin_include([NotNull] sassy_parser.Mixin_includeContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

@@ -76,6 +76,7 @@ selector_statement      : var_decl
                         | merge_value
                         | field_set
                         | selection_block
+                        | mixin_include
                         ;
                         
 sel_level_conditional   : PRE_IF cond=sub_expression LEFT_BRACE body=selector_statement* RIGHT_BRACE els=sel_level_else?;
@@ -182,3 +183,5 @@ fn_level_else_else      : PRE_ELSE LEFT_BRACE body=function_statement* RIGHT_BRA
 fn_level_else_if        : PRE_ELSE_IF cond=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE els=fn_level_else?;
 
 fn_return               : RETURN sub_expression SEMICOLON;
+
+mixin_include           : INCLUDE mixin=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN;

@@ -1,5 +1,12 @@
 ﻿namespace PatchManager.SassyPatching;
 
+public class IncorrectTypeException : Exception
+{
+    public IncorrectTypeException(string message) : base(message)
+    {
+    }
+}
+
 public class Value
 {
     public enum ValueType
@@ -9,7 +16,7 @@ public class Value
         Number,
         String,
         List,
-        Object,
+        Dictionary,
         Deletion
     }
 
@@ -22,6 +29,72 @@ public class Value
         Object = o;
     }
 
+    private void CheckType(ValueType toCheck)
+    {
+        if (Type != toCheck)
+        {
+            throw new IncorrectTypeException($"Attempting to read Value of type {Type} as a value of type {toCheck}");
+        }
+    }
+
+    public bool IsNone => Type == ValueType.None;
+
+    public bool IsBoolean => Type == ValueType.Boolean;
+
+    public bool Boolean
+    {
+        get
+        {
+            CheckType(ValueType.Boolean);
+            return (bool)Object;
+        }
+    }
+
+    public bool IsNumber => Type == ValueType.Number;
+
+    public double Number
+    {
+        get
+        {
+            CheckType(ValueType.Number);
+            return (double)Object;
+        }
+    }
+
+    public bool IsString => Type == ValueType.String;
+
+    public string String
+    {
+        get
+        {
+            CheckType(ValueType.String);
+            return (string)Object;
+        }
+    }
+
+    public bool IsList => Type == ValueType.List;
+
+    public List<Value> List
+    {
+        get
+        {
+            CheckType(ValueType.List);
+            return (List<Value>)Object;
+        }
+    }
+
+    public bool IsDictionary => Type == ValueType.Dictionary;
+
+    public Dictionary<string, Value> Dictionary
+    {
+        get
+        {
+            CheckType(ValueType.Dictionary);
+            return (Dictionary<string, Value>)Object;
+        }
+    }
+
+    public bool IsDeletion => Type == ValueType.Deletion;
 
     public static implicit operator Value(bool b)
     {
@@ -45,6 +118,6 @@ public class Value
 
     public static implicit operator Value(Dictionary<string, Value> d)
     {
-        return new Value(ValueType.Object, d);
+        return new Value(ValueType.Dictionary, d);
     }
 }

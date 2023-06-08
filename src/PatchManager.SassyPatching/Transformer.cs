@@ -2,6 +2,15 @@
 using Antlr4.Runtime.Tree;
 using BepInEx.Logging;
 using PatchManager.SassyPatching.Nodes;
+using PatchManager.SassyPatching.Nodes.Attributes;
+using PatchManager.SassyPatching.Nodes.Expressions;
+using PatchManager.SassyPatching.Nodes.Expressions.Binary;
+using PatchManager.SassyPatching.Nodes.Expressions.Unary;
+using PatchManager.SassyPatching.Nodes.Indexers;
+using PatchManager.SassyPatching.Nodes.Selectors;
+using PatchManager.SassyPatching.Nodes.Statements;
+using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
+using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 using SassyPatchGrammar;
 
 namespace PatchManager.SassyPatching;
@@ -279,5 +288,82 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitString_indexor(sassy_parser.String_indexorContext context) =>
         new StringIndexer(context.GetCoordinate(), context.elem.Text.Unescape());
-    
+
+    public override Node VisitImplicit_add(sassy_parser.Implicit_addContext context) =>
+        new ImplicitAdd(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
+
+    public override Node VisitImplicit_subtract(sassy_parser.Implicit_subtractContext context) =>
+        new ImplicitSubtract(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
+
+    public override Node VisitImplicit_multiply(sassy_parser.Implicit_multiplyContext context) =>
+        new ImplicitMultiply(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
+
+    public override Node VisitImplicit_divide(sassy_parser.Implicit_divideContext context) =>
+        new ImplicitDivide(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
+
+    public override Node VisitNot_equal_to(sassy_parser.Not_equal_toContext context) =>
+        new NotEqualTo(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitVariable_reference(sassy_parser.Variable_referenceContext context) =>
+        new VariableReference(context.GetCoordinate(),context.VARIABLE().GetText().TrimFirst());
+
+    public override Node VisitEqual_to(sassy_parser.Equal_toContext context) =>
+        new EqualTo(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitIndexor(sassy_parser.IndexorContext context) =>
+        new Subscript(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitOr(sassy_parser.OrContext context) =>
+        new Or(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitLesser_than_equal(sassy_parser.Lesser_than_equalContext context) =>
+        new LesserThanEqual(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitSubtraction(sassy_parser.SubtractionContext context) =>
+        new Subtract(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitPositive(sassy_parser.PositiveContext context) =>
+        new Positive(context.GetCoordinate(), Visit(context.child) as Expression);
+
+    public override Node VisitSimple_call(sassy_parser.Simple_callContext context) =>
+        new SimpleCall(context.GetCoordinate(), context.lhs.Text,
+            context.args.children.Select(Visit).Cast<CallArgument>().ToList());
+
+    public override Node VisitDivision(sassy_parser.DivisionContext context) =>
+        new Divide(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitNegative(sassy_parser.NegativeContext context) =>
+        new Negate(context.GetCoordinate(), Visit(context.child) as Expression);
+
+    public override Node VisitNot(sassy_parser.NotContext context) =>
+        new Not(context.GetCoordinate(), Visit(context.child) as Expression);
+
+    public override Node VisitLesser_than(sassy_parser.Lesser_thanContext context) =>
+        new LesserThan(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitMember_call(sassy_parser.Member_callContext context) =>
+        new MemberCall(context.GetCoordinate(), Visit(context.lhs) as Expression, context.name.Text,
+            context.args.children.Select(Visit).Cast<CallArgument>().ToList());
+
+    public override Node VisitGreater_than(sassy_parser.Greater_thanContext context) =>
+        new GreaterThan(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitAnd(sassy_parser.AndContext context) =>
+        new And(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitMultiplication(sassy_parser.MultiplicationContext context) =>
+        new Multiply(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitRemainder(sassy_parser.RemainderContext context) =>
+        new Remainder(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitGreater_than_equal(sassy_parser.Greater_than_equalContext context) =>
+        new GreaterThanEqual(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitTernary(sassy_parser.TernaryContext context) =>
+        new Ternary(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.cond) as Expression,
+            Visit(context.rhs) as Expression);
+
+    public override Node VisitAddition(sassy_parser.AdditionContext context) =>
+        new Add(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
 }
