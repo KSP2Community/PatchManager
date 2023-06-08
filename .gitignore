@@ -15,6 +15,7 @@ _UpgradeReport_Files/
 ![Ee]xternal_dlls/PUT_EXTERNAL_DLLS_HERE
 
 # Rider
+*.csproj.DotSettings
 
 # User specific
 **/.idea/**/workspace.xml

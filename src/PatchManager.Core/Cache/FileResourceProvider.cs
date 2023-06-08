@@ -1,4 +1,4 @@
-﻿using PatchManager.Core.Utility;
+﻿using PatchManager.Shared;
 using UnityEngine;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
@@ -6,6 +6,10 @@ namespace PatchManager.Core.Cache;
 
 internal class FileResourceProvider : ResourceProviderBase
 {
+    /// <summary>
+    /// Provides assets found by <see cref="FileResourceLocator"/>.
+    /// </summary>
+    /// <param name="provideHandle">Contains the data needed to provide the requested asset.</param>
     public override void Provide(ProvideHandle provideHandle)
     {
         try

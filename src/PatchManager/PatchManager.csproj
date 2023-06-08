@@ -20,22 +20,15 @@
     </Target>
 
     <!-- References -->
-    <ItemGroup Label="DLL file references">
-    </ItemGroup>
     <ItemGroup Label="NuGet package references">
-        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0" GeneratePathProperty="true" />
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
-        <PackageReference Include="BepInEx.Core" Version="5.*" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-        <PackageReference Include="HarmonyX" Version="2.10.1" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all" />
         <PackageReference Include="SpaceWarp" Version="1.2.0" />
-        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" Publicize="true" />
     </ItemGroup>
     <ItemGroup Label="Project references">
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Core/PatchManager.Core.csproj" Private="false" />
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager.PreloadPatcher/PatchManager.PreloadPatcher.csproj" Private="false" />
-        <ProjectReference Include="..\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" />
     </ItemGroup>
 </Project>

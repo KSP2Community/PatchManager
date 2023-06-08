@@ -1,37 +1,51 @@
 ﻿using System.Reflection;
 using BepInEx;
-using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
-using PatchManager.Core.Cache;
-using PatchManager.Core.Utility;
+using PatchManager.Shared;
+using PatchManager.Shared.Modules;
 using SpaceWarp;
 using SpaceWarp.API.Mods;
-using UnityEngine.AddressableAssets;
 
 namespace PatchManager;
 
+/// <summary>
+/// Main plugin class
+/// </summary>
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 [BepInDependency(SpaceWarpPlugin.ModGuid, SpaceWarpPlugin.ModVer)]
 public class PatchManagerPlugin : BaseSpaceWarpPlugin
 {
+    /// <summary>
+    /// BepInEx GUID of the mod
+    /// </summary>
     [PublicAPI] public const string ModGuid = MyPluginInfo.PLUGIN_GUID;
+    /// <summary>
+    /// Name of the mod
+    /// </summary>
     [PublicAPI] public const string ModName = MyPluginInfo.PLUGIN_NAME;
+    /// <summary>
+    /// Version of the mod
+    /// </summary>
     [PublicAPI] public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
-    internal static PatchManagerPlugin Instance { get; private set; }
-    public new static ManualLogSource Logger { get; set; }
-
-    internal string CachePath;
-    internal string PatchesPath;
+    /// <summary>
+    /// Path to the folder where files are stored after patches get applied
+    /// </summary>
+    public static string CachePath { get; private set; }
+    /// <summary>
+    /// Temporary folder from where patches are loaded and applied
+    /// TODO: Make patches load from all mods' `patches` folders
+    /// </summary>
+    public static string PatchesPath { get; private set; }
 
     private void Awake()
     {
-        Logger = base.Logger;
-        Instance = this;
-
         CachePath = Path.Combine(Paths.PluginPath, ModGuid, "cache");
         PatchesPath = Path.Combine(Paths.PluginPath, ModGuid, "patches");
+
+        // Initialize logging
+        Logging.Initialize(Logger);
 
         // Clean up cache folder (for debugging purposes)
         if (Directory.Exists(CachePath))
@@ -41,30 +55,34 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
 
         Directory.CreateDirectory(CachePath);
 
-        // Initialize logging
-        Logging.Initialize(Logger);
-
-        // Load plugin DLLs
-        // Doing it this way won't allow people to put mods in subfolders
-        // Assembly.LoadFile(Path.Combine(Paths.PluginPath, ModGuid, "PatchManager.Core.dll"));
-        // Assembly.LoadFile(Path.Combine(Paths.PluginPath, ModGuid, ))
+        // Load library DLLs
         var path = new FileInfo(Assembly.GetExecutingAssembly().Location);
         var dir = path.Directory!;
-        Assembly.LoadFile(Path.Combine(dir.FullName, "PatchManager.Core.dll"));
-        Assembly.LoadFile(Path.Combine(dir.FullName, "PatchManager.SassyPatching.dll"));
         Assembly.LoadFile(Path.Combine(dir.FullName, "lib", "Antlr4.Runtime.Standard.dll"));
-        
-        // Register Harmony patches
-        Harmony.CreateAndPatchAll(typeof(PatchManagerPlugin).Assembly);
+        Assembly.LoadFile(Path.Combine(dir.FullName, "PatchManager.SassyPatching.dll"));
 
-        // Patcher.LoadAssetsDelegate = AssetProviderPatch.LoadByLabel;
-        // Patcher.IsLoaded = true;
+        // Load module DLLs
+        ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Core.dll"));
     }
 
+    private void Start()
+    {
+        // Register Harmony patches
+        var harmony = Harmony.CreateAndPatchAll(typeof(PatchManagerPlugin).Assembly);
+        foreach (var module in ModuleManager.Modules)
+        {
+            harmony.PatchAll(module.GetType().Assembly);
+        }
+
+        // Preload modules
+        ModuleManager.PreloadAll();
+    }
+
+    /// <summary>
+    /// Called after the game is initialized
+    /// </summary>
     public override void OnInitialized()
     {
-        Logger.LogInfo("Registering resource locator");
-        Addressables.ResourceManager.ResourceProviders.Add(new FileResourceProvider());
-        Game.Assets.RegisterResourceLocator(new FileResourceLocator());
+        ModuleManager.LoadAll();
     }
 }
