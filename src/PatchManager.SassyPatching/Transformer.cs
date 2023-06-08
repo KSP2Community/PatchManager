@@ -366,4 +366,44 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitAddition(sassy_parser.AdditionContext context) =>
         new Add(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    public override Node VisitValue_deletion(sassy_parser.Value_deletionContext context)
+        => new ValueNode(context.GetCoordinate(), new Value(Value.ValueType.Deletion, null));
+
+    public override Node VisitBoolean_true(sassy_parser.Boolean_trueContext context)
+        => new ValueNode(context.GetCoordinate(), true);
+
+    public override Node VisitBoolean_false(sassy_parser.Boolean_falseContext context)
+        => new ValueNode(context.GetCoordinate(), false);
+
+    public override Node VisitNumber_value(sassy_parser.Number_valueContext context)
+    {
+        var location = context.GetCoordinate();
+        if (double.TryParse(context.NUMBER().GetText(), out var dbl))
+        {
+            return new ValueNode(location, dbl);
+        }
+        return Error(location, "Numbers must be parsable as a double precision floating point number");
+    }
+
+    public override Node VisitString_value(sassy_parser.String_valueContext context)
+        => new ValueNode(context.GetCoordinate(), context.STRING().GetText().Unescape());
+
+    public override Node VisitNone(sassy_parser.NoneContext context)
+        => new ValueNode(context.GetCoordinate(), new Value(Value.ValueType.None, null));
+
+    public override Node VisitList_value(sassy_parser.List_valueContext context)
+        => new ListNode(context.GetCoordinate(),
+            context.list().list_values().sub_expression().Select(Visit).Cast<Expression>().ToList());
+
+    public override Node VisitObject_value(sassy_parser.Object_valueContext context)
+        => new ObjectNode(context.GetCoordinate(),
+            context.obj().obj_values().key_value().Select(Visit).Cast<KeyValueNode>()
+                .ToDictionary(x => x.Key, x => x.Value));
+
+    public override Node VisitLiteral_key(sassy_parser.Literal_keyContext context)
+        => new KeyValueNode(context.GetCoordinate(), context.key.Text, Visit(context.val) as Expression);
+
+    public override Node VisitString_key(sassy_parser.String_keyContext context)
+        => new KeyValueNode(context.GetCoordinate(), context.key.Text.Unescape(), Visit(context.val) as Expression);
 }

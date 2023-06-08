@@ -1,4 +1,4 @@
-﻿using PatchManager.SassyPatching.Execptions;
+﻿using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
@@ -15,7 +15,7 @@ public class Subtract : Binary
             return leftHandSide.Number - rightHandSide.Number;
         }
 
-        throw new BinaryExpressionTypeException("subtract", leftHandSide.Type.ToString(),
+        throw new BinaryExpressionTypeException(Coordinate,"subtract", leftHandSide.Type.ToString(),
             rightHandSide.Type.ToString());
     }
 

@@ -7,14 +7,9 @@ public class Or : Binary
     }
 
     // This should only be called if the left hand side is falsy
-    public override Value GetResult(Value leftHandSide, Value rightHandSide) => 
-        (rightHandSide.IsBoolean && rightHandSide.Boolean) ||
-        (rightHandSide.IsNumber && rightHandSide.Number > 0) || (rightHandSide.IsString) ||
-        (rightHandSide.IsList) || (rightHandSide.IsDictionary);
+    public override Value GetResult(Value leftHandSide, Value rightHandSide) => rightHandSide.Truthy;
 
-    public override bool ShortCircuitOn(Value value) => (value.IsBoolean && value.Boolean) ||
-                                                        (value.IsNumber && value.Number > 0) || (value.IsString) ||
-                                                        (value.IsList) || (value.IsDictionary);
+    public override bool ShortCircuitOn(Value value) => value.Truthy;
 
     public override Value ShortCircuitValue => true;
 }

@@ -12,4 +12,8 @@ public class Ternary : Expression
         Condition = condition;
         RightHandSide = rightHandSide;
     }
+
+    public override Value Compute(Environment environment) => Condition.Compute(environment).Truthy
+        ? LeftHandSide.Compute(environment)
+        : RightHandSide.Compute(environment);
 }

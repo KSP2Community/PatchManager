@@ -16,4 +16,16 @@ public abstract class Binary : Expression
     public abstract bool ShortCircuitOn(Value value);
 
     public abstract Value ShortCircuitValue { get; }
+
+    public override Value Compute(Environment environment)
+    {
+        var lhs = LeftHandSide.Compute(environment);
+        if (ShortCircuitOn(lhs))
+        {
+            return ShortCircuitValue;
+        }
+
+        var rhs = RightHandSide.Compute(environment);
+        return GetResult(lhs, rhs);
+    }
 }

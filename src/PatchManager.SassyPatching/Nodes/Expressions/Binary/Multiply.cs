@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using PatchManager.SassyPatching.Execptions;
+using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
@@ -36,7 +36,7 @@ public class Multiply : Binary
             return ListRepeat(rightHandSide, leftHandSide);
         }
 
-        throw new BinaryExpressionTypeException("multiply", leftHandSide.Type.ToString(),
+        throw new BinaryExpressionTypeException(Coordinate,"multiply", leftHandSide.Type.ToString(),
             rightHandSide.Type.ToString());
     }
 

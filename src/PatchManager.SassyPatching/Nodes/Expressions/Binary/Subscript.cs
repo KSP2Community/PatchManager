@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Execptions;
+﻿using System.Globalization;
+using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
@@ -12,20 +13,44 @@ public class Subscript : Binary
     {
         if (leftHandSide.IsList && rightHandSide.IsNumber)
         {
-            return leftHandSide.List[(int)rightHandSide.Number];
+            try
+            {
+                return leftHandSide.List[(int)rightHandSide.Number];
+            }
+            catch
+            {
+                throw new ListIndexOutOfRangeException(Coordinate,
+                    ((int)rightHandSide.Number) + " is out of range of the list being indexed");
+            }
         }
 
         if (leftHandSide.IsString && rightHandSide.IsNumber)
         {
-            return (double)leftHandSide.String[(int)rightHandSide.Number];
+            try
+            {
+                return (double)leftHandSide.String[(int)rightHandSide.Number];
+            }
+            catch
+            {
+                throw new ListIndexOutOfRangeException(Coordinate,
+                    ((int)rightHandSide.Number) + " is out of range of the string being indexed");
+            }
         }
 
         if (leftHandSide.IsDictionary && rightHandSide.IsString)
         {
-            return leftHandSide.Dictionary[rightHandSide.String];
+            try
+            {
+                return leftHandSide.Dictionary[rightHandSide.String];
+            }
+            catch
+            {
+                throw new DictionaryKeyNotFoundException(Coordinate,
+                    rightHandSide.String + " is not a key found in the dictionary being indexed");
+            }
         }
 
-        throw new BinaryExpressionTypeException("subscript", leftHandSide.Type.ToString(),
+        throw new BinaryExpressionTypeException(Coordinate, "subscript", leftHandSide.Type.ToString(),
             rightHandSide.Type.ToString());
     }
 

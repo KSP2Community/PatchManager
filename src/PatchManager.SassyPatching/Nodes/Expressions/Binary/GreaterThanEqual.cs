@@ -1,4 +1,4 @@
-﻿using PatchManager.SassyPatching.Execptions;
+﻿using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
@@ -20,7 +20,7 @@ public class GreaterThanEqual : Binary
             return string.Compare(leftHandSide.String, rightHandSide.String, StringComparison.Ordinal) >= 0;
         }
 
-        throw new BinaryExpressionTypeException("perform a relational comparison (>=)", leftHandSide.Type.ToString(),
+        throw new BinaryExpressionTypeException(Coordinate,"perform a relational comparison (>=)", leftHandSide.Type.ToString(),
             rightHandSide.Type.ToString());
     }
 

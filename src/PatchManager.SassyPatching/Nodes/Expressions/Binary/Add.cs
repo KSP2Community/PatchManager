@@ -1,4 +1,4 @@
-﻿using PatchManager.SassyPatching.Execptions;
+﻿using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
@@ -28,7 +28,7 @@ public class Add : Binary
             case Value.ValueType.Dictionary:
             case Value.ValueType.Deletion:
             default:
-                throw new BinaryExpressionTypeException("add", leftHandSide.Type.ToString(), rightHandSide.Type.ToString());
+                throw new BinaryExpressionTypeException(Coordinate,"add", leftHandSide.Type.ToString(), rightHandSide.Type.ToString());
         }
     }
 

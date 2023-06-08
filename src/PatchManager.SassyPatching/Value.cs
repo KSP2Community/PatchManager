@@ -95,6 +95,15 @@ public class Value
     }
 
     public bool IsDeletion => Type == ValueType.Deletion;
+    
+    public bool Truthy {
+        get
+        {
+            if (IsBoolean) return Boolean;
+            if (IsNumber) return Number != 0;
+            return !(IsNone || IsDeletion);
+        }
+    }
 
     public static implicit operator Value(bool b)
     {

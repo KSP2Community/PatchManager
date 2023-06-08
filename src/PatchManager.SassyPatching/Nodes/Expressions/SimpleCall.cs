@@ -10,4 +10,9 @@ public class SimpleCall : Expression
         FunctionName = functionName;
         Arguments = arguments;
     }
+
+    public override Value Compute(Environment environment)
+    {
+        throw new NotImplementedException();
+    }
 }
