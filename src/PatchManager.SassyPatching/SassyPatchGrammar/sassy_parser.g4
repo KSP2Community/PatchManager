@@ -17,7 +17,7 @@ import_declaration      : USE imp=STRING SEMICOLON;
 
 var_decl                : variable=VARIABLE COLON val=expression SEMICOLON;
 
-stage_def               : DEFINE_STAGE stage=STRING (COMMA priority=NUMBER)? SEMICOLON;
+stage_def               : DEFINE_STAGE stage=STRING COMMA priority=NUMBER SEMICOLON;
 
 function_def            : FUNCTION name=ELEMENT LEFT_PAREN args=arg_decl_list RIGHT_PAREN LEFT_BRACE body=function_body RIGHT_BRACE;
 

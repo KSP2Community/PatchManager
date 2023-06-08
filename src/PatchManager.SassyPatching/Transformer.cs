@@ -63,10 +63,10 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitFunction_def(sassy_parser.Function_defContext context) =>
         new Function(context.GetCoordinate(),
             context.name.Text,
-            context.args.arg_decl()
+            context.args.arg_decl() != null ? context.args.arg_decl()
                 .Select(Visit)
                 .Cast<Argument>()
-                .ToList(),
+                .ToList() : new(),
             context.body.children.Select(Visit)
                 .ToList());
 
