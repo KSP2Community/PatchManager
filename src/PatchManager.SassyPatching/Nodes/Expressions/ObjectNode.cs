@@ -2,8 +2,8 @@
 
 public class ObjectNode : Expression
 {
-    public Dictionary<string, Expression> Initializers;
-    public ObjectNode(Coordinate c, Dictionary<string, Expression> initializers) : base(c)
+    public List<KeyValueNode> Initializers;
+    public ObjectNode(Coordinate c, List<KeyValueNode> initializers) : base(c)
     {
         Initializers = initializers;
     }

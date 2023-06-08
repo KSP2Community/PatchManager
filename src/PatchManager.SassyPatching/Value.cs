@@ -104,7 +104,6 @@ public class Value
         get
         {
             if (IsBoolean) return Boolean;
-            if (IsNumber) return Number != 0;
             return !(IsNone || IsDeletion);
         }
     }

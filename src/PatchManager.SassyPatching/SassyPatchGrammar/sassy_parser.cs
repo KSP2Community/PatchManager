@@ -1385,12 +1385,12 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class Sel_intersectionContext : SelectorContext {
 		public SelectorContext lhs;
-		public SelectorContext rhs;
-		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext[] selector() {
-			return GetRuleContexts<SelectorContext>();
+		public Selector_no_childrenContext rhs;
+		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext selector() {
+			return GetRuleContext<SelectorContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext selector(int i) {
-			return GetRuleContext<SelectorContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public Selector_no_childrenContext selector_no_children() {
+			return GetRuleContext<Selector_no_childrenContext>(0);
 		}
 		public Sel_intersectionContext(SelectorContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -1476,13 +1476,13 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class Sel_combinationContext : SelectorContext {
 		public SelectorContext lhs;
-		public SelectorContext rhs;
+		public Selector_no_childrenContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA() { return GetToken(sassy_parser.COMMA, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext[] selector() {
-			return GetRuleContexts<SelectorContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext selector() {
+			return GetRuleContext<SelectorContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext selector(int i) {
-			return GetRuleContext<SelectorContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public Selector_no_childrenContext selector_no_children() {
+			return GetRuleContext<Selector_no_childrenContext>(0);
 		}
 		public Sel_combinationContext(SelectorContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -1503,11 +1503,11 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Sel_subContext : SelectorContext {
-		public Selector_no_childrenContext internal_selector;
+		public SelectorContext internal_selector;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_PAREN() { return GetToken(sassy_parser.RIGHT_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Selector_no_childrenContext selector_no_children() {
-			return GetRuleContext<Selector_no_childrenContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public SelectorContext selector() {
+			return GetRuleContext<SelectorContext>(0);
 		}
 		public Sel_subContext(SelectorContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -1592,7 +1592,7 @@ public partial class sassy_parser : Parser {
 				State = 209;
 				Match(LEFT_PAREN);
 				State = 210;
-				((Sel_subContext)_localctx).internal_selector = selector_no_children(0);
+				((Sel_subContext)_localctx).internal_selector = selector(0);
 				State = 211;
 				Match(RIGHT_PAREN);
 				}
@@ -1663,31 +1663,31 @@ public partial class sassy_parser : Parser {
 						State = 223;
 						Match(COMMA);
 						State = 224;
-						((Sel_combinationContext)_localctx).rhs = selector(8);
+						((Sel_combinationContext)_localctx).rhs = selector_no_children(0);
 						}
 						break;
 					case 2:
 						{
-						_localctx = new Sel_intersectionContext(new SelectorContext(_parentctx, _parentState));
-						((Sel_intersectionContext)_localctx).lhs = _prevctx;
+						_localctx = new Sel_childContext(new SelectorContext(_parentctx, _parentState));
+						((Sel_childContext)_localctx).parent = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector);
 						State = 225;
-						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
+						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
 						State = 226;
-						((Sel_intersectionContext)_localctx).rhs = selector(6);
+						Match(GREATER_THAN);
+						State = 227;
+						((Sel_childContext)_localctx).child = selector_no_children(0);
 						}
 						break;
 					case 3:
 						{
-						_localctx = new Sel_childContext(new SelectorContext(_parentctx, _parentState));
-						((Sel_childContext)_localctx).parent = _prevctx;
+						_localctx = new Sel_intersectionContext(new SelectorContext(_parentctx, _parentState));
+						((Sel_intersectionContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector);
-						State = 227;
-						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
 						State = 228;
-						Match(GREATER_THAN);
+						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
 						State = 229;
-						((Sel_childContext)_localctx).child = selector_no_children(0);
+						((Sel_intersectionContext)_localctx).rhs = selector_no_children(0);
 						}
 						break;
 					}
@@ -4760,7 +4760,7 @@ public partial class sassy_parser : Parser {
 	public partial class ObjContext : ParserRuleContext {
 		public Obj_valuesContext @values;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACKET() { return GetToken(sassy_parser.RIGHT_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public Obj_valuesContext obj_values() {
 			return GetRuleContext<Obj_valuesContext>(0);
 		}
@@ -4811,7 +4811,7 @@ public partial class sassy_parser : Parser {
 			}
 
 			State = 489;
-			Match(RIGHT_BRACKET);
+			Match(RIGHT_BRACE);
 			}
 		}
 		catch (RecognitionException re) {
@@ -6040,8 +6040,8 @@ public partial class sassy_parser : Parser {
 	private bool selector_sempred(SelectorContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0: return Precpred(Context, 7);
-		case 1: return Precpred(Context, 5);
-		case 2: return Precpred(Context, 6);
+		case 1: return Precpred(Context, 6);
+		case 2: return Precpred(Context, 5);
 		}
 		return true;
 	}
@@ -6164,14 +6164,14 @@ public partial class sassy_parser : Parser {
 		12,0,0,197,203,5,49,0,0,198,199,5,13,0,0,199,203,5,49,0,0,200,201,5,14,
 		0,0,201,203,5,49,0,0,202,196,1,0,0,0,202,198,1,0,0,0,202,200,1,0,0,0,203,
 		27,1,0,0,0,204,205,6,14,-1,0,205,221,5,55,0,0,206,221,5,52,0,0,207,221,
-		5,51,0,0,208,221,5,54,0,0,209,210,5,20,0,0,210,211,3,30,15,0,211,212,5,
+		5,51,0,0,208,221,5,54,0,0,209,210,5,20,0,0,210,211,3,28,14,0,211,212,5,
 		21,0,0,212,221,1,0,0,0,213,214,5,27,0,0,214,221,5,55,0,0,215,216,5,43,
 		0,0,216,221,5,52,0,0,217,218,5,43,0,0,218,221,5,51,0,0,219,221,5,29,0,
 		0,220,204,1,0,0,0,220,206,1,0,0,0,220,207,1,0,0,0,220,208,1,0,0,0,220,
 		209,1,0,0,0,220,213,1,0,0,0,220,215,1,0,0,0,220,217,1,0,0,0,220,219,1,
-		0,0,0,221,232,1,0,0,0,222,223,10,7,0,0,223,224,5,26,0,0,224,231,3,28,14,
-		8,225,226,10,5,0,0,226,231,3,28,14,6,227,228,10,6,0,0,228,229,5,33,0,0,
-		229,231,3,30,15,0,230,222,1,0,0,0,230,225,1,0,0,0,230,227,1,0,0,0,231,
+		0,0,0,221,232,1,0,0,0,222,223,10,7,0,0,223,224,5,26,0,0,224,231,3,30,15,
+		0,225,226,10,6,0,0,226,227,5,33,0,0,227,231,3,30,15,0,228,229,10,5,0,0,
+		229,231,3,30,15,0,230,222,1,0,0,0,230,225,1,0,0,0,230,228,1,0,0,0,231,
 		234,1,0,0,0,232,230,1,0,0,0,232,233,1,0,0,0,233,29,1,0,0,0,234,232,1,0,
 		0,0,235,236,6,15,-1,0,236,252,5,55,0,0,237,252,5,52,0,0,238,252,5,51,0,
 		0,239,252,5,54,0,0,240,241,5,20,0,0,241,242,3,30,15,0,242,243,5,21,0,0,
@@ -6249,7 +6249,7 @@ public partial class sassy_parser : Parser {
 		0,479,477,1,0,0,0,479,480,1,0,0,0,480,483,1,0,0,0,481,479,1,0,0,0,482,
 		473,1,0,0,0,482,483,1,0,0,0,483,63,1,0,0,0,484,485,5,18,0,0,485,487,3,
 		66,33,0,486,488,5,26,0,0,487,486,1,0,0,0,487,488,1,0,0,0,488,489,1,0,0,
-		0,489,490,5,23,0,0,490,65,1,0,0,0,491,493,3,68,34,0,492,491,1,0,0,0,492,
+		0,489,490,5,19,0,0,490,65,1,0,0,0,491,493,3,68,34,0,492,491,1,0,0,0,492,
 		493,1,0,0,0,493,498,1,0,0,0,494,495,5,26,0,0,495,497,3,68,34,0,496,494,
 		1,0,0,0,497,500,1,0,0,0,498,496,1,0,0,0,498,499,1,0,0,0,499,502,1,0,0,
 		0,500,498,1,0,0,0,501,492,1,0,0,0,501,502,1,0,0,0,502,67,1,0,0,0,503,504,

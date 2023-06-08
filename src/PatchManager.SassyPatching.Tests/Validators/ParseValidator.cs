@@ -5,7 +5,7 @@ public abstract class ParseValidator
     public abstract bool Validate(Node node);
 }
 
-public abstract class ParseValidator<T> : ParseValidator
+public abstract class ParseValidator<T> : ParseValidator where T : Node
 {
     public sealed override bool Validate(Node node) => node is T tNode && Validate(tNode);
 

@@ -44,10 +44,10 @@ selector                : ELEMENT                                               
                         | CLASS                                                         #sel_class
                         | NAME                                                          #sel_name
                         | RULESET                                                       #sel_ruleset
-                        | LEFT_PAREN internal_selector=selector_no_children RIGHT_PAREN #sel_sub
-                        | lhs=selector COMMA rhs=selector                               #sel_combination
+                        | LEFT_PAREN internal_selector=selector RIGHT_PAREN             #sel_sub
+                        | lhs=selector COMMA rhs=selector_no_children                   #sel_combination
                         | parent=selector GREATER_THAN child=selector_no_children       #sel_child
-                        | lhs=selector rhs=selector                                     #sel_intersection
+                        | lhs=selector rhs=selector_no_children                         #sel_intersection
                         | ADD element=ELEMENT                                           #sel_add_element // Adds an element and selects the added element
                         | WITHOUT field=CLASS                                           #sel_without_class
                         | WITHOUT name=NAME                                             #sel_without_name
@@ -148,7 +148,7 @@ value                   : DELETE    #value_deletion
 list                    : LEFT_BRACKET values=list_values COMMA? RIGHT_BRACKET;
 list_values             : (sub_expression? (COMMA sub_expression)*)?;
 
-obj                     : LEFT_BRACE   values=obj_values COMMA? RIGHT_BRACKET;
+obj                     : LEFT_BRACE   values=obj_values COMMA? RIGHT_BRACE;
 obj_values              : (key_value? (COMMA key_value)*)?;
 
 key_value               : key=ELEMENT COLON val=sub_expression #literal_key

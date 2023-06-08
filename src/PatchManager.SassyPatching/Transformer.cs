@@ -399,8 +399,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitObject_value(sassy_parser.Object_valueContext context)
         => new ObjectNode(context.GetCoordinate(),
-            context.obj().obj_values().key_value().Select(Visit).Cast<KeyValueNode>()
-                .ToDictionary(x => x.Key, x => x.Value));
+            context.obj().obj_values().key_value().Select(Visit).Cast<KeyValueNode>().ToList());
 
     public override Node VisitLiteral_key(sassy_parser.Literal_keyContext context)
         => new KeyValueNode(context.GetCoordinate(), context.key.Text, Visit(context.val) as Expression);
@@ -458,7 +457,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitMixin_include(sassy_parser.Mixin_includeContext context) =>
         new MixinInclude(context.GetCoordinate(), context.mixin.Text,
-        context.args.children.Select(Visit).Cast<CallArgument>().ToList());
+        context.args.argument().Select(Visit).Cast<CallArgument>().ToList());
 
     public override Node VisitArgument_without_default(sassy_parser.Argument_without_defaultContext context)
         => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst());
