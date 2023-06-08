@@ -236,42 +236,48 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new SetValue(context.GetCoordinate(),Visit(context.expr) as Expression);
 
     public override Node VisitDelete_value(sassy_parser.Delete_valueContext context)
-    {
-        return base.VisitDelete_value(context);
-    }
+        => new DeleteValue(context.GetCoordinate());
 
     public override Node VisitMerge_value(sassy_parser.Merge_valueContext context)
-    {
-        return base.VisitMerge_value(context);
-    }
+        => new MergeValue(context.GetCoordinate(), Visit(context.expr) as Expression);
 
-    public override Node VisitElement_key_field(sassy_parser.Element_key_fieldContext context)
-    {
-        return base.VisitElement_key_field(context);
-    }
+    public override Node VisitElement_key_field(sassy_parser.Element_key_fieldContext context) =>
+        new Field(context.GetCoordinate(),
+            context.ELEMENT()
+                .GetText(),
+            context.indexor != null
+                ? Visit(context.indexor) as Indexer
+                : null,
+            Visit(context.expr) as Expression);
 
-    public override Node VisitString_key_field(sassy_parser.String_key_fieldContext context)
-    {
-        return base.VisitString_key_field(context);
-    }
+    public override Node VisitString_key_field(sassy_parser.String_key_fieldContext context) =>
+        new Field(context.GetCoordinate(),
+            context.STRING()
+                .GetText()
+                .Unescape(),
+            context.indexor != null
+                ? Visit(context.indexor) as Indexer
+                : null,
+            Visit(context.expr) as Expression);
 
     public override Node VisitNumber_indexor(sassy_parser.Number_indexorContext context)
     {
-        return base.VisitNumber_indexor(context);
+        var location = context.GetCoordinate();
+        return ulong.TryParse(context.num.Text,
+            out var index)
+            ? new NumberIndexer(location,
+                index)
+            : Error(location,
+                "Index must be a positive integer");
     }
 
-    public override Node VisitElement_indexor(sassy_parser.Element_indexorContext context)
-    {
-        return base.VisitElement_indexor(context);
-    }
+    public override Node VisitElement_indexor(sassy_parser.Element_indexorContext context) =>
+        new ElementIndexer(context.GetCoordinate(), context.elem.Text);
 
-    public override Node VisitClass_indexor(sassy_parser.Class_indexorContext context)
-    {
-        return base.VisitClass_indexor(context);
-    }
+    public override Node VisitClass_indexor(sassy_parser.Class_indexorContext context) =>
+        new ClassIndexer(context.GetCoordinate(), context.clazz.Text.TrimFirst());
 
-    public override Node VisitString_indexor(sassy_parser.String_indexorContext context)
-    {
-        return base.VisitString_indexor(context);
-    }
+    public override Node VisitString_indexor(sassy_parser.String_indexorContext context) =>
+        new StringIndexer(context.GetCoordinate(), context.elem.Text.Unescape());
+    
 }
