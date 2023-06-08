@@ -1,5 +1,5 @@
-﻿using System.Linq.Expressions;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Nodes.Expressions;
 
 namespace PatchManager.SassyPatching.Nodes;
 

@@ -9,6 +9,7 @@ using PatchManager.SassyPatching.Nodes.Expressions.Unary;
 using PatchManager.SassyPatching.Nodes.Indexers;
 using PatchManager.SassyPatching.Nodes.Selectors;
 using PatchManager.SassyPatching.Nodes.Statements;
+using PatchManager.SassyPatching.Nodes.Statements.FunctionLevel;
 using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 using SassyPatchGrammar;
@@ -406,4 +407,56 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitString_key(sassy_parser.String_keyContext context)
         => new KeyValueNode(context.GetCoordinate(), context.key.Text.Unescape(), Visit(context.val) as Expression);
+
+    public override Node VisitNamed_argument(sassy_parser.Named_argumentContext context)
+        => new CallArgument(context.GetCoordinate(), context.key.Text.TrimFirst(), Visit(context.val) as Expression);
+
+    public override Node VisitUnnamed_argument(sassy_parser.Unnamed_argumentContext context)
+        => new CallArgument(context.GetCoordinate(), Visit(context.val) as Expression);
+
+    public override Node VisitFn_level_conditional(sassy_parser.Fn_level_conditionalContext context)
+    {
+        Node @else = null;
+        if (context.els != null)
+        {
+            @else = Visit(context.els);
+        }
+        return new Conditional(context.GetCoordinate(),
+            Visit(context.cond),
+            context.function_statement()
+                .Select(Visit)
+                .ToList(),
+            @else);
+    }
+
+
+    public override Node VisitFn_level_else_else(sassy_parser.Fn_level_else_elseContext context) =>
+        new Block(context.GetCoordinate(),
+            context.function_statement()
+                .Select(Visit)
+                .ToList());
+
+    public override Node VisitFn_level_else_if(sassy_parser.Fn_level_else_ifContext context)
+    {
+        Node @else = null;
+        if (context.els != null)
+        {
+            @else = Visit(context.els);
+        }
+        return new Conditional(context.GetCoordinate(),
+            Visit(context.cond),
+            context.function_statement()
+                .Select(Visit)
+                .ToList(),
+            @else);
+    }
+
+    public override Node VisitFn_return(sassy_parser.Fn_returnContext context)
+    {
+        return new Return(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
+    }
+
+    public override Node VisitMixin_include(sassy_parser.Mixin_includeContext context) =>
+        new MixinInclude(context.GetCoordinate(), context.mixin.Text,
+        context.args.children.Select(Visit).Cast<CallArgument>().ToList());
 }
