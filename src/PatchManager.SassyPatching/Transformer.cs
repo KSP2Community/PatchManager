@@ -63,11 +63,11 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitFunction_def(sassy_parser.Function_defContext context) =>
         new Function(context.GetCoordinate(),
             context.name.Text,
-            context.args.arg_decl() != null ? context.args.arg_decl()
+            context.args.arg_decl()
                 .Select(Visit)
                 .Cast<Argument>()
-                .ToList() : new(),
-            context.body.children.Select(Visit)
+                .ToList(), 
+            context.body.function_statement().Select(Visit)
                 .ToList());
 
     public override Node VisitMixin_def(sassy_parser.Mixin_defContext context) =>
@@ -77,7 +77,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 .Select(Visit)
                 .Cast<Argument>()
                 .ToList(),
-            context.body.children.Select(Visit)
+            context.body.selector_statement().Select(Visit)
                 .ToList());
 
     public override Node VisitTop_level_conditional(sassy_parser.Top_level_conditionalContext context)
