@@ -328,7 +328,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitSimple_call(sassy_parser.Simple_callContext context) =>
         new SimpleCall(context.GetCoordinate(), context.lhs.Text,
-            context.args.children.Select(Visit).Cast<CallArgument>().ToList());
+            context.args.argument().Select(Visit).Cast<CallArgument>().ToList());
 
     public override Node VisitDivision(sassy_parser.DivisionContext context) =>
         new Divide(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);

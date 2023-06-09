@@ -51,7 +51,7 @@ GREATER_THAN        : '>';
 GREATER_THAN_EQUAL  : '>=';
 LESSER_THAN         : '<';
 LESSER_THAN_EQUAL   : '<=';
-EQUAL_TO            : '=';
+EQUAL_TO            : '==';
 NOT_EQUAL_TO        : '!=';
 AND                 : 'and';
 OR                  : 'or';

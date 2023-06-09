@@ -116,11 +116,14 @@ sub_expression          : value                                                 
                         | SUBTRACT child=sub_expression                                                     #negative
                         | ADD child=sub_expression                                                          #positive
                         | NOT child=sub_expression                                                          #not
-                        | lhs=sub_expression ADD rhs=sub_expression                                         #addition
-                        | lhs=sub_expression SUBTRACT rhs=sub_expression                                    #subtraction
+                        | lhs=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN                             #simple_call
+                        | lhs=sub_expression COLON name=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN   #member_call
+                        | lhs=sub_expression LEFT_BRACKET rhs=sub_expression RIGHT_BRACKET                  #indexor
                         | lhs=sub_expression MULTIPLY rhs=sub_expression                                    #multiplication
                         | lhs=sub_expression DIVIDE rhs=sub_expression                                      #division
                         | lhs=sub_expression MODULUS rhs=sub_expression                                     #remainder
+                        | lhs=sub_expression ADD rhs=sub_expression                                         #addition
+                        | lhs=sub_expression SUBTRACT rhs=sub_expression                                    #subtraction
                         | lhs=sub_expression GREATER_THAN rhs=sub_expression                                #greater_than
                         | lhs=sub_expression LESSER_THAN rhs=sub_expression                                 #lesser_than
                         | lhs=sub_expression GREATER_THAN_EQUAL rhs=sub_expression                          #greater_than_equal
@@ -129,9 +132,6 @@ sub_expression          : value                                                 
                         | lhs=sub_expression NOT_EQUAL_TO rhs=sub_expression                                #not_equal_to
                         | lhs=sub_expression AND rhs=sub_expression                                         #and
                         | lhs=sub_expression OR rhs=sub_expression                                          #or
-                        | lhs=sub_expression LEFT_BRACKET rhs=sub_expression RIGHT_BRACKET                  #indexor
-                        | lhs=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN                             #simple_call
-                        | lhs=sub_expression COLON name=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN   #member_call
                         | lhs=sub_expression IF cond=sub_expression ELSE rhs=sub_expression                 #ternary
                         ;
 

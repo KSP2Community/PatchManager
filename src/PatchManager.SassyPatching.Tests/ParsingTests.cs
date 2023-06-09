@@ -37,7 +37,7 @@ public class ParsingTests
     private void Match(string patch, ParseValidator validator)
     {
         var parsed = Parse(patch);
-        Assert.That(validator.Validate(parsed), Is.True,"Parse tree does not match the validation criterion");
+        Assert.That(validator.Validate(parsed), Is.True, "Parse tree does not match the validation criterion");
     }
 
     #region Top Level Statement Tests
@@ -1378,7 +1378,7 @@ a b c {
         };
         Match(patch, validator);
     }
-    
+
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a simple deletion selection action")]
     public void DeletionAction()
     {
@@ -1446,7 +1446,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1478,7 +1478,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1510,7 +1510,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1546,7 +1546,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1582,7 +1582,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1618,7 +1618,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1654,7 +1654,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1690,7 +1690,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1725,7 +1725,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1761,7 +1761,7 @@ a b c {
         {
             new SelectionBlockValidator
             {
-                Attributes = new (),
+                Attributes = new(),
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
@@ -1841,6 +1841,785 @@ a b c {
         };
         Match(patch, validator);
     }
+
+    #endregion
+
+    #region Expression Tests
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit addition expression")]
+    public void ImplicitAddition()
+    {
+        const string patch =
+            @"
+$x: +2;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<ImplicitAdd>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = 2
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit subtraction expression")]
+    public void ImplicitSubtraction()
+    {
+        const string patch =
+            @"
+$x: -2;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<ImplicitSubtract>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = 2
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit multiplication expression")]
+    public void ImplicitMultiplication()
+    {
+        const string patch =
+            @"
+$x: *2;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<ImplicitMultiply>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = 2
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit division expression")]
+    public void ImplicitDivision()
+    {
+        const string patch =
+            @"
+$x: /2;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<ImplicitDivide>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = 2
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a variable reference expression")]
+    public void VariableReference()
+    {
+        const string patch =
+            @"
+$x: $y;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new VariableReferenceValidator
+                {
+                    VariableName = "y"
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a negation expression")]
+    public void Negate()
+    {
+        const string patch =
+            @"
+$x: (-2);
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<Negate>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = 2
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a positive expression")]
+    public void Positive()
+    {
+        const string patch =
+            @"
+$x: (+2);
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<Positive>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = 2
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an inversion expression")]
+    public void Inversion()
+    {
+        const string patch =
+            @"
+$x: !false;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new UnaryValidator<Not>
+                {
+                    Child = new ValueValidator
+                    {
+                        StoredValue = false
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese",
+        Description = "Tests a function call w/ no unnamed or named arguments")]
+    public void CallNoUnnamedNoNamed()
+    {
+        const string patch =
+            @"
+$x: test-function();
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new SimpleCallValidator
+                {
+                    FunctionName = "test-function",
+                    Arguments = new()
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese",
+        Description = "Tests a function call w/ an unnamed argument but no named arguments")]
+    public void CallUnnamedNoNamed()
+    {
+        const string patch =
+            @"
+$x: test-function(5);
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new SimpleCallValidator
+                {
+                    FunctionName = "test-function",
+                    Arguments = new()
+                    {
+                        new CallArgumentValidator
+                        {
+                            ArgumentValue = new ValueValidator
+                            {
+                                StoredValue = 5
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese",
+        Description = "Tests a function call w/ a named argument but no unnamed arguments")]
+    public void CallNoUnnamedNamed()
+    {
+        const string patch =
+            @"
+$x: test-function($a: 5);
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new SimpleCallValidator
+                {
+                    FunctionName = "test-function",
+                    Arguments = new()
+                    {
+                        new CallArgumentValidator
+                        {
+                            ArgumentName = "a",
+                            ArgumentValue = new ValueValidator
+                            {
+                                StoredValue = 5
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese",
+        Description = "Tests a function call w/ a named argument and an unnamed argument")]
+    public void CallUnnamedNamed()
+    {
+        const string patch =
+            @"
+$x: test-function(6, $a: 5);
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new SimpleCallValidator
+                {
+                    FunctionName = "test-function",
+                    Arguments = new()
+                    {
+                        new CallArgumentValidator
+                        {
+                            ArgumentValue = new ValueValidator
+                            {
+                                StoredValue = 6
+                            }
+                        },
+                        new CallArgumentValidator
+                        {
+                            ArgumentName = "a",
+                            ArgumentValue = new ValueValidator
+                            {
+                                StoredValue = 5
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a member call w/o any arguments")]
+    public void MemberCall()
+    {
+        const string patch =
+            @"
+$x: $y:method();
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new MemberCallValidator
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    FunctionName = "method",
+                    Arguments = new()
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a subscript expression")]
+    public void Subscript()
+    {
+        const string patch =
+            @"
+$x: $y[$z];
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Subscript>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a multiplication expression")]
+    public void Multiply()
+    {
+        const string patch =
+            @"
+$x: $y * $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Multiply>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a division expression")]
+    public void Divide()
+    {
+        const string patch =
+            @"
+$x: $y / $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Divide>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a remainder expression")]
+    public void Remainder()
+    {
+        const string patch =
+            @"
+$x: $y % $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Remainder>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an addition expression")]
+    public void Add()
+    {
+        const string patch =
+            @"
+$x: $y + $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Add>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a subtraction expression")]
+    public void Subtract()
+    {
+        const string patch =
+            @"
+$x: $y - $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Subtract>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a greater than expression")]
+    public void GreaterThan()
+    {
+        const string patch =
+            @"
+$x: $y > $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<GreaterThan>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a lesser than expression")]
+    public void LesserThan()
+    {
+        const string patch =
+            @"
+$x: $y < $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<LesserThan>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a greater than equal expression")]
+    public void GreaterThanEqual()
+    {
+        const string patch =
+            @"
+$x: $y >= $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<GreaterThanEqual>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a lesser than equal expression")]
+    public void LesserThanEqual()
+    {
+        const string patch =
+            @"
+$x: $y <= $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<LesserThanEqual>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an equal to expression")]
+    public void EqualTo()
+    {
+        const string patch =
+            @"
+$x: $y == $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<EqualTo>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a not equal to expression")]
+    public void NotEqualTo()
+    {
+        const string patch =
+            @"
+$x: $y != $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<NotEqualTo>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an and expression")]
+    public void And()
+    {
+        const string patch =
+            @"
+$x: $y and $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<And>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an or expression")]
+    public void Or()
+    {
+        const string patch =
+            @"
+$x: $y or $z;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Or>
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a ternary expression")]
+    public void Ternary()
+    {
+        const string patch =
+            @"
+$x: $y if $z else $w;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new TernaryValidator
+                {
+                    LeftHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "y"
+                    },
+                    Condition = new VariableReferenceValidator
+                    {
+                        VariableName = "z"
+                    },
+                    RightHandSide = new VariableReferenceValidator
+                    {
+                        VariableName = "w"
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
     
+    #endregion
+
+    #region Operator Precedence Tests
+
+    #endregion
+
+    #region Value Tests
+
     #endregion
 }
