@@ -2,18 +2,18 @@
 
 namespace PatchManager.SassyPatching.Tests.Validators;
 
-// Used for validating a parse tree
-// How do we validate a parse tree
-// Well
-// new TreeValidator {
-//
-// }
+/// <summary>
+/// Describes a validator for matching nodes of type <see cref="SassyPatch"/>
+/// </summary>
 public class PatchValidator : ParseValidator<SassyPatch>, IEnumerable<ParseValidator>
 {
-    // ReSharper disable once CollectionNeverUpdated.Local
     private readonly List<ParseValidator> _validators = new();
     
     
+    /// <summary>
+    /// Gets an enumerator that enumerates over the validators contained in this validator
+    /// </summary>
+    /// <returns>The enumerator that enumerates over the validators contained in this validator</returns>
     public IEnumerator<ParseValidator> GetEnumerator()
     {
         return _validators.GetEnumerator();
@@ -24,12 +24,21 @@ public class PatchValidator : ParseValidator<SassyPatch>, IEnumerable<ParseValid
         return GetEnumerator();
     }
 
-    public override bool Validate(SassyPatch patch)
+    /// <summary>
+    /// Determines if a node matches the tree defined by this validator
+    /// </summary>
+    /// <param name="node">The node to match against</param>
+    /// <returns>True if the node matches against the tree defined by this validator</returns>
+    public override bool Validate(SassyPatch node)
     {
-        if (patch.Children.Count != _validators.Count) return false;
-        return !_validators.Where((t, i) => !t.Validate(patch.Children[i])).Any();
+        if (node.Children.Count != _validators.Count) return false;
+        return !_validators.Where((t, i) => !t.Validate(node.Children[i])).Any();
     }
 
+    /// <summary>
+    /// Adds a validator to the children of the tree that this validator describes
+    /// </summary>
+    /// <param name="parseValidator">The child validator that should be added to the end as a child of this validator</param>
     public void Add(ParseValidator parseValidator)
     {
         _validators.Add(parseValidator);

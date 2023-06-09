@@ -1,8 +1,13 @@
 ﻿namespace PatchManager.SassyPatching.Tests.Validators.Expressions;
-
+/// <summary>
+/// Describes a validator for matching nodes of type <see cref="ValueNode"/>
+/// </summary>
 public class ValueValidator : ParseValidator<ValueNode>
 {
-    public Value StoredValue = new Value(Value.ValueType.None, null);
+    /// <summary>
+    /// A field that is used to match against the corresponding field in a node of type <see cref="ValueNode"/>
+    /// </summary>
+    public Value StoredValue = new Value(Value.ValueType.None);
     
     private static bool ListCompare(List<Value> leftHandSide, List<Value> rightHandSide)
     {
@@ -69,6 +74,11 @@ public class ValueValidator : ParseValidator<ValueNode>
 
         return true;
     }
+    /// <summary>
+    /// Determines if a node matches the tree defined by this validator
+    /// </summary>
+    /// <param name="node">The node to match against</param>
+    /// <returns>True if the node matches against the tree defined by this validator</returns>
     public override bool Validate(ValueNode node)
     {
         // Now we compare equality between values

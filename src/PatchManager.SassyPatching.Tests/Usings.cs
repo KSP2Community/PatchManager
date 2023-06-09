@@ -1,3 +1,4 @@
+// ReSharper disable RedundantUsingDirective.Global
 global using NUnit.Framework;
 global using PatchManager.SassyPatching;
 global using PatchManager.SassyPatching.Nodes;

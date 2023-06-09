@@ -1,4 +1,3 @@
-using System.Text;
 using PatchManager.SassyPatching.Tests.Validators;
 using PatchManager.SassyPatching.Tests.Validators.Attributes;
 using PatchManager.SassyPatching.Tests.Validators.Expressions;
@@ -8,13 +7,22 @@ using PatchManager.SassyPatching.Tests.Validators.Statements;
 using PatchManager.SassyPatching.Tests.Validators.Statements.FunctionLevel;
 using PatchManager.SassyPatching.Tests.Validators.Statements.SelectionLevel;
 using PatchManager.SassyPatching.Tests.Validators.Statements.TopLevel;
+// ReSharper disable RedundantEmptyObjectOrCollectionInitializer
 
 namespace PatchManager.SassyPatching.Tests;
 
+/// <summary>
+/// A class containing all of the tests for the parser and the Transformer class
+/// </summary>
 public class ParsingTests
 {
+#pragma warning disable CS8618
     private Transformer _tokenTransformer;
+#pragma warning restore CS8618
 
+    /// <summary>
+    /// Sets up the parser tests by creating the transformer to be tested
+    /// </summary>
     [SetUp]
     public void Setup()
     {
@@ -23,7 +31,7 @@ public class ParsingTests
 
     private class FailErrorListener : IAntlrErrorListener<IToken>
     {
-        internal static FailErrorListener Instance = new();
+        internal static readonly FailErrorListener Instance = new();
         private FailErrorListener() {}
         public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine,
             string msg, RecognitionException e)
@@ -54,6 +62,9 @@ public class ParsingTests
 
     #region Top Level Statement Tests
 
+    /// <summary>
+    /// Tests single line comments
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests single line comments")]
     public void SingleLineComments()
     {
@@ -64,7 +75,7 @@ $variable: 5;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "variable",
                 Value = new ValueValidator
@@ -77,6 +88,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests single line comments
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests multi line comments")]
     public void MultiLineComment()
     {
@@ -89,7 +103,7 @@ $variable: 5;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "variable",
                 Value = new ValueValidator
@@ -101,6 +115,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an import declaration
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an import declaration")]
     public void ImportDeclaration()
     {
@@ -118,6 +135,9 @@ $variable: 5;
     }
 
 
+    /// <summary>
+    /// Tests a top level variable declaration
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a top level variable declaration")]
     public void TopLevelVariableDeclaration()
     {
@@ -127,7 +147,7 @@ $variable: 5;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "variable",
                 Value = new ValueValidator
@@ -139,6 +159,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a stage definition
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a stage definition")]
     public void StageDefinition()
     {
@@ -157,6 +180,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function definition w/o any arguments or body
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function definition w/o any arguments or body")]
     public void FunctionDefinitionNoArgumentsNoBody()
@@ -178,6 +204,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function definition w/ a single argument that has no default value and no body
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function definition w/ a single argument that has no default value and no body")]
     public void FunctionDefinitionSingleArgumentNoDefaultNoBody()
@@ -205,6 +234,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function definition w/ a single argument that has a default value and no body
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function definition w/ a single argument that has a default value and no body")]
     public void FunctionDefinitionSingleArgumentDefaultNoBody()
@@ -236,6 +268,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function definition w/ a single argument that has a default value and a body that returns that value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description =
             "Tests a function definition w/ a single argument that has a default value and a body that returns that value")]
@@ -278,8 +313,11 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a mixin definition w/o any arguments or body
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a function definition w/o any arguments or body")]
+        Description = "Tests a mixin definition w/o any arguments or body")]
     public void MixinDefinitionNoArgumentsNoBody()
     {
         const string patch =
@@ -299,8 +337,11 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a mixin definition w/ a single argument that has no default value and no body
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a function definition w/ a single argument that has no default value and no body")]
+        Description = "Tests a mixin definition w/ a single argument that has no default value and no body")]
     public void MixinDefinitionSingleArgumentNoDefaultNoBody()
     {
         const string patch =
@@ -326,8 +367,11 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a mixin definition w/ a single argument that has a default value and no body
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a function definition w/ a single argument that has a default value and no body")]
+        Description = "Tests a mixin definition w/ a single argument that has a default value and no body")]
     public void MixinDefinitionSingleArgumentDefaultNoBody()
     {
         const string patch =
@@ -357,9 +401,12 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a mixin definition w/ a single argument that has a default value and a body that returns that value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description =
-            "Tests a function definition w/ a single argument that has a default value and a body that returns that value")]
+            "Tests a mixin definition w/ a single argument that has a default value and a body that returns that value")]
     public void MixinDefinitionSingleArgumentDefaultBody()
     {
         const string patch =
@@ -386,7 +433,7 @@ $variable: 5;
                 },
                 Body = new()
                 {
-                    new VarDeclValidator()
+                    new VariableDeclarationValidator()
                     {
                         Variable = "var",
                         Value = new VariableReferenceValidator
@@ -400,6 +447,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a top level conditional statement w/ no else or else if
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a top level conditional statement w/ no else or else if")]
     public void TopLevelConditionalNoElseIfNoElse()
@@ -420,7 +470,7 @@ $variable: 5;
                 },
                 Body = new()
                 {
-                    new VarDeclValidator
+                    new VariableDeclarationValidator
                     {
                         Variable = "variable",
                         Value = new ValueValidator
@@ -434,6 +484,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a top level conditional statement w/ an else but no else if
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a top level conditional statement w/ an else but no else if")]
     public void TopLevelConditionalNoElseIfElse()
@@ -459,7 +512,7 @@ $variable: 5;
                 },
                 Body = new()
                 {
-                    new VarDeclValidator
+                    new VariableDeclarationValidator
                     {
                         Variable = "variable",
                         Value = new ValueValidator
@@ -470,7 +523,7 @@ $variable: 5;
                 },
                 Else = new BlockValidator
                 {
-                    new VarDeclValidator
+                    new VariableDeclarationValidator
                     {
                         Variable = "variable",
                         Value = new ValueValidator
@@ -484,6 +537,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a top level conditional statement w/ an else if but no else
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a top level conditional statement w/ an else if but no else")]
     public void TopLevelConditionalElseIfNoElse()
@@ -509,7 +565,7 @@ $variable: 5;
                 },
                 Body = new()
                 {
-                    new VarDeclValidator
+                    new VariableDeclarationValidator
                     {
                         Variable = "variable",
                         Value = new ValueValidator
@@ -526,7 +582,7 @@ $variable: 5;
                     },
                     Body = new()
                     {
-                        new VarDeclValidator
+                        new VariableDeclarationValidator
                         {
                             Variable = "variable",
                             Value = new ValueValidator
@@ -541,6 +597,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a top level conditional statement w/ an else if and an else
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a top level conditional statement w/ an else if and an else")]
     public void TopLevelConditionalElseIfElse()
@@ -570,7 +629,7 @@ $variable: 5;
                 },
                 Body = new()
                 {
-                    new VarDeclValidator
+                    new VariableDeclarationValidator
                     {
                         Variable = "variable",
                         Value = new ValueValidator
@@ -587,7 +646,7 @@ $variable: 5;
                     },
                     Body = new()
                     {
-                        new VarDeclValidator
+                        new VariableDeclarationValidator
                         {
                             Variable = "variable",
                             Value = new ValueValidator
@@ -598,7 +657,7 @@ $variable: 5;
                     },
                     Else = new BlockValidator
                     {
-                        new VarDeclValidator
+                        new VariableDeclarationValidator
                         {
                             Variable = "variable",
                             Value = new ValueValidator
@@ -613,6 +672,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a simple selection block
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a simple selection block")]
     public void SelectionBlock()
     {
@@ -638,6 +700,9 @@ $variable: 5;
 
     #region Attribute Tests
 
+    /// <summary>
+    /// Tests a selection block w/ an @require attribute
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection block w/ an @require attribute")]
     public void RequireAttribute()
@@ -667,6 +732,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection block w/ an @require-not attribute
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection block w/ an @require-not attribute")]
     public void RequireNotAttribute()
@@ -696,6 +764,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection block w/ an @stage attribute
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection block w/ an @stage attribute")]
     public void StageAttribute()
@@ -725,6 +796,9 @@ $variable: 5;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection block w/ a @require, a @require-not, and a @stage attribute
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection block w/ a @require, a @require-not, and a @stage attribute")]
     public void MultipleAttributes()
@@ -768,6 +842,9 @@ $variable: 5;
 
     #region Selector Tests
 
+    /// <summary>
+    /// Tests an element selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an element selector")]
     public void ElementSelector()
     {
@@ -792,6 +869,9 @@ element {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a class selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a class selector")]
     public void ClassSelector()
     {
@@ -816,6 +896,9 @@ element {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a name selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a name selector")]
     public void NameSelector()
     {
@@ -840,6 +923,9 @@ element {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a ruleset selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a ruleset selector")]
     public void RulesetSelector()
     {
@@ -864,6 +950,9 @@ element {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a combination selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a combination selector")]
     public void CombinationSelector()
     {
@@ -899,7 +988,10 @@ a, b, c {
         Match(patch, validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a selector")]
+    /// <summary>
+    /// Tests a child selector
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a child selector")]
     public void ChildSelector()
     {
         const string patch =
@@ -930,6 +1022,9 @@ a > .b {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an intersection selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an intersection selector")]
     public void IntersectionSelector()
     {
@@ -965,6 +1060,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a without class selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a without class selector")]
     public void WithoutClassSelector()
     {
@@ -989,6 +1087,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a without name selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a without name selector")]
     public void WithoutNameSelector()
     {
@@ -1013,6 +1114,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a wildcard selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a wildcard selector")]
     public void WildcardSelector()
     {
@@ -1034,6 +1138,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a complex child selector
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a complex child selector")]
     public void ComplexChildSelector()
     {
@@ -1077,6 +1184,9 @@ a b c {
 
     #region Selection Action Tests
 
+    /// <summary>
+    /// Tests a selection level variable declaration
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection level variable declaration")]
     public void SelectionLevelVariableDeclaration()
@@ -1095,7 +1205,7 @@ a b c {
                 Selector = new WildcardSelectorValidator(),
                 Actions = new()
                 {
-                    new VarDeclValidator
+                    new VariableDeclarationValidator
                     {
                         Variable = "variable",
                         Value = new ValueValidator
@@ -1106,8 +1216,12 @@ a b c {
                 }
             }
         };
+        Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection level conditional statement w/ no else or else if
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection level conditional statement w/ no else or else if")]
     public void SelectionLevelConditionalNoElseIfNoElse()
@@ -1136,7 +1250,7 @@ a b c {
                         },
                         Body = new()
                         {
-                            new VarDeclValidator
+                            new VariableDeclarationValidator
                             {
                                 Variable = "variable",
                                 Value = new ValueValidator
@@ -1152,6 +1266,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection level conditional statement w/ an else but no else if
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection level conditional statement w/ an else but no else if")]
     public void SelectionLevelConditionalNoElseIfElse()
@@ -1185,7 +1302,7 @@ a b c {
                         },
                         Body = new()
                         {
-                            new VarDeclValidator
+                            new VariableDeclarationValidator
                             {
                                 Variable = "variable",
                                 Value = new ValueValidator
@@ -1196,7 +1313,7 @@ a b c {
                         },
                         Else = new BlockValidator
                         {
-                            new VarDeclValidator
+                            new VariableDeclarationValidator
                             {
                                 Variable = "variable",
                                 Value = new ValueValidator
@@ -1212,6 +1329,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection level conditional statement w/ an else if but no else
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection level conditional statement w/ an else if but no else")]
     public void SelectionLevelConditionalElseIfNoElse()
@@ -1245,7 +1365,7 @@ a b c {
                         },
                         Body = new()
                         {
-                            new VarDeclValidator
+                            new VariableDeclarationValidator
                             {
                                 Variable = "variable",
                                 Value = new ValueValidator
@@ -1262,7 +1382,7 @@ a b c {
                             },
                             Body = new()
                             {
-                                new VarDeclValidator
+                                new VariableDeclarationValidator
                                 {
                                     Variable = "variable",
                                     Value = new ValueValidator
@@ -1279,6 +1399,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a selection level conditional statement w/ an else if and an else
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a selection level conditional statement w/ an else if and an else")]
     public void SelectionLevelConditionalElseIfElse()
@@ -1316,7 +1439,7 @@ a b c {
                         },
                         Body = new()
                         {
-                            new VarDeclValidator
+                            new VariableDeclarationValidator
                             {
                                 Variable = "variable",
                                 Value = new ValueValidator
@@ -1333,7 +1456,7 @@ a b c {
                             },
                             Body = new()
                             {
-                                new VarDeclValidator
+                                new VariableDeclarationValidator
                                 {
                                     Variable = "variable",
                                     Value = new ValueValidator
@@ -1344,7 +1467,7 @@ a b c {
                             },
                             Else = new BlockValidator
                             {
-                                new VarDeclValidator
+                                new VariableDeclarationValidator
                                 {
                                     Variable = "variable",
                                     Value = new ValueValidator
@@ -1361,7 +1484,10 @@ a b c {
         Match(patch, validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a simple set value selection action")]
+    /// <summary>
+    /// Tests a set value selection action
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a set value selection action")]
     public void SetValueAction()
     {
         const string patch =
@@ -1391,7 +1517,10 @@ a b c {
         Match(patch, validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a simple deletion selection action")]
+    /// <summary>
+    /// Tests a deletion selection action
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a deletion selection action")]
     public void DeletionAction()
     {
         const string patch =
@@ -1413,9 +1542,13 @@ a b c {
                 }
             }
         };
+        Match(patch,validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a simple merge selection action")]
+    /// <summary>
+    /// Tests a merge selection action
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a merge selection action")]
     public void MergeAction()
     {
         const string patch =
@@ -1444,8 +1577,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ an element key and no indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ an element key and no indexer")]
+        Description = "Tests a field set selection action w/ an element key and no indexer")]
     public void FieldSetElementKeyNoIndexer()
     {
         const string patch =
@@ -1476,8 +1612,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ a string key and no indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ a string key and no indexer")]
+        Description = "Tests a field set selection action w/ a string key and no indexer")]
     public void FieldSetStringKeyNoIndexer()
     {
         const string patch =
@@ -1508,8 +1647,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ an element key and a number indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ an element key and a number indexer")]
+        Description = "Tests a field set selection action w/ an element key and a number indexer")]
     public void FieldSetElementKeyNumberIndexer()
     {
         const string patch =
@@ -1544,8 +1686,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ a string key and a number indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ a string key and a number indexer")]
+        Description = "Tests a field set selection action w/ a string key and a number indexer")]
     public void FieldSetStringKeyNumberIndexer()
     {
         const string patch =
@@ -1580,8 +1725,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ an element key and an element indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ an element key and an element indexer")]
+        Description = "Tests a field set selection action w/ an element key and an element indexer")]
     public void FieldSetElementKeyElementIndexer()
     {
         const string patch =
@@ -1616,8 +1764,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ a string key and an element indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ a string key and an element indexer")]
+        Description = "Tests a field set selection action w/ a string key and an element indexer")]
     public void FieldSetStringKeyElementIndexer()
     {
         const string patch =
@@ -1652,8 +1803,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ an element key and a class indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ an element key and a class indexer")]
+        Description = "Tests a field set selection action w/ an element key and a class indexer")]
     public void FieldSetElementKeyClassIndexer()
     {
         const string patch =
@@ -1688,8 +1842,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ a string key and a class indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ a string key and a class indexer")]
+        Description = "Tests a field set selection action w/ a string key and a class indexer")]
     public void FieldSetStringKeyClassIndexer()
     {
         const string patch =
@@ -1721,10 +1878,14 @@ a b c {
                 }
             }
         };
+        Match(patch,validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ an element key and a string indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ an element key and a string indexer")]
+        Description = "Tests a field set selection action w/ an element key and a string indexer")]
     public void FieldSetElementKeyStringIndexer()
     {
         const string patch =
@@ -1759,8 +1920,11 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a field set selection action w/ a string key and a string indexer
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a simple field set selection action w/ a string key and a string indexer")]
+        Description = "Tests a field set selection action w/ a string key and a string indexer")]
     public void FieldSetStringKeyStringIndexer()
     {
         const string patch =
@@ -1795,6 +1959,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a nested selection block as a selection action
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a nested selection block as a selection action")]
     public void NestedSelectionBlock()
@@ -1826,6 +1993,9 @@ a b c {
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a mixin include as a selection action
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a mixin include as a selection action")]
     public void MixinInclude()
     {
@@ -1858,7 +2028,10 @@ a b c {
 
     #region Expression Tests
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit addition expression")]
+    /// <summary>
+    /// Tests an implicit addition expression
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an implicit addition expression")]
     public void ImplicitAddition()
     {
         const string patch =
@@ -1867,7 +2040,7 @@ $x: +2;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<ImplicitAdd>
@@ -1882,7 +2055,10 @@ $x: +2;
         Match(patch, validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit subtraction expression")]
+    /// <summary>
+    /// Tests an implicit subtraction expression
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an implicit subtraction expression")]
     public void ImplicitSubtraction()
     {
         const string patch =
@@ -1891,7 +2067,7 @@ $x: -2;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<ImplicitSubtract>
@@ -1906,7 +2082,10 @@ $x: -2;
         Match(patch, validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit multiplication expression")]
+    /// <summary>
+    /// Tests an implicit multiplication expression
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an implicit multiplication expression")]
     public void ImplicitMultiplication()
     {
         const string patch =
@@ -1915,7 +2094,7 @@ $x: *2;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<ImplicitMultiply>
@@ -1930,7 +2109,10 @@ $x: *2;
         Match(patch, validator);
     }
 
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a implicit division expression")]
+    /// <summary>
+    /// Tests an implicit division expression
+    /// </summary>
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an implicit division expression")]
     public void ImplicitDivision()
     {
         const string patch =
@@ -1939,7 +2121,7 @@ $x: /2;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<ImplicitDivide>
@@ -1954,6 +2136,9 @@ $x: /2;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a variable reference expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a variable reference expression")]
     public void VariableReference()
     {
@@ -1963,7 +2148,7 @@ $x: $y;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new VariableReferenceValidator
@@ -1975,6 +2160,9 @@ $x: $y;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a negation expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a negation expression")]
     public void Negate()
     {
@@ -1984,7 +2172,7 @@ $x: (-2);
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<Negate>
@@ -1999,6 +2187,9 @@ $x: (-2);
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a positive expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a positive expression")]
     public void Positive()
     {
@@ -2008,7 +2199,7 @@ $x: (+2);
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<Positive>
@@ -2023,6 +2214,9 @@ $x: (+2);
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an inversion expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an inversion expression")]
     public void Inversion()
     {
@@ -2032,7 +2226,7 @@ $x: !false;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new UnaryValidator<Not>
@@ -2047,6 +2241,9 @@ $x: !false;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function call w/ no unnamed or named arguments
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function call w/ no unnamed or named arguments")]
     public void CallNoUnnamedNoNamed()
@@ -2057,7 +2254,7 @@ $x: test-function();
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new SimpleCallValidator
@@ -2070,6 +2267,9 @@ $x: test-function();
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function call w/ an unnamed argument but no named arguments
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function call w/ an unnamed argument but no named arguments")]
     public void CallUnnamedNoNamed()
@@ -2080,7 +2280,7 @@ $x: test-function(5);
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new SimpleCallValidator
@@ -2102,6 +2302,9 @@ $x: test-function(5);
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function call w/ a named argument but no unnamed arguments
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function call w/ a named argument but no unnamed arguments")]
     public void CallNoUnnamedNamed()
@@ -2112,7 +2315,7 @@ $x: test-function($a: 5);
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new SimpleCallValidator
@@ -2135,6 +2338,9 @@ $x: test-function($a: 5);
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a function call w/ a named argument and an unnamed argument
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests a function call w/ a named argument and an unnamed argument")]
     public void CallUnnamedNamed()
@@ -2145,7 +2351,7 @@ $x: test-function(6, $a: 5);
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new SimpleCallValidator
@@ -2175,6 +2381,9 @@ $x: test-function(6, $a: 5);
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a member call w/o any arguments
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a member call w/o any arguments")]
     public void MemberCall()
     {
@@ -2184,7 +2393,7 @@ $x: $y:method();
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new MemberCallValidator
@@ -2201,6 +2410,9 @@ $x: $y:method();
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a subscript expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a subscript expression")]
     public void Subscript()
     {
@@ -2210,7 +2422,7 @@ $x: $y[$z];
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Subscript>
@@ -2229,6 +2441,9 @@ $x: $y[$z];
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a multiplication expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a multiplication expression")]
     public void Multiply()
     {
@@ -2238,7 +2453,7 @@ $x: $y * $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Multiply>
@@ -2257,6 +2472,9 @@ $x: $y * $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a division expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a division expression")]
     public void Divide()
     {
@@ -2266,7 +2484,7 @@ $x: $y / $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Divide>
@@ -2285,6 +2503,9 @@ $x: $y / $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a remainder expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a remainder expression")]
     public void Remainder()
     {
@@ -2294,7 +2515,7 @@ $x: $y % $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Remainder>
@@ -2313,6 +2534,9 @@ $x: $y % $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an addition expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an addition expression")]
     public void Add()
     {
@@ -2322,7 +2546,7 @@ $x: $y + $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Add>
@@ -2341,6 +2565,9 @@ $x: $y + $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a subtraction expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a subtraction expression")]
     public void Subtract()
     {
@@ -2350,7 +2577,7 @@ $x: $y - $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Subtract>
@@ -2369,6 +2596,9 @@ $x: $y - $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a greater than expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a greater than expression")]
     public void GreaterThan()
     {
@@ -2378,7 +2608,7 @@ $x: $y > $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<GreaterThan>
@@ -2397,6 +2627,9 @@ $x: $y > $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a lesser than expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a lesser than expression")]
     public void LesserThan()
     {
@@ -2406,7 +2639,7 @@ $x: $y < $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<LesserThan>
@@ -2425,6 +2658,9 @@ $x: $y < $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a greater than equal expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a greater than equal expression")]
     public void GreaterThanEqual()
     {
@@ -2434,7 +2670,7 @@ $x: $y >= $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<GreaterThanEqual>
@@ -2453,6 +2689,9 @@ $x: $y >= $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a lesser than equal expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a lesser than equal expression")]
     public void LesserThanEqual()
     {
@@ -2462,7 +2701,7 @@ $x: $y <= $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<LesserThanEqual>
@@ -2481,6 +2720,9 @@ $x: $y <= $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an equal to expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an equal to expression")]
     public void EqualTo()
     {
@@ -2490,7 +2732,7 @@ $x: $y == $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<EqualTo>
@@ -2509,6 +2751,9 @@ $x: $y == $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a not equal to expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a not equal to expression")]
     public void NotEqualTo()
     {
@@ -2518,7 +2763,7 @@ $x: $y != $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<NotEqualTo>
@@ -2537,6 +2782,9 @@ $x: $y != $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an and expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an and expression")]
     public void And()
     {
@@ -2546,7 +2794,7 @@ $x: $y and $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<And>
@@ -2565,6 +2813,9 @@ $x: $y and $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an or expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an or expression")]
     public void Or()
     {
@@ -2574,7 +2825,7 @@ $x: $y or $z;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Or>
@@ -2593,6 +2844,9 @@ $x: $y or $z;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a ternary expression
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a ternary expression")]
     public void Ternary()
     {
@@ -2602,7 +2856,7 @@ $x: $y if $z else $w;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new TernaryValidator
@@ -2629,9 +2883,12 @@ $x: $y if $z else $w;
 
     #region Operator Precedence Tests
     
+    /// <summary>
+    /// Tests that multiplication has a higher precedence than addition
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests that multiplication has a higher precedence than addition")]
-    public void MultiplicitavePrecedence()
+    public void MultiplicativePrecedence()
     {
         const string patch =
             @"
@@ -2639,7 +2896,7 @@ $x: $y * $z + $w * $v;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Add>
@@ -2672,9 +2929,12 @@ $x: $y * $z + $w * $v;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests that subscription has a higher precedence than addition
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
         Description = "Tests that subscription has a higher precedence than addition")]
-    public void SubscriptivePrecedence()
+    public void SubscriptionPrecedence()
     {
         const string patch =
             @"
@@ -2682,7 +2942,7 @@ $x: $y * $z + $w[$v];
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new BinaryValidator<Add>
@@ -2719,6 +2979,9 @@ $x: $y * $z + $w[$v];
 
     #region Value Tests
 
+    /// <summary>
+    /// Tests a deletion value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a deletion value")]
     public void DeleteValue()
     {
@@ -2728,7 +2991,7 @@ $x: @delete;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ValueValidator
@@ -2740,6 +3003,9 @@ $x: @delete;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a true value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a true value")]
     public void True()
     {
@@ -2749,7 +3015,7 @@ $x: true;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ValueValidator
@@ -2761,6 +3027,9 @@ $x: true;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a false value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a false value")]
     public void False()
     {
@@ -2770,7 +3039,7 @@ $x: false;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ValueValidator
@@ -2782,6 +3051,9 @@ $x: false;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a number value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a number value")]
     public void Number()
     {
@@ -2791,7 +3063,7 @@ $x: 6.75;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ValueValidator
@@ -2803,6 +3075,9 @@ $x: 6.75;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a string value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a string value")]
     public void String()
     {
@@ -2812,7 +3087,7 @@ $x: 'a\nb\n';
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ValueValidator
@@ -2824,6 +3099,9 @@ $x: 'a\nb\n';
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a null value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a null value")]
     public void None()
     {
@@ -2833,7 +3111,7 @@ $x: null;
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ValueValidator
@@ -2845,6 +3123,9 @@ $x: null;
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests a list value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a list value")]
     public void List()
     {
@@ -2854,7 +3135,7 @@ $x: [1,'2',true,4,null];
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ListValidator
@@ -2885,6 +3166,9 @@ $x: [1,'2',true,4,null];
         Match(patch, validator);
     }
 
+    /// <summary>
+    /// Tests an object value
+    /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an object value")]
     public void Object()
     {
@@ -2897,7 +3181,7 @@ $x: {
 ";
         var validator = new PatchValidator
         {
-            new VarDeclValidator
+            new VariableDeclarationValidator
             {
                 Variable = "x",
                 Value = new ObjectValidator
