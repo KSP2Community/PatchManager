@@ -118,6 +118,7 @@ sub_expression          : value                                                 
                         | NOT child=sub_expression                                                          #not
                         | lhs=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN                             #simple_call
                         | lhs=sub_expression COLON name=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN   #member_call
+                        | lhs=sub_expression RULESET LEFT_PAREN args=argument_list RIGHT_PAREN              #member_call_ruleset
                         | lhs=sub_expression LEFT_BRACKET rhs=sub_expression RIGHT_BRACKET                  #indexor
                         | lhs=sub_expression MULTIPLY rhs=sub_expression                                    #multiplication
                         | lhs=sub_expression DIVIDE rhs=sub_expression                                      #division

@@ -1,3 +1,4 @@
+using System.Text;
 using PatchManager.SassyPatching.Tests.Validators;
 using PatchManager.SassyPatching.Tests.Validators.Attributes;
 using PatchManager.SassyPatching.Tests.Validators.Expressions;
@@ -20,6 +21,16 @@ public class ParsingTests
         _tokenTransformer = new Transformer(Assert.Fail);
     }
 
+    private class FailErrorListener : IAntlrErrorListener<IToken>
+    {
+        internal static FailErrorListener Instance = new();
+        private FailErrorListener() {}
+        public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine,
+            string msg, RecognitionException e)
+        {
+            Assert.Fail($"{line}:{charPositionInLine}: {msg}");
+        }
+    }
 
     private SassyPatch Parse(string testPatch)
     {
@@ -27,6 +38,7 @@ public class ParsingTests
         var lexer = new sassy_lexer(charStream);
         var tokenStream = new CommonTokenStream(lexer);
         var parser = new sassy_parser(tokenStream);
+        parser.AddErrorListener(FailErrorListener.Instance);
         var patchContext = parser.patch();
         _tokenTransformer.Errored = false;
         var patch = _tokenTransformer.Visit(patchContext) as SassyPatch;
@@ -1820,7 +1832,7 @@ a b c {
         const string patch =
             @"
 * {
-    @include test-mixin();
+    @include test-mixin()
 }
 ";
         var validator = new PatchValidator

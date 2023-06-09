@@ -718,6 +718,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitOr([NotNull] sassy_parser.OrContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>member_call_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>value_reference</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// <para>

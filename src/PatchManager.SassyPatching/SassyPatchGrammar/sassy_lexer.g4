@@ -105,9 +105,10 @@ UNICODE_ESC
    ;
 
 fragment IDENTIFIER : [a-zA-Z_*?][a-zA-Z_.\-*?0-9]*;
+fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_][a-zA-Z_.\-0-9]*;
 
 NAME                : '#' IDENTIFIER;
-CLASS               : '.' IDENTIFIER;
-VARIABLE            : '$' IDENTIFIER;
-RULESET             : ':' IDENTIFIER;
-ELEMENT             : IDENTIFIER;
+CLASS               : '.' WILDCARDLESS_IDENTIFIER;
+VARIABLE            : '$' WILDCARDLESS_IDENTIFIER;
+RULESET             : ':' WILDCARDLESS_IDENTIFIER;
+ELEMENT             : WILDCARDLESS_IDENTIFIER;

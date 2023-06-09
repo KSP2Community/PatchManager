@@ -344,7 +344,11 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitMember_call(sassy_parser.Member_callContext context) =>
         new MemberCall(context.GetCoordinate(), Visit(context.lhs) as Expression, context.name.Text,
-            context.args.children.Select(Visit).Cast<CallArgument>().ToList());
+            context.args.argument().Select(Visit).Cast<CallArgument>().ToList());
+
+    public override Node VisitMember_call_ruleset(sassy_parser.Member_call_rulesetContext context) =>
+        new MemberCall(context.GetCoordinate(), Visit(context.lhs) as Expression, context.RULESET().GetText().TrimFirst(),
+            context.args.argument().Select(Visit).Cast<CallArgument>().ToList());
 
     public override Node VisitGreater_than(sassy_parser.Greater_thanContext context) =>
         new GreaterThan(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
@@ -464,4 +468,13 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     public override Node VisitArgument_with_default(sassy_parser.Argument_with_defaultContext context)
         => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst(),Visit(context.val));
+
+    public override Node VisitSel_sub(sassy_parser.Sel_subContext context) =>
+        Visit(context.internal_selector);
+
+    public override Node VisitSub_selector(sassy_parser.Sub_selectorContext context) =>
+        Visit(context.internal_selector);
+
+    public override Node VisitSub_sub_expression(sassy_parser.Sub_sub_expressionContext context) =>
+        Visit(context.internal_expr);
 }
