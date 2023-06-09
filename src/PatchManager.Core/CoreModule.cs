@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using KSP.Game;
+using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
 using PatchManager.Core.Flow;
 using PatchManager.Shared;
@@ -32,6 +32,6 @@ public class CoreModule : BaseModule
     {
         Logging.LogInfo("Registering resource locator");
         Addressables.ResourceManager.ResourceProviders.Add(new FileResourceProvider());
-        GameManager.Instance.Game.Assets.RegisterResourceLocator(new FileResourceLocator());
+        Locators.Register(new FileResourceLocator());
     }
 }

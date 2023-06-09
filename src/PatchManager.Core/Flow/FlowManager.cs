@@ -1,6 +1,5 @@
-﻿using PatchManager.Shared;
-using KSP.Game.Flow;
-using SpaceWarp.API.Loading;
+﻿using KSP.Game.Flow;
+using PatchManager.Shared;
 
 namespace PatchManager.Core.Flow;
 
@@ -9,26 +8,23 @@ namespace PatchManager.Core.Flow;
 /// </summary>
 public static class FlowManager
 {
-    private static readonly Dictionary<IAction, string> Actions = new();
-
-    internal static void RunPatch()
-    {
-        foreach (var (action, after) in Actions)
-        {
-            SaveLoad.AddFlowActionToGameLoadAfter(new GenericFlowAction(action.Name, action.DoAction), after);
-            Logging.LogDebug($"Registering flow action: {action.Name}" + (after != null ? $" after {after}" : ""));
-        }
-    }
+    private static readonly List<IAction> Actions = new();
 
     /// <summary>
     /// Registers an action to be executed during game loading.
     /// </summary>
     /// <param name="action">Action to be executed.</param>
-    /// <param name="after">
-    /// Name of the action this action should execute after, or null to insert it at the start.
-    /// </param>
-    public static void RegisterAction(IAction action, string after = null)
+    public static void RegisterAction(IAction action)
     {
-        Actions.Add(action, after);
+        Actions.Add(action);
+    }
+
+    internal static void AddActionsToFlow(SequentialFlow loadingFlow)
+    {
+        foreach (var action in Actions)
+        {
+            loadingFlow.AddAction(new GenericFlowAction(action.Name, action.DoAction));
+            Logging.LogDebug($"Registering flow action: {action.Name}");
+        }
     }
 }

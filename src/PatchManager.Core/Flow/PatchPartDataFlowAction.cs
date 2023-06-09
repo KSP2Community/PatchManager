@@ -37,10 +37,7 @@ public class PatchPartDataFlowAction : IAction
         {
             Logging.LogDebug("JSON Manager patching started");
 
-            Addressables.LoadAssetsAsync(
-                Label,
-                new Action<TextAsset>(OnJsonLoaded)
-            ).Completed += OnCompleted(resolve, reject);
+            Addressables.LoadAssetsAsync<TextAsset>(Label, OnJsonLoaded).Completed += OnCompleted(resolve, reject);
         }
         catch (Exception e)
         {
