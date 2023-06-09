@@ -1,10 +1,15 @@
 ﻿namespace PatchManager.SassyPatching.Nodes;
 
+/// <summary>
+/// A node representing a transformation error
+/// </summary>
 public class ErrorNode : Node
 {
+    /// <summary>
+    /// The error message
+    /// </summary>
     public string Error;
-
-    public ErrorNode(Coordinate c, string error) : base(c)
+    internal ErrorNode(Coordinate c, string error) : base(c)
     {
         Error = error;
     }

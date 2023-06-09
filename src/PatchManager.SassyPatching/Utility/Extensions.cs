@@ -20,4 +20,9 @@ internal static class Extensions
     {
         return new Coordinate(@this.Start.TokenSource.SourceName, @this.Start.Line, @this.Start.Column);
     }
+
+    public static bool MatchesPattern(this string @this, string pattern)
+    {
+        return Regex.IsMatch(@this, pattern.Replace("*", ".*").Replace("?", ".?"));
+    }
 }

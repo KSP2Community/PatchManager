@@ -17,7 +17,7 @@ import_declaration      : USE imp=STRING SEMICOLON;
 
 var_decl                : variable=VARIABLE COLON val=expression SEMICOLON;
 
-stage_def               : DEFINE_STAGE stage=STRING (COMMA priority=NUMBER)? SEMICOLON;
+stage_def               : DEFINE_STAGE stage=STRING COMMA priority=NUMBER SEMICOLON;
 
 function_def            : FUNCTION name=ELEMENT LEFT_PAREN args=arg_decl_list RIGHT_PAREN LEFT_BRACE body=function_body RIGHT_BRACE;
 
@@ -44,10 +44,10 @@ selector                : ELEMENT                                               
                         | CLASS                                                         #sel_class
                         | NAME                                                          #sel_name
                         | RULESET                                                       #sel_ruleset
-                        | LEFT_PAREN internal_selector=selector_no_children RIGHT_PAREN #sel_sub
-                        | lhs=selector COMMA rhs=selector                               #sel_combination
+                        | LEFT_PAREN internal_selector=selector RIGHT_PAREN             #sel_sub
+                        | lhs=selector COMMA rhs=selector_no_children                   #sel_combination
                         | parent=selector GREATER_THAN child=selector_no_children       #sel_child
-                        | lhs=selector rhs=selector                                     #sel_intersection
+                        | lhs=selector rhs=selector_no_children                         #sel_intersection
                         | ADD element=ELEMENT                                           #sel_add_element // Adds an element and selects the added element
                         | WITHOUT field=CLASS                                           #sel_without_class
                         | WITHOUT name=NAME                                             #sel_without_name
@@ -76,6 +76,7 @@ selector_statement      : var_decl
                         | merge_value
                         | field_set
                         | selection_block
+                        | mixin_include
                         ;
                         
 sel_level_conditional   : PRE_IF cond=sub_expression LEFT_BRACE body=selector_statement* RIGHT_BRACE els=sel_level_else?;
@@ -115,11 +116,15 @@ sub_expression          : value                                                 
                         | SUBTRACT child=sub_expression                                                     #negative
                         | ADD child=sub_expression                                                          #positive
                         | NOT child=sub_expression                                                          #not
-                        | lhs=sub_expression ADD rhs=sub_expression                                         #addition
-                        | lhs=sub_expression SUBTRACT rhs=sub_expression                                    #subtraction
+                        | lhs=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN                             #simple_call
+                        | lhs=sub_expression COLON name=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN   #member_call
+                        | lhs=sub_expression RULESET LEFT_PAREN args=argument_list RIGHT_PAREN              #member_call_ruleset
+                        | lhs=sub_expression LEFT_BRACKET rhs=sub_expression RIGHT_BRACKET                  #indexor
                         | lhs=sub_expression MULTIPLY rhs=sub_expression                                    #multiplication
                         | lhs=sub_expression DIVIDE rhs=sub_expression                                      #division
                         | lhs=sub_expression MODULUS rhs=sub_expression                                     #remainder
+                        | lhs=sub_expression ADD rhs=sub_expression                                         #addition
+                        | lhs=sub_expression SUBTRACT rhs=sub_expression                                    #subtraction
                         | lhs=sub_expression GREATER_THAN rhs=sub_expression                                #greater_than
                         | lhs=sub_expression LESSER_THAN rhs=sub_expression                                 #lesser_than
                         | lhs=sub_expression GREATER_THAN_EQUAL rhs=sub_expression                          #greater_than_equal
@@ -128,9 +133,6 @@ sub_expression          : value                                                 
                         | lhs=sub_expression NOT_EQUAL_TO rhs=sub_expression                                #not_equal_to
                         | lhs=sub_expression AND rhs=sub_expression                                         #and
                         | lhs=sub_expression OR rhs=sub_expression                                          #or
-                        | lhs=sub_expression LEFT_BRACKET rhs=sub_expression RIGHT_BRACKET                  #indexor
-                        | lhs=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN                             #simple_call
-                        | lhs=sub_expression COLON name=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN   #member_call
                         | lhs=sub_expression IF cond=sub_expression ELSE rhs=sub_expression                 #ternary
                         ;
 
@@ -147,7 +149,7 @@ value                   : DELETE    #value_deletion
 list                    : LEFT_BRACKET values=list_values COMMA? RIGHT_BRACKET;
 list_values             : (sub_expression? (COMMA sub_expression)*)?;
 
-obj                     : LEFT_BRACE   values=obj_values COMMA? RIGHT_BRACKET;
+obj                     : LEFT_BRACE   values=obj_values COMMA? RIGHT_BRACE;
 obj_values              : (key_value? (COMMA key_value)*)?;
 
 key_value               : key=ELEMENT COLON val=sub_expression #literal_key
@@ -182,3 +184,5 @@ fn_level_else_else      : PRE_ELSE LEFT_BRACE body=function_statement* RIGHT_BRA
 fn_level_else_if        : PRE_ELSE_IF cond=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE els=fn_level_else?;
 
 fn_return               : RETURN sub_expression SEMICOLON;
+
+mixin_include           : INCLUDE mixin=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN;

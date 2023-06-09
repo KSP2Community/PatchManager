@@ -459,6 +459,13 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitOr([NotNull] sassy_parser.OrContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>member_call_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>value_reference</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// </summary>
@@ -760,5 +767,11 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitFn_return([NotNull] sassy_parser.Fn_returnContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.mixin_include"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMixin_include([NotNull] sassy_parser.Mixin_includeContext context);
 }
 } // namespace SassyPatchGrammar

@@ -1,9 +1,16 @@
 ﻿namespace PatchManager.SassyPatching.Nodes;
 
+/// <summary>
+/// Represents a group of nodes
+/// </summary>
 public class Block : Node
 {
-    public List<Node> Children;
-    public Block(Coordinate c, List<Node> children) : base(c)
+    /// <summary>
+    /// The children of this block node
+    /// </summary>
+    public readonly List<Node> Children;
+    
+    internal Block(Coordinate c, List<Node> children) : base(c)
     {
         Children = children;
     }

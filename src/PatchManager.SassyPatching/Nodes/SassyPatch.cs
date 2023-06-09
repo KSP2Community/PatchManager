@@ -1,10 +1,16 @@
 ﻿namespace PatchManager.SassyPatching.Nodes;
 
+/// <summary>
+/// The top level node of a patch file, represents the entire file
+/// </summary>
 public class SassyPatch : Node
 {
-    public List<Node> Children;
+    /// <summary>
+    /// The list of statements in this patch
+    /// </summary>
+    public readonly List<Node> Children;
 
-    public SassyPatch(Coordinate c, List<Node> children) : base(c)
+    internal SassyPatch(Coordinate c, List<Node> children) : base(c)
     {
         Children = children;
     }

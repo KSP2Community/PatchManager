@@ -756,6 +756,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitOr([NotNull] sassy_parser.OrContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>member_call_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>member_call_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>value_reference</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// </summary>
@@ -1269,5 +1281,15 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitFn_return([NotNull] sassy_parser.Fn_returnContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.mixin_include"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMixin_include([NotNull] sassy_parser.Mixin_includeContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.mixin_include"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMixin_include([NotNull] sassy_parser.Mixin_includeContext context);
 }
 } // namespace SassyPatchGrammar
