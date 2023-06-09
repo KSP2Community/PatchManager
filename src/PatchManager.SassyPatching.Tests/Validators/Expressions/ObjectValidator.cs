@@ -8,7 +8,7 @@ public class ObjectValidator : ParseValidator<ObjectNode>, IEnumerable<KeyValueV
     public override bool Validate(ObjectNode node)
     {
         if (node.Initializers.Count != Initializers.Count) return false;
-        return !Initializers.Where((x, y) => x.Validate(node.Initializers[y])).Any();
+        return !Initializers.Where((x, y) => !x.Validate(node.Initializers[y])).Any();
     }
 
     public IEnumerator<KeyValueValidator> GetEnumerator()

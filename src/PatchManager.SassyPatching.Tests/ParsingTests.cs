@@ -2628,10 +2628,301 @@ $x: $y if $z else $w;
     #endregion
 
     #region Operator Precedence Tests
+    
+    [Test(TestOf = typeof(Transformer), Author = "Cheese",
+        Description = "Tests that multiplication has a higher precedence than addition")]
+    public void MultiplicitavePrecedence()
+    {
+        const string patch =
+            @"
+$x: $y * $z + $w * $v;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Add>
+                {
+                    LeftHandSide = new BinaryValidator<Multiply>
+                    {
+                        LeftHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "y"
+                        },
+                        RightHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "z"
+                        }
+                    },
+                    RightHandSide = new BinaryValidator<Multiply>
+                    {
+                        LeftHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "w"
+                        },
+                        RightHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "v"
+                        }
+                    },
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese",
+        Description = "Tests that subscription has a higher precedence than addition")]
+    public void SubscriptivePrecedence()
+    {
+        const string patch =
+            @"
+$x: $y * $z + $w[$v];
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new BinaryValidator<Add>
+                {
+                    LeftHandSide = new BinaryValidator<Multiply>
+                    {
+                        LeftHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "y"
+                        },
+                        RightHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "z"
+                        }
+                    },
+                    RightHandSide = new BinaryValidator<Subscript>
+                    {
+                        LeftHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "w"
+                        },
+                        RightHandSide = new VariableReferenceValidator
+                        {
+                            VariableName = "v"
+                        }
+                    },
+                }
+            }
+        };
+        Match(patch, validator);
+    }
 
     #endregion
 
     #region Value Tests
 
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a deletion value")]
+    public void DeleteValue()
+    {
+        const string patch =
+            @"
+$x: @delete;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ValueValidator
+                {
+                    StoredValue = new Value(Value.ValueType.Deletion)
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a true value")]
+    public void True()
+    {
+        const string patch =
+            @"
+$x: true;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ValueValidator
+                {
+                    StoredValue = true
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a false value")]
+    public void False()
+    {
+        const string patch =
+            @"
+$x: false;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ValueValidator
+                {
+                    StoredValue = false
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a number value")]
+    public void Number()
+    {
+        const string patch =
+            @"
+$x: 6.75;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ValueValidator
+                {
+                    StoredValue = 6.75
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a string value")]
+    public void String()
+    {
+        const string patch =
+            @"
+$x: 'a\nb\n';
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ValueValidator
+                {
+                    StoredValue = "a\nb\n"
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a null value")]
+    public void None()
+    {
+        const string patch =
+            @"
+$x: null;
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ValueValidator
+                {
+                    StoredValue = new Value(Value.ValueType.None)
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a list value")]
+    public void List()
+    {
+        const string patch =
+            @"
+$x: [1,'2',true,4,null];
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ListValidator
+                {
+                    new ValueValidator
+                    {
+                        StoredValue = 1
+                    },
+                    new ValueValidator
+                    {
+                        StoredValue = "2"
+                    },
+                    new ValueValidator
+                    {
+                        StoredValue = true
+                    },
+                    new ValueValidator
+                    {
+                        StoredValue = 4
+                    },
+                    new ValueValidator
+                    {
+                        StoredValue = new Value(Value.ValueType.None)
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+
+    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests an object value")]
+    public void Object()
+    {
+        const string patch =
+            @"
+$x: {
+    a: 1,
+    'b': 2,
+};
+";
+        var validator = new PatchValidator
+        {
+            new VarDeclValidator
+            {
+                Variable = "x",
+                Value = new ObjectValidator
+                {
+                    new KeyValueValidator
+                    {
+                        Key = "a",
+                        Value = new ValueValidator
+                        {
+                            StoredValue = 1
+                        }
+                    },
+                    new KeyValueValidator
+                    {
+                        Key = "b",
+                        Value = new ValueValidator
+                        {
+                            StoredValue = 2
+                        }
+                    }
+                }
+            }
+        };
+        Match(patch, validator);
+    }
+    
     #endregion
 }

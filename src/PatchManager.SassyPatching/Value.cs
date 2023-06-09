@@ -27,7 +27,7 @@ public class Value
     public ValueType Type;
     public object Object;
 
-    public Value(ValueType type, object o)
+    public Value(ValueType type, object o = null)
     {
         Type = type;
         Object = o;

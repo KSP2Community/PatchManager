@@ -66,8 +66,8 @@ public class ValueValidator : ParseValidator<ValueNode>
         {
             return DictionaryCompare(leftHandSide.Dictionary, rightHandSide.Dictionary);
         }
-        
-        return leftHandSide.IsDeletion;
+
+        return true;
     }
     public override bool Validate(ValueNode node)
     {
