@@ -2,14 +2,21 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions;
 
+/// <summary>
+/// Represents a reference to a variable within the current environment
+/// </summary>
 public class VariableReference : Expression
 {
-    public string VariableName;
-    public VariableReference(Coordinate c, string variableName) : base(c)
+    /// <summary>
+    /// The variable being referenced
+    /// </summary>
+    public readonly string VariableName;
+    internal VariableReference(Coordinate c, string variableName) : base(c)
     {
         VariableName = variableName;
     }
 
+    /// <inheritdoc />
     public override Value Compute(Environment environment)
     {
         try

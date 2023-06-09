@@ -1,8 +1,10 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
-
+/// <summary>
+/// Represents a binary expression that returns true if both of its children are not equal
+/// </summary>
 public class NotEqualTo : Binary
 {
-    public NotEqualTo(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal NotEqualTo(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
     private bool ListCompare(List<Value> leftHandSide, List<Value> rightHandSide)
@@ -37,7 +39,8 @@ public class NotEqualTo : Binary
         }
         return false;
     }
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.Type != rightHandSide.Type) return true;
         
@@ -70,7 +73,7 @@ public class NotEqualTo : Binary
         return leftHandSide.IsNone;
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(Value value) => false;
 
-    public override Value ShortCircuitValue => null;
+    internal override Value ShortCircuitValue => null;
 }

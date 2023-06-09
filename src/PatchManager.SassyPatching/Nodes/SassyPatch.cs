@@ -6,16 +6,11 @@
 public class SassyPatch : Node
 {
     /// <summary>
-    /// 
+    /// The list of statements in this patch
     /// </summary>
     public readonly List<Node> Children;
 
-    /// <summary>
-    /// Create a new top level node
-    /// </summary>
-    /// <param name="c">The location of the node</param>
-    /// <param name="children">The children of the node</param>
-    public SassyPatch(Coordinate c, List<Node> children) : base(c)
+    internal SassyPatch(Coordinate c, List<Node> children) : base(c)
     {
         Children = children;
     }

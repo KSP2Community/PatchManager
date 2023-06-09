@@ -1,8 +1,11 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Selectors;
 
+/// <summary>
+/// Represents a selection action that matches all selectables
+/// </summary>
 public class WildcardSelector : Selector
 {
-    public WildcardSelector(Coordinate c) : base(c)
+    internal WildcardSelector(Coordinate c) : base(c)
     {
     }
 }

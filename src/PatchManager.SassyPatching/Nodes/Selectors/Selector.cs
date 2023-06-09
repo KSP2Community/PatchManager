@@ -1,8 +1,11 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Selectors;
 
+/// <summary>
+/// Represents a selector node
+/// </summary>
 public abstract class Selector : Node
 {
-    public Selector(Coordinate c) : base(c)
+    internal Selector(Coordinate c) : base(c)
     {
     }
 }

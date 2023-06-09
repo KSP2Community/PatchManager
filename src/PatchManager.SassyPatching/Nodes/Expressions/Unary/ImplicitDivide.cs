@@ -2,13 +2,16 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represent an implicit division which divides $value by its child
+/// </summary>
 public class ImplicitDivide : Implicit
 {
-    public ImplicitDivide(Coordinate c, Expression child) : base(c, child)
+    internal ImplicitDivide(Coordinate c, Expression child) : base(c, child)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {

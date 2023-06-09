@@ -2,13 +2,16 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
+/// <summary>
+/// Represents a binary expression which divides the left hand side by the right hand side
+/// </summary>
 public class Divide : Binary
 {
-    public Divide(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal Divide(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {
@@ -18,6 +21,6 @@ public class Divide : Binary
         throw new BinaryExpressionTypeException(Coordinate,"divide", leftHandSide.Type.ToString(), rightHandSide.Type.ToString());
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
-    public override Value ShortCircuitValue => null;
+    internal override bool ShortCircuitOn(Value value) => false;
+    internal override Value ShortCircuitValue => null;
 }

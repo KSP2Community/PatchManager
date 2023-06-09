@@ -2,20 +2,23 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represents an implicit addition, which adds the child to $value
+/// </summary>
 public class ImplicitAdd : Implicit
 {
-    public ImplicitAdd(Coordinate c, Expression child) : base(c, child)
+    internal ImplicitAdd(Coordinate c, Expression child) : base(c, child)
     {
     }
 
     // There should be a value called "$value" in the current environment, a literal new environment gets made here w/ that value set
-    public override Value GetResult(Value child)
+    internal override Value GetResult(Value child)
     {
         // Should be unreachable
         throw new Exception("Unreachable");
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         switch (leftHandSide.Type)
         {

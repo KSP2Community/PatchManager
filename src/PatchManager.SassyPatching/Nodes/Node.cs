@@ -14,7 +14,7 @@ public abstract class Node
     /// Creates a new node at a location
     /// </summary>
     /// <param name="c">The location of the node</param>
-    protected Node(Coordinate c)
+    internal Node(Coordinate c)
     {
         Coordinate = c;
     }

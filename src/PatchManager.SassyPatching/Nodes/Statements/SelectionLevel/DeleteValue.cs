@@ -1,8 +1,11 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 
+/// <summary>
+/// Represents a deletion selection action
+/// </summary>
 public class DeleteValue : Node
 {
-    public DeleteValue(Coordinate c) : base(c)
+    internal DeleteValue(Coordinate c) : base(c)
     {
     }
 }

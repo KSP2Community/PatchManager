@@ -1,14 +1,18 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
+/// <summary>
+/// Represents a binary expression that returns true if both children are truthy (short circuits)
+/// </summary>
+/// <seealso cref="Value.Truthy"/>
 public class And : Binary
 {
     public And(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide) => rightHandSide.Truthy;
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide) => rightHandSide.Truthy;
 
-    public override bool ShortCircuitOn(Value value) => !value.Truthy;
+    internal override bool ShortCircuitOn(Value value) => !value.Truthy;
 
-    public override Value ShortCircuitValue => false;
+    internal override Value ShortCircuitValue => false;
 }

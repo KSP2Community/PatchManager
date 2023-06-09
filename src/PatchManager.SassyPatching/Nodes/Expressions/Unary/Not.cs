@@ -1,10 +1,14 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represents a not operation which returns the opposite of the truthiness  of its child
+/// </summary>
+/// <seealso cref="Value.Truthy"/>
 public class Not : Unary
 {
-    public Not(Coordinate c, Expression child) : base(c, child)
+    internal Not(Coordinate c, Expression child) : base(c, child)
     {
     }
 
-    public override Value GetResult(Value child) => child.Truthy;
+    internal override Value GetResult(Value child) => !child.Truthy;
 }

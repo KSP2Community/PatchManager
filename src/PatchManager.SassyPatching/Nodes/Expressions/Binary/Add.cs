@@ -2,13 +2,16 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
+/// <summary>
+/// Represents a binary expression which adds its 2 children together and returns the result
+/// </summary>
 public class Add : Binary
 {
-    public Add(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal Add(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         switch (leftHandSide.Type)
         {
@@ -32,6 +35,6 @@ public class Add : Binary
         }
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
-    public override Value ShortCircuitValue => null;
+    internal override bool ShortCircuitOn(Value value) => false;
+    internal override Value ShortCircuitValue => null;
 }

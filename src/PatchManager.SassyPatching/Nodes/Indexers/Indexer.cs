@@ -1,8 +1,11 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Indexers;
 
+/// <summary>
+/// Represents a field indexer
+/// </summary>
 public abstract class Indexer : Node
 {
-    protected Indexer(Coordinate c) : base(c)
+    internal Indexer(Coordinate c) : base(c)
     {
     }
 }

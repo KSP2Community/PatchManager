@@ -1,12 +1,15 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represents a positive expression which returns its child
+/// </summary>
 public class Positive : Unary
 {
-    public Positive(Coordinate c, Expression child) : base(c, child)
+    internal Positive(Coordinate c, Expression child) : base(c, child)
     {
     }
 
-    public override Value GetResult(Value child)
+    internal override Value GetResult(Value child)
     {
         return child;
     }

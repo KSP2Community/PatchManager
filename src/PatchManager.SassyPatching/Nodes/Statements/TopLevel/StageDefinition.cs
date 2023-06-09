@@ -1,11 +1,20 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
+/// <summary>
+/// Represents a stage definition
+/// </summary>
 public class StageDefinition : Node
 {
-    public string StageName;
-    public ulong StagePriority;
+    /// <summary>
+    /// The name of the stage being defined
+    /// </summary>
+    public readonly string StageName;
+    /// <summary>
+    /// The priority of the stage
+    /// </summary>
+    public readonly ulong StagePriority;
 
-    public StageDefinition(Coordinate c, string stageName, ulong stagePriority) : base(c)
+    internal StageDefinition(Coordinate c, string stageName, ulong stagePriority) : base(c)
     {
         StageName = stageName;
         StagePriority = stagePriority;

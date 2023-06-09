@@ -1,9 +1,15 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Indexers;
 
+/// <summary>
+/// Represents a field indexer that indexes the first sub-value w/ the specified class
+/// </summary>
 public class ClassIndexer : Indexer
 {
-    public string ClassName;
-    public ClassIndexer(Coordinate c, string className) : base(c)
+    /// <summary>
+    /// The class to index by
+    /// </summary>
+    public readonly string ClassName;
+    internal ClassIndexer(Coordinate c, string className) : base(c)
     {
         ClassName = className;
     }

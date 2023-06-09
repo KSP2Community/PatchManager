@@ -2,14 +2,16 @@
 using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
-
+/// <summary>
+/// Represents a binary expression which multiplies its 2 children together and returns the result
+/// </summary>
 public class Multiply : Binary
 {
-    public Multiply(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal Multiply(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {
@@ -61,7 +63,7 @@ public class Multiply : Binary
         return newList;
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(Value value) => false;
 
-    public override Value ShortCircuitValue => null;
+    internal override Value ShortCircuitValue => null;
 }

@@ -2,13 +2,16 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
+/// <summary>
+/// Represents a binary expression that returns true if its left hand side is greater than its right hand side
+/// </summary>
 public class GreaterThan : Binary
 {
-    public GreaterThan(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal GreaterThan(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {
@@ -24,7 +27,7 @@ public class GreaterThan : Binary
             rightHandSide.Type.ToString());
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(Value value) => false;
 
-    public override Value ShortCircuitValue => null;
+    internal override Value ShortCircuitValue => null;
 }

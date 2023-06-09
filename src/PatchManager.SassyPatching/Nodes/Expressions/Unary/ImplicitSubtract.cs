@@ -2,13 +2,16 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represents an implicit subtraction which subtracts its child from $value
+/// </summary>
 public class ImplicitSubtract : Implicit
 {
-    public ImplicitSubtract(Coordinate c, Expression child) : base(c, child)
+    internal ImplicitSubtract(Coordinate c, Expression child) : base(c, child)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {

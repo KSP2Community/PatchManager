@@ -4,12 +4,24 @@ using PatchManager.SassyPatching.Nodes.Indexers;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 
+/// <summary>
+/// Represents a field setting selection action
+/// </summary>
 public class Field : Node
 {
-    public string FieldName;
-    [CanBeNull] public Indexer Indexer;
-    public Expression FieldValue;
-    public Field(Coordinate c, string fieldName, [CanBeNull] Indexer indexer, Expression fieldValue) : base(c)
+    /// <summary>
+    /// The field to be set
+    /// </summary>
+    public readonly string FieldName;
+    /// <summary>
+    /// The index into the field, if there is one
+    /// </summary>
+    [CanBeNull] public readonly Indexer Indexer;
+    /// <summary>
+    /// The value to set the field to
+    /// </summary>
+    public readonly Expression FieldValue;
+    internal Field(Coordinate c, string fieldName, [CanBeNull] Indexer indexer, Expression fieldValue) : base(c)
     {
         FieldName = fieldName;
         Indexer = indexer;

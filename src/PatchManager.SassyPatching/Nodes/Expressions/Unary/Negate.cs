@@ -2,13 +2,16 @@
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represents a negation operation which returns the negative value of its child
+/// </summary>
 public class Negate : Unary
 {
-    public Negate(Coordinate c, Expression child) : base(c, child)
+    internal Negate(Coordinate c, Expression child) : base(c, child)
     {
     }
 
-    public override Value GetResult(Value child)
+    internal override Value GetResult(Value child)
     {
         if (child.IsNumber)
         {

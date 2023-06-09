@@ -3,13 +3,17 @@ using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
+/// <summary>
+/// A binary expression which indexes the left hand side by the right hand side and returns the result
+/// </summary>
 public class Subscript : Binary
 {
-    public Subscript(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal Subscript(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    // ReSharper disable once CognitiveComplexity
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.IsList && rightHandSide.IsNumber)
         {
@@ -54,7 +58,7 @@ public class Subscript : Binary
             rightHandSide.Type.ToString());
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(Value value) => false;
 
-    public override Value ShortCircuitValue => null;
+    internal override Value ShortCircuitValue => null;
 }

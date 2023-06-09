@@ -1,8 +1,11 @@
 ﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
+/// <summary>
+/// Represents a binary expression that returns true if both of its children are equal
+/// </summary>
 public class EqualTo : Binary
 {
-    public EqualTo(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
+    internal EqualTo(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
 
@@ -38,7 +41,8 @@ public class EqualTo : Binary
         }
         return true;
     }
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {
         if (leftHandSide.Type != rightHandSide.Type) return false;
         
@@ -71,7 +75,7 @@ public class EqualTo : Binary
         return leftHandSide.IsDeletion;
     }
 
-    public override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(Value value) => false;
 
-    public override Value ShortCircuitValue => null;
+    internal override Value ShortCircuitValue => null;
 }

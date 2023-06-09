@@ -3,13 +3,16 @@ using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
+/// <summary>
+/// Represents an implicit multiplication which multiplies $value by its child
+/// </summary>
 public class ImplicitMultiply : Implicit
 {
-    public ImplicitMultiply(Coordinate c, Expression child) : base(c, child)
+    internal ImplicitMultiply(Coordinate c, Expression child) : base(c, child)
     {
     }
 
-    public override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
     {        
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {
