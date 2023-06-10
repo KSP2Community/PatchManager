@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using PatchManager.SassyPatching.Attributes;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Builtins;
 
@@ -13,12 +14,12 @@ public static class ReflectionBuiltins
     /// <summary>
     /// Gets the type of a value
     /// </summary>
-    /// <param name="value">The value to get the type of</param>
+    /// <param name="dataValue">The value to get the type of</param>
     /// <returns>The values type as a lowercase string</returns>
     [SassyMethod("typeof")]
-    public static string GetValueType(Value value)
+    public static string GetValueType(DataValue dataValue)
     {
-        return value.Type.ToString().ToLowerInvariant();
+        return dataValue.Type.ToString().ToLowerInvariant();
     }
 
 
@@ -30,7 +31,7 @@ public static class ReflectionBuiltins
     /// <param name="environment">Automatically filled in by the engine, the current environment</param>
     /// <returns>The result of the function</returns>
     [SassyMethod("string.invoke")]
-    public static Value Invoke(string functionName, [VarArgs] List<Value> arguments, Environment environment)
+    public static DataValue Invoke(string functionName, [VarArgs] List<DataValue> arguments, Environment environment)
     {
         throw new NotImplementedException();
     }

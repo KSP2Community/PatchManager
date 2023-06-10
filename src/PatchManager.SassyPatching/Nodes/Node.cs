@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes;
 
 /// <summary>
 /// An abstract class representing a node in the tree of a patch file
@@ -18,4 +20,10 @@ public abstract class Node
     {
         Coordinate = c;
     }
+
+    /// <summary>
+    /// Execute this node in the given environment
+    /// </summary>
+    /// <param name="environment">The given environment</param>
+    public abstract void ExecuteIn(Environment environment);
 }

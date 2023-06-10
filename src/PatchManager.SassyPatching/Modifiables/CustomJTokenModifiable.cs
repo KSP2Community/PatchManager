@@ -65,38 +65,38 @@ public abstract class CustomJTokenModifiable : IModifiable
     }
 
     /// <inheritdoc />
-    public virtual Value GetFieldByNumber(string fieldName, ulong index)
+    public virtual DataValue GetFieldByNumber(string fieldName, ulong index)
     {
         if (CustomFieldAdaptor(fieldName, out var customField, out _, out var indexAdaptor, out _))
         {
-            if (indexAdaptor == null) return Value.FromJToken(customField[(int)index]);
+            if (indexAdaptor == null) return DataValue.FromJToken(customField[(int)index]);
             var result = indexAdaptor(customField, index);
-            return Value.FromJToken(result ?? customField[(int)index]);
+            return DataValue.FromJToken(result ?? customField[(int)index]);
         }
 
         var field = JToken[fieldName];
-        if (!CustomIndexAdaptors.TryGetValue(fieldName, out var adaptor)) return Value.FromJToken(field[(int)index]);
+        if (!CustomIndexAdaptors.TryGetValue(fieldName, out var adaptor)) return DataValue.FromJToken(field[(int)index]);
         var result2 = adaptor(field, index);
-        return Value.FromJToken(result2 ?? field[(int)index]);
+        return DataValue.FromJToken(result2 ?? field[(int)index]);
     }
 
     /// <inheritdoc />
-    public virtual Value GetFieldByElement(string fieldName, string elementName)
+    public virtual DataValue GetFieldByElement(string fieldName, string elementName)
     {
         if (CustomFieldAdaptor(fieldName, out var customField, out _, out _, out var elementAdaptor))
         {
-            if (elementAdaptor == null) return Value.FromJToken(customField[elementName]);
+            if (elementAdaptor == null) return DataValue.FromJToken(customField[elementName]);
             var result = elementAdaptor(customField, elementName);
-            return Value.FromJToken(result ?? customField[elementName]);
+            return DataValue.FromJToken(result ?? customField[elementName]);
         }
         var field = JToken[fieldName];
-        if (!CustomElementAdaptors.TryGetValue(fieldName, out var adaptor)) return Value.FromJToken(field[elementName]);
+        if (!CustomElementAdaptors.TryGetValue(fieldName, out var adaptor)) return DataValue.FromJToken(field[elementName]);
         var result2 = adaptor(field, elementName);
-        return Value.FromJToken(result2 ?? field[elementName]);
+        return DataValue.FromJToken(result2 ?? field[elementName]);
     }
 
     /// <inheritdoc />
-    public virtual Value GetFieldByClass(string fieldName, string className)
+    public virtual DataValue GetFieldByClass(string fieldName, string className)
     {
         if (CustomFieldAdaptor(fieldName, out var customField, out var classAdaptor, out _, out _))
         {
@@ -105,15 +105,15 @@ public abstract class CustomJTokenModifiable : IModifiable
                 var converted = subfield is JProperty jProperty ? jProperty.Value : subfield;
                 if (classAdaptor != null && classAdaptor(converted, className))
                 {
-                    return Value.FromJToken(subfield);
+                    return DataValue.FromJToken(subfield);
                 }
 
                 if (converted.Contains(className))
                 {
-                    return Value.FromJToken(subfield);
+                    return DataValue.FromJToken(subfield);
                 }
             }
-            return new Value(Value.ValueType.None);
+            return new DataValue(DataValue.DataType.None);
         }
         CustomClassAdaptors.TryGetValue(fieldName, out var adaptor);
         var field = JToken[fieldName];
@@ -122,86 +122,86 @@ public abstract class CustomJTokenModifiable : IModifiable
             var converted = subfield is JProperty jProperty ? jProperty.Value : subfield;
             if (adaptor != null && adaptor(converted, className))
             {
-                return Value.FromJToken(subfield);
+                return DataValue.FromJToken(subfield);
             }
             if (converted.Contains(className))
             {
-                return Value.FromJToken(subfield);
+                return DataValue.FromJToken(subfield);
             }
         }
-        return new Value(Value.ValueType.None);
+        return new DataValue(DataValue.DataType.None);
     }
 
     /// <summary>
     /// Sets a JToken to a value, taking care of deletions
     /// </summary>
     /// <param name="jToken">The JToken being set or replaced</param>
-    /// <param name="value">The Value to replace it with</param>
-    protected static void Set(JToken jToken, Value value)
+    /// <param name="dataValue">The Value to replace it with</param>
+    protected static void Set(JToken jToken, DataValue dataValue)
     {
-        if (value.IsDeletion)
+        if (dataValue.IsDeletion)
         {
             RemoveToken(jToken);
         }
         else
         {
-            jToken.Replace(value.ToJToken());
+            jToken.Replace(dataValue.ToJToken());
         }
     }
 
     /// <inheritdoc />
-    public virtual void SetFieldByNumber(string fieldName, ulong index, Value value)
+    public virtual void SetFieldByNumber(string fieldName, ulong index, DataValue dataValue)
     {
         _setDirty();
         if (CustomFieldAdaptor(fieldName, out var customField, out _, out var indexAdaptor, out _))
         {
             if (indexAdaptor == null)
             {
-                Set(customField[(int)index],value);
+                Set(customField[(int)index],dataValue);
                 return;
             }
             var result = indexAdaptor(customField, index);
-            Set(result ?? customField[(int)index], value);
+            Set(result ?? customField[(int)index], dataValue);
             return;
         }
 
         var field = JToken[fieldName];
         if (!CustomIndexAdaptors.TryGetValue(fieldName, out var adaptor))
         {
-            Set(field[(int)index], value);
+            Set(field[(int)index], dataValue);
             return;
         }
         var result2 = adaptor(field, index);
-        Set(result2 ?? field[(int)index], value);
+        Set(result2 ?? field[(int)index], dataValue);
     }
 
     /// <inheritdoc />
-    public virtual void SetFieldByElement(string fieldName, string elementName, Value value)
+    public virtual void SetFieldByElement(string fieldName, string elementName, DataValue dataValue)
     {
         _setDirty();
         if (CustomFieldAdaptor(fieldName, out var customField, out _, out _, out var elementAdaptor))
         {
             if (elementAdaptor == null)
             {
-                Set(customField[elementName],value);
+                Set(customField[elementName],dataValue);
                 return;
             }
             var result = elementAdaptor(customField, elementName);
-            Set(result ?? customField[elementName],value);
+            Set(result ?? customField[elementName],dataValue);
             return;
         }
         var field = JToken[fieldName];
         if (!CustomElementAdaptors.TryGetValue(fieldName, out var adaptor))
         {
-            Set(field[elementName],value);
+            Set(field[elementName],dataValue);
             return;
         }
         var result2 = adaptor(field, elementName);
-        Set(result2 ?? field[elementName],value);
+        Set(result2 ?? field[elementName],dataValue);
     }
 
     /// <inheritdoc />
-    public virtual void SetFieldByClass(string fieldName, string className, Value value)
+    public virtual void SetFieldByClass(string fieldName, string className, DataValue dataValue)
     {
         _setDirty();
         if (CustomFieldAdaptor(fieldName, out var customField, out var classAdaptor, out _, out _))
@@ -211,13 +211,13 @@ public abstract class CustomJTokenModifiable : IModifiable
                 var converted = subfield is JProperty jProperty ? jProperty.Value : subfield;
                 if (classAdaptor != null && classAdaptor(converted, className))
                 {
-                    Set(subfield,value);
+                    Set(subfield,dataValue);
                     return;
                 }
 
                 if (converted.Contains(className))
                 {
-                    Set(subfield,value);
+                    Set(subfield,dataValue);
                     return;
                 }
             }
@@ -230,42 +230,42 @@ public abstract class CustomJTokenModifiable : IModifiable
             var converted = subfield is JProperty jProperty ? jProperty.Value : subfield;
             if (adaptor != null && adaptor(converted, className))
             {
-                Set(subfield,value);
+                Set(subfield,dataValue);
                 return;
             }
             if (converted.Contains(className))
             {
-                Set(subfield,value);
+                Set(subfield,dataValue);
                 return;
             }
         }
     }
 
     /// <inheritdoc />
-    public virtual Value GetFieldValue(string fieldName)
+    public virtual DataValue GetFieldValue(string fieldName)
     {
-        return Value.FromJToken(CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _) ? customField : JToken[fieldName]);
+        return DataValue.FromJToken(CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _) ? customField : JToken[fieldName]);
     }
 
     /// <inheritdoc />
-    public virtual void SetFieldValue(string fieldName, Value value)
+    public virtual void SetFieldValue(string fieldName, DataValue dataValue)
     {
         _setDirty();
         Set(CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _) ? customField : JToken[fieldName],
-            value);
+            dataValue);
     }
 
     /// <inheritdoc />
-    public virtual void Set(Value value)
+    public virtual void Set(DataValue dataValue)
     {
         _setDirty();
-        Set(JToken, value);
+        Set(JToken, dataValue);
     }
 
     /// <inheritdoc />
-    public virtual Value Get()
+    public virtual DataValue Get()
     {
-        return Value.FromJToken(JToken);
+        return DataValue.FromJToken(JToken);
     }
 
     /// <inheritdoc />

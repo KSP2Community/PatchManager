@@ -58,7 +58,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitVar_decl(sassy_parser.Var_declContext context) =>
         new VariableDeclaration(context.GetCoordinate(),
             context.variable.Text.TrimFirst(),
-            Visit(context.val));
+            Visit(context.val) as Expression);
 
     /// <inheritdoc />
     public override Node VisitStage_def(sassy_parser.Stage_defContext context)
@@ -105,7 +105,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond),
+            Visit(context.cond) as Expression, 
             context.top_level_statement()
                 .Select(Visit)
                 .ToList(),
@@ -129,7 +129,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond),
+            Visit(context.cond) as Expression, 
             context.top_level_statement()
                 .Select(Visit)
                 .ToList(),
@@ -261,7 +261,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond),
+            Visit(context.cond) as Expression, 
             context.selector_statement()
                 .Select(Visit)
                 .ToList(),
@@ -285,7 +285,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond),
+            Visit(context.cond) as Expression,
             context.selector_statement()
                 .Select(Visit)
                 .ToList(),
@@ -462,7 +462,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     /// <inheritdoc />
     public override Node VisitValue_deletion(sassy_parser.Value_deletionContext context)
-        => new ValueNode(context.GetCoordinate(), new Value(Value.ValueType.Deletion));
+        => new ValueNode(context.GetCoordinate(), new DataValue(DataValue.DataType.Deletion));
 
     /// <inheritdoc />
     public override Node VisitBoolean_true(sassy_parser.Boolean_trueContext context)
@@ -490,7 +490,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     /// <inheritdoc />
     public override Node VisitNone(sassy_parser.NoneContext context)
-        => new ValueNode(context.GetCoordinate(), new Value(Value.ValueType.None));
+        => new ValueNode(context.GetCoordinate(), new DataValue(DataValue.DataType.None));
 
     /// <inheritdoc />
     public override Node VisitList_value(sassy_parser.List_valueContext context)
@@ -528,7 +528,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond),
+            Visit(context.cond) as Expression,
             context.function_statement()
                 .Select(Visit)
                 .ToList(),
@@ -552,7 +552,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond),
+            Visit(context.cond) as Expression,
             context.function_statement()
                 .Select(Visit)
                 .ToList(),
@@ -576,7 +576,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     /// <inheritdoc />
     public override Node VisitArgument_with_default(sassy_parser.Argument_with_defaultContext context)
-        => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst(), Visit(context.val));
+        => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst(), Visit(context.val) as Expression);
 
     /// <inheritdoc />
     public override Node VisitSel_sub(sassy_parser.Sel_subContext context) =>

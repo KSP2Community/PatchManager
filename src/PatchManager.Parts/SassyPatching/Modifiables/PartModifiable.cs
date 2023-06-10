@@ -74,12 +74,12 @@ public sealed class PartModifiable : CustomJTokenModifiable
     protected override Dictionary<string, Func<JToken, string, JToken>> CustomElementAdaptors { get; }
 
     /// <inheritdoc />
-    public override void Set(Value value)
+    public override void Set(DataValue dataValue)
     {
-        if (value.IsDeletion)
+        if (dataValue.IsDeletion)
         {
             _selectable.SetDeleted();
         }
-        base.Set(value);
+        base.Set(dataValue);
     }
 }

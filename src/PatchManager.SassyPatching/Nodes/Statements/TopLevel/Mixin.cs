@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
+﻿using PatchManager.SassyPatching.Execution;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
 /// <summary>
 /// Represents a selection block mixin
@@ -22,5 +25,11 @@ public class Mixin : Node
         Name = name;
         Arguments = arguments;
         Body = body;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        environment.GlobalEnvironment.AllMixins[Name] = new PatchMixin(this);
     }
 }

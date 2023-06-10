@@ -1,4 +1,5 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
@@ -15,15 +16,15 @@ public abstract class Implicit : Unary
     internal Implicit(Coordinate c, Expression child) : base(c, child)
     {
     }
-    internal abstract Value GetResult(Value leftHandSide, Value rightHandSide);
+    internal abstract DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide);
 
-    internal override Value GetResult(Value child)
+    internal override DataValue GetResult(DataValue child)
     {
         throw new Exception("Unreachable");
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
         try
         {

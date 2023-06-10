@@ -14,10 +14,10 @@ public static class ListBuiltins
     /// Copies a list and appends a value onto the copy and returns the copy
     /// </summary>
     /// <param name="list">The list to copy</param>
-    /// <param name="value">The value to append</param>
+    /// <param name="dataValue">The value to append</param>
     /// <returns>The new list w/ the value appended to it</returns>
     [SassyMethod("list.append")]
-    public static List<Value> Append(List<Value> list, Value value) => new(list) { value };
+    public static List<DataValue> Append(List<DataValue> list, DataValue dataValue) => new(list) { dataValue };
 
     /// <summary>
     /// Copies a list and appends a list of values onto the copy and returns the copy
@@ -27,9 +27,9 @@ public static class ListBuiltins
     /// <param name="values">The list of values to append</param>
     /// <returns>The new list w/ the values appended to it</returns>
     [SassyMethod("list.append-all")]
-    public static List<Value> AppendAll(List<Value> list, List<Value> values)
+    public static List<DataValue> AppendAll(List<DataValue> list, List<DataValue> values)
     {
-        var result = new List<Value>(list);
+        var result = new List<DataValue>(list);
         result.AddRange(values);
         return result;
     }
@@ -40,7 +40,7 @@ public static class ListBuiltins
     /// <param name="varArgs"></param>
     /// <returns></returns>
     [SassyMethod("list.create")]
-    public static List<Value> Create([VarArgs] List<Value> varArgs)
+    public static List<DataValue> Create([VarArgs] List<DataValue> varArgs)
     {
         return varArgs;
     }

@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 
 /// <summary>
 /// Represents a binary expressions which performs a computation on 2 values to return one value
@@ -20,19 +22,19 @@ public abstract class Binary : Expression
         RightHandSide = rightHandSide;
     }
 
-    internal abstract Value GetResult(Value leftHandSide, Value rightHandSide);
+    internal abstract DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide);
 
-    internal abstract bool ShortCircuitOn(Value value);
+    internal abstract bool ShortCircuitOn(DataValue dataValue);
 
-    internal abstract Value ShortCircuitValue { get; }
+    internal abstract DataValue ShortCircuitDataValue { get; }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
         var lhs = LeftHandSide.Compute(environment);
         if (ShortCircuitOn(lhs))
         {
-            return ShortCircuitValue;
+            return ShortCircuitDataValue;
         }
 
         var rhs = RightHandSide.Compute(environment);

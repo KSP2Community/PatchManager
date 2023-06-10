@@ -11,7 +11,7 @@ public class Negate : Unary
     {
     }
 
-    internal override Value GetResult(Value child)
+    internal override DataValue GetResult(DataValue child)
     {
         if (child.IsNumber)
         {

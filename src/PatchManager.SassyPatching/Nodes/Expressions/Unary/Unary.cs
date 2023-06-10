@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 
 /// <summary>
 /// Represents a unary expression (an expression with one child)
@@ -17,10 +19,10 @@ public abstract class Unary : Expression
         Child = child;
     }
     
-    internal abstract Value GetResult(Value child);
+    internal abstract DataValue GetResult(DataValue child);
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
         return GetResult(Child.Compute(environment));
     }

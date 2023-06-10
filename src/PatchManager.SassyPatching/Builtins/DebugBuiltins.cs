@@ -15,7 +15,7 @@ public static class DebugBuiltins
     /// </summary>
     /// <param name="v">The value to log</param>
     [SassyMethod("debug-log")]
-    public static void Log(Value v)
+    public static void Log(DataValue v)
     {
         Logging.LogInfo(v.ToString());
     }

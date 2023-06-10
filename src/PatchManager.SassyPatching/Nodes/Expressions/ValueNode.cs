@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents a literal value
@@ -8,12 +10,12 @@ public class ValueNode : Expression
     /// <summary>
     /// The literal value
     /// </summary>
-    public readonly Value StoredValue;
-    internal ValueNode(Coordinate c, Value storedValue) : base(c)
+    public readonly DataValue StoredDataValue;
+    internal ValueNode(Coordinate c, DataValue storedDataValue) : base(c)
     {
-        StoredValue = storedValue;
+        StoredDataValue = storedDataValue;
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment) => StoredValue;
+    public override DataValue Compute(Environment environment) => StoredDataValue;
 }

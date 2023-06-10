@@ -26,65 +26,65 @@ public class JTokenModifiable : IModifiable
         this._setDirty = setDirty;
     }
 
-    public Value GetFieldByNumber(string fieldName, ulong index)
+    public DataValue GetFieldByNumber(string fieldName, ulong index)
     {
-        return Value.FromJToken(_jToken[fieldName][(int)index]);
+        return DataValue.FromJToken(_jToken[fieldName][(int)index]);
     }
 
-    public Value GetFieldByElement(string fieldName, string elementName)
+    public DataValue GetFieldByElement(string fieldName, string elementName)
     {
-        return Value.FromJToken(_jToken[fieldName][elementName]);
+        return DataValue.FromJToken(_jToken[fieldName][elementName]);
     }
 
-    public Value GetFieldByClass(string fieldName, string className)
+    public DataValue GetFieldByClass(string fieldName, string className)
     {
         var field = _jToken[fieldName];
         foreach (var subField in field)
         {
             if (subField.Contains(className))
             {
-                return Value.FromJToken(field);
+                return DataValue.FromJToken(field);
             }
 
         }
 
-        return new Value(Value.ValueType.None);
+        return new DataValue(DataValue.DataType.None);
     }
 
-    public void SetFieldByNumber(string fieldName, ulong index, Value value)
+    public void SetFieldByNumber(string fieldName, ulong index, DataValue dataValue)
     {
         _setDirty();
-        if (value.IsDeletion)
+        if (dataValue.IsDeletion)
         {
             RemoveToken(_jToken[fieldName][(int)index]);
         }
         else
         {
-            _jToken[fieldName][(int)index].Replace(value.ToJToken());
+            _jToken[fieldName][(int)index].Replace(dataValue.ToJToken());
         }
     }
 
-    public void SetFieldByElement(string fieldName, string elementName, Value value)
+    public void SetFieldByElement(string fieldName, string elementName, DataValue dataValue)
     {
         _setDirty();
-        if (value.IsDeletion)
+        if (dataValue.IsDeletion)
         {
             // _jToken[fieldName][elementName].Remove();
             RemoveToken(_jToken[fieldName][elementName]);
         }
         else {
-            _jToken[fieldName][elementName].Replace(value.ToJToken());
+            _jToken[fieldName][elementName].Replace(dataValue.ToJToken());
         }
     }
 
     /// <inheritdoc />
-    public void SetFieldByClass(string fieldName, string className, Value value)
+    public void SetFieldByClass(string fieldName, string className, DataValue dataValue)
     {
         _setDirty();
         var field = _jToken[fieldName];
         foreach (var subField in field.ToList().Where(subField => subField.Contains(className)))
         {
-            if (value.IsDeletion)
+            if (dataValue.IsDeletion)
             {
                 // subField.Remove();
                 RemoveToken(subField);
@@ -93,52 +93,52 @@ public class JTokenModifiable : IModifiable
             {
                 if (subField is JProperty property)
                 {
-                    property.Value.Replace(value.ToJToken());
+                    property.Value.Replace(dataValue.ToJToken());
                 }
                 else
                 {
-                    subField.Replace(value.ToJToken());
+                    subField.Replace(dataValue.ToJToken());
                 }
             }
             break;
         }
     }
 
-    public Value GetFieldValue(string fieldName)
+    public DataValue GetFieldValue(string fieldName)
     {
-        return Value.FromJToken(_jToken[fieldName]);
+        return DataValue.FromJToken(_jToken[fieldName]);
     }
 
-    public void SetFieldValue(string fieldName, Value value)
+    public void SetFieldValue(string fieldName, DataValue dataValue)
     {
         _setDirty();
-        if (value.IsDeletion)
+        if (dataValue.IsDeletion)
         {
             _jToken[fieldName].Remove();
         }
         else
         {
-            _jToken[fieldName].Replace(value.ToJToken());
+            _jToken[fieldName].Replace(dataValue.ToJToken());
         }
     }
 
-    public void Set(Value value)
+    public void Set(DataValue dataValue)
     {
         _setDirty();
-        if (value.IsDeletion)
+        if (dataValue.IsDeletion)
         {
             // _jToken.Remove();
             RemoveToken(_jToken);
         }
         else
         {
-            _jToken.Replace(value.ToJToken());
+            _jToken.Replace(dataValue.ToJToken());
         }
     }
 
-    public Value Get()
+    public DataValue Get()
     {
-        return Value.FromJToken(_jToken);
+        return DataValue.FromJToken(_jToken);
     }
 
     public void Complete()

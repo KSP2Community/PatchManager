@@ -11,7 +11,7 @@ public class Multiply : Binary
     {
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {
@@ -42,7 +42,7 @@ public class Multiply : Binary
             rightHandSide.Type.ToString());
     }
 
-    private static Value StringRepeat(Value str, Value amount)
+    private static DataValue StringRepeat(DataValue str, DataValue amount)
     {
         StringBuilder sb = new StringBuilder();
         for (var i = 0; i < amount.Number; i++)
@@ -53,9 +53,9 @@ public class Multiply : Binary
         return sb.ToString();
     }
 
-    private static Value ListRepeat(Value list, Value amount)
+    private static DataValue ListRepeat(DataValue list, DataValue amount)
     {
-        List<Value> newList = new();
+        List<DataValue> newList = new();
         for (var i = 0; i < amount.Number; i++)
         {
             newList.AddRange(list.List);
@@ -63,7 +63,7 @@ public class Multiply : Binary
         return newList;
     }
 
-    internal override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(DataValue dataValue) => false;
 
-    internal override Value ShortCircuitValue => null;
+    internal override DataValue ShortCircuitDataValue => null;
 }

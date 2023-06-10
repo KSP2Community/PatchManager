@@ -11,7 +11,7 @@ public class ImplicitDivide : Implicit
     {
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup Label="Package references">
-        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0"/>
-        <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
-        <PackageReference Include="HarmonyX" Version="2.10.1"/>
-        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1"/>
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0" />
+        <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+        <PackageReference Include="HarmonyX" Version="2.10.1" />
+        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" />
     </ItemGroup>
 </Project>

@@ -73,8 +73,7 @@ public interface ISelectable
     /// <summary>
     /// Opens up this selectable for modification
     /// </summary>
-    /// <returns>The modifiable state of this selector</returns>
-    /// <exception cref="Exceptions.NotModifiableException">Thrown if this selectable cannot be modified</exception>
+    /// <returns>The modifiable state of this selector or null if not modifiable</returns>
     public IModifiable OpenModification();
 
     /// <summary>

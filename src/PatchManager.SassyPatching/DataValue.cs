@@ -9,12 +9,12 @@ namespace PatchManager.SassyPatching;
 /// The basic value type that the sassy patching engine uses
 /// It can be one of 7 different types of values, 6 of which correspond fully to JSON types w/ one extra type/value meant to "delete" whatever it is assigned to
 /// </summary>
-public class Value
+public class DataValue
 {
     /// <summary>
     /// The types of values that a Value can be
     /// </summary>
-    public enum ValueType
+    public enum DataType
     {
         /// <summary>
         /// The type of null, corresponds to JSON null values
@@ -49,7 +49,7 @@ public class Value
     /// <summary>
     /// The type of this Value
     /// </summary>
-    public readonly ValueType Type;
+    public readonly DataType Type;
 
     private readonly object _object;
 
@@ -57,14 +57,14 @@ public class Value
     /// Creates a new value w/ a specified type and stored value
     /// </summary>
     /// <param name="type">The type of this value</param>
-    /// <param name="o">The value that is stored in this value, can be null for values of type <see cref="ValueType.None"/> and <see cref="ValueType.Deletion"/></param>
-    public Value(ValueType type, object o = null)
+    /// <param name="o">The value that is stored in this value, can be null for values of type <see cref="DataType.None"/> and <see cref="DataType.Deletion"/></param>
+    public DataValue(DataType type, object o = null)
     {
         Type = type;
         _object = o;
     }
 
-    private void CheckType(ValueType toCheck)
+    private void CheckType(DataType toCheck)
     {
         if (Type != toCheck)
         {
@@ -73,113 +73,113 @@ public class Value
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.None"/>?
+    /// Is the type of this variable <see cref="DataType.None"/>?
     /// </summary>
-    public bool IsNone => Type == ValueType.None;
+    public bool IsNone => Type == DataType.None;
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.Boolean"/>?
+    /// Is the type of this variable <see cref="DataType.Boolean"/>?
     /// </summary>
-    public bool IsBoolean => Type == ValueType.Boolean;
+    public bool IsBoolean => Type == DataType.Boolean;
 
     /// <summary>
-    /// Asserts this value is of type <see cref="ValueType.Boolean"/>,
+    /// Asserts this value is of type <see cref="DataType.Boolean"/>,
     /// then returns the <see cref="bool"/> contained within
     /// </summary>
-    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="ValueType.Boolean"/></exception>
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Boolean"/></exception>
     public bool Boolean
     {
         get
         {
-            CheckType(ValueType.Boolean);
+            CheckType(DataType.Boolean);
             return (bool)_object;
         }
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.Number"/>?
+    /// Is the type of this variable <see cref="DataType.Number"/>?
     /// </summary>
-    public bool IsNumber => Type == ValueType.Number;
+    public bool IsNumber => Type == DataType.Number;
 
     /// <summary>
-    /// Asserts this value is of type <see cref="ValueType.Number"/>,
+    /// Asserts this value is of type <see cref="DataType.Number"/>,
     /// then returns the <see cref="double"/> contained within
     /// </summary>
-    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="ValueType.Number"/></exception>
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Number"/></exception>
     public double Number
     {
         get
         {
-            CheckType(ValueType.Number);
+            CheckType(DataType.Number);
             return (double)_object;
         }
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.String"/>?
+    /// Is the type of this variable <see cref="DataType.String"/>?
     /// </summary>
-    public bool IsString => Type == ValueType.String;
+    public bool IsString => Type == DataType.String;
 
     /// <summary>
-    /// Asserts this value is of type <see cref="ValueType.String"/>,
+    /// Asserts this value is of type <see cref="DataType.String"/>,
     /// then returns the <see cref="string"/> contained within
     /// </summary>
-    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="ValueType.String"/></exception>
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.String"/></exception>
     public string String
     {
         get
         {
-            CheckType(ValueType.String);
+            CheckType(DataType.String);
             return (string)_object;
         }
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.List"/>?
+    /// Is the type of this variable <see cref="DataType.List"/>?
     /// </summary>
-    public bool IsList => Type == ValueType.List;
+    public bool IsList => Type == DataType.List;
 
     /// <summary>
-    /// Asserts this value is of type <see cref="ValueType.List"/>,
-    /// then returns the <see cref="List{T}"/> contained within of which generic type argument is <see cref="Value"/>
+    /// Asserts this value is of type <see cref="DataType.List"/>,
+    /// then returns the <see cref="List{T}"/> contained within of which generic type argument is <see cref="DataValue"/>
     /// </summary>
-    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="ValueType.List"/></exception>
-    public List<Value> List
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.List"/></exception>
+    public List<DataValue> List
     {
         get
         {
-            CheckType(ValueType.List);
-            return (List<Value>)_object;
+            CheckType(DataType.List);
+            return (List<DataValue>)_object;
         }
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.Dictionary"/>?
+    /// Is the type of this variable <see cref="DataType.Dictionary"/>?
     /// </summary>
-    public bool IsDictionary => Type == ValueType.Dictionary;
+    public bool IsDictionary => Type == DataType.Dictionary;
     
     /// <summary>
-    /// Asserts this value is of type <see cref="ValueType.Dictionary"/>,
-    /// then returns the <see cref="Dictionary{K,V}"/> contained within of which the key type is <see cref="string"/> and the value type is <see cref="Value"/>
+    /// Asserts this value is of type <see cref="DataType.Dictionary"/>,
+    /// then returns the <see cref="Dictionary{K,V}"/> contained within of which the key type is <see cref="string"/> and the value type is <see cref="DataValue"/>
     /// </summary>
-    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="ValueType.Dictionary"/></exception>
-    public Dictionary<string, Value> Dictionary
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Dictionary"/></exception>
+    public Dictionary<string, DataValue> Dictionary
     {
         get
         {
-            CheckType(ValueType.Dictionary);
-            return (Dictionary<string, Value>)_object;
+            CheckType(DataType.Dictionary);
+            return (Dictionary<string, DataValue>)_object;
         }
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="ValueType.Deletion"/>?
+    /// Is the type of this variable <see cref="DataType.Deletion"/>?
     /// </summary>
-    public bool IsDeletion => Type == ValueType.Deletion;
+    public bool IsDeletion => Type == DataType.Deletion;
     
     /// <summary>
-    /// Does this value get interpreted as true in places where a <see cref="ValueType.Boolean"/> is expected?
-    /// That is, is the value a <see cref="ValueType.Boolean"/> and the value stored within true, or is the value anything but <see cref="ValueType.None"/> and <see cref="ValueType.Deletion"/>?
+    /// Does this value get interpreted as true in places where a <see cref="DataType.Boolean"/> is expected?
+    /// That is, is the value a <see cref="DataType.Boolean"/> and the value stored within true, or is the value anything but <see cref="DataType.None"/> and <see cref="DataType.Deletion"/>?
     /// </summary>
     public bool Truthy {
         get
@@ -190,53 +190,53 @@ public class Value
     }
 
     /// <summary>
-    /// Creates a <see cref="Value"/> from a <see cref="Boolean"/>
+    /// Creates a <see cref="DataValue"/> from a <see cref="Boolean"/>
     /// </summary>
     /// <param name="b">The value to be stored within the value</param>
-    /// <returns>A <see cref="Value"/> with a type of <see cref="ValueType.Boolean"/> and a stored value of <param name="b"></param></returns>
-    public static implicit operator Value(bool b)
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Boolean"/> and a stored value of <param name="b"></param></returns>
+    public static implicit operator DataValue(bool b)
     {
-        return new Value(ValueType.Boolean, b);
+        return new DataValue(DataType.Boolean, b);
     }
 
     /// <summary>
-    /// Creates a <see cref="Value"/> from a <see cref="Double"/>
+    /// Creates a <see cref="DataValue"/> from a <see cref="Double"/>
     /// </summary>
     /// <param name="d">The value to be stored within the value</param>
-    /// <returns>A <see cref="Value"/> with a type of <see cref="ValueType.Number"/> and a stored value of <param name="d"></param></returns>
-    public static implicit operator Value(double d)
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Number"/> and a stored value of <param name="d"></param></returns>
+    public static implicit operator DataValue(double d)
     {
-        return new Value(ValueType.Number, d);
+        return new DataValue(DataType.Number, d);
     }
 
     /// <summary>
-    /// Creates a <see cref="Value"/> from a <see cref="string"/>
+    /// Creates a <see cref="DataValue"/> from a <see cref="string"/>
     /// </summary>
     /// <param name="s">The value to be stored within the value</param>
-    /// <returns>A <see cref="Value"/> with a type of <see cref="ValueType.String"/> and a stored value of <param name="s"></param></returns>
-    public static implicit operator Value(string s)
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.String"/> and a stored value of <param name="s"></param></returns>
+    public static implicit operator DataValue(string s)
     {
-        return new Value(ValueType.String, s);
+        return new DataValue(DataType.String, s);
     }
 
     /// <summary>
-    /// Creates a <see cref="Value"/> from a <see cref="List{T}"/> with the generic type argument being <see cref="Value"/>
+    /// Creates a <see cref="DataValue"/> from a <see cref="List{T}"/> with the generic type argument being <see cref="DataValue"/>
     /// </summary>
     /// <param name="l">The value to be stored within the value</param>
-    /// <returns>A <see cref="Value"/> with a type of <see cref="ValueType.List"/> and a stored value of <param name="l"></param></returns>
-    public static implicit operator Value(List<Value> l)
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.List"/> and a stored value of <param name="l"></param></returns>
+    public static implicit operator DataValue(List<DataValue> l)
     {
-        return new Value(ValueType.List, l);
+        return new DataValue(DataType.List, l);
     }
 
     /// <summary>
-    /// Creates a <see cref="Value"/> from a <see cref="Dictionary{K,V}"/> with the key type being <see cref="string"/> and value type being <see cref="Value"/>
+    /// Creates a <see cref="DataValue"/> from a <see cref="Dictionary{K,V}"/> with the key type being <see cref="string"/> and value type being <see cref="DataValue"/>
     /// </summary>
     /// <param name="d">The value to be stored within the value</param>
-    /// <returns>A <see cref="Value"/> with a type of <see cref="ValueType.Dictionary"/> and a stored value of <param name="d"></param></returns>
-    public static implicit operator Value(Dictionary<string, Value> d)
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Dictionary"/> and a stored value of <param name="d"></param></returns>
+    public static implicit operator DataValue(Dictionary<string, DataValue> d)
     {
-        return new Value(ValueType.Dictionary, d);
+        return new DataValue(DataType.Dictionary, d);
     }
 
     /// <summary>
@@ -288,9 +288,9 @@ public class Value
     /// </summary>
     /// <param name="token">The token to convert to a value</param>
     /// <returns>A value that represents the data stored in the token</returns>
-    public static Value FromJToken(JToken token)
+    public static DataValue FromJToken(JToken token)
     {
-        if (token == null) return new Value(ValueType.None);
+        if (token == null) return new DataValue(DataType.None);
         while (true)
         {
             switch (token.Type)
@@ -299,7 +299,7 @@ public class Value
                     token = ((JProperty)token).Value;
                     continue;
                 case JTokenType.Null or JTokenType.None:
-                    return new Value(ValueType.None);
+                    return new DataValue(DataType.None);
                 case JTokenType.Float:
                     return (double)token;
                 case JTokenType.Boolean:
@@ -310,7 +310,7 @@ public class Value
                     return token.Select(FromJToken).ToList();
                 case JTokenType.Object:
                 {
-                    Dictionary<string, Value> values = new();
+                    Dictionary<string, DataValue> values = new();
                     foreach (var jToken in token)
                     {
                         var jProperty = (JProperty)jToken;
@@ -320,7 +320,7 @@ public class Value
                     return values;
                 }
                 default:
-                    return new Value(ValueType.None);
+                    return new DataValue(DataType.None);
             }
         }
     }

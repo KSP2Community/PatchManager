@@ -11,7 +11,7 @@ public class GreaterThan : Binary
     {
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         if (leftHandSide.IsNumber && rightHandSide.IsNumber)
         {
@@ -27,7 +27,7 @@ public class GreaterThan : Binary
             rightHandSide.Type.ToString());
     }
 
-    internal override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(DataValue dataValue) => false;
 
-    internal override Value ShortCircuitValue => null;
+    internal override DataValue ShortCircuitDataValue => null;
 }

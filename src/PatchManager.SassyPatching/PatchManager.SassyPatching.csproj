@@ -3,9 +3,6 @@
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" />
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Execution\" />
-    </ItemGroup>
-    <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     </ItemGroup>
 </Project>

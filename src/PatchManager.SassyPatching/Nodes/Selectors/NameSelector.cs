@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Selectors;
+﻿using PatchManager.SassyPatching.Interfaces;
+
+namespace PatchManager.SassyPatching.Nodes.Selectors;
 
 /// <summary>
 /// Represents a selector that matches selectables that have a name that matches a name pattern
@@ -8,9 +10,21 @@ public class NameSelector : Selector
     /// <summary>
     /// The name pattern to match against, can contain */? wildcards
     /// </summary>
-    public string NamePattern;
+    public readonly string NamePattern;
     internal NameSelector(Coordinate c, string namePattern) : base(c)
     {
         NamePattern = namePattern;
+    }
+
+    /// <inheritdoc />
+    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public override List<ISelectable> SelectAllTopLevel(string type, string data)
+    {
+        return new();
     }
 }

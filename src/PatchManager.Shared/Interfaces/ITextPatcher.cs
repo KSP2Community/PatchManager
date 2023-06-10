@@ -1,4 +1,4 @@
-﻿namespace PatchManager.Core.Interfaces;
+﻿namespace PatchManager.Shared.Interfaces;
 
 /// <summary>
 /// This interfaces describes a patcher that can patch a simple text asset

@@ -46,10 +46,7 @@ public sealed class ResourceContainersSelectable : BaseSelectable
         resourceContainersSelectable._containers == _containers;
 
     /// <inheritdoc />
-    public override IModifiable OpenModification()
-    {
-        throw new NotModifiableException("Resource container lists are not modifiable");
-    }
+    public override IModifiable OpenModification() => null;
 
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)

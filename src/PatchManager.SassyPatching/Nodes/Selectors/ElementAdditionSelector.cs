@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Selectors;
+﻿using PatchManager.SassyPatching.Interfaces;
+
+namespace PatchManager.SassyPatching.Nodes.Selectors;
 
 /// <summary>
 /// Represents a selector that adds an element to a selectable and selects it
@@ -12,5 +14,17 @@ public class ElementAdditionSelector : Selector
     internal ElementAdditionSelector(Coordinate c, string elementName) : base(c)
     {
         ElementName = elementName;
+    }
+
+    /// <inheritdoc />
+    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    {
+        return selectables.Select(selectable => selectable.AddElement(ElementName)).ToList();
+    }
+
+    /// <inheritdoc />
+    public override List<ISelectable> SelectAllTopLevel(string type, string data)
+    {
+        return new();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
-using PatchManager.SassyPatching.Nodes;
 
-namespace PatchManager.SassyPatching;
+namespace PatchManager.SassyPatching.Execution;
 
 /// <summary>
 /// Describes a local environment/scope (per function/patch) used by the patching engine
@@ -19,7 +18,7 @@ public class Environment
     /// <summary>
     /// The list of variables in this scope
     /// </summary>
-    public readonly Dictionary<string, Value> ScopedValues;
+    public Dictionary<string, DataValue> ScopedValues;
 
     /// <summary>
     /// Creates a new environment
@@ -30,10 +29,10 @@ public class Environment
     {
         GlobalEnvironment = globalEnvironment;
         Parent = parent;
-        ScopedValues = new Dictionary<string, Value>();
+        ScopedValues = new Dictionary<string, DataValue>();
     }
 
-    public Value this[string index]
+    public DataValue this[string index]
     {
         get
         {
@@ -65,5 +64,19 @@ public class Environment
                 ScopedValues[index] = value;
             }
         }
+    }
+
+    /// <summary>
+    /// Takes a "snapshot" of this environment, for later action taken within the environment, such as in selection actions
+    /// </summary>
+    /// <returns>A copy of this environment, in its current state, w/ each parent in their current state as well</returns>
+    public Environment Snapshot()
+    {
+        var scopedValues = new Dictionary<string, DataValue>(ScopedValues);
+        var parent = Parent?.Snapshot();
+        return new Environment(GlobalEnvironment, parent)
+        {
+            ScopedValues = scopedValues
+        };
     }
 }

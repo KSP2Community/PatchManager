@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
+﻿using PatchManager.SassyPatching.Exceptions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
 /// <summary>
 /// Represents a library import
@@ -24,5 +27,18 @@ public class Import : Node
     internal Import(Coordinate c, string library) : base(c)
     {
         Library = library;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        try
+        {
+            environment.GlobalEnvironment.Import(environment, Library);
+        }
+        catch (ImportException)
+        {
+            throw new InterpreterException(Coordinate, $"Cannot import library {Library} as it does not exist");
+        }
     }
 }

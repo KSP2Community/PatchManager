@@ -1,4 +1,6 @@
-﻿using PatchManager.SassyPatching.Nodes.Expressions;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Nodes.Expressions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.FunctionLevel;
 
@@ -14,5 +16,11 @@ public class Return : Node
     internal Return(Coordinate c, Expression returnedValue) : base(c)
     {
         ReturnedValue = returnedValue;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        throw new FunctionReturnException(ReturnedValue.Compute(environment));
     }
 }

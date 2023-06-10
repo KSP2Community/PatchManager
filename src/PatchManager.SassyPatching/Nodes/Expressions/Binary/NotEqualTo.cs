@@ -7,7 +7,7 @@ public class NotEqualTo : Binary
     internal NotEqualTo(Coordinate c, Expression leftHandSide, Expression rightHandSide) : base(c, leftHandSide, rightHandSide)
     {
     }
-    private bool ListCompare(List<Value> leftHandSide, List<Value> rightHandSide)
+    private bool ListCompare(List<DataValue> leftHandSide, List<DataValue> rightHandSide)
     {
         if (leftHandSide.Count != rightHandSide.Count)
         {
@@ -16,7 +16,7 @@ public class NotEqualTo : Binary
         return leftHandSide.Where((t, index) => GetResult(t, rightHandSide[index]).Boolean).Any();
     }
 
-    private bool DictionaryCompare(Dictionary<string, Value> leftHandSide, Dictionary<string, Value> rightHandSide)
+    private bool DictionaryCompare(Dictionary<string, DataValue> leftHandSide, Dictionary<string, DataValue> rightHandSide)
     {
         if (leftHandSide.Count != rightHandSide.Count)
         {
@@ -40,7 +40,7 @@ public class NotEqualTo : Binary
         return false;
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         if (leftHandSide.Type != rightHandSide.Type) return true;
         
@@ -73,7 +73,7 @@ public class NotEqualTo : Binary
         return false;
     }
 
-    internal override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(DataValue dataValue) => false;
 
-    internal override Value ShortCircuitValue => null;
+    internal override DataValue ShortCircuitDataValue => null;
 }

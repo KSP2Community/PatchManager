@@ -1,5 +1,7 @@
 ﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Nodes.Expressions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes;
 
@@ -33,5 +35,19 @@ public class CallArgument : Node
     {
         ArgumentName = null;
         ArgumentValue = argumentValue;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+    }
+
+    public PatchArgument Compute(Environment environment)
+    {
+        return new PatchArgument
+        {
+            ArgumentName = ArgumentName,
+            ArgumentDataValue = ArgumentValue.Compute(environment)
+        };
     }
 }

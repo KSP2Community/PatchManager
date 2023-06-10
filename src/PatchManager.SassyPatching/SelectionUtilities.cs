@@ -15,4 +15,5 @@ internal static class SelectionUtilities
     {
         return a.Where(x => b.Any(x.IsSameAs)).ToList();
     }
+
 }

@@ -1,4 +1,8 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Execution;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents a member call, or a call syntax where the left hand side is the first argument
@@ -26,8 +30,50 @@ public class MemberCall : Expression
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
-        throw new NotImplementedException();
+        var lhs = LeftHandSide.Compute(environment);
+        var lhsType = lhs.Type.ToString().ToLowerInvariant();
+        var args = new List<PatchArgument>
+        {
+            new PatchArgument
+            {
+                ArgumentName = null,
+                ArgumentDataValue = lhs
+            }
+        };
+        args.AddRange(Arguments.Select(x => x.Compute(environment)));
+        if (environment.GlobalEnvironment.AllFunctions.TryGetValue($"{lhsType}.{FunctionName}", out var overloadedFunction))
+        {
+            try
+            {
+                return overloadedFunction.Execute(environment,args);
+            }
+            catch (InterpreterException i)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new InterpreterException(Coordinate, e.ToString());
+            }
+        }
+        if (environment.GlobalEnvironment.AllFunctions.TryGetValue(FunctionName, out var function))
+        {
+            try
+            {
+                return function.Execute(environment,args);
+            }
+            catch (InterpreterException i)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new InterpreterException(Coordinate, e.ToString());
+            }
+        }
+
+        throw new InterpreterException(Coordinate, $"Attempting to call {FunctionName}/{lhsType}.{FunctionName} which does not exist");
     }
 }
