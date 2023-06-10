@@ -27,6 +27,29 @@ public interface IModifiable
     /// <param name="className">The class</param>
     /// <returns>The value of the field</returns>
     public Value GetFieldByClass(string fieldName, string className);
+    
+    /// <summary>
+    /// Sets a a field indexed by number
+    /// </summary>
+    /// <param name="fieldName">the name of the field</param>
+    /// <param name="index">the index</param>
+    /// <param name="value">The value of the field</param>
+    public void SetFieldByNumber(string fieldName, ulong index, Value value);
+    /// <summary>
+    /// Sets a field indexed by element type
+    /// </summary>
+    /// <param name="fieldName">the name of the field</param>
+    /// <param name="elementName">The element type</param>
+    /// <param name="value">The value of the field</param>
+    public void SetFieldByElement(string fieldName, string elementName, Value value);
+    
+    /// <summary>
+    /// Sets a field indexed by class
+    /// </summary>
+    /// <param name="fieldName">the name of the field</param>
+    /// <param name="className">The class</param>
+    /// <param name="value">The value of the field</param>
+    public void SetFieldByClass(string fieldName, string className, Value value);
     /// <summary>
     /// Gets the value of a field
     /// </summary>

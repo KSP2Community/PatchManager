@@ -72,7 +72,7 @@ public class EqualTo : Binary
             return DictionaryCompare(leftHandSide.Dictionary, rightHandSide.Dictionary);
         }
         
-        return leftHandSide.IsDeletion;
+        return true;
     }
 
     internal override bool ShortCircuitOn(Value value) => false;

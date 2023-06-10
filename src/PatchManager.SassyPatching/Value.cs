@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using Newtonsoft.Json.Linq;
 
 namespace PatchManager.SassyPatching;
 
@@ -280,5 +281,91 @@ public class Value
         }
 
         return "<unknown>";
+    }
+
+    /// <summary>
+    /// Creates a Value from a <see cref="JToken"/>
+    /// </summary>
+    /// <param name="token">The token to convert to a value</param>
+    /// <returns>A value that represents the data stored in the token</returns>
+    public static Value FromJToken(JToken token)
+    {
+        if (token == null) return new Value(ValueType.None);
+        while (true)
+        {
+            switch (token.Type)
+            {
+                case JTokenType.Property:
+                    token = ((JProperty)token).Value;
+                    continue;
+                case JTokenType.Null or JTokenType.None:
+                    return new Value(ValueType.None);
+                case JTokenType.Float:
+                    return (double)token;
+                case JTokenType.Boolean:
+                    return (bool)token;
+                case JTokenType.Date or JTokenType.String:
+                    return (string)token;
+                case JTokenType.Array:
+                    return token.Select(FromJToken).ToList();
+                case JTokenType.Object:
+                {
+                    Dictionary<string, Value> values = new();
+                    foreach (var jToken in token)
+                    {
+                        var jProperty = (JProperty)jToken;
+                        values[jProperty.Name] = FromJToken(jProperty.Value);
+                    }
+
+                    return values;
+                }
+                default:
+                    return new Value(ValueType.None);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Converts a value to a json.net object
+    /// </summary>
+    /// <returns>A JToken that represents the data in this object</returns>
+    public JToken ToJToken()
+    {
+        if (IsBoolean)
+        {
+            return new JValue(Boolean);
+        }
+
+        if (IsNumber)
+        {
+            return new JValue(Number);
+        }
+
+        if (IsString)
+        {
+            return new JValue(String);
+        }
+
+        if (IsList)
+        {
+            var array = new JArray();
+            foreach (var value in List)
+            {
+                array.Add(value.ToJToken());
+            }
+            return array;
+        }
+
+        if (IsDictionary)
+        {
+            var obj = new JObject();
+            foreach (var kvPair in Dictionary)
+            {
+                obj[kvPair.Key] = kvPair.Value.ToJToken();
+            }
+            return obj;
+        }
+        
+        return null;
     }
 }

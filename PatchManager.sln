@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.SassyPatching.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Shared", "src\PatchManager.Shared\PatchManager.Shared.csproj", "{DF0E5AE8-2B81-48E9-9BB2-CE29F2AAD9E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Parts", "src\PatchManager.Parts\PatchManager.Parts.csproj", "{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,5 +70,13 @@ Global
 		{DF0E5AE8-2B81-48E9-9BB2-CE29F2AAD9E7}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
 		{DF0E5AE8-2B81-48E9-9BB2-CE29F2AAD9E7}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
 		{DF0E5AE8-2B81-48E9-9BB2-CE29F2AAD9E7}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.Deploy|Any CPU.ActiveCfg = Deploy|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
+		{38BFD6C2-9F6D-49C9-A319-CDFDD847CB4B}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -70,7 +70,7 @@ public class NotEqualTo : Binary
             return DictionaryCompare(leftHandSide.Dictionary, rightHandSide.Dictionary);
         }
         
-        return leftHandSide.IsNone;
+        return false;
     }
 
     internal override bool ShortCircuitOn(Value value) => false;

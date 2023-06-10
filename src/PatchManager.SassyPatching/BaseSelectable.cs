@@ -68,4 +68,8 @@ public abstract class BaseSelectable : ISelectable
 
     /// <inheritdoc />
     public abstract ISelectable AddElement(string elementType);
+
+
+    /// <inheritdoc />
+    public abstract string Serialize();
 }

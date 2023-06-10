@@ -82,4 +82,10 @@ public interface ISelectable
     /// </summary>
     /// <exception cref="Exceptions.NotModifiableException">Thrown if this selectable cannot be modified</exception>
     public ISelectable AddElement(string elementType);
+
+    /// <summary>
+    /// Convert the ISelectable back to its string form, used to finalize a patch
+    /// </summary>
+    /// <returns>A string representing all the data contained in the ISelectable, usually in JSON</returns>
+    public string Serialize();
 }

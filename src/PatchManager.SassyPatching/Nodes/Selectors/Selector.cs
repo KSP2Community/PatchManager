@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Selectors;
+﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Interfaces;
+
+namespace PatchManager.SassyPatching.Nodes.Selectors;
 
 /// <summary>
 /// Represents a selector node

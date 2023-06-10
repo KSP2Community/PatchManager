@@ -1,4 +1,6 @@
-﻿using PatchManager.SassyPatching.Nodes.Attributes;
+﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Interfaces;
+using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Selectors;
 
 namespace PatchManager.SassyPatching.Nodes.Statements;
@@ -26,5 +28,13 @@ public class SelectionBlock : Node
         Attributes = attributes;
         Selector = selector;
         Actions = actions;
+    }
+    
+    
+
+    
+    public void Execute(Environment parentEnvironment, [CanBeNull] List<ISelectable> parentSelectables = null)
+    {
+        
     }
 }
