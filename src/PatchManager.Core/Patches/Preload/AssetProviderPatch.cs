@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using KSP.Assets;
+using PatchManager.Core.Assets;
 using PatchManager.Shared;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -19,16 +20,13 @@ internal static class AssetProviderPatch
     public static void LoadByLabel<T>(string label, Action<T> assetLoadCallback, Action<IList<T>> resultCallback)
         where T : UnityEngine.Object
     {
-        Logging.LogInfo($"LoadByLabel<{typeof(T).Name}>({label})");
-        // At some point we should inject our code above
-
         if (AssetProvider.IsComponent(typeof(T)))
         {
             Logging.LogError("AssetProvider cannot load components/MonoBehaviours in batch.");
             return;
         }
 
-        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += results =>
+        var onCompletedCallback = new Action<AsyncOperationHandle<IList<T>>>(results =>
         {
             if (results.Status != AsyncOperationStatus.Succeeded)
             {
@@ -39,6 +37,17 @@ internal static class AssetProviderPatch
             }
 
             resultCallback?.Invoke(results.Result);
-        };
+        });
+
+        var found = Locators.LocateAll(label, typeof(T), out var locations);
+
+        if (found)
+        {
+            Logging.LogDebug($"Found {locations.Count} custom locations with label '{label}'.");
+            Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += onCompletedCallback;
+            return;
+        }
+
+        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += onCompletedCallback;
     }
 }
