@@ -6,10 +6,24 @@ namespace PatchManager.SassyPatching.Modifiables;
 public class JTokenModifiable : IModifiable
 {
     private JToken _jToken;
+    private readonly Action _setDirty;
 
-    public JTokenModifiable(JToken jToken)
+    private static void RemoveToken(JToken token)
+    {
+        if (token.Parent is JProperty)
+        {
+            token.Parent.Remove();
+        }
+        else
+        {
+            token.Remove();
+        }
+    }
+    
+    public JTokenModifiable(JToken jToken, Action setDirty)
     {
         _jToken = jToken;
+        this._setDirty = setDirty;
     }
 
     public Value GetFieldByNumber(string fieldName, ulong index)
@@ -25,7 +39,6 @@ public class JTokenModifiable : IModifiable
     public Value GetFieldByClass(string fieldName, string className)
     {
         var field = _jToken[fieldName];
-        var idx = 0;
         foreach (var subField in field)
         {
             if (subField.Contains(className))
@@ -33,7 +46,6 @@ public class JTokenModifiable : IModifiable
                 return Value.FromJToken(field);
             }
 
-            idx++;
         }
 
         return new Value(Value.ValueType.None);
@@ -41,9 +53,10 @@ public class JTokenModifiable : IModifiable
 
     public void SetFieldByNumber(string fieldName, ulong index, Value value)
     {
+        _setDirty();
         if (value.IsDeletion)
         {
-            _jToken[fieldName][(int)index].Remove();
+            RemoveToken(_jToken[fieldName][(int)index]);
         }
         else
         {
@@ -53,9 +66,11 @@ public class JTokenModifiable : IModifiable
 
     public void SetFieldByElement(string fieldName, string elementName, Value value)
     {
+        _setDirty();
         if (value.IsDeletion)
         {
-            _jToken[fieldName][elementName].Remove();
+            // _jToken[fieldName][elementName].Remove();
+            RemoveToken(_jToken[fieldName][elementName]);
         }
         else {
             _jToken[fieldName][elementName].Replace(value.ToJToken());
@@ -65,28 +80,27 @@ public class JTokenModifiable : IModifiable
     /// <inheritdoc />
     public void SetFieldByClass(string fieldName, string className, Value value)
     {
+        _setDirty();
         var field = _jToken[fieldName];
-        foreach (var subField in field)
+        foreach (var subField in field.ToList().Where(subField => subField.Contains(className)))
         {
-            if (subField.Contains(className))
+            if (value.IsDeletion)
             {
-                if (value.IsDeletion)
+                // subField.Remove();
+                RemoveToken(subField);
+            }
+            else
+            {
+                if (subField is JProperty property)
                 {
-                    subField.Remove();
+                    property.Value.Replace(value.ToJToken());
                 }
                 else
                 {
-                    if (subField is JProperty property)
-                    {
-                        property.Value.Replace(value.ToJToken());
-                    }
-                    else
-                    {
-                        subField.Replace(value.ToJToken());
-                    }
+                    subField.Replace(value.ToJToken());
                 }
-                break;
             }
+            break;
         }
     }
 
@@ -97,6 +111,7 @@ public class JTokenModifiable : IModifiable
 
     public void SetFieldValue(string fieldName, Value value)
     {
+        _setDirty();
         if (value.IsDeletion)
         {
             _jToken[fieldName].Remove();
@@ -109,9 +124,11 @@ public class JTokenModifiable : IModifiable
 
     public void Set(Value value)
     {
+        _setDirty();
         if (value.IsDeletion)
         {
-            _jToken.Remove();
+            // _jToken.Remove();
+            RemoveToken(_jToken);
         }
         else
         {

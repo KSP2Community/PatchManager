@@ -10,10 +10,12 @@ namespace PatchManager.Parts.SassyPatching.Rulesets;
 [PatcherRuleset("parts")]
 public class PartsRuleset : IPatcherRuleSet
 {
-    /// <summary>
-    /// This rule set matches the "part" type used by the core engine for patching
-    /// </summary>
-    public string PatchTypeMatch => "part_data";
+    /// <inheritdoc />
+    public bool Matches(string label)
+    {
+        return label == "part_data";
+    }
+
     /// <summary>
     /// Converts the part json to an ISelectable following this ruleset
     /// </summary>

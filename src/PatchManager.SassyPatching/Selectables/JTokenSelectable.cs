@@ -7,10 +7,13 @@ namespace PatchManager.SassyPatching.Selectables;
 /// <summary>
 /// Represents a selectable that operates over <see cref="JToken"/> objects
 /// </summary>
-public sealed class JTokenSelectable : BaseSelectable
+public class JTokenSelectable : BaseSelectable
 {
     private readonly Action _markDirty;
-    private readonly JToken _token;
+    /// <summary>
+    /// This is the token being modified
+    /// </summary>
+    protected readonly JToken Token;
 
     /// <summary>
     /// Create a new JToken Selectable
@@ -21,8 +24,9 @@ public sealed class JTokenSelectable : BaseSelectable
     public JTokenSelectable(Action markDirty,JToken token, string name)
     {
         _markDirty = markDirty;
-        _token = token;
+        Token = token;
         ElementType = name;
+        Name = name;
         Classes = new();
         Children = new();
         foreach (var subToken in token)
@@ -33,31 +37,35 @@ public sealed class JTokenSelectable : BaseSelectable
         }
     }
 
-    public override List<ISelectable> Children { get; }
+    /// <inheritdoc />
+    public sealed override List<ISelectable> Children { get; }
+
+    /// <inheritdoc />
     public override string Name { get; }
-    public override List<string> Classes { get; }
+
+    /// <inheritdoc />
+    public sealed override List<string> Classes { get; }
 
     /// <inheritdoc />
     public override string ElementType { get; }
 
     /// <inheritdoc />
     public override bool IsSameAs(ISelectable other) =>
-        other is JTokenSelectable jTokenSelectable && jTokenSelectable._token == _token;
+        other is JTokenSelectable jTokenSelectable && jTokenSelectable.Token == Token;
 
     /// <inheritdoc />
     public override IModifiable OpenModification()
     {
-        _markDirty();
-        return new JTokenModifiable(_token);
+        return new JTokenModifiable(Token,_markDirty);
     }
 
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        _token[elementType] = new JObject();
-        return new JTokenSelectable(_markDirty, _token[elementType],elementType);
+        Token[elementType] = new JObject();
+        return new JTokenSelectable(_markDirty, Token[elementType],elementType);
     }
 
     /// <inheritdoc />
-    public override string Serialize() => _token.ToString();
+    public override string Serialize() => Token.ToString();
 }

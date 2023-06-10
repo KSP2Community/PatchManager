@@ -10,7 +10,7 @@ public interface IPatcherRuleSet
     /// <summary>
     /// What type of patch type will this ruleset match
     /// </summary>
-    public string PatchTypeMatch { get; }
+    public bool Matches(string label);
 
     /// <summary>
     /// This converts json data to an ISelectable for the rest of the engine to use
