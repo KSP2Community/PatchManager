@@ -15,29 +15,29 @@ public class Subscript : Binary
     // ReSharper disable once CognitiveComplexity
     internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
-        if (leftHandSide.IsList && rightHandSide.IsNumber)
+        if (leftHandSide.IsList && rightHandSide.IsInteger)
         {
             try
             {
-                return leftHandSide.List[(int)rightHandSide.Number];
+                return leftHandSide.List[(int)rightHandSide.Integer];
             }
             catch
             {
                 throw new ListIndexOutOfRangeException(Coordinate,
-                    ((int)rightHandSide.Number) + " is out of range of the list being indexed");
+                    ((int)rightHandSide.Real) + " is out of range of the list being indexed");
             }
         }
 
-        if (leftHandSide.IsString && rightHandSide.IsNumber)
+        if (leftHandSide.IsString && rightHandSide.IsInteger)
         {
             try
             {
-                return (double)leftHandSide.String[(int)rightHandSide.Number];
+                return (double)leftHandSide.String[(int)rightHandSide.Integer];
             }
             catch
             {
                 throw new ListIndexOutOfRangeException(Coordinate,
-                    ((int)rightHandSide.Number) + " is out of range of the string being indexed");
+                    ((int)rightHandSide.Real) + " is out of range of the string being indexed");
             }
         }
 

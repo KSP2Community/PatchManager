@@ -46,18 +46,17 @@ public class IntersectionSelector : Selector
 
     private List<ISelectable> SelectAllSkippingFirst(List<ISelectable> selectables)
     {
-        var result = new List<ISelectable>();
         for (var i = 1; i < Selectors.Count; i++)
         {
-            result = SelectionUtilities.IntersectSelections(result, Selectors[i].SelectAll(selectables));
+            selectables = SelectionUtilities.IntersectSelections(selectables, Selectors[i].SelectAll(selectables));
         }
-        return result;
+        return selectables;
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string data)
+    public override List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject)
     {
-        var start = Selectors[0].SelectAllTopLevel(type, data);
+        var start = Selectors[0].SelectAllTopLevel(type, data, out rulesetMatchingObject);
         return SelectAllSkippingFirst(start);
     }
 }

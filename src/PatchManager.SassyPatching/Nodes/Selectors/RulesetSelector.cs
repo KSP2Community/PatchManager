@@ -25,19 +25,21 @@ public class RulesetSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string data)
+    public override List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject)
     {
         if (Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
         {
             if (ruleSet.Matches(type))
             {
+                rulesetMatchingObject = ruleSet.ConvertToSelectable(data);
                 return new List<ISelectable>
                 {
-                    ruleSet.ConvertToSelectable(data)
+                    rulesetMatchingObject
                 };
             }
             else
             {
+                rulesetMatchingObject = null;
                 return new();
             }
         }

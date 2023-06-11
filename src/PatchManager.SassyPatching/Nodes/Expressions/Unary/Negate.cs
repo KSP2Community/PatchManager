@@ -13,9 +13,9 @@ public class Negate : Unary
 
     internal override DataValue GetResult(DataValue child)
     {
-        if (child.IsNumber)
+        if (child.IsReal)
         {
-            return -child.Number;
+            return -child.Real;
         }
 
         throw new UnaryTypeException(Coordinate, "negate", child.Type.ToString());

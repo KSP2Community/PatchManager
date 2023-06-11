@@ -23,8 +23,9 @@ public class ElementAdditionSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string data)
+    public override List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject)
     {
+        rulesetMatchingObject = null;
         return new();
     }
 }

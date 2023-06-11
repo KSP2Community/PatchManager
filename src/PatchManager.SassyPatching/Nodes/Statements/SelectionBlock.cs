@@ -44,32 +44,38 @@ public class SelectionBlock : Node, ISelectionAction
     public bool ExecuteFresh(Environment snapshot, string datasetType, ref string dataset)
     {
         // var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
-        var selections = Selector.SelectAllTopLevel(datasetType, dataset);
-        if (selections.Count == 0)
+        var selections = Selector.SelectAllTopLevel(datasetType, dataset, out var rulesetMatchingObject);
+        
+
+        
+        if (rulesetMatchingObject == null || selections.Count == 0)
         {
             return false;
         }
         // Get the first matching selection if there are somehow more than one
-        var selectable = selections.First();
-        var modifiable = selectable.OpenModification();
-        var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
-        if (modifiable != null)
-        {
-            subEnvironment["current"] = modifiable.Get();
-        }
-        foreach (var action in Actions)
-        {
-            if (action is ISelectionAction selectionAction)
+        foreach (var selectable in selections) {
+            var modifiable = selectable.OpenModification();
+            var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
+            if (modifiable != null)
             {
-                selectionAction.ExecuteOn(subEnvironment,selectable,modifiable);
+                subEnvironment["current"] = modifiable.Get();
             }
-            else
+
+            foreach (var action in Actions)
             {
-                action.ExecuteIn(subEnvironment);
+                if (action is ISelectionAction selectionAction)
+                {
+                    selectionAction.ExecuteOn(subEnvironment, selectable, modifiable);
+                }
+                else
+                {
+                    action.ExecuteIn(subEnvironment);
+                }
             }
+
+
         }
-        
-        var newDataSet = selectable.Serialize();
+        var newDataSet = rulesetMatchingObject.Serialize();
         if (newDataSet == dataset) return false;
         dataset = newDataSet;
         return true;

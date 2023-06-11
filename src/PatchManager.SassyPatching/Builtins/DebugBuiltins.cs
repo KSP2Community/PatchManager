@@ -8,7 +8,7 @@ namespace PatchManager.SassyPatching.Builtins;
 /// Contains a lot of builtin debug libraries for the sassy patch engine to use
 /// </summary>
 [SassyLibrary("builtin","debug"),PublicAPI]
-public static class DebugBuiltins
+public class DebugBuiltins
 {
     /// <summary>
     /// Logs a value into the console for debugging

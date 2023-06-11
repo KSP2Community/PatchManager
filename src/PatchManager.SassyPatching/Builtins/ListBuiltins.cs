@@ -8,7 +8,7 @@ namespace PatchManager.SassyPatching.Builtins;
 /// </summary>
 [SassyLibrary("builtin","list")]
 [PublicAPI]
-public static class ListBuiltins
+public class ListBuiltins
 {
     /// <summary>
     /// Copies a list and appends a value onto the copy and returns the copy

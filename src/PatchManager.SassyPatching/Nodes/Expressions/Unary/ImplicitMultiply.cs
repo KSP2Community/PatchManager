@@ -14,27 +14,27 @@ public class ImplicitMultiply : Implicit
 
     internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {        
-        if (leftHandSide.IsNumber && rightHandSide.IsNumber)
+        if (leftHandSide.IsReal && rightHandSide.IsReal)
         {
-            return leftHandSide.Number * rightHandSide.Number;
+            return leftHandSide.Real * rightHandSide.Real;
         }
 
-        if (leftHandSide.IsString && rightHandSide.IsNumber)
+        if (leftHandSide.IsString && rightHandSide.IsInteger)
         {
             return StringRepeat(leftHandSide, rightHandSide);
         }
 
-        if (leftHandSide.IsNumber && rightHandSide.IsString)
+        if (leftHandSide.IsInteger && rightHandSide.IsString)
         {
             return StringRepeat(rightHandSide, leftHandSide);
         }
         
-        if (leftHandSide.IsList && rightHandSide.IsNumber)
+        if (leftHandSide.IsList && rightHandSide.IsInteger)
         {
             return ListRepeat(leftHandSide, rightHandSide);
         }
 
-        if (leftHandSide.IsNumber && rightHandSide.IsList)
+        if (leftHandSide.IsInteger && rightHandSide.IsList)
         {
             return ListRepeat(rightHandSide, leftHandSide);
         }
@@ -46,7 +46,7 @@ public class ImplicitMultiply : Implicit
     private static DataValue StringRepeat(DataValue str, DataValue amount)
     {
         StringBuilder sb = new StringBuilder();
-        for (var i = 0; i < amount.Number; i++)
+        for (var i = 0; i < amount.Integer; i++)
         {
             sb.Append(str.String);
         }
@@ -57,7 +57,7 @@ public class ImplicitMultiply : Implicit
     private static DataValue ListRepeat(DataValue list, DataValue amount)
     {
         List<DataValue> newList = new();
-        for (var i = 0; i < amount.Number; i++)
+        for (var i = 0; i < amount.Integer; i++)
         {
             newList.AddRange(list.List);
         }

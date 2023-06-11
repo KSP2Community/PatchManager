@@ -49,10 +49,15 @@ public class NotEqualTo : Binary
             return leftHandSide.Boolean != rightHandSide.Boolean;
         }
 
-        if (leftHandSide.IsNumber)
+        if (leftHandSide.IsReal)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
-            return leftHandSide.Number != rightHandSide.Number;
+            return leftHandSide.Real != rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsInteger)
+        {
+            return leftHandSide.Integer != rightHandSide.Integer;
         }
 
         if (leftHandSide.IsString)

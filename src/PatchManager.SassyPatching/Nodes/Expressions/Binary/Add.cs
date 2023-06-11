@@ -15,8 +15,14 @@ public class Add : Binary
     {
         switch (leftHandSide.Type)
         {
-            case DataValue.DataType.Number when rightHandSide.IsNumber:
-                return leftHandSide.Number + rightHandSide.Number;
+            case DataValue.DataType.Real when rightHandSide.IsReal:
+                return leftHandSide.Real + rightHandSide.Real;
+            case DataValue.DataType.Real when rightHandSide.IsInteger:
+                return leftHandSide.Real + rightHandSide.Integer;
+            case DataValue.DataType.Integer when rightHandSide.IsInteger:
+                return leftHandSide.Integer + rightHandSide.Integer;
+            case DataValue.DataType.Integer when rightHandSide.IsReal:
+                return leftHandSide.Integer + rightHandSide.Real;
             case DataValue.DataType.String when rightHandSide.IsString:
                 return leftHandSide.String + rightHandSide.String;
             case DataValue.DataType.List when rightHandSide.IsList:

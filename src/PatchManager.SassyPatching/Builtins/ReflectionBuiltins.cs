@@ -9,7 +9,7 @@ namespace PatchManager.SassyPatching.Builtins;
 /// </summary>
 [SassyLibrary("builtin","reflection")]
 [PublicAPI]
-public static class ReflectionBuiltins
+public class ReflectionBuiltins
 {
     /// <summary>
     /// Gets the type of a value

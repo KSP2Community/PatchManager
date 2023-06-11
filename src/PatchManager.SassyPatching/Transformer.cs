@@ -476,6 +476,10 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitNumber_value(sassy_parser.Number_valueContext context)
     {
         var location = context.GetCoordinate();
+        if (long.TryParse(context.NUMBER().GetText(), out var lng))
+        {
+            return new ValueNode(location, lng);
+        }
         if (double.TryParse(context.NUMBER().GetText(), out var dbl))
         {
             return new ValueNode(location, dbl);

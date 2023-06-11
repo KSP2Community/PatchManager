@@ -1194,7 +1194,7 @@ a b c {
         const string patch =
             @"
 * {
-    $variable: 5
+    $variable: 5;
 }
 ";
         var validator = new PatchValidator

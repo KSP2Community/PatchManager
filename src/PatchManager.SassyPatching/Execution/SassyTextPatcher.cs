@@ -48,6 +48,6 @@ public class SassyTextPatcher : ITextPatcher
     /// <inheritdoc />
     public bool TryPatch(string patchType, ref string patchData)
     {
-        return _rootSelectionBlock.ExecuteFresh(_environmentSnapshot,patchData, ref patchData);
+        return _rootSelectionBlock.ExecuteFresh(_environmentSnapshot,patchType, ref patchData);
     }
 }

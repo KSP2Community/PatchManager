@@ -25,8 +25,9 @@ public abstract class Selector : Node
     /// </summary>
     /// <param name="type">The type, e.g. part_data</param>
     /// <param name="data">The data, a textual representation of the data</param>
+    /// <param name="rulesetMatchingObject">The found object that matches the ruleset</param>
     /// <returns>A list of all selections from the data</returns>
-    public abstract List<ISelectable> SelectAllTopLevel(string type, string data);
+    public abstract List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject);
 
     /// <inheritdoc />
     public override void ExecuteIn(Environment environment)

@@ -42,7 +42,7 @@ public abstract class BaseSelectable : ISelectable
     public abstract string Name { get; }
 
     /// <inheritdoc />
-    public bool MatchesName(string name) => name.MatchesPattern(name);
+    public bool MatchesName(string name) => Name.MatchesPattern(name);
 
     /// <summary>
     /// The classes that this selectable has, usually corresponds to the field names of the children (except for parts, in which its that + module type)

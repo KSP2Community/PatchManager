@@ -40,6 +40,6 @@ public class ChildSelector : Selector
     }
     
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string data) =>
-        SelectChildren(Parent.SelectAllTopLevel(type, data));
+    public override List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject) =>
+        SelectChildren(Parent.SelectAllTopLevel(type, data, out rulesetMatchingObject));
 }

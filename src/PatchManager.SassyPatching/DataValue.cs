@@ -25,9 +25,13 @@ public class DataValue
         /// </summary>
         Boolean,
         /// <summary>
-        /// The type of numbers, stored as a double, corresponds to JSON numbers
+        /// The type of real numbers, stored as a double, corresponds to JSON floats
         /// </summary>
-        Number,
+        Real,
+        /// <summary>
+        /// The type of integers, stored as a long, corresponds to JSON integers
+        /// </summary>
+        Integer,
         /// <summary>
         /// The type of strings, corresponds to JSON strings
         /// </summary>
@@ -97,23 +101,43 @@ public class DataValue
     }
 
     /// <summary>
-    /// Is the type of this variable <see cref="DataType.Number"/>?
+    /// Is the type of this variable <see cref="DataType.Real"/>?
     /// </summary>
-    public bool IsNumber => Type == DataType.Number;
+    public bool IsReal => Type == DataType.Real;
 
     /// <summary>
-    /// Asserts this value is of type <see cref="DataType.Number"/>,
+    /// Asserts this value is of type <see cref="DataType.Real"/>,
     /// then returns the <see cref="double"/> contained within
     /// </summary>
-    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Number"/></exception>
-    public double Number
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Real"/></exception>
+    public double Real
     {
         get
         {
-            CheckType(DataType.Number);
+            CheckType(DataType.Real);
             return (double)_object;
         }
     }
+
+    /// <summary>
+    /// Is the type of this variable <see cref="DataType.Integer"/>?
+    /// </summary>
+    public bool IsInteger => Type == DataType.Integer;
+    
+    /// <summary>
+    /// Asserts this value is of type <see cref="DataType.Integer"/>,
+    /// then returns the <see cref="long"/> contained within
+    /// </summary>
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Integer"/></exception>
+    public long Integer
+    {
+        get
+        {
+            CheckType(DataType.Integer);
+            return (long)_object;
+        }
+    }
+    
 
     /// <summary>
     /// Is the type of this variable <see cref="DataType.String"/>?
@@ -203,11 +227,22 @@ public class DataValue
     /// Creates a <see cref="DataValue"/> from a <see cref="Double"/>
     /// </summary>
     /// <param name="d">The value to be stored within the value</param>
-    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Number"/> and a stored value of <param name="d"></param></returns>
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Real"/> and a stored value of <param name="d"></param></returns>
     public static implicit operator DataValue(double d)
     {
-        return new DataValue(DataType.Number, d);
+        return new DataValue(DataType.Real, d);
+    } 
+    
+    /// <summary>
+    /// Creates a <see cref="DataValue"/> from a <see cref="long"/>
+    /// </summary>
+    /// <param name="l">The value to be stored within the value</param>
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Integer"/> and a stored value of <param name="l"></param></returns>
+    public static implicit operator DataValue(long l)
+    {
+        return new DataValue(DataType.Integer, l);
     }
+    
 
     /// <summary>
     /// Creates a <see cref="DataValue"/> from a <see cref="string"/>
@@ -255,9 +290,9 @@ public class DataValue
             return Boolean.ToString();
         }
 
-        if (IsNumber)
+        if (IsReal)
         {
-            return Number.ToString(CultureInfo.InvariantCulture);
+            return Real.ToString(CultureInfo.InvariantCulture);
         }
 
         if (IsString)
@@ -302,6 +337,8 @@ public class DataValue
                     return new DataValue(DataType.None);
                 case JTokenType.Float:
                     return (double)token;
+                case JTokenType.Integer:
+                    return (long)token;
                 case JTokenType.Boolean:
                     return (bool)token;
                 case JTokenType.Date or JTokenType.String:
@@ -336,11 +373,16 @@ public class DataValue
             return new JValue(Boolean);
         }
 
-        if (IsNumber)
+        if (IsReal)
         {
-            return new JValue(Number);
+            return new JValue(Real);
         }
 
+        if (IsInteger)
+        {
+            return new JValue(Integer);
+        }
+        
         if (IsString)
         {
             return new JValue(String);

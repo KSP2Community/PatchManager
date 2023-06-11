@@ -56,7 +56,7 @@ public class Field : Node, ISelectionAction
         {
             ["value"] = value
         };
-        var result = FieldValue.Compute(environment);
+        var result = FieldValue.Compute(subEnvironment);
         switch (Indexer)
         {
             case ElementIndexer setElementIndexer:

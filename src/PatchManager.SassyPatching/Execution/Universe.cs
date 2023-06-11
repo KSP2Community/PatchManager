@@ -4,6 +4,7 @@ using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes;
 using PatchManager.Shared.Interfaces;
 using SassyPatchGrammar;
+using System.Reflection;
 
 namespace PatchManager.SassyPatching.Execution;
 
@@ -29,15 +30,18 @@ public class Universe
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             // Only use public rule sets
-            foreach (var type in assembly.GetExportedTypes())
+            foreach (var type in assembly.GetTypes())
             {
                 if (type.IsAbstract || type.IsInterface) continue;
-                if (typeof(IPatcherRuleSet).IsAssignableFrom(type) && type.GetCustomAttributes(typeof(PatcherRulesetAttribute), false).FirstOrDefault() is PatcherRulesetAttribute rsAttribute)
+                if (typeof(IPatcherRuleSet).IsAssignableFrom(type))
                 {
-                    RuleSets[rsAttribute.RulesetName] = (IPatcherRuleSet)Activator.CreateInstance(type);
+                    var rsAttribute = type.GetCustomAttribute<PatcherRulesetAttribute>();
+                    if (rsAttribute != null)
+                        RuleSets[rsAttribute.RulesetName] = (IPatcherRuleSet)Activator.CreateInstance(type);
                 }
 
-                if (type.GetCustomAttributes(typeof(SassyLibraryAttribute), false).FirstOrDefault() is SassyLibraryAttribute sassyLibraryAttribute)
+                var sassyLibraryAttribute = type.GetCustomAttribute<SassyLibraryAttribute>();
+                if (sassyLibraryAttribute != null)
                 {
                     var name = sassyLibraryAttribute.Mod + ":" + sassyLibraryAttribute.Library;
                     AllManagedLibraries[name] = new ManagedPatchLibrary(type);
@@ -45,7 +49,7 @@ public class Universe
             }
         }
     }
-    
+
     /// <summary>
     /// All stages defined by every mod
     /// </summary>
@@ -75,7 +79,10 @@ public class Universe
     }
 
     // TODO: Fix this so that other mods stages get their guids working
-    public Dictionary<string,PatchLibrary> AllLibraries = new(AllManagedLibraries);
+    /// <summary>
+    /// All the libraries in this "universe"
+    /// </summary>
+    public readonly Dictionary<string, PatchLibrary> AllLibraries = new(AllManagedLibraries);
 
     private class LoadException : Exception
     {
@@ -90,9 +97,10 @@ public class Universe
 
         private LoadListener()
         {
-            
         }
-        public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine,
+
+        public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line,
+            int charPositionInLine,
             string msg, RecognitionException e)
         {
             throw new LoadException($"{line}:{charPositionInLine}: msg");
@@ -106,7 +114,6 @@ public class Universe
     /// <param name="modId">The ID of the mod to load the guid as</param>
     public void LoadPatchesInDirectory(DirectoryInfo directory, string modId)
     {
-        
         var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
         foreach (var library in directory.EnumerateFiles("_*.patch", SearchOption.AllDirectories))
         {
@@ -142,7 +149,7 @@ public class Universe
                 parser.AddErrorListener(LoadListener.Instance);
                 var patchContext = parser.patch();
                 tokenTransformer.Errored = false;
-                var gEnv = new GlobalEnvironment(this,modId);
+                var gEnv = new GlobalEnvironment(this, modId);
                 var env = new Environment(gEnv);
                 var ctx = tokenTransformer.Visit(patchContext) as SassyPatch;
                 ctx?.ExecuteIn(env);

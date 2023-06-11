@@ -39,52 +39,52 @@ internal class ManagedPatchFunction : PatchFunction
 
         if (t == typeof(byte))
         {
-            return (byte)v.Number;
+            return (byte)v.Real;
         }
 
         if (t == typeof(sbyte))
         {
-            return (sbyte)v.Number;
+            return (sbyte)v.Real;
         }
 
         if (t == typeof(short))
         {
-            return (short)v.Number;
+            return (short)v.Real;
         }
 
         if (t == typeof(ushort))
         {
-            return (ushort)v.Number;
+            return (ushort)v.Real;
         }
 
         if (t == typeof(int))
         {
-            return (int)v.Number;
+            return (int)v.Real;
         }
 
         if (t == typeof(uint))
         {
-            return (uint)v.Number;
+            return (uint)v.Real;
         }
 
         if (t == typeof(long))
         {
-            return (long)v.Number;
+            return (long)v.Real;
         }
 
         if (t == typeof(ulong))
         {
-            return (ulong)v.Number;
+            return (ulong)v.Real;
         }
 
         if (t == typeof(float))
         {
-            return (float)v.Number;
+            return (float)v.Real;
         }
 
         if (t == typeof(double))
         {
-            return v.Number;
+            return v.Real;
         }
 
         if (t == typeof(bool))
