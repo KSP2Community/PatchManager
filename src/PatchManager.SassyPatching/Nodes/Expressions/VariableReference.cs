@@ -1,4 +1,5 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions;
 
@@ -17,7 +18,7 @@ public class VariableReference : Expression
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
         try
         {

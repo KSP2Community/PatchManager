@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using PatchManager.SassyPatching.Exceptions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents a simple function call
@@ -21,8 +24,24 @@ public class SimpleCall : Expression
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
-        throw new NotImplementedException();
+        if (environment.GlobalEnvironment.AllFunctions.TryGetValue(FunctionName, out var function))
+        {
+            try
+            {
+                return function.Execute(environment, Arguments.Select(x => x.Compute(environment)).ToList());
+            }
+            catch (InterpreterException i)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new InterpreterException(Coordinate, e.ToString());
+            }
+        }
+
+        throw new InterpreterException(Coordinate, $"Attempting to call {FunctionName} which does not exist");
     }
 }

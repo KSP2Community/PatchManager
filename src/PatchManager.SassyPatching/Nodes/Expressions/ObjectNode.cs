@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents an object initializer
@@ -15,7 +17,7 @@ public class ObjectNode : Expression
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
         return Initializers.ToDictionary(x => x.Key, x => x.Value.Compute(environment));
     }

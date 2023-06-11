@@ -1,4 +1,6 @@
 ﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Nodes.Expressions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes;
 
@@ -14,11 +16,16 @@ public class Argument : Node
     /// <summary>
     /// The default value of the argument if there is one
     /// </summary>
-    [CanBeNull] public readonly Node Value;
+    [CanBeNull] public readonly Expression Value;
     
-    internal Argument(Coordinate c, string name, [CanBeNull] Node value = null) : base(c)
+    internal Argument(Coordinate c, string name, [CanBeNull] Expression value = null) : base(c)
     {
         Name = name;
         Value = value;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
     }
 }

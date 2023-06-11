@@ -73,8 +73,7 @@ public interface ISelectable
     /// <summary>
     /// Opens up this selectable for modification
     /// </summary>
-    /// <returns>The modifiable state of this selector</returns>
-    /// <exception cref="Exceptions.NotModifiableException">Thrown if this selectable cannot be modified</exception>
+    /// <returns>The modifiable state of this selector or null if not modifiable</returns>
     public IModifiable OpenModification();
 
     /// <summary>
@@ -82,4 +81,10 @@ public interface ISelectable
     /// </summary>
     /// <exception cref="Exceptions.NotModifiableException">Thrown if this selectable cannot be modified</exception>
     public ISelectable AddElement(string elementType);
+
+    /// <summary>
+    /// Convert the ISelectable back to its string form, used to finalize a patch
+    /// </summary>
+    /// <returns>A string representing all the data contained in the ISelectable, usually in JSON</returns>
+    public string Serialize();
 }

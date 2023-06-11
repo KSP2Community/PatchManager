@@ -7,9 +7,9 @@ public class ValueValidator : ParseValidator<ValueNode>
     /// <summary>
     /// A field that is used to match against the corresponding field in a node of type <see cref="ValueNode"/>
     /// </summary>
-    public Value StoredValue = new Value(Value.ValueType.None);
+    public DataValue StoredDataValue = new DataValue(DataValue.DataType.None);
     
-    private static bool ListCompare(List<Value> leftHandSide, List<Value> rightHandSide)
+    private static bool ListCompare(List<DataValue> leftHandSide, List<DataValue> rightHandSide)
     {
         if (leftHandSide.Count != rightHandSide.Count)
         {
@@ -18,7 +18,7 @@ public class ValueValidator : ParseValidator<ValueNode>
         return !leftHandSide.Where((t, index) => !GetResult(t, rightHandSide[index])).Any();
     }
 
-    private static bool DictionaryCompare(Dictionary<string, Value> leftHandSide, Dictionary<string, Value> rightHandSide)
+    private static bool DictionaryCompare(Dictionary<string, DataValue> leftHandSide, Dictionary<string, DataValue> rightHandSide)
     {
         if (leftHandSide.Count != rightHandSide.Count)
         {
@@ -42,7 +42,7 @@ public class ValueValidator : ParseValidator<ValueNode>
         return true;
     }
 
-    private static bool GetResult(Value leftHandSide, Value rightHandSide)
+    private static bool GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         if (leftHandSide.Type != rightHandSide.Type) return false;
         
@@ -51,10 +51,15 @@ public class ValueValidator : ParseValidator<ValueNode>
             return leftHandSide.Boolean == rightHandSide.Boolean;
         }
 
-        if (leftHandSide.IsNumber)
+        if (leftHandSide.IsReal)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
-            return leftHandSide.Number == rightHandSide.Number;
+            return leftHandSide.Real == rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsInteger)
+        {
+            return leftHandSide.Integer == rightHandSide.Integer;
         }
 
         if (leftHandSide.IsString)
@@ -83,6 +88,6 @@ public class ValueValidator : ParseValidator<ValueNode>
     {
         // Now we compare equality between values
         // Good thing is there should only be a few value types
-        return GetResult(StoredValue, node.StoredValue);
+        return GetResult(StoredDataValue, node.StoredDataValue);
     }
 }

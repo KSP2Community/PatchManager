@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents an expression node
@@ -12,8 +14,14 @@ public abstract class Expression : Node
     /// <param name="environment">The environment to compute the expression within</param>
     /// <returns>The computed value</returns>
     /// <exception cref="Exceptions.InterpreterException">Thrown if any error happens</exception>
-    public abstract Value Compute(Environment environment);
+    public abstract DataValue Compute(Environment environment);
     internal Expression(Coordinate c) : base(c)
     {
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        _ = Compute(environment);
     }
 }

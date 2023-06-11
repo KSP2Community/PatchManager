@@ -1,4 +1,4 @@
-﻿namespace PatchManager.SassyPatching;
+﻿namespace PatchManager.SassyPatching.Attributes;
 
 
 
@@ -10,6 +10,9 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class PatcherRulesetAttribute : Attribute
 {
+    /// <summary>
+    /// The name of the ruleset
+    /// </summary>
     public string RulesetName;
 
     /// <summary>

@@ -7,7 +7,7 @@ internal static class SelectionUtilities
     public static List<ISelectable> CombineSelections(List<ISelectable> a, List<ISelectable> b)
     {
         var combination = a.ToList();
-        combination.AddRange(b.Where(y => combination.Any(x => x.IsSameAs(y))));
+        combination.AddRange(b.Where(y => !combination.Any(x => x.IsSameAs(y))));
         return combination;
     }
 
@@ -15,4 +15,5 @@ internal static class SelectionUtilities
     {
         return a.Where(x => b.Any(x.IsSameAs)).ToList();
     }
+
 }

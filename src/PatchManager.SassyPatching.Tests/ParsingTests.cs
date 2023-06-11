@@ -80,7 +80,7 @@ $variable: 5;
                 Variable = "variable",
                 Value = new ValueValidator
                 {
-                    StoredValue = 5
+                    StoredDataValue = 5
                 }
             }
         };
@@ -108,7 +108,7 @@ $variable: 5;
                 Variable = "variable",
                 Value = new ValueValidator
                 {
-                    StoredValue = 5
+                    StoredDataValue = 5
                 }
             }
         };
@@ -152,7 +152,7 @@ $variable: 5;
                 Variable = "variable",
                 Value = new ValueValidator
                 {
-                    StoredValue = 5
+                    StoredDataValue = 5
                 }
             }
         };
@@ -258,7 +258,7 @@ $variable: 5;
                         Name = "arg",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -294,7 +294,7 @@ $variable: 5;
                         Name = "arg",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -391,7 +391,7 @@ $variable: 5;
                         Name = "arg",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -427,7 +427,7 @@ $variable: 5;
                         Name = "arg",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -466,7 +466,7 @@ $variable: 5;
             {
                 Condition = new ValueValidator
                 {
-                    StoredValue = true
+                    StoredDataValue = true
                 },
                 Body = new()
                 {
@@ -475,7 +475,7 @@ $variable: 5;
                         Variable = "variable",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -508,7 +508,7 @@ $variable: 5;
             {
                 Condition = new ValueValidator
                 {
-                    StoredValue = true
+                    StoredDataValue = true
                 },
                 Body = new()
                 {
@@ -517,7 +517,7 @@ $variable: 5;
                         Variable = "variable",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -528,7 +528,7 @@ $variable: 5;
                         Variable = "variable",
                         Value = new ValueValidator
                         {
-                            StoredValue = 6
+                            StoredDataValue = 6
                         }
                     }
                 }
@@ -561,7 +561,7 @@ $variable: 5;
             {
                 Condition = new ValueValidator
                 {
-                    StoredValue = true
+                    StoredDataValue = true
                 },
                 Body = new()
                 {
@@ -570,7 +570,7 @@ $variable: 5;
                         Variable = "variable",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -578,7 +578,7 @@ $variable: 5;
                 {
                     Condition = new ValueValidator
                     {
-                        StoredValue = false
+                        StoredDataValue = false
                     },
                     Body = new()
                     {
@@ -587,7 +587,7 @@ $variable: 5;
                             Variable = "variable",
                             Value = new ValueValidator
                             {
-                                StoredValue = 6
+                                StoredDataValue = 6
                             }
                         }
                     }
@@ -625,7 +625,7 @@ $variable: 5;
             {
                 Condition = new ValueValidator
                 {
-                    StoredValue = true
+                    StoredDataValue = true
                 },
                 Body = new()
                 {
@@ -634,7 +634,7 @@ $variable: 5;
                         Variable = "variable",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 },
@@ -642,7 +642,7 @@ $variable: 5;
                 {
                     Condition = new ValueValidator
                     {
-                        StoredValue = false
+                        StoredDataValue = false
                     },
                     Body = new()
                     {
@@ -651,7 +651,7 @@ $variable: 5;
                             Variable = "variable",
                             Value = new ValueValidator
                             {
-                                StoredValue = 6
+                                StoredDataValue = 6
                             }
                         }
                     },
@@ -662,7 +662,7 @@ $variable: 5;
                             Variable = "variable",
                             Value = new ValueValidator
                             {
-                                StoredValue = 7
+                                StoredDataValue = 7
                             }
                         }
                     }
@@ -1194,7 +1194,7 @@ a b c {
         const string patch =
             @"
 * {
-    $variable: 5
+    $variable: 5;
 }
 ";
         var validator = new PatchValidator
@@ -1210,7 +1210,7 @@ a b c {
                         Variable = "variable",
                         Value = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1246,7 +1246,7 @@ a b c {
                     {
                         Condition = new ValueValidator
                         {
-                            StoredValue = true
+                            StoredDataValue = true
                         },
                         Body = new()
                         {
@@ -1255,7 +1255,7 @@ a b c {
                                 Variable = "variable",
                                 Value = new ValueValidator
                                 {
-                                    StoredValue = 5
+                                    StoredDataValue = 5
                                 }
                             }
                         }
@@ -1298,7 +1298,7 @@ a b c {
                     {
                         Condition = new ValueValidator
                         {
-                            StoredValue = true
+                            StoredDataValue = true
                         },
                         Body = new()
                         {
@@ -1307,7 +1307,7 @@ a b c {
                                 Variable = "variable",
                                 Value = new ValueValidator
                                 {
-                                    StoredValue = 5
+                                    StoredDataValue = 5
                                 }
                             }
                         },
@@ -1318,7 +1318,7 @@ a b c {
                                 Variable = "variable",
                                 Value = new ValueValidator
                                 {
-                                    StoredValue = 6
+                                    StoredDataValue = 6
                                 }
                             }
                         }
@@ -1361,7 +1361,7 @@ a b c {
                     {
                         Condition = new ValueValidator
                         {
-                            StoredValue = true
+                            StoredDataValue = true
                         },
                         Body = new()
                         {
@@ -1370,7 +1370,7 @@ a b c {
                                 Variable = "variable",
                                 Value = new ValueValidator
                                 {
-                                    StoredValue = 5
+                                    StoredDataValue = 5
                                 }
                             }
                         },
@@ -1378,7 +1378,7 @@ a b c {
                         {
                             Condition = new ValueValidator
                             {
-                                StoredValue = false
+                                StoredDataValue = false
                             },
                             Body = new()
                             {
@@ -1387,7 +1387,7 @@ a b c {
                                     Variable = "variable",
                                     Value = new ValueValidator
                                     {
-                                        StoredValue = 6
+                                        StoredDataValue = 6
                                     }
                                 }
                             }
@@ -1435,7 +1435,7 @@ a b c {
                     {
                         Condition = new ValueValidator
                         {
-                            StoredValue = true
+                            StoredDataValue = true
                         },
                         Body = new()
                         {
@@ -1444,7 +1444,7 @@ a b c {
                                 Variable = "variable",
                                 Value = new ValueValidator
                                 {
-                                    StoredValue = 5
+                                    StoredDataValue = 5
                                 }
                             }
                         },
@@ -1452,7 +1452,7 @@ a b c {
                         {
                             Condition = new ValueValidator
                             {
-                                StoredValue = false
+                                StoredDataValue = false
                             },
                             Body = new()
                             {
@@ -1461,7 +1461,7 @@ a b c {
                                     Variable = "variable",
                                     Value = new ValueValidator
                                     {
-                                        StoredValue = 6
+                                        StoredDataValue = 6
                                     }
                                 }
                             },
@@ -1472,7 +1472,7 @@ a b c {
                                     Variable = "variable",
                                     Value = new ValueValidator
                                     {
-                                        StoredValue = 7
+                                        StoredDataValue = 7
                                     }
                                 }
                             }
@@ -1603,7 +1603,7 @@ a b c {
                         FieldName = "x",
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1638,7 +1638,7 @@ a b c {
                         FieldName = "x",
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1677,7 +1677,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1716,7 +1716,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1755,7 +1755,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1794,7 +1794,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1833,7 +1833,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1872,7 +1872,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1911,7 +1911,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -1950,7 +1950,7 @@ a b c {
                         },
                         FieldValue = new ValueValidator
                         {
-                            StoredValue = 5
+                            StoredDataValue = 5
                         }
                     }
                 }
@@ -2047,7 +2047,7 @@ $x: +2;
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = 2
+                        StoredDataValue = 2
                     }
                 }
             }
@@ -2074,7 +2074,7 @@ $x: -2;
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = 2
+                        StoredDataValue = 2
                     }
                 }
             }
@@ -2101,7 +2101,7 @@ $x: *2;
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = 2
+                        StoredDataValue = 2
                     }
                 }
             }
@@ -2128,7 +2128,7 @@ $x: /2;
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = 2
+                        StoredDataValue = 2
                     }
                 }
             }
@@ -2179,7 +2179,7 @@ $x: (-2);
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = 2
+                        StoredDataValue = 2
                     }
                 }
             }
@@ -2206,7 +2206,7 @@ $x: (+2);
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = 2
+                        StoredDataValue = 2
                     }
                 }
             }
@@ -2233,7 +2233,7 @@ $x: !false;
                 {
                     Child = new ValueValidator
                     {
-                        StoredValue = false
+                        StoredDataValue = false
                     }
                 }
             }
@@ -2292,7 +2292,7 @@ $x: test-function(5);
                         {
                             ArgumentValue = new ValueValidator
                             {
-                                StoredValue = 5
+                                StoredDataValue = 5
                             }
                         }
                     }
@@ -2328,7 +2328,7 @@ $x: test-function($a: 5);
                             ArgumentName = "a",
                             ArgumentValue = new ValueValidator
                             {
-                                StoredValue = 5
+                                StoredDataValue = 5
                             }
                         }
                     }
@@ -2363,7 +2363,7 @@ $x: test-function(6, $a: 5);
                         {
                             ArgumentValue = new ValueValidator
                             {
-                                StoredValue = 6
+                                StoredDataValue = 6
                             }
                         },
                         new CallArgumentValidator
@@ -2371,7 +2371,7 @@ $x: test-function(6, $a: 5);
                             ArgumentName = "a",
                             ArgumentValue = new ValueValidator
                             {
-                                StoredValue = 5
+                                StoredDataValue = 5
                             }
                         }
                     }
@@ -2996,7 +2996,7 @@ $x: @delete;
                 Variable = "x",
                 Value = new ValueValidator
                 {
-                    StoredValue = new Value(Value.ValueType.Deletion)
+                    StoredDataValue = new DataValue(DataValue.DataType.Deletion)
                 }
             }
         };
@@ -3020,7 +3020,7 @@ $x: true;
                 Variable = "x",
                 Value = new ValueValidator
                 {
-                    StoredValue = true
+                    StoredDataValue = true
                 }
             }
         };
@@ -3044,7 +3044,7 @@ $x: false;
                 Variable = "x",
                 Value = new ValueValidator
                 {
-                    StoredValue = false
+                    StoredDataValue = false
                 }
             }
         };
@@ -3068,7 +3068,7 @@ $x: 6.75;
                 Variable = "x",
                 Value = new ValueValidator
                 {
-                    StoredValue = 6.75
+                    StoredDataValue = 6.75
                 }
             }
         };
@@ -3092,7 +3092,7 @@ $x: 'a\nb\n';
                 Variable = "x",
                 Value = new ValueValidator
                 {
-                    StoredValue = "a\nb\n"
+                    StoredDataValue = "a\nb\n"
                 }
             }
         };
@@ -3116,7 +3116,7 @@ $x: null;
                 Variable = "x",
                 Value = new ValueValidator
                 {
-                    StoredValue = new Value(Value.ValueType.None)
+                    StoredDataValue = new DataValue(DataValue.DataType.None)
                 }
             }
         };
@@ -3142,23 +3142,23 @@ $x: [1,'2',true,4,null];
                 {
                     new ValueValidator
                     {
-                        StoredValue = 1
+                        StoredDataValue = 1
                     },
                     new ValueValidator
                     {
-                        StoredValue = "2"
+                        StoredDataValue = "2"
                     },
                     new ValueValidator
                     {
-                        StoredValue = true
+                        StoredDataValue = true
                     },
                     new ValueValidator
                     {
-                        StoredValue = 4
+                        StoredDataValue = 4
                     },
                     new ValueValidator
                     {
-                        StoredValue = new Value(Value.ValueType.None)
+                        StoredDataValue = new DataValue(DataValue.DataType.None)
                     }
                 }
             }
@@ -3191,7 +3191,7 @@ $x: {
                         Key = "a",
                         Value = new ValueValidator
                         {
-                            StoredValue = 1
+                            StoredDataValue = 1
                         }
                     },
                     new KeyValueValidator
@@ -3199,7 +3199,7 @@ $x: {
                         Key = "b",
                         Value = new ValueValidator
                         {
-                            StoredValue = 2
+                            StoredDataValue = 2
                         }
                     }
                 }

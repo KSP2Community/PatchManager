@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Indexers;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Indexers;
 
 /// <summary>
 /// Represents a field indexer
@@ -6,6 +8,11 @@
 public abstract class Indexer : Node
 {
     internal Indexer(Coordinate c) : base(c)
+    {
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
     {
     }
 }

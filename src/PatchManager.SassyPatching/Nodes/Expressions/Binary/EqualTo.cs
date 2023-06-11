@@ -9,7 +9,7 @@ public class EqualTo : Binary
     {
     }
 
-    private bool ListCompare(List<Value> leftHandSide, List<Value> rightHandSide)
+    private bool ListCompare(List<DataValue> leftHandSide, List<DataValue> rightHandSide)
     {
         if (leftHandSide.Count != rightHandSide.Count)
         {
@@ -18,7 +18,7 @@ public class EqualTo : Binary
         return !leftHandSide.Where((t, index) => !GetResult(t, rightHandSide[index]).Boolean).Any();
     }
 
-    private bool DictionaryCompare(Dictionary<string, Value> leftHandSide, Dictionary<string, Value> rightHandSide)
+    private bool DictionaryCompare(Dictionary<string, DataValue> leftHandSide, Dictionary<string, DataValue> rightHandSide)
     {
         if (leftHandSide.Count != rightHandSide.Count)
         {
@@ -42,7 +42,7 @@ public class EqualTo : Binary
         return true;
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         if (leftHandSide.Type != rightHandSide.Type) return false;
         
@@ -51,10 +51,15 @@ public class EqualTo : Binary
             return leftHandSide.Boolean == rightHandSide.Boolean;
         }
 
-        if (leftHandSide.IsNumber)
+        if (leftHandSide.IsReal)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
-            return leftHandSide.Number == rightHandSide.Number;
+            return leftHandSide.Real == rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsInteger)
+        {
+            return leftHandSide.Integer == rightHandSide.Integer;
         }
 
         if (leftHandSide.IsString)
@@ -72,10 +77,10 @@ public class EqualTo : Binary
             return DictionaryCompare(leftHandSide.Dictionary, rightHandSide.Dictionary);
         }
         
-        return leftHandSide.IsDeletion;
+        return true;
     }
 
-    internal override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(DataValue dataValue) => false;
 
-    internal override Value ShortCircuitValue => null;
+    internal override DataValue ShortCircuitDataValue => null;
 }

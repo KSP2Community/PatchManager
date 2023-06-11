@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Statements;
+﻿using PatchManager.SassyPatching.Nodes.Expressions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Statements;
 
 /// <summary>
 /// Represents a variable declaration
@@ -12,11 +15,17 @@ public class VariableDeclaration : Node
     /// <summary>
     /// The value being assigned to the variable
     /// </summary>
-    public readonly Node Value;
+    public readonly Expression Value;
 
-    internal VariableDeclaration(Coordinate c, string variable, Node value) : base(c)
+    internal VariableDeclaration(Coordinate c, string variable, Expression value) : base(c)
     {
         Variable = variable;
         Value = value;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        environment[Variable] = Value.Compute(environment);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents a ternary expression, which computes the left hand side if the condition is true otherwise the righthand side
@@ -26,7 +28,7 @@ public class Ternary : Expression
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment) => Condition.Compute(environment).Truthy
+    public override DataValue Compute(Environment environment) => Condition.Compute(environment).Truthy
         ? LeftHandSide.Compute(environment)
         : RightHandSide.Compute(environment);
 }

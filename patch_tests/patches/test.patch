@@ -1,0 +1,5 @@
+:parts {
+    @if $current["crewCapacity"] > 0 {
+        crewCapacity: +1;
+    }
+}

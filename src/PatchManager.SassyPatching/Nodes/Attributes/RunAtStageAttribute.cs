@@ -2,6 +2,7 @@
 
 /// <summary>
 /// Represents an attribute that defines the stage of a selection block
+/// This should only be on top level blocks
 /// </summary>
 public class RunAtStageAttribute : SelectorAttribute
 {

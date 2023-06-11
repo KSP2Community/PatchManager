@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Expressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Expressions;
 
 /// <summary>
 /// Represents a list initializer
@@ -15,7 +17,7 @@ public class ListNode : Expression
     }
 
     /// <inheritdoc />
-    public override Value Compute(Environment environment)
+    public override DataValue Compute(Environment environment)
     {
         return Expressions.Select(x => x.Compute(environment)).ToList();
     }

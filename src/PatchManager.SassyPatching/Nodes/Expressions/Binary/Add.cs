@@ -11,30 +11,36 @@ public class Add : Binary
     {
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
         switch (leftHandSide.Type)
         {
-            case Value.ValueType.Number when rightHandSide.IsNumber:
-                return leftHandSide.Number + rightHandSide.Number;
-            case Value.ValueType.String when rightHandSide.IsString:
+            case DataValue.DataType.Real when rightHandSide.IsReal:
+                return leftHandSide.Real + rightHandSide.Real;
+            case DataValue.DataType.Real when rightHandSide.IsInteger:
+                return leftHandSide.Real + rightHandSide.Integer;
+            case DataValue.DataType.Integer when rightHandSide.IsInteger:
+                return leftHandSide.Integer + rightHandSide.Integer;
+            case DataValue.DataType.Integer when rightHandSide.IsReal:
+                return leftHandSide.Integer + rightHandSide.Real;
+            case DataValue.DataType.String when rightHandSide.IsString:
                 return leftHandSide.String + rightHandSide.String;
-            case Value.ValueType.List when rightHandSide.IsList:
+            case DataValue.DataType.List when rightHandSide.IsList:
             {
                 // If every value is immutable a shallow copy should be fine
-                var newList = new List<Value>(leftHandSide.List);
+                var newList = new List<DataValue>(leftHandSide.List);
                 newList.AddRange(rightHandSide.List);
                 return newList;
             }
-            case Value.ValueType.None:
-            case Value.ValueType.Boolean:
-            case Value.ValueType.Dictionary:
-            case Value.ValueType.Deletion:
+            case DataValue.DataType.None:
+            case DataValue.DataType.Boolean:
+            case DataValue.DataType.Dictionary:
+            case DataValue.DataType.Deletion:
             default:
                 throw new BinaryExpressionTypeException(Coordinate,"add", leftHandSide.Type.ToString(), rightHandSide.Type.ToString());
         }
     }
 
-    internal override bool ShortCircuitOn(Value value) => false;
-    internal override Value ShortCircuitValue => null;
+    internal override bool ShortCircuitOn(DataValue dataValue) => false;
+    internal override DataValue ShortCircuitDataValue => null;
 }

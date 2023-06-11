@@ -9,7 +9,7 @@ public class Positive : Unary
     {
     }
 
-    internal override Value GetResult(Value child)
+    internal override DataValue GetResult(DataValue child)
     {
         return child;
     }

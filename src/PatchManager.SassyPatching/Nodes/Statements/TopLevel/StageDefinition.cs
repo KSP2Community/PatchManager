@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
 /// <summary>
 /// Represents a stage definition
@@ -18,5 +20,11 @@ public class StageDefinition : Node
     {
         StageName = stageName;
         StagePriority = stagePriority;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        throw new NotImplementedException();
     }
 }

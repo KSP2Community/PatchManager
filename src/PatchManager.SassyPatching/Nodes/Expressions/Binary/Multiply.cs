@@ -11,29 +11,44 @@ public class Multiply : Binary
     {
     }
 
-    internal override Value GetResult(Value leftHandSide, Value rightHandSide)
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
-        if (leftHandSide.IsNumber && rightHandSide.IsNumber)
+        if (leftHandSide.IsReal && rightHandSide.IsReal)
         {
-            return leftHandSide.Number * rightHandSide.Number;
+            return leftHandSide.Real * rightHandSide.Real;
         }
 
-        if (leftHandSide.IsString && rightHandSide.IsNumber)
+        if (leftHandSide.IsReal && rightHandSide.IsInteger)
+        {
+            return leftHandSide.Real * rightHandSide.Integer;
+        }
+
+        if (leftHandSide.IsInteger && rightHandSide.IsInteger)
+        {
+            return leftHandSide.Integer * rightHandSide.Integer;
+        }
+
+        if (leftHandSide.IsInteger && rightHandSide.IsReal)
+        {
+            return leftHandSide.Integer * rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsString && rightHandSide.IsInteger)
         {
             return StringRepeat(leftHandSide, rightHandSide);
         }
 
-        if (leftHandSide.IsNumber && rightHandSide.IsString)
+        if (leftHandSide.IsInteger && rightHandSide.IsString)
         {
             return StringRepeat(rightHandSide, leftHandSide);
         }
         
-        if (leftHandSide.IsList && rightHandSide.IsNumber)
+        if (leftHandSide.IsList && rightHandSide.IsInteger)
         {
             return ListRepeat(leftHandSide, rightHandSide);
         }
 
-        if (leftHandSide.IsNumber && rightHandSide.IsList)
+        if (leftHandSide.IsInteger && rightHandSide.IsList)
         {
             return ListRepeat(rightHandSide, leftHandSide);
         }
@@ -42,10 +57,10 @@ public class Multiply : Binary
             rightHandSide.Type.ToString());
     }
 
-    private static Value StringRepeat(Value str, Value amount)
+    private static DataValue StringRepeat(DataValue str, DataValue amount)
     {
         StringBuilder sb = new StringBuilder();
-        for (var i = 0; i < amount.Number; i++)
+        for (var i = 0; i < amount.Integer; i++)
         {
             sb.Append(str.String);
         }
@@ -53,17 +68,17 @@ public class Multiply : Binary
         return sb.ToString();
     }
 
-    private static Value ListRepeat(Value list, Value amount)
+    private static DataValue ListRepeat(DataValue list, DataValue amount)
     {
-        List<Value> newList = new();
-        for (var i = 0; i < amount.Number; i++)
+        List<DataValue> newList = new();
+        for (var i = 0; i < amount.Integer; i++)
         {
             newList.AddRange(list.List);
         }
         return newList;
     }
 
-    internal override bool ShortCircuitOn(Value value) => false;
+    internal override bool ShortCircuitOn(DataValue dataValue) => false;
 
-    internal override Value ShortCircuitValue => null;
+    internal override DataValue ShortCircuitDataValue => null;
 }

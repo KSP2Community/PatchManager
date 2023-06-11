@@ -25,4 +25,5 @@ internal static class Extensions
     {
         return Regex.IsMatch(@this, pattern.Replace("*", ".*").Replace("?", ".?"));
     }
+
 }

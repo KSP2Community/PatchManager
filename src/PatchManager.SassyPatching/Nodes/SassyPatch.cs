@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Nodes;
+﻿using PatchManager.SassyPatching.Nodes.Statements;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes;
 
 /// <summary>
 /// The top level node of a patch file, represents the entire file
@@ -13,5 +16,14 @@ public class SassyPatch : Node
     internal SassyPatch(Coordinate c, List<Node> children) : base(c)
     {
         Children = children;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
+        foreach (var child in Children)
+        {
+            child.ExecuteIn(environment);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using PatchManager.SassyPatching.Nodes.Expressions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes;
 
@@ -20,5 +21,10 @@ public class KeyValueNode : Node
     {
         Key = key;
         Value = value;
+    }
+
+    /// <inheritdoc />
+    public override void ExecuteIn(Environment environment)
+    {
     }
 }
