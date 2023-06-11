@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching;
+﻿using System.Text.RegularExpressions;
+using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,6 +16,7 @@ public sealed class PartSelectable : BaseSelectable
 {
     private bool _modified = false;
     private bool _deleted = false;
+    
 
     /// <summary>
     /// Marks this part selectable as having been modified any level down
@@ -35,7 +37,12 @@ public sealed class PartSelectable : BaseSelectable
 
     private readonly string _originalData;
     internal JObject _jObject;
-
+    private static Regex Sanitizer = new Regex("[^a-zA-Z0-9 -_]");
+    private string Sanitize(string str)
+    {
+        return Sanitizer.Replace(str, "");
+    }
+    
     internal PartSelectable(string data)
     {
         _originalData = data;
@@ -44,6 +51,11 @@ public sealed class PartSelectable : BaseSelectable
         Children = new();
         var partData = _jObject["data"];
         Name = (string)partData["partName"];
+        foreach (var tag in ((string)partData["tags"]).Split(' '))
+        {
+            Classes.Add(Sanitize(tag));
+        }
+        
         var serializedPartModules = partData["serializedPartModules"];
         foreach (var module in serializedPartModules)
         {
