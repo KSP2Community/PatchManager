@@ -69,13 +69,23 @@ public class Universe
     public readonly Action<string> ErrorLogger;
 
     /// <summary>
+    /// This logs any message that is not an error in the universe
+    /// </summary>
+    public readonly Action<string> MessageLogger;
+
+    private readonly List<(string id, SassyPatch patch)> ToRegister = new();
+
+    /// <summary>
     /// Create a new universal state
     /// </summary>
     /// <param name="registerPatcher">This action receives patchers and registers them for later execution</param>
-    public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger)
+    /// <param name="errorLogger">The action to be taken to log an error</param>
+    /// <param name="messageLogger">The action to be taken to log a message</param>
+    public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger)
     {
         RegisterPatcher = registerPatcher;
         ErrorLogger = errorLogger;
+        MessageLogger = messageLogger;
     }
 
     // TODO: Fix this so that other mods stages get their guids working
@@ -149,16 +159,29 @@ public class Universe
                 parser.AddErrorListener(LoadListener.Instance);
                 var patchContext = parser.patch();
                 tokenTransformer.Errored = false;
-                var gEnv = new GlobalEnvironment(this, modId);
-                var env = new Environment(gEnv);
+                // var gEnv = new GlobalEnvironment(this, modId);
+                // var env = new Environment(gEnv);
                 var ctx = tokenTransformer.Visit(patchContext) as SassyPatch;
-                ctx?.ExecuteIn(env);
+                ToRegister.Add((modId, ctx));
                 // lib = new SassyPatchLibrary(patch);
             }
             catch (Exception e)
             {
                 ErrorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e.Message}");
             }
+        }
+    }
+
+    /// <summary>
+    /// This registers every patch in the files in the to register list
+    /// </summary>
+    public void RegisterAllPatches()
+    {
+        foreach (var (modId, patch) in ToRegister)
+        {
+            var gEnv = new GlobalEnvironment(this, modId);
+            var env = new Environment(gEnv);
+            patch.ExecuteIn(env);
         }
     }
 }

@@ -11,7 +11,7 @@ public class PatchArgument
     /// <summary>
     /// The name of the argument if it was named by the caller
     /// </summary>
-    [CanBeNull] public string ArgumentName;
+    [CanBeNull] public string ArgumentName = null;
     /// <summary>
     /// The value of the argument
     /// </summary>

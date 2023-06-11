@@ -1,5 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Antlr4.Runtime;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SassyPatchGrammar;
 
 namespace PatchManager.SassyPatching.Utility;
@@ -24,6 +26,11 @@ internal static class Extensions
     public static bool MatchesPattern(this string @this, string pattern)
     {
         return Regex.IsMatch(@this, pattern.Replace("*", ".*").Replace("?", ".?"));
+    }
+
+    public static string Escape(this string @this)
+    {
+        return JsonConvert.ToString(@this);
     }
 
 }

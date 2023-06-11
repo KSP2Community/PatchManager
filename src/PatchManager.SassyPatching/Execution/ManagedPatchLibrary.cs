@@ -5,11 +5,11 @@ namespace PatchManager.SassyPatching.Execution;
 
 internal class ManagedPatchLibrary : PatchLibrary
 {
-    public Dictionary<string, ManagedPatchFunction> Functions;
+    private readonly Dictionary<string, ManagedPatchFunction> _functions;
 
     public ManagedPatchLibrary(IReflect libraryClass)
     {
-        Functions = libraryClass.GetMethods(BindingFlags.Static)
+        _functions = libraryClass.GetMethods(BindingFlags.Static | BindingFlags.Public)
             .Where(method => method.GetCustomAttributes().OfType<SassyMethodAttribute>().Any())
             .ToDictionary(method => method.GetCustomAttributes().OfType<SassyMethodAttribute>().First().MethodName,
                 method => new ManagedPatchFunction(method));
@@ -17,7 +17,7 @@ internal class ManagedPatchLibrary : PatchLibrary
     
     public override void RegisterInto(Environment environment)
     {
-        foreach (var function in Functions)
+        foreach (var function in _functions)
         {
             environment.GlobalEnvironment.AllFunctions[function.Key] = function.Value;
         }

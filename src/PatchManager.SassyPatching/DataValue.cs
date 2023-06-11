@@ -1,13 +1,15 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PatchManager.SassyPatching.Execution;
 
 namespace PatchManager.SassyPatching;
 
 /// <summary>
 /// The basic value type that the sassy patching engine uses
-/// It can be one of 7 different types of values, 6 of which correspond fully to JSON types w/ one extra type/value meant to "delete" whatever it is assigned to
+/// It can be one of 8 different types of values, 6 of which correspond fully to JSON types w/ one extra type/value meant to "delete" whatever it is assigned to, and then closures
 /// </summary>
 public class DataValue
 {
@@ -47,7 +49,12 @@ public class DataValue
         /// <summary>
         /// The type of a value that when assigned to a variable/field deletes that variable/field
         /// </summary>
-        Deletion
+        Deletion,
+        
+        /// <summary>
+        /// The type of a closure, a function in a value
+        /// </summary>
+        Closure,
     }
 
     /// <summary>
@@ -202,6 +209,26 @@ public class DataValue
     public bool IsDeletion => Type == DataType.Deletion;
     
     /// <summary>
+    /// Is the type of this variable <see cref="DataType.Closure"/>?
+    /// </summary>
+    public bool IsClosure => Type == DataType.Closure;
+
+    /// <summary>
+    /// Asserts this value is of type <see cref="DataType.Closure"/>,
+    /// then returns the <see cref="PatchFunction"/> contained within
+    /// </summary>
+    /// <exception cref="IncorrectTypeException">Thrown if this value is not a value of type <see cref="DataType.Closure"/></exception>
+    public PatchFunction Closure
+    {
+        get
+        {
+            CheckType(DataType.Closure);
+            return (PatchFunction)_object;
+        }
+    }
+    
+    
+    /// <summary>
     /// Does this value get interpreted as true in places where a <see cref="DataType.Boolean"/> is expected?
     /// That is, is the value a <see cref="DataType.Boolean"/> and the value stored within true, or is the value anything but <see cref="DataType.None"/> and <see cref="DataType.Deletion"/>?
     /// </summary>
@@ -273,6 +300,16 @@ public class DataValue
     {
         return new DataValue(DataType.Dictionary, d);
     }
+    
+    /// <summary>
+    /// Creates a <see cref="DataValue"/> from a <see cref="PatchFunction"/>
+    /// </summary>
+    /// <param name="c">The value to be stored within the value</param>
+    /// <returns>A <see cref="DataValue"/> with a type of <see cref="DataType.Closure"/> and a stored value of <param name="c"></param></returns>
+    public static implicit operator DataValue(PatchFunction c)
+    {
+        return new DataValue(DataType.Closure, c);
+    }
 
     /// <summary>
     /// Converts a value to a string representation that can be interpreted by the engine as the exact value
@@ -297,7 +334,8 @@ public class DataValue
 
         if (IsString)
         {
-            return "'" + Regex.Escape(String) + "'";
+            // return "'" + Regex.Escape(String) + "'";
+            return String.Escape();
         }
 
         if (IsList)
@@ -307,12 +345,17 @@ public class DataValue
 
         if (IsDictionary)
         {
-            return "{" + string.Join(",",Dictionary.Select(x => "'" + Regex.Escape(x.Key) + $"':{x.Value}")) + "}";
+            return "{" + string.Join(",",Dictionary.Select(x => x.Key.Escape() + $":{x.Value}")) + "}";
         }
 
         if (IsDeletion)
         {
             return "@delete";
+        }
+
+        if (IsClosure)
+        {
+            return "<closure>";
         }
 
         return "<unknown>";
