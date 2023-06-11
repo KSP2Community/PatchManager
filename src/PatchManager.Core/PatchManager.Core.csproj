@@ -4,7 +4,7 @@
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all" />
     </ItemGroup>
-    <ItemGroup>
+    <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager/PatchManager.csproj" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" />
     </ItemGroup>
