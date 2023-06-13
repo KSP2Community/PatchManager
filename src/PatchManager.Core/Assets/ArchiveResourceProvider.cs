@@ -13,7 +13,7 @@ internal class ArchiveResourceProvider : ResourceProviderBase
     /// <summary>
     /// Provides assets found by <see cref="ArchiveResourceLocator"/>.
     /// </summary>
-    /// <param name="provideHandle"></param>
+    /// <param name="provideHandle">Information about the asset to be provided.</param>
     public override void Provide(ProvideHandle provideHandle)
     {
         try
@@ -23,7 +23,10 @@ internal class ArchiveResourceProvider : ResourceProviderBase
             Logging.LogDebug($"Loading {archiveName}/{file}");
 
             var archive = CacheManager.GetArchive(archiveName);
-            var asset = new TextAsset(archive.ReadFile(file));
+            var asset = new TextAsset(archive.ReadFile(file))
+            {
+                name = Path.GetFileName(file)
+            };
             provideHandle.Complete(asset, true, null);
         }
         catch (Exception e)
