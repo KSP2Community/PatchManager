@@ -13,7 +13,7 @@ public class PartsRuleset : IPatcherRuleSet
     /// <inheritdoc />
     public bool Matches(string label)
     {
-        return label == "part_data";
+        return label == "parts_data";
     }
 
     /// <summary>

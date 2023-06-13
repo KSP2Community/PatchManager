@@ -4,7 +4,7 @@
 
     <!-- Build configuration -->
     <PropertyGroup>
-        <BaseOutputPath>$(SolutionDir)/build/bin/$(MSBuildProjectName)</BaseOutputPath>
+        <BaseOutputPath>$(SolutionDir)/build/bin/testing/$(MSBuildProjectName)</BaseOutputPath>
         <BaseIntermediateOutputPath>$(SolutionDir)build/obj/testing/$(MSBuildProjectName)</BaseIntermediateOutputPath>
     </PropertyGroup>
 </Project>

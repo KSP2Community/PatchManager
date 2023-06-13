@@ -1,16 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
+    <!-- Project configuration -->
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <BaseOutputPath>$(SolutionDir)/build/bin/testing/$(MSBuildProjectName)</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(SolutionDir)build/obj/testing/$(MSBuildProjectName)</BaseIntermediateOutputPath>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\src\PatchManager.Parts\PatchManager.Parts.csproj" />
-      <ProjectReference Include="..\src\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" />
-      <ProjectReference Include="..\src\PatchManager.Shared\PatchManager.Shared.csproj" />
+    <!-- References -->
+    <ItemGroup Label="Project references">
+      <ProjectReference Include="$(SolutionDir)/src/PatchManager.Parts/PatchManager.Parts.csproj" />
+      <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" />
+      <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" />
     </ItemGroup>
-
 </Project>
