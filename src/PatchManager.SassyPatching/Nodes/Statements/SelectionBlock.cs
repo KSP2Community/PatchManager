@@ -41,13 +41,11 @@ public class SelectionBlock : Node, ISelectionAction
     /// <param name="snapshot">The environment that contains this selection block</param>
     /// <param name="datasetType">The type of dataset this is being executed (e.g. parts_data)</param>
     /// <param name="dataset">The dataset to execute this patch on</param>
-    public bool ExecuteFresh(Environment snapshot, string datasetType, ref string dataset)
+    public bool ExecuteFresh(Environment snapshot, string datasetType, string name, ref string dataset)
     {
         // var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
-        var selections = Selector.SelectAllTopLevel(datasetType, dataset, out var rulesetMatchingObject);
-
-
-
+        var selections = Selector.SelectAllTopLevel(datasetType, name, dataset, out var rulesetMatchingObject);
+        
         if (rulesetMatchingObject == null || selections.Count == 0)
         {
             return false;

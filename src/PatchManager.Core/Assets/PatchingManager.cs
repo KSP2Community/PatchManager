@@ -13,7 +13,7 @@ namespace PatchManager.Core.Assets;
 internal static class PatchingManager
 {
     private static readonly List<ITextPatcher> Patchers = new();
-    private static readonly Universe Universe = new(RegisterPatcher, Logging.LogError);
+    private static readonly Universe Universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo);
 
     private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
@@ -45,7 +45,7 @@ internal static class PatchingManager
             var backup = text;
             try
             {
-                var wasPatched = patcher.TryPatch(label, ref text);
+                var wasPatched = patcher.TryPatch(label, assetName, ref text);
                 if (wasPatched)
                 {
                     patchCount++;
@@ -63,12 +63,11 @@ internal static class PatchingManager
         return text;
     }
 
-    public static void RunModPatches(string modName, string modFolder)
+    public static void ImportModPatches(string modName, string modFolder)
     {
         Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
         Logging.LogInfo($"{Universe.AllLibraries.Count - InitialLibraryCount} libraries loaded!");
-        Logging.LogInfo($"{Patchers.Count} patchers registered!");
 
         var patchFiles = Directory.GetFiles(modFolder, "*.patch", SearchOption.AllDirectories);
         foreach (var patchFile in patchFiles)
@@ -78,6 +77,12 @@ internal static class PatchingManager
         }
     }
 
+    public static void RegisterPatches()
+    {
+        Universe.RegisterAllPatches();
+        Logging.LogInfo($"{Patchers.Count} patchers registered!");
+    }
+    
     public static void InvalidateCacheIfNeeded()
     {
         var checksum = Hash.FromJsonObject(CurrentPatchHashes);

@@ -28,8 +28,9 @@ public class CoreModule : BaseModule
         foreach (var modFolder in modFolders)
         {
             var modName = Path.GetDirectoryName(modFolder);
-            PatchingManager.RunModPatches(modName, modFolder);
+            PatchingManager.ImportModPatches(modName, modFolder);
         }
+        PatchingManager.RegisterPatches();
 
         PatchingManager.InvalidateCacheIfNeeded();
     }

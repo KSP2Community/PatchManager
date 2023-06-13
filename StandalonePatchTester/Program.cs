@@ -56,7 +56,7 @@ if (Directory.Exists("json") && Directory.Exists("patches"))
             var copy = new string(text);
             try
             {
-                var patched = patcher.TryPatch("parts_data", ref text);
+                var patched = patcher.TryPatch("parts_data",Path.GetFileNameWithoutExtension(part.Name), ref text);
                 if (patched) localPatchesRan++;
             }
             catch (Exception e)

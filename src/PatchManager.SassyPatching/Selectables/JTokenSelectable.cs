@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
 
@@ -21,11 +22,12 @@ public class JTokenSelectable : BaseSelectable
     /// <param name="markDirty">How this should notify that it has been modified</param>
     /// <param name="token">The token this operates over</param>
     /// <param name="name">The name/element this is coming from</param>
-    public JTokenSelectable(Action markDirty,JToken token, string name)
+    /// <param name="elementType">The type of element this is, can be different from the name</param>
+    public JTokenSelectable(Action markDirty, JToken token, string name, [CanBeNull] string elementType = null)
     {
         _markDirty = markDirty;
         Token = token;
-        ElementType = name;
+        ElementType = elementType ?? name;
         Name = name;
         Classes = new();
         Children = new();
