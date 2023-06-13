@@ -42,17 +42,28 @@ internal static class AssetProviderPatch
 
         if (!CacheManager.CacheValidLabels.Contains(label))
         {
-            PatchingManager.RebuildCache(label);
+            PatchingManager.RebuildCache(label, () => LoadAssets(label, assetLoadCallback, onCompletedCallback));
         }
+        else
+        {
+            LoadAssets(label, assetLoadCallback, onCompletedCallback);
+        }
+    }
 
+    private static void LoadAssets<T>(
+        string label,
+        Action<T> assetLoadCallback,
+        Action<AsyncOperationHandle<IList<T>>> resultCallback
+    )
+    {
         var found = Locators.LocateAll(label, typeof(T), out var locations);
 
         if (found)
         {
-            Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += onCompletedCallback;
+            Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += resultCallback;
             return;
         }
 
-        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += onCompletedCallback;
+        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += resultCallback;
     }
 }
