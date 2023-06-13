@@ -95,7 +95,7 @@ internal static class PatchingManager
         CacheManager.Inventory.Patches = CurrentPatchHashes;
     }
 
-    public static void RebuildCache(string label)
+    public static void RebuildCache(string label, Action onComplete)
     {
         var archiveFilename = $"{label}.zip";
         var archive = CacheManager.CreateArchive(archiveFilename);
@@ -122,7 +122,7 @@ internal static class PatchingManager
         {
             if (results.Status != AsyncOperationStatus.Succeeded)
             {
-                throw new Exception($"Unable to rebuild cache for label '{label}'.");
+                Logging.LogWarning($"Unable to rebuild cache for label '{label}'.");
             }
 
             CacheManager.Inventory.CacheEntries.Add(label, cacheEntry);
@@ -131,6 +131,8 @@ internal static class PatchingManager
             CacheManager.CacheValidLabels.Add(label);
             Addressables.Release(results);
             Logging.LogDebug($"Cache for label '{label}' rebuilt.");
+
+            onComplete();
         };
     }
 }
