@@ -14,7 +14,8 @@ public interface ITextPatcher
     /// Execute this patcher on a blob of text
     /// </summary>
     /// <param name="patchType">The type of patch, "part" for parts patches, etc...</param>
+    /// <param name="name">The name of the blob of text being patched</param>
     /// <param name="patchData">The string representation of the file being patched, if it gets set to an empty string, then we should just delete whatever is being patched</param>
     /// <returns>True if the patchData was modified</returns>
-    public bool TryPatch(string patchType, ref string patchData);
+    public bool TryPatch(string patchType, string name, ref string patchData);
 }

@@ -45,14 +45,14 @@ public class CombinationSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject)
+    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
     {
         var start = new List<ISelectable>();
         rulesetMatchingObject = null;
         foreach (var selector in Selectors)
         {
             // ReSharper disable once IdentifierTypo
-            start = SelectionUtilities.CombineSelections(start,selector.SelectAllTopLevel(type, data, out var rsmo));
+            start = SelectionUtilities.CombineSelections(start,selector.SelectAllTopLevel(type, name, data, out var rsmo));
             if (rsmo != null && rulesetMatchingObject == null)
             {
                 rulesetMatchingObject = rsmo;

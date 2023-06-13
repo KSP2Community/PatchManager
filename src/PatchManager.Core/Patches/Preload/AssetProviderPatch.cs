@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using KSP.Assets;
 using PatchManager.Core.Assets;
+using PatchManager.Core.Cache;
 using PatchManager.Shared;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -39,15 +40,30 @@ internal static class AssetProviderPatch
             resultCallback?.Invoke(results.Result);
         });
 
+        if (!CacheManager.CacheValidLabels.Contains(label))
+        {
+            PatchingManager.RebuildCache(label, () => LoadAssets(label, assetLoadCallback, onCompletedCallback));
+        }
+        else
+        {
+            LoadAssets(label, assetLoadCallback, onCompletedCallback);
+        }
+    }
+
+    private static void LoadAssets<T>(
+        string label,
+        Action<T> assetLoadCallback,
+        Action<AsyncOperationHandle<IList<T>>> resultCallback
+    )
+    {
         var found = Locators.LocateAll(label, typeof(T), out var locations);
 
         if (found)
         {
-            Logging.LogDebug($"Found {locations.Count} custom locations with label '{label}'.");
-            Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += onCompletedCallback;
+            Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += resultCallback;
             return;
         }
 
-        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += onCompletedCallback;
+        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += resultCallback;
     }
 }

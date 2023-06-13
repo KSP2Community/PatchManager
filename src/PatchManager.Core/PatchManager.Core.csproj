@@ -4,8 +4,8 @@
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all" />
     </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager/PatchManager.csproj" />
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" />
+    <ItemGroup Label="Project references">
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
 </Project>

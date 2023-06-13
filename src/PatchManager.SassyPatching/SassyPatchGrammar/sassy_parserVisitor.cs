@@ -634,6 +634,13 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitNone([NotNull] sassy_parser.NoneContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>closure</c>
+	/// labeled alternative in <see cref="sassy_parser.value"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitClosure([NotNull] sassy_parser.ClosureContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>list_value</c>
 	/// labeled alternative in <see cref="sassy_parser.value"/>.
 	/// </summary>
@@ -773,5 +780,31 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitMixin_include([NotNull] sassy_parser.Mixin_includeContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFor_to_loop([NotNull] sassy_parser.For_to_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFor_through_loop([NotNull] sassy_parser.For_through_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitEach_loop([NotNull] sassy_parser.Each_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitWhile_loop([NotNull] sassy_parser.While_loopContext context);
 }
 } // namespace SassyPatchGrammar

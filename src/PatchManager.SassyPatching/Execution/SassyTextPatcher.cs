@@ -46,8 +46,8 @@ public class SassyTextPatcher : ITextPatcher
     public ulong Priority { get; }
 
     /// <inheritdoc />
-    public bool TryPatch(string patchType, ref string patchData)
+    public bool TryPatch(string patchType, string name, ref string patchData)
     {
-        return _rootSelectionBlock.ExecuteFresh(_environmentSnapshot,patchType, ref patchData);
+        return _rootSelectionBlock.ExecuteFresh(_environmentSnapshot,patchType, name, ref patchData);
     }
 }

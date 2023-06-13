@@ -136,14 +136,15 @@ sub_expression          : value                                                 
                         | lhs=sub_expression IF cond=sub_expression ELSE rhs=sub_expression                 #ternary
                         ;
 
-value                   : DELETE    #value_deletion
-                        | TRUE      #boolean_true
-                        | FALSE     #boolean_false
-                        | NUMBER    #number_value
-                        | STRING    #string_value
-                        | NONE      #none
-                        | list      #list_value
-                        | obj       #object_value
+value                   : DELETE                                                                                        #value_deletion
+                        | TRUE                                                                                          #boolean_true
+                        | FALSE                                                                                         #boolean_false
+                        | NUMBER                                                                                        #number_value
+                        | STRING                                                                                        #string_value
+                        | NONE                                                                                          #none
+                        | FUNCTION LEFT_PAREN args=arg_decl_list RIGHT_PAREN LEFT_BRACE body=function_body RIGHT_BRACE  #closure
+                        | list                                                                                          #list_value
+                        | obj                                                                                           #object_value
                         ;
 
 list                    : LEFT_BRACKET values=list_values COMMA? RIGHT_BRACKET;
@@ -173,6 +174,9 @@ function_body           : function_statement*;
 function_statement      : var_decl
                         | fn_level_conditional
                         | fn_return
+                        | for_loop
+                        | each_loop
+                        | while_loop
                         ;
 
 fn_level_conditional    : PRE_IF cond=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE els=fn_level_else?;
@@ -186,3 +190,11 @@ fn_level_else_if        : PRE_ELSE_IF cond=sub_expression LEFT_BRACE body=functi
 fn_return               : RETURN sub_expression SEMICOLON;
 
 mixin_include           : INCLUDE mixin=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN;
+
+for_loop                : FOR idx=VARIABLE FROM start=sub_expression TO end=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE #for_to_loop
+                        | FOR idx=VARIABLE FROM start=sub_expression THROUGH end=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE #for_through_loop
+                        ;
+                        
+each_loop               : EACH (key=VARIABLE COMMA)? val=VARIABLE IN iter=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE;
+                        
+while_loop              : WHILE cond=sub_expression LEFT_BRACE body=function_statement* RIGHT_BRACE;

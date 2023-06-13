@@ -28,7 +28,9 @@
         <PackageReference Include="SpaceWarp" Version="1.2.0" />
     </ItemGroup>
     <ItemGroup Label="Project references">
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" />
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Core/PatchManager.Core.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Parts/PatchManager.Parts.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
     </ItemGroup>
 </Project>

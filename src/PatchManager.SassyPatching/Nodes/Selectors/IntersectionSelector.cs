@@ -54,9 +54,9 @@ public class IntersectionSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string data, out ISelectable rulesetMatchingObject)
+    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
     {
-        var start = Selectors[0].SelectAllTopLevel(type, data, out rulesetMatchingObject);
+        var start = Selectors[0].SelectAllTopLevel(type, name, data, out rulesetMatchingObject);
         return SelectAllSkippingFirst(start);
     }
 }

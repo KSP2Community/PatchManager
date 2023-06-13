@@ -1239,6 +1239,20 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitNone([NotNull] sassy_parser.NoneContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by the <c>closure</c>
+	/// labeled alternative in <see cref="sassy_parser.value"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterClosure([NotNull] sassy_parser.ClosureContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>closure</c>
+	/// labeled alternative in <see cref="sassy_parser.value"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitClosure([NotNull] sassy_parser.ClosureContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by the <c>list_value</c>
 	/// labeled alternative in <see cref="sassy_parser.value"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -1518,6 +1532,58 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitMixin_include([NotNull] sassy_parser.Mixin_includeContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterFor_to_loop([NotNull] sassy_parser.For_to_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitFor_to_loop([NotNull] sassy_parser.For_to_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterFor_through_loop([NotNull] sassy_parser.For_through_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitFor_through_loop([NotNull] sassy_parser.For_through_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.each_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterEach_loop([NotNull] sassy_parser.Each_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.each_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitEach_loop([NotNull] sassy_parser.Each_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.while_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterWhile_loop([NotNull] sassy_parser.While_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.while_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitWhile_loop([NotNull] sassy_parser.While_loopContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

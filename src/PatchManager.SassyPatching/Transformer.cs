@@ -85,6 +85,15 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 .ToList());
 
     /// <inheritdoc />
+    public override Node VisitClosure(sassy_parser.ClosureContext context) =>
+        new Closure(context.GetCoordinate(),
+            context.args.arg_decl()
+                .Select(Visit)
+                .Cast<Argument>()
+                .ToList(),
+            context.body.function_statement().Select(Visit)
+                .ToList());
+    /// <inheritdoc />
     public override Node VisitMixin_def(sassy_parser.Mixin_defContext context) =>
         new Mixin(context.GetCoordinate(),
             context.name.Text,
@@ -593,4 +602,24 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitSub_sub_expression(sassy_parser.Sub_sub_expressionContext context) =>
         Visit(context.internal_expr);
+
+    /// <inheritdoc />
+    public override Node VisitFor_to_loop(sassy_parser.For_to_loopContext context)
+        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.start) as Expression, false,
+            Visit(context.end) as Expression, context.function_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitFor_through_loop(sassy_parser.For_through_loopContext context)
+        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.start) as Expression, true,
+            Visit(context.end) as Expression, context.function_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitEach_loop(sassy_parser.Each_loopContext context)
+        => new Each(context.GetCoordinate(), context.key?.Text.TrimFirst(), context.val.Text.TrimFirst(),
+            Visit(context.iter) as Expression, context.function_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitWhile_loop(sassy_parser.While_loopContext context)
+        => new While(context.GetCoordinate(), Visit(context.cond) as Expression,
+            context.function_statement().Select(Visit).ToList());
 }

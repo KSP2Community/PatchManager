@@ -47,14 +47,6 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         // Initialize logging
         Logging.Initialize(Logger);
 
-        // Clean up cache folder (for debugging purposes)
-        if (Directory.Exists(CachePath))
-        {
-            Directory.Delete(CachePath, true);
-        }
-
-        Directory.CreateDirectory(CachePath);
-
         // Load library DLLs
         var path = new FileInfo(Assembly.GetExecutingAssembly().Location);
         var dir = path.Directory!;
@@ -63,6 +55,8 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
 
         // Load module DLLs
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Core.dll"));
+        ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Parts.dll"));
+        ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Generic.dll"));
     }
 
     private void Start()

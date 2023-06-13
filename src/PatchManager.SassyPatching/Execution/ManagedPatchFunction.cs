@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Reflection;
+using JetBrains.Annotations;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Exceptions;
 
@@ -8,15 +9,22 @@ namespace PatchManager.SassyPatching.Execution;
 internal class ManagedPatchFunction : PatchFunction
 {
     // private Func<Environment, List<PatchArgument>,Value> _execute;
-    private MethodInfo _info;
+    private readonly MethodInfo _info;
+    [CanBeNull] private object _target;
 
-    public ManagedPatchFunction(MethodInfo info)
+    public ManagedPatchFunction(MethodInfo info, [CanBeNull] object target = null)
     {
         _info = info;
+        _target = target;
     }
 
     private static object ConvertParameterValue(DataValue v, Type t)
     {
+        if (t == typeof(DataValue))
+        {
+            return v;
+        }
+        
         if (t == typeof(string))
         {
             return v.String;
@@ -39,42 +47,42 @@ internal class ManagedPatchFunction : PatchFunction
 
         if (t == typeof(byte))
         {
-            return (byte)v.Real;
+            return (byte)v.Integer;
         }
 
         if (t == typeof(sbyte))
         {
-            return (sbyte)v.Real;
+            return (sbyte)v.Integer;
         }
 
         if (t == typeof(short))
         {
-            return (short)v.Real;
+            return (short)v.Integer;
         }
 
         if (t == typeof(ushort))
         {
-            return (ushort)v.Real;
+            return (ushort)v.Integer;
         }
 
         if (t == typeof(int))
         {
-            return (int)v.Real;
+            return (int)v.Integer;
         }
 
         if (t == typeof(uint))
         {
-            return (uint)v.Real;
+            return (uint)v.Integer;
         }
 
         if (t == typeof(long))
         {
-            return (long)v.Real;
+            return (long)v.Integer;
         }
 
         if (t == typeof(ulong))
         {
-            return (ulong)v.Real;
+            return (ulong)v.Integer;
         }
 
         if (t == typeof(float))
@@ -90,6 +98,11 @@ internal class ManagedPatchFunction : PatchFunction
         if (t == typeof(bool))
         {
             return v.Boolean;
+        }
+
+        if (t == typeof(PatchFunction))
+        {
+            return v.Closure;
         }
 
         if (v.Type == DataValue.DataType.None)
@@ -282,9 +295,14 @@ internal class ManagedPatchFunction : PatchFunction
                 return av.ToList();
             case Dictionary<string, DataValue> dv:
                 return dv;
+            case PatchFunction pf:
+                return pf;
+            case Delegate d:
+                return new ManagedPatchFunction(d.Method, d.Target);
         }
 
         var t = value.GetType();
+        
         if (ConvertSingleRankArrayToValue(value, t, out var singleRankArray)) return singleRankArray;
         if (ConvertMultiRankArrayToValue(value, t, out var multiRankArrayValue)) return multiRankArrayValue;
         if (ConvertGenericListOrDictionaryToValue(value, t, out var listOrDictionaryValue)) return listOrDictionaryValue;
@@ -414,16 +432,26 @@ internal class ManagedPatchFunction : PatchFunction
             if (parameter.ParameterType == typeof(Environment))
             {
                 args.Add(env);
+                continue;
             }
 
             if (parameter.ParameterType == typeof(GlobalEnvironment))
             {
                 args.Add(env.GlobalEnvironment);
+                continue;
             }
 
             if (parameter.ParameterType == typeof(Universe))
             {
                 args.Add(env.GlobalEnvironment.Universe);
+                continue;
+            }
+
+            if (parameter.ParameterType == typeof(List<PatchArgument>))
+            {
+                args.Add(new List<PatchArgument>(arguments));
+                arguments.Clear();
+                continue;
             }
             
             if (parameter.ParameterType == typeof(List<DataValue>) &&
@@ -443,6 +471,7 @@ internal class ManagedPatchFunction : PatchFunction
                 {
                     arguments.RemoveAt(i);
                 }
+                continue;
             }
 
             if (parameter.ParameterType == typeof(Dictionary<string, DataValue>) &&
@@ -462,6 +491,7 @@ internal class ManagedPatchFunction : PatchFunction
                 {
                     arguments.RemoveAt(i);
                 }
+                continue;
             }
 
             bool foundPositional = false;
@@ -510,6 +540,6 @@ internal class ManagedPatchFunction : PatchFunction
             throw new InvocationException("Too many arguments passed");
         }
         
-        return ConvertReturnedValue(_info.Invoke(null, args.ToArray()));
+        return ConvertReturnedValue(_info.Invoke(_target, args.ToArray()));
     }
 }
