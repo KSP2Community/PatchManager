@@ -4,8 +4,4 @@ namespace PatchManager.Parts;
 
 public class PartsModule : BaseModule
 {
-    public override void Preload()
-    {
-
-    }
 }

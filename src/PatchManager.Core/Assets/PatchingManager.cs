@@ -1,5 +1,6 @@
 ﻿using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
+using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Interfaces;
@@ -11,51 +12,31 @@ namespace PatchManager.Core.Assets;
 
 internal static class PatchingManager
 {
-    internal static readonly List<ITextPatcher> Patchers = new();
-    internal static readonly Universe Universe = new(RegisterPatcher, Logging.LogError);
+    private static readonly List<ITextPatcher> Patchers = new();
+    private static readonly Universe Universe = new(RegisterPatcher, Logging.LogError);
 
+    private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
+
+    private static readonly int InitialLibraryCount = Universe.AllLibraries.Count;
     private static int _totalPatchCount;
 
-    public static void RebuildCache(string label)
+    private static void RegisterPatcher(ITextPatcher patcher)
     {
-        var archive = CacheManager.CreateArchive(label);
-        var cacheEntry = new CacheEntry
+        for (var index = 0; index < Patchers.Count; index++)
         {
-            Label = label,
-            ArchiveFilename = $"{label}.zip",
-            Assets = new List<string>()
-        };
-
-        Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
-        {
-            try
+            if (Patchers[index].Priority <= patcher.Priority)
             {
-                var patchedText = PatchJson(asset.name, asset.text);
-                Logging.LogDebug($"Patched {asset.name}.");
-                cacheEntry.Assets.Add(asset.name);
-                archive.AddFile(asset.name, patchedText);
-                Logging.LogDebug($"Added {asset.name} to cache archive '{label}.zip'.");
-            }
-            catch (Exception e)
-            {
-                Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
-            }
-        }).Completed += results =>
-        {
-            if (results.Status != AsyncOperationStatus.Succeeded)
-            {
-                throw new Exception($"Unable to rebuild cache for label '{label}'.");
+                continue;
             }
 
-            CacheManager.Inventory.CacheEntries.Add(label, cacheEntry);
-            CacheManager.SaveInventory();
-            archive.Save();
-            CacheManager.CacheValidLabels.Add(label);
-            Addressables.Release(results);
-        };
+            Patchers.Insert(index, patcher);
+            return;
+        }
+
+        Patchers.Add(patcher);
     }
 
-    private static string PatchJson(string assetName, string text)
+    private static string PatchJson(string label, string assetName, string text)
     {
         var patchCount = 0;
 
@@ -64,7 +45,7 @@ internal static class PatchingManager
             var backup = text;
             try
             {
-                var wasPatched = patcher.TryPatch("part_data", ref text);
+                var wasPatched = patcher.TryPatch(label, ref text);
                 if (wasPatched)
                 {
                     patchCount++;
@@ -82,19 +63,74 @@ internal static class PatchingManager
         return text;
     }
 
-    private static void RegisterPatcher(ITextPatcher patcher)
+    public static void RunModPatches(string modName, string modFolder)
     {
-        for (var index = 0; index < Patchers.Count; index++)
-        {
-            if (Patchers[index].Priority <= patcher.Priority)
-            {
-                continue;
-            }
+        Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-            Patchers.Insert(index, patcher);
+        Logging.LogInfo($"{Universe.AllLibraries.Count - InitialLibraryCount} libraries loaded!");
+        Logging.LogInfo($"{Patchers.Count} patchers registered!");
+
+        var patchFiles = Directory.GetFiles(modFolder, "*.patch", SearchOption.AllDirectories);
+        foreach (var patchFile in patchFiles)
+        {
+            var patchHash = Hash.FromFile(patchFile);
+            CurrentPatchHashes.Patches.Add(patchFile, patchHash);
+        }
+    }
+
+    public static void InvalidateCacheIfNeeded()
+    {
+        var checksum = Hash.FromJsonObject(CurrentPatchHashes);
+
+        if (CacheManager.Inventory.Checksum == checksum)
+        {
+            Logging.LogInfo("Cache is valid, skipping rebuild.");
+            CacheManager.CacheValidLabels.AddRange(CacheManager.Inventory.CacheEntries.Keys);
             return;
         }
 
-        Patchers.Add(patcher);
+        Logging.LogInfo("Cache is invalid, rebuilding.");
+        CacheManager.InvalidateCache();
+        CacheManager.Inventory.Checksum = checksum;
+        CacheManager.Inventory.Patches = CurrentPatchHashes;
+    }
+
+    public static void RebuildCache(string label)
+    {
+        var archiveFilename = $"{label}.zip";
+        var archive = CacheManager.CreateArchive(archiveFilename);
+        var cacheEntry = new CacheEntry
+        {
+            Label = label,
+            ArchiveFilename = archiveFilename,
+            Assets = new List<string>()
+        };
+
+        Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
+        {
+            try
+            {
+                var patchedText = PatchJson(label, asset.name, asset.text);
+                cacheEntry.Assets.Add(asset.name);
+                archive.AddFile(asset.name, patchedText);
+            }
+            catch (Exception e)
+            {
+                Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
+            }
+        }).Completed += results =>
+        {
+            if (results.Status != AsyncOperationStatus.Succeeded)
+            {
+                throw new Exception($"Unable to rebuild cache for label '{label}'.");
+            }
+
+            CacheManager.Inventory.CacheEntries.Add(label, cacheEntry);
+            CacheManager.SaveInventory();
+            archive.Save();
+            CacheManager.CacheValidLabels.Add(label);
+            Addressables.Release(results);
+            Logging.LogDebug($"Cache for label '{label}' rebuilt.");
+        };
     }
 }

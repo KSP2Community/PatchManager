@@ -7,9 +7,9 @@ namespace PatchManager.Core.Cache;
 /// </summary>
 public class Archive : IDisposable
 {
-    private readonly ZipArchive _archive;
     private readonly string _path;
     private readonly MemoryStream _stream;
+    private bool _isDisposed;
 
     /// <summary>
     /// Loads an archive from the given path into memory.
@@ -21,17 +21,13 @@ public class Archive : IDisposable
         _path = path;
         _stream = new MemoryStream();
 
-        if (createNew)
+        if (!createNew)
         {
-            _path = path;
-        }
-        else
-        {
-            var zipData = File.ReadAllBytes(path);
-            _stream.Write(zipData, 0, zipData.Length);
+            using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+            fileStream.CopyTo(_stream);
         }
 
-        _archive = new ZipArchive(_stream, ZipArchiveMode.Update, true);
+        _stream.Seek(0, SeekOrigin.Begin);
     }
 
     /// <summary>
@@ -39,7 +35,14 @@ public class Archive : IDisposable
     /// </summary>
     public void Dispose()
     {
-        _archive.Dispose();
+        if (_isDisposed)
+        {
+            return;
+        }
+        _stream.Dispose();
+        _isDisposed = true;
+
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -50,7 +53,10 @@ public class Archive : IDisposable
     /// <exception cref="FileNotFoundException">Thrown when the file does not exist in the archive.</exception>
     public string ReadFile(string filePath)
     {
-        var entry = _archive.GetEntry(filePath);
+        AssertNotDisposed();
+
+        using var archive = new ZipArchive(_stream, ZipArchiveMode.Read, true);
+        var entry = archive.GetEntry(filePath);
         if (entry == null)
         {
             throw new FileNotFoundException($"File {filePath} does not exist in archive {_path}!");
@@ -69,12 +75,16 @@ public class Archive : IDisposable
     /// <exception cref="ArgumentException">Thrown when the file already exists in the archive.</exception>
     public void AddFile(string filePath, string content)
     {
-        if (_archive.GetEntry(filePath) != null)
+        AssertNotDisposed();
+
+        using var archive = new ZipArchive(_stream, ZipArchiveMode.Update, true);
+
+        if (archive.GetEntry(filePath) != null)
         {
             throw new ArgumentException($"File {filePath} already exists in archive {_path}!");
         }
 
-        var entry = _archive.CreateEntry(filePath);
+        var entry = archive.CreateEntry(filePath);
         using var stream = entry.Open();
         using var writer = new StreamWriter(stream);
         writer.Write(content);
@@ -85,8 +95,18 @@ public class Archive : IDisposable
     /// </summary>
     public void Save()
     {
+        AssertNotDisposed();
+
         using var fileStream = new FileStream(_path, FileMode.Create);
         _stream.Seek(0, SeekOrigin.Begin);
         _stream.CopyTo(fileStream);
+    }
+
+    private void AssertNotDisposed()
+    {
+        if (_isDisposed)
+        {
+            throw new ObjectDisposedException(nameof(Archive), "The Archive object has been disposed.");
+        }
     }
 }

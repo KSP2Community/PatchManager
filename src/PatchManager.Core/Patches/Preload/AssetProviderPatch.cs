@@ -49,7 +49,6 @@ internal static class AssetProviderPatch
 
         if (found)
         {
-            Logging.LogDebug($"Found {locations.Count} custom locations with label '{label}'.");
             Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += onCompletedCallback;
             return;
         }

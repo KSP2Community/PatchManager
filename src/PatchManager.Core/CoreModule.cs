@@ -23,35 +23,15 @@ public class CoreModule : BaseModule
     {
         // TODO: Move this whole process into a SpaceWarp 1.3 per-mod flow action
 
-        var patchHashes = PatchHashes.CreateDefault();
-
         var modFolders = Directory.GetDirectories(Paths.PluginPath, "*", SearchOption.TopDirectoryOnly);
+
         foreach (var modFolder in modFolders)
         {
             var modName = Path.GetDirectoryName(modFolder);
-            PatchingManager.Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
-
-            Logging.LogInfo($"{PatchingManager.Universe.AllLibraries.Count} libraries loaded!");
-            Logging.LogInfo($"{PatchingManager.Patchers.Count} patchers registered!");
-
-            var patchFiles = Directory.GetFiles(modFolder, "*.patch", SearchOption.AllDirectories);
-            foreach (var patchFile in patchFiles)
-            {
-                var patchHash = Hash.FromFile(patchFile);
-                patchHashes.Patches.Add(patchFile, patchHash);
-            }
+            PatchingManager.RunModPatches(modName, modFolder);
         }
 
-        var checksum = Hash.FromJsonObject(patchHashes);
-
-        if (CacheManager.Inventory.Checksum == checksum)
-        {
-            return;
-        }
-
-        CacheManager.InvalidateCache();
-        CacheManager.Inventory.Checksum = checksum;
-        CacheManager.Inventory.Patches = patchHashes;
+        PatchingManager.InvalidateCacheIfNeeded();
     }
 
     /// <summary>

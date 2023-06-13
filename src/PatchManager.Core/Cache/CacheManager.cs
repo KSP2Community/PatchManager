@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using PatchManager.Core.Cache.Json;
+using PatchManager.Shared;
 
 namespace PatchManager.Core.Cache;
 
@@ -20,39 +21,42 @@ internal static class CacheManager
 
     public static void CreateCacheFolderIfNotExists()
     {
-        if (!Directory.Exists(CacheDirectory))
+        if (Directory.Exists(CacheDirectory))
         {
-            Directory.CreateDirectory(CacheDirectory);
+            return;
         }
+
+        Logging.LogDebug("Cache directory does not exist, creating a new one.");
+        Directory.CreateDirectory(CacheDirectory);
     }
 
-    public static Archive CreateArchive(string archiveName)
+    public static Archive CreateArchive(string archiveFilename)
     {
-        var archivePath = Path.Combine(CacheDirectory, $"{archiveName}.zip");
+        var archivePath = Path.Combine(CacheDirectory, archiveFilename);
         if (File.Exists(archivePath))
         {
-            throw new ArgumentException($"Archive {archiveName} already exists!");
+            throw new ArgumentException($"Archive '{archivePath}' already exists!");
         }
 
         var archive = new Archive(archivePath, true);
-        OpenArchives.Add(archiveName, archive);
+        OpenArchives.Add(archiveFilename, archive);
         return archive;
     }
 
-    public static Archive GetArchive(string archiveName)
+    public static Archive GetArchive(string archiveFilename)
     {
-        var archivePath = Path.Combine(CacheDirectory, $"{archiveName}.zip");
+        var archivePath = Path.Combine(CacheDirectory, archiveFilename);
         if (!File.Exists(archivePath))
         {
-            throw new FileNotFoundException($"Archive {archiveName} does not exist!");
+            throw new FileNotFoundException($"Archive '{archivePath}' does not exist!");
         }
 
-        if (!OpenArchives.ContainsKey(archiveName))
+        if (!OpenArchives.ContainsKey(archiveFilename))
         {
-            OpenArchives.Add(archiveName, new Archive(archivePath));
+            OpenArchives.Add(archiveFilename, new Archive(archivePath));
         }
 
-        return OpenArchives[archiveName];
+        return OpenArchives[archiveFilename];
     }
 
     public static void InvalidateCache()

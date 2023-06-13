@@ -64,13 +64,16 @@ public sealed class Inventory
         CacheManager.CreateCacheFolderIfNotExists();
         if (!File.Exists(path))
         {
+            Logging.LogDebug($"Inventory file does not exist, creating new inventory.");
             return Create();
         }
 
         try
         {
             var inventoryText = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<Inventory>(inventoryText);
+            var inventory = JsonConvert.DeserializeObject<Inventory>(inventoryText);
+            Logging.LogDebug("Inventory file loaded successfully.");
+            return inventory;
         }
         catch (Exception e)
         {
