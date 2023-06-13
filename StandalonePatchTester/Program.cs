@@ -36,7 +36,7 @@ if (Directory.Exists("json") && Directory.Exists("patches"))
             patchers.Add(patcher);
         }
     }
-    
+
     var universe = new Universe(Add, Console.WriteLine);
     universe.LoadPatchesInDirectory(new DirectoryInfo("patches"), "test");
 
@@ -55,7 +55,7 @@ if (Directory.Exists("json") && Directory.Exists("patches"))
             var copy = new string(text);
             try
             {
-                var patched = patcher.TryPatch("part_data", ref text);
+                var patched = patcher.TryPatch("parts_data", ref text);
                 if (patched) localPatchesRan++;
             }
             catch (Exception e)
@@ -70,7 +70,7 @@ if (Directory.Exists("json") && Directory.Exists("patches"))
             File.WriteAllText(Path.Combine("patched", part.Name), text);
         }
         numPatchesRan += localPatchesRan;
-        
+
     }
     Console.WriteLine($"{numPatchesRan} patch(es) ran in total");
 }

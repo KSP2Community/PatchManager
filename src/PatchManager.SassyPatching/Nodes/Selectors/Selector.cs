@@ -23,7 +23,7 @@ public abstract class Selector : Node
     /// <summary>
     /// Select all that match this selector from the type and data
     /// </summary>
-    /// <param name="type">The type, e.g. part_data</param>
+    /// <param name="type">The type, e.g. parts_data</param>
     /// <param name="data">The data, a textual representation of the data</param>
     /// <param name="rulesetMatchingObject">The found object that matches the ruleset</param>
     /// <returns>A list of all selections from the data</returns>

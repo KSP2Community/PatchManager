@@ -16,7 +16,7 @@ public sealed class PartSelectable : BaseSelectable
 {
     private bool _modified = false;
     private bool _deleted = false;
-    
+
 
     /// <summary>
     /// Marks this part selectable as having been modified any level down
@@ -42,7 +42,7 @@ public sealed class PartSelectable : BaseSelectable
     {
         return Sanitizer.Replace(str, "");
     }
-    
+
     internal PartSelectable(string data)
     {
         _originalData = data;
@@ -55,7 +55,7 @@ public sealed class PartSelectable : BaseSelectable
         {
             Classes.Add(Sanitize(tag));
         }
-        
+
         var serializedPartModules = partData["serializedPartModules"];
         foreach (var module in serializedPartModules)
         {
@@ -86,7 +86,7 @@ public sealed class PartSelectable : BaseSelectable
     public override List<string> Classes { get; }
 
     /// <inheritdoc />
-    public override string ElementType => "part_data";
+    public override string ElementType => "parts_data";
 
     /// <inheritdoc />
     public override bool IsSameAs(ISelectable other) => other is PartSelectable ps && ps.Name == Name;
