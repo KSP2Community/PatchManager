@@ -82,7 +82,7 @@ internal static class PatchingManager
         Universe.RegisterAllPatches();
         Logging.LogInfo($"{Patchers.Count} patchers registered!");
     }
-    
+
     public static void InvalidateCacheIfNeeded()
     {
         var checksum = Hash.FromJsonObject(CurrentPatchHashes);
@@ -104,20 +104,28 @@ internal static class PatchingManager
     {
         var archiveFilename = $"{label}.zip";
         var archive = CacheManager.CreateArchive(archiveFilename);
-        var cacheEntry = new CacheEntry
+
+        var labelCacheEntry = new CacheEntry
         {
             Label = label,
             ArchiveFilename = archiveFilename,
             Assets = new List<string>()
         };
+        var assetsCacheEntries = new Dictionary<string, CacheEntry>();
 
         Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
         {
             try
             {
                 var patchedText = PatchJson(label, asset.name, asset.text);
-                cacheEntry.Assets.Add(asset.name);
                 archive.AddFile(asset.name, patchedText);
+                labelCacheEntry.Assets.Add(asset.name);
+                assetsCacheEntries.Add(asset.name, new CacheEntry
+                {
+                    Label = asset.name,
+                    ArchiveFilename = archiveFilename,
+                    Assets = new List<string> { asset.name }
+                });
             }
             catch (Exception e)
             {
@@ -130,10 +138,13 @@ internal static class PatchingManager
                 Logging.LogWarning($"Unable to rebuild cache for label '{label}'.");
             }
 
-            CacheManager.Inventory.CacheEntries.Add(label, cacheEntry);
-            CacheManager.SaveInventory();
             archive.Save();
+
             CacheManager.CacheValidLabels.Add(label);
+            CacheManager.Inventory.CacheEntries.Add(label, labelCacheEntry);
+            CacheManager.Inventory.CacheEntries.AddRange(assetsCacheEntries);
+            CacheManager.SaveInventory();
+
             Addressables.Release(results);
             Logging.LogDebug($"Cache for label '{label}' rebuilt.");
 

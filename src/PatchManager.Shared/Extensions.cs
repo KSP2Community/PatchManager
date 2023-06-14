@@ -22,4 +22,23 @@ public static class Extensions
         key = keyValuePair.Key;
         value = keyValuePair.Value;
     }
+
+    /// <summary>
+    /// Adds the contents of an <see cref="IEnumerable{T}"/> of type <see cref="KeyValuePair{TKey,TValue}"/>
+    /// to a <see cref="Dictionary{TKey,TValue}"/>.
+    /// </summary>
+    /// <param name="target">Target dictionary to add to.</param>
+    /// <param name="source">Source enumerable to add from.</param>
+    /// <typeparam name="TKey">Type of the key.</typeparam>
+    /// <typeparam name="TValue">Type of the value.</typeparam>
+    public static void AddRange<TKey, TValue>(
+        this Dictionary<TKey, TValue> target,
+        IEnumerable<KeyValuePair<TKey, TValue>> source
+    )
+    {
+        foreach (var kvp in source)
+        {
+            target.Add(kvp.Key, kvp.Value);
+        }
+    }
 }
