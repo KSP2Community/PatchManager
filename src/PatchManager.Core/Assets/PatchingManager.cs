@@ -142,7 +142,7 @@ internal static class PatchingManager
 
             CacheManager.CacheValidLabels.Add(label);
             CacheManager.Inventory.CacheEntries.Add(label, labelCacheEntry);
-            CacheManager.Inventory.CacheEntries.AddRange(assetsCacheEntries);
+            CacheManager.Inventory.CacheEntries.AddRangeUnique(assetsCacheEntries);
             CacheManager.SaveInventory();
 
             Addressables.Release(results);
