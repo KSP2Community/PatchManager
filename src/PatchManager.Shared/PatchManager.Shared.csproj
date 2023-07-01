@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+    <!-- References -->
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.0" />
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
