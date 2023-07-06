@@ -63,11 +63,19 @@ internal static class PatchingManager
         return text;
     }
 
+    private static int _previousLibraryCount = -1;
+
     public static void ImportModPatches(string modName, string modFolder)
     {
         Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-        Logging.LogInfo($"{Universe.AllLibraries.Count - InitialLibraryCount} libraries loaded!");
+        var currentLibraryCount = Universe.AllLibraries.Count - InitialLibraryCount;
+
+        if (currentLibraryCount > _previousLibraryCount)
+        {
+            Logging.LogInfo($"{currentLibraryCount} mod libraries loaded!");
+            _previousLibraryCount++;
+        }
 
         var patchFiles = Directory.GetFiles(modFolder, "*.patch", SearchOption.AllDirectories);
         foreach (var patchFile in patchFiles)
