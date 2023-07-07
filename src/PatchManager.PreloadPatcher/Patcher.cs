@@ -1,4 +1,4 @@
-﻿using BepInEx;
+﻿/*using BepInEx;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Mono.Cecil;
@@ -77,4 +77,4 @@ public static class Patcher
 
         Logger.CreateLogSource("Patch Manager Preload").LogInfo("Pre-patching complete!");
     }
-}
+}*/

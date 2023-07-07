@@ -1,4 +1,6 @@
-﻿using PatchManager.Core.Cache;
+﻿using System.Collections;
+using KSP.Game;
+using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
@@ -91,7 +93,11 @@ internal static class PatchingManager
         Logging.LogInfo($"{Patchers.Count} patchers registered!");
     }
 
-    public static void InvalidateCacheIfNeeded()
+    /// <summary>
+    /// Invalidates the cache if the checksum is different.
+    /// </summary>
+    /// <returns>True if the cache is valid, false if it was invalidated.</returns>
+    public static bool InvalidateCacheIfNeeded()
     {
         var checksum = Hash.FromJsonObject(CurrentPatchHashes);
 
@@ -99,16 +105,18 @@ internal static class PatchingManager
         {
             Logging.LogInfo("Cache is valid, skipping rebuild.");
             CacheManager.CacheValidLabels.AddRange(CacheManager.Inventory.CacheEntries.Keys);
-            return;
+            return true;
         }
 
         Logging.LogInfo("Cache is invalid, rebuilding.");
         CacheManager.InvalidateCache();
         CacheManager.Inventory.Checksum = checksum;
         CacheManager.Inventory.Patches = CurrentPatchHashes;
+
+        return false;
     }
 
-    public static void RebuildCache(string label, Action onComplete)
+    private static AsyncOperationHandle<IList<TextAsset>> RebuildCache(string label)
     {
         var archiveFilename = $"{label}.zip";
         var archive = CacheManager.CreateArchive(archiveFilename);
@@ -121,7 +129,7 @@ internal static class PatchingManager
         };
         var assetsCacheEntries = new Dictionary<string, CacheEntry>();
 
-        Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
+        var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
         {
             try
             {
@@ -139,11 +147,14 @@ internal static class PatchingManager
             {
                 Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
             }
-        }).Completed += results =>
+        });
+
+        handle.Completed += results =>
         {
             if (results.Status != AsyncOperationStatus.Succeeded)
             {
                 Logging.LogWarning($"Unable to rebuild cache for label '{label}'.");
+                return;
             }
 
             archive.Save();
@@ -155,8 +166,40 @@ internal static class PatchingManager
 
             Addressables.Release(results);
             Logging.LogDebug($"Cache for label '{label}' rebuilt.");
-
-            onComplete();
         };
+
+        return handle;
+    }
+
+    public static void RebuildAllCache(Action resolve, Action<string> reject)
+    {
+        var keys = GameManager.Instance.Game.Assets._registeredResourceLocators
+            .SelectMany(locator => locator.Keys)
+            .ToList();
+        keys.AddRange(Addressables.ResourceLocators.SelectMany(locator => locator.Keys));
+
+        var handles = keys.Select(key => key.ToString())
+            .Distinct()
+            .Where(key => !CacheManager.CacheValidLabels.Contains(key))
+            .Select(RebuildCache);
+
+        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuild(handles, resolve));
+    }
+
+    private static IEnumerator WaitForCacheRebuild(
+        IEnumerable<AsyncOperationHandle<IList<TextAsset>>> handles,
+        Action resolve
+    )
+    {
+        foreach (var handle in handles)
+        {
+            while (!handle.IsDone)
+            {
+                yield return null;
+            }
+        }
+
+        Logging.LogDebug("Cache for all labels rebuilt.");
+        resolve();
     }
 }

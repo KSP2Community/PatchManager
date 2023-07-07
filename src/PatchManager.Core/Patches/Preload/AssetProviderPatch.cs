@@ -1,69 +1,64 @@
-﻿using JetBrains.Annotations;
+﻿using HarmonyLib;
 using KSP.Assets;
+using KSP.Game;
 using PatchManager.Core.Assets;
-using PatchManager.Core.Cache;
-using PatchManager.Shared;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace PatchManager.Core.Patches.Preload;
 
+[HarmonyPatch]
 internal static class AssetProviderPatch
 {
-    /// <summary>
-    /// Used by the preloader patcher to replace the body of <see cref="AssetProvider.LoadByLabel{T}"/>
-    /// </summary>
-    /// <param name="label">Label of the assets to be loaded.</param>
-    /// <param name="assetLoadCallback">Action to execute for each loaded asset.</param>
-    /// <param name="resultCallback">Action to execute after loading is done.</param>
-    /// <typeparam name="T">Type of assets to load.</typeparam>
-    [UsedImplicitly]
-    public static void LoadByLabel<T>(string label, Action<T> assetLoadCallback, Action<IList<T>> resultCallback)
-        where T : UnityEngine.Object
+    private static readonly AssetProvider Assets = GameManager.Instance.Game.Assets;
+
+    [HarmonyPatch(typeof(AssetProvider), nameof(AssetProvider.LocateAssetInExternalData))]
+    [HarmonyPrefix]
+    // ReSharper disable once InconsistentNaming
+    private static bool LocateAssetInExternalData(object key, Type T, out IResourceLocation location, ref bool __result)
     {
-        if (AssetProvider.IsComponent(typeof(T)))
+        location = null;
+
+        if (Locators.LocateAll(key.ToString(), T, out var patchedLocations))
         {
-            Logging.LogError("AssetProvider cannot load components/MonoBehaviours in batch.");
-            return;
+            location = patchedLocations[0];
+            __result = true;
+            return false;
         }
 
-        var onCompletedCallback = new Action<AsyncOperationHandle<IList<T>>>(results =>
+        foreach (var registeredResourceLocator in Assets._registeredResourceLocators)
         {
-            if (results.Status != AsyncOperationStatus.Succeeded)
+            if (registeredResourceLocator.Locate(key, T, out var locations))
             {
-                Logging.LogError($"AssetProvider unable to find assets with label '{label}'.");
-                resultCallback?.Invoke(null);
-                Addressables.Release(results);
-                return;
+                location = locations[0];
+                __result = true;
+                return false;
             }
-
-            resultCallback?.Invoke(results.Result);
-        });
-
-        if (!CacheManager.CacheValidLabels.Contains(label))
-        {
-            PatchingManager.RebuildCache(label, () => LoadAssets(label, assetLoadCallback, onCompletedCallback));
         }
-        else
-        {
-            LoadAssets(label, assetLoadCallback, onCompletedCallback);
-        }
+
+        return false;
     }
 
-    private static void LoadAssets<T>(
-        string label,
-        Action<T> assetLoadCallback,
-        Action<AsyncOperationHandle<IList<T>>> resultCallback
-    )
+    [HarmonyPatch(typeof(AssetProvider), nameof(AssetProvider.LocateAssetsInExternalData))]
+    [HarmonyPrefix]
+    // ReSharper disable once RedundantAssignment,InconsistentNaming
+    private static bool LocateAssetsInExternalData(object reference, ref List<IResourceLocation> __result)
     {
-        var found = Locators.LocateAll(label, typeof(T), out var locations);
-
-        if (found)
+        if (Locators.LocateAll(reference.ToString(), typeof(TextAsset), out var patchedLocations))
         {
-            Addressables.LoadAssetsAsync(locations, assetLoadCallback).Completed += resultCallback;
-            return;
+            __result = patchedLocations;
+            return false;
         }
 
-        Addressables.LoadAssetsAsync(label, assetLoadCallback).Completed += resultCallback;
+        __result = new List<IResourceLocation>();
+        foreach (var registeredResourceLocator in Assets._registeredResourceLocators)
+        {
+            if (registeredResourceLocator.Locate(reference, typeof(object), out var locations))
+            {
+                __result.AddRange(locations);
+            }
+        }
+
+        return false;
     }
 }

@@ -1,9 +1,7 @@
 ﻿using BepInEx;
 using JetBrains.Annotations;
 using PatchManager.Core.Assets;
-using PatchManager.Core.Cache;
-using PatchManager.Core.Cache.Json;
-using PatchManager.Core.Utility;
+using PatchManager.Core.Flow;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using UnityEngine.AddressableAssets;
@@ -30,9 +28,18 @@ public class CoreModule : BaseModule
             var modName = Path.GetDirectoryName(modFolder);
             PatchingManager.ImportModPatches(modName, modFolder);
         }
+
         PatchingManager.RegisterPatches();
 
-        PatchingManager.InvalidateCacheIfNeeded();
+        var isValid = PatchingManager.InvalidateCacheIfNeeded();
+
+        if (!isValid)
+        {
+            FlowManager.RegisterActionAfter(
+                new FlowAction("Patch Manager: rebuilding cache", PatchingManager.RebuildAllCache),
+                "Creating Game Instance"
+            );
+        }
     }
 
     /// <summary>
