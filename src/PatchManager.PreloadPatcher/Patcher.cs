@@ -69,11 +69,13 @@ public static class Patcher
         var methodInModule = targetMethod.Module.ImportReference(extractedMethod);
         var generic = methodInModule.MakeGeneric(targetMethod.GenericParameters.ToArray());
         targetMethod.Body.Instructions.Clear();
-        targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-        targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
+        // Due to some unknown magic, this has to be ldargs instead of ldarg.1 and ldarg2.
+        targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_S,1));
+        targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_S,2));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Call, generic));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
-        Logger.CreateLogSource("Patch Manager Preload").LogInfo("Pre-patching complete!");
+        var preload = Logger.CreateLogSource("Patch Manager Preload");
+        preload.LogInfo("Patching complete");
     }
 }
