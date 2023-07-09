@@ -1,64 +1,39 @@
-﻿using HarmonyLib;
-using KSP.Assets;
+﻿using JetBrains.Annotations;
 using KSP.Game;
 using PatchManager.Core.Assets;
-using UnityEngine;
-using UnityEngine.ResourceManagement.ResourceLocations;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityObject = UnityEngine.Object;
 
 namespace PatchManager.Core.Patches.Preload;
 
-[HarmonyPatch]
 internal static class AssetProviderPatch
 {
-    private static readonly AssetProvider Assets = GameManager.Instance.Game.Assets;
-
-    [HarmonyPatch(typeof(AssetProvider), nameof(AssetProvider.LocateAssetInExternalData))]
-    [HarmonyPrefix]
-    // ReSharper disable once InconsistentNaming
-    private static bool LocateAssetInExternalData(object key, Type T, out IResourceLocation location, ref bool __result)
+    [UsedImplicitly]
+    public static AsyncOperationHandle<IList<T>> LoadAssetsAsync<T>(
+        string key,
+        Action<T> assetLoadCallback
+    )
     {
-        location = null;
-
-        if (Locators.LocateAll(key.ToString(), T, out var patchedLocations))
+        if (Locators.LocateAll(key, out var patchedLocations))
         {
-            location = patchedLocations[0];
-            __result = true;
-            return false;
+            return Addressables.LoadAssetsAsync(patchedLocations, assetLoadCallback);
         }
 
-        foreach (var registeredResourceLocator in Assets._registeredResourceLocators)
+        var locations = GameManager.Instance.Game.Assets.LocateAssetsInExternalData(key);
+        if (locations.Count <= 0)
         {
-            if (registeredResourceLocator.Locate(key, T, out var locations))
+            return Addressables.LoadAssetsAsync(key, assetLoadCallback);
+        }
+
+        foreach (var resourceLocator in Addressables.ResourceLocators)
+        {
+            if (resourceLocator.Locate(key, typeof(T), out var internalLocations))
             {
-                location = locations[0];
-                __result = true;
-                return false;
+                locations.AddRange(internalLocations);
             }
         }
 
-        return false;
-    }
-
-    [HarmonyPatch(typeof(AssetProvider), nameof(AssetProvider.LocateAssetsInExternalData))]
-    [HarmonyPrefix]
-    // ReSharper disable once RedundantAssignment,InconsistentNaming
-    private static bool LocateAssetsInExternalData(object reference, ref List<IResourceLocation> __result)
-    {
-        if (Locators.LocateAll(reference.ToString(), typeof(TextAsset), out var patchedLocations))
-        {
-            __result = patchedLocations;
-            return false;
-        }
-
-        __result = new List<IResourceLocation>();
-        foreach (var registeredResourceLocator in Assets._registeredResourceLocators)
-        {
-            if (registeredResourceLocator.Locate(reference, typeof(object), out var locations))
-            {
-                __result.AddRange(locations);
-            }
-        }
-
-        return false;
+        return Addressables.LoadAssetsAsync(locations, assetLoadCallback);
     }
 }

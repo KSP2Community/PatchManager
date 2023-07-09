@@ -1,4 +1,4 @@
-﻿/*using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Mono.Cecil;
@@ -39,7 +39,7 @@ public static class Patcher
     }
 
     /// <summary>
-    /// Replace the generic AssetProvider.LoadByLabel method with our own.
+    /// Replace the generic AssetProvider.LoadAssetsAsync method with our own.
     /// </summary>
     /// <param name="assemblyDefinition">Game assembly containing the AssetProvider class.</param>
     /// <exception cref="Exception">Thrown if the assembly with the replacement method cannot be found.</exception>
@@ -60,10 +60,10 @@ public static class Patcher
         }
 
         var coreType = coreAssembly.MainModule.Types.First(t => t.Name == "AssetProviderPatch");
-        var extractedMethod = coreType.Methods.First(m => m.Name == "LoadByLabel");
+        var extractedMethod = coreType.Methods.First(m => m.Name == "LoadAssetsAsync");
 
         var targetType = assemblyDefinition.MainModule.Types.Single(t => t.Name == "AssetProvider");
-        var targetMethod = targetType.Methods.Single(m => m.Name == "LoadByLabel" && m.HasGenericParameters);
+        var targetMethod = targetType.Methods.Single(m => m.Name == "LoadAssetsAsync" && m.HasGenericParameters);
         // Remove every single instruction from the body of the methods
         // Emit call to our extracted method
         var methodInModule = targetMethod.Module.ImportReference(extractedMethod);
@@ -71,10 +71,9 @@ public static class Patcher
         targetMethod.Body.Instructions.Clear();
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
-        targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Call, generic));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
         Logger.CreateLogSource("Patch Manager Preload").LogInfo("Pre-patching complete!");
     }
-}*/
+}
