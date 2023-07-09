@@ -122,7 +122,7 @@ internal static class PatchingManager
 
     private static AsyncOperationHandle<IList<TextAsset>> RebuildCache(string label)
     {
-        var archiveFilename = $"{label}.zip";
+        var archiveFilename = $"{label.Replace("/", "")}.zip";
         var archive = CacheManager.CreateArchive(archiveFilename);
 
         var labelCacheEntry = new CacheEntry
