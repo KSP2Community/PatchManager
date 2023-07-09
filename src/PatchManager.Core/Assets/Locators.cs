@@ -1,4 +1,5 @@
-﻿using UnityEngine.AddressableAssets.ResourceLocators;
+﻿using UnityEngine;
+using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace PatchManager.Core.Assets;
@@ -20,18 +21,17 @@ public static class Locators
     }
 
     /// <summary>
-    /// Locate asset(s) by label and type.
+    /// Locate assets by label.
     /// </summary>
-    /// <param name="label">Label of the asset(s) to be located.</param>
-    /// <param name="type">Type of the asset(s).</param>
-    /// <param name="locations">List of locations of the found asset(s).</param>
+    /// <param name="label">Label of the assets to be located.</param>
+    /// <param name="locations">List of locations of the found assets.</param>
     /// <returns>True if any assets were found, false otherwise.</returns>
-    public static bool LocateAll(string label, Type type, out List<IResourceLocation> locations)
+    public static bool LocateAll(object label, out List<IResourceLocation> locations)
     {
         locations = new List<IResourceLocation>();
         foreach (var locator in ResourceLocators)
         {
-            locator.Locate(label, type, out var foundLocations);
+            locator.Locate(label, typeof(TextAsset), out var foundLocations);
             locations.AddRange(foundLocations);
         }
 
