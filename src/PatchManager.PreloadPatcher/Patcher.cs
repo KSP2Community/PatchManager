@@ -60,10 +60,10 @@ public static class Patcher
         }
 
         var coreType = coreAssembly.MainModule.Types.First(t => t.Name == "AssetProviderPatch");
-        var extractedMethod = coreType.Methods.First(m => m.Name == "LoadAssetsAsync");
+        var extractedMethod = coreType.Methods.First(m => m.Name == "LoadByLabel");
 
         var targetType = assemblyDefinition.MainModule.Types.Single(t => t.Name == "AssetProvider");
-        var targetMethod = targetType.Methods.Single(m => m.Name == "LoadAssetsAsync" && m.HasGenericParameters);
+        var targetMethod = targetType.Methods.Single(m => m.Name == "LoadByLabel" && m.HasGenericParameters);
         // Remove every single instruction from the body of the methods
         // Emit call to our extracted method
         var methodInModule = targetMethod.Module.ImportReference(extractedMethod);
@@ -71,6 +71,7 @@ public static class Patcher
         targetMethod.Body.Instructions.Clear();
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
+        targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Call, generic));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 

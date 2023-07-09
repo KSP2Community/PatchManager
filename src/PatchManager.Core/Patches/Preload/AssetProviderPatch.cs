@@ -1,6 +1,8 @@
 ﻿using JetBrains.Annotations;
+using KSP.Assets;
 using KSP.Game;
 using PatchManager.Core.Assets;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityObject = UnityEngine.Object;
@@ -10,30 +12,36 @@ namespace PatchManager.Core.Patches.Preload;
 internal static class AssetProviderPatch
 {
     [UsedImplicitly]
-    public static AsyncOperationHandle<IList<T>> LoadAssetsAsync<T>(
+    public static void LoadByLabel<T>(
+        string label,
+        Action<T> assetLoadCallback,
+        Action<IList<T>> resultCallback = null
+    ) where T : UnityEngine.Object
+    {
+        if (AssetProvider.IsComponent(typeof(T)))
+        {
+            Debug.LogError("AssetProvider cannot load components/monobehaviours in batch.");
+            return;
+        }
+
+        LoadPatchedAssetsAsync(label, assetLoadCallback).Completed += results =>
+        {
+            if (results.Status == AsyncOperationStatus.Succeeded)
+            {
+                resultCallback?.Invoke(results.Result);
+                return;
+            }
+
+            Debug.LogError("AssetProvider unable to find assets with label '" + label + "'.");
+            resultCallback?.Invoke(null);
+            Addressables.Release((AsyncOperationHandle)results);
+        };
+    }
+
+    private static AsyncOperationHandle<IList<T>> LoadPatchedAssetsAsync<T>(
         string key,
         Action<T> assetLoadCallback
-    )
-    {
-        if (Locators.LocateAll(key, out var patchedLocations))
-        {
-            return Addressables.LoadAssetsAsync(patchedLocations, assetLoadCallback);
-        }
-
-        var locations = GameManager.Instance.Game.Assets.LocateAssetsInExternalData(key);
-        if (locations.Count <= 0)
-        {
-            return Addressables.LoadAssetsAsync(key, assetLoadCallback);
-        }
-
-        foreach (var resourceLocator in Addressables.ResourceLocators)
-        {
-            if (resourceLocator.Locate(key, typeof(T), out var internalLocations))
-            {
-                locations.AddRange(internalLocations);
-            }
-        }
-
-        return Addressables.LoadAssetsAsync(locations, assetLoadCallback);
-    }
+    ) => Locators.LocateAll(key, out var patchedLocations)
+        ? Addressables.LoadAssetsAsync(patchedLocations, assetLoadCallback)
+        : GameManager.Instance.Game.Assets.LoadAssetsAsync(key, assetLoadCallback);
 }
