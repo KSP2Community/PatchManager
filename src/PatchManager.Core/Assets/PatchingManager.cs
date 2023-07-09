@@ -61,7 +61,11 @@ internal static class PatchingManager
         }
 
         _totalPatchCount += patchCount;
-        Logging.LogInfo($"Patched {assetName} with {patchCount} patches. Total: {_totalPatchCount}");
+        if (patchCount > 0)
+        {
+            Logging.LogDebug($"Patched {assetName} with {patchCount} patches. Total: {_totalPatchCount}");
+        }
+
         return text;
     }
 
@@ -153,7 +157,6 @@ internal static class PatchingManager
         {
             if (results.Status != AsyncOperationStatus.Succeeded)
             {
-                Logging.LogWarning($"Unable to rebuild cache for label '{label}'.");
                 return;
             }
 
