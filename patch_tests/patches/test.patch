@@ -1,16 +1,5 @@
-@use 'builtin:debug';
-@use 'builtin:functional';
-@use 'builtin:type-conversion';
-@use 'builtin:reflection';
-
-
-@function log($dict) {
-    @each $k, $v in $dict {
-        $ignored: debug-log($k + ": " + ("<list>" if typeof($v) == "list" else ("<dict>" if typeof($v) == "dictionary" else $v:serialize())));
-    }
-}
-
-
 :parts {
-    $x: log($current);
+    @if $current["crewCapacity"] > 0 {
+        crewCapacity: +1;
+    }
 }

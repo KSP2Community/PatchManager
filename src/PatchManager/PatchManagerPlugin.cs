@@ -69,7 +69,7 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         }
 
         // Preload modules
-        ModuleManager.PreloadAll();
+        ModuleManager.InitAll();
     }
 
     /// <summary>

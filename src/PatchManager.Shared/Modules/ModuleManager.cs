@@ -43,7 +43,7 @@ public static class ModuleManager
         ModulePaths.Add(path);
     }
 
-    internal static void PreloadAll()
+    internal static void InitAll()
     {
         foreach (var module in Modules)
         {

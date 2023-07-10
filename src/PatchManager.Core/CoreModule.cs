@@ -1,9 +1,12 @@
 ﻿using BepInEx;
 using JetBrains.Annotations;
+using KSP.Game.Flow;
+using Newtonsoft.Json;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Flow;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using SpaceWarp.API.Mods.JSON;
 using UnityEngine.AddressableAssets;
 
 namespace PatchManager.Core;
@@ -14,6 +17,21 @@ namespace PatchManager.Core;
 [UsedImplicitly]
 public class CoreModule : BaseModule
 {
+
+    private static bool ShouldLoad(string[] disabled, string modInfoLocation)
+    {
+        if (!File.Exists(modInfoLocation))
+            return false;
+        try
+        {
+            var metadata = JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(modInfoLocation));
+            return metadata.ModID == null || !disabled.Contains(metadata.ModID);
+        } catch
+        {
+            return false;
+        }
+    }
+    
     /// <summary>
     /// Reads all patch files.
     /// </summary>
@@ -21,10 +39,15 @@ public class CoreModule : BaseModule
     {
         // TODO: Move this whole process into a SpaceWarp 1.3 per-mod flow action
 
-        var modFolders = Directory.GetDirectories(Paths.PluginPath, "*", SearchOption.TopDirectoryOnly);
+        var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
+            .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        var modFolders = Directory.GetDirectories(Paths.PluginPath, "*",SearchOption.AllDirectories)
+            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")));
 
         foreach (var modFolder in modFolders)
         {
+            Logging.LogInfo($"Loading patchers from {modFolder}");
             var modName = Path.GetDirectoryName(modFolder);
             PatchingManager.ImportModPatches(modName, modFolder);
         }
@@ -35,10 +58,8 @@ public class CoreModule : BaseModule
 
         if (!isValid)
         {
-            FlowManager.RegisterActionAfter(
-                new FlowAction("Patch Manager: rebuilding cache", PatchingManager.RebuildAllCache),
-                "Creating Game Instance"
-            );
+            SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
+                () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
         }
     }
 
