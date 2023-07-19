@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using KSP.Game;
-using KSP.Game.Flow;
 using PatchManager.Core.Flow;
-using PatchManager.Shared;
 
 namespace PatchManager.Core.Patches.Runtime;
 

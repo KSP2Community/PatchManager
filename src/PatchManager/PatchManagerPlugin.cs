@@ -29,21 +29,8 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
     /// </summary>
     [PublicAPI] public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
-    /// <summary>
-    /// Path to the folder where files are stored after patches get applied
-    /// </summary>
-    public static string CachePath { get; private set; }
-    /// <summary>
-    /// Temporary folder from where patches are loaded and applied
-    /// TODO: Make patches load from all mods' `patches` folders
-    /// </summary>
-    public static string PatchesPath { get; private set; }
-
     private void Awake()
     {
-        CachePath = Path.Combine(Paths.PluginPath, ModGuid, "cache");
-        PatchesPath = Path.Combine(Paths.PluginPath, ModGuid, "patches");
-
         // Initialize logging
         Logging.Initialize(Logger);
 
