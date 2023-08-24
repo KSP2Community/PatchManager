@@ -43,6 +43,7 @@ internal static class PatchingManager
 
     private static string PatchJson(string label, string assetName, string text)
     {
+        Console.WriteLine($"Patching {label}:{assetName}");
         var patchCount = 0;
 
         foreach (var patcher in Patchers)
@@ -58,7 +59,7 @@ internal static class PatchingManager
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Patch errored due to: {e.Message}");
+                Console.WriteLine($"Patch of {label}:{assetName} errored due to: {e}");
                 text = backup;
             }
         }
@@ -66,7 +67,7 @@ internal static class PatchingManager
         TotalPatchCount += patchCount;
         if (patchCount > 0)
         {
-            Logging.LogDebug($"Patched {assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+            Console.WriteLine($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
         }
 
         return text;
@@ -125,6 +126,7 @@ internal static class PatchingManager
 
     private static AsyncOperationHandle<IList<TextAsset>> RebuildCache(string label)
     {
+        Logging.LogInfo($"Patching: {label}");
         var archiveFilename = $"{label.Replace("/", "")}.zip";
 
         var archiveFiles = new Dictionary<string, string>();
@@ -160,7 +162,7 @@ internal static class PatchingManager
             }
             catch (Exception e)
             {
-                Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
+                Console.WriteLine($"Unable to patch {asset.name} due to: {e.Message}");
             }
         });
 
@@ -183,7 +185,7 @@ internal static class PatchingManager
             CacheManager.SaveInventory();
 
             Addressables.Release(results);
-            Logging.LogDebug($"Cache for label '{label}' rebuilt.");
+            Console.WriteLine($"Cache for label '{label}' rebuilt.");
         };
 
         return handle;
@@ -201,7 +203,7 @@ internal static class PatchingManager
             return !key.All(x => "0123456789abcdef".Contains(x));
         }
 
-        return true;
+        return !key.EndsWith(".prefab") && !key.EndsWith(".png");
     }
 
     public static void RebuildAllCache(Action resolve, Action<string> reject)

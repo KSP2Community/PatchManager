@@ -19,7 +19,12 @@ public class ElementSelector : Selector
     /// <inheritdoc />
     public override List<ISelectable> SelectAll(List<ISelectable> selectables)
     {
-        return selectables.Where(selectable => selectable.MatchesElement(ElementName)).ToList();
+        return selectables.Where(selectable =>
+        {
+            var asBase = selectable as BaseSelectable;
+            Console.WriteLine($"Testing: {asBase?.ElementType} against {ElementName}");
+            return selectable.MatchesElement(ElementName);
+        }).ToList();
     }
 
     /// <inheritdoc />

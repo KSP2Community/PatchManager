@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using JetBrains.Annotations;
+using KSP.Game;
 using KSP.Game.Flow;
 using Newtonsoft.Json;
 using PatchManager.Core.Assets;
@@ -68,6 +69,7 @@ public class CoreModule : BaseModule
     /// </summary>
     public override void Load()
     {
+        
         Logging.LogInfo("Registering resource locator");
         Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
         Locators.Register(new ArchiveResourceLocator());

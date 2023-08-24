@@ -43,7 +43,7 @@ public class Field : Node, ISelectionAction
         {
             throw new InterpreterException(Coordinate, "Attempting to modify an unmodifiable selection");
         }
-
+        
         var value = Indexer switch
         {
             ElementIndexer elementIndexer => modifiable.GetFieldByElement(FieldName, elementIndexer.ElementName),
@@ -57,23 +57,30 @@ public class Field : Node, ISelectionAction
             ["value"] = value
         };
         var result = FieldValue.Compute(subEnvironment);
-        switch (Indexer)
+        try
         {
-            case ElementIndexer setElementIndexer:
-                modifiable.SetFieldByElement(FieldName, setElementIndexer.ElementName, result);
-                return;
-            case StringIndexer setStringIndexer:
-                modifiable.SetFieldByElement(FieldName, setStringIndexer.Index, result);
-                return;
-            case NumberIndexer setNumberIndexer:
-                modifiable.SetFieldByNumber(FieldName, setNumberIndexer.Index, result);
-                return;
-            case ClassIndexer setClassIndexer:
-                modifiable.SetFieldByClass(FieldName, setClassIndexer.ClassName, result);
-                return;
-            default:
-                modifiable.SetFieldValue(FieldName, result);
-                return;
+            switch (Indexer)
+            {
+                case ElementIndexer setElementIndexer:
+                    modifiable.SetFieldByElement(FieldName, setElementIndexer.ElementName, result);
+                    return;
+                case StringIndexer setStringIndexer:
+                    modifiable.SetFieldByElement(FieldName, setStringIndexer.Index, result);
+                    return;
+                case NumberIndexer setNumberIndexer:
+                    modifiable.SetFieldByNumber(FieldName, setNumberIndexer.Index, result);
+                    return;
+                case ClassIndexer setClassIndexer:
+                    modifiable.SetFieldByClass(FieldName, setClassIndexer.ClassName, result);
+                    return;
+                default:
+                    modifiable.SetFieldValue(FieldName, result);
+                    return;
+            }
+        }
+        catch (NullReferenceException e)
+        {
+            Console.WriteLine("Field does not exist :3");
         }
     }
 }
