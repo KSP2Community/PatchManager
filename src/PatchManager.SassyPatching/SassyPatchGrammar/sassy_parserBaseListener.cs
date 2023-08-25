@@ -259,6 +259,32 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitRun_at_stage([NotNull] sassy_parser.Run_at_stageContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by the <c>new_asset</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterNew_asset([NotNull] sassy_parser.New_assetContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>new_asset</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitNew_asset([NotNull] sassy_parser.New_assetContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// <para>The default implementation does nothing.</para>

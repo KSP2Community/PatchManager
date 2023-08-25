@@ -144,6 +144,19 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitRun_at_stage([NotNull] sassy_parser.Run_at_stageContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>new_asset</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNew_asset([NotNull] sassy_parser.New_assetContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>

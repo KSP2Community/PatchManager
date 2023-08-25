@@ -241,18 +241,44 @@ public abstract class CustomJTokenModifiable : IModifiable
         }
     }
 
-    /// <inheritdoc />
-    public virtual DataValue GetFieldValue(string fieldName)
+    private DataValue BaseGetFieldValue(string fieldName)
     {
-        return DataValue.FromJToken(CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _) ? customField : JToken[fieldName]);
+        try
+        {
+            return DataValue.FromJToken(JToken[fieldName]);
+        }
+        catch
+        {
+            return new DataValue(DataValue.DataType.None);
+        }
     }
+
+    /// <inheritdoc />
+    public virtual DataValue GetFieldValue(string fieldName) => CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _) ? DataValue.FromJToken(customField) : BaseGetFieldValue(fieldName);
 
     /// <inheritdoc />
     public virtual void SetFieldValue(string fieldName, DataValue dataValue)
     {
         _setDirty();
-        Set(CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _) ? customField : JToken[fieldName],
-            dataValue);
+        if (CustomFieldAdaptor(fieldName, out var customField, out _, out _, out _))
+        {
+            Set(customField, dataValue);
+        }
+        else
+        {
+            
+            if (dataValue.IsDeletion)
+            {
+                JToken[fieldName].Remove();
+            }
+            else
+            {
+                if (JToken is JObject obj && !obj.ContainsKey(fieldName))
+                    JToken[fieldName] = dataValue.ToJToken();
+                else
+                    JToken[fieldName].Replace(dataValue.ToJToken());
+            }
+        }
     }
 
     /// <inheritdoc />

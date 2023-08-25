@@ -36,8 +36,13 @@ if (Directory.Exists("json") && Directory.Exists("patches"))
             patchers.Add(patcher);
         }
     }
+
+    void AddGenerator(ITextAssetGenerator generator)
+    {
+        
+    }
     
-    var universe = new Universe(Add, Console.WriteLine, Console.WriteLine);
+    var universe = new Universe(Add, Console.WriteLine, Console.WriteLine, AddGenerator);
     universe.LoadPatchesInDirectory(new DirectoryInfo("patches"), "test");
 
     Console.WriteLine($"{universe.AllLibraries.Count} libraries loaded!");

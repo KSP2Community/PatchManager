@@ -3,6 +3,7 @@ using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes.Attributes;
+using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Nodes.Selectors;
 using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
@@ -80,6 +81,54 @@ public class SelectionBlock : Node, ISelectionAction
 
     }
 
+    public INewAsset ExecuteCreation(Environment snapshot, List<DataValue> arguments)
+    {
+        var selections = Selector.CreateNew(arguments, out var resultingAsset);
+        foreach (var selectable in selections) {
+            var modifiable = selectable.OpenModification();
+            var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
+            if (modifiable != null)
+            {
+                subEnvironment["current"] = modifiable.Get();
+            }
+
+            foreach (var action in Actions)
+            {
+                if (action is ISelectionAction selectionAction)
+                {
+                    selectionAction.ExecuteOn(subEnvironment, selectable, modifiable);
+                }
+                else
+                {
+                    action.ExecuteIn(subEnvironment);
+                }
+            }
+            
+        }
+        return resultingAsset;
+    }
+
+
+    private void CreateGenerator(Environment environment, List<Expression> arguments)
+    {
+        
+        foreach (var attribute in Attributes)
+        {
+            switch (attribute)
+            {
+                case RequireModAttribute requireModAttribute when
+                    !environment.GlobalEnvironment.Universe.AllMods.Contains(requireModAttribute.Guid):
+                case RequireNotModAttribute requireNotModAttribute when
+                    environment.GlobalEnvironment.Universe.AllMods.Contains(requireNotModAttribute.Guid):
+                    return;
+            }
+        }
+
+        var snapshot = environment.Snapshot();
+        var args = arguments.Select(x => x.Compute(snapshot)).ToList();
+        var generator = new SassyGenerator(snapshot, this, args);
+        environment.GlobalEnvironment.Universe.RegisterGenerator(generator);
+    }
     /// <inheritdoc />
     public override void ExecuteIn(Environment environment)
     {
@@ -91,6 +140,9 @@ public class SelectionBlock : Node, ISelectionAction
                     !environment.GlobalEnvironment.Universe.AllMods.Contains(requireModAttribute.Guid):
                 case RequireNotModAttribute requireNotModAttribute when
                     environment.GlobalEnvironment.Universe.AllMods.Contains(requireNotModAttribute.Guid):
+                    return;
+                case NewAttribute na:
+                    CreateGenerator(environment, na.Arguments);
                     return;
             }
         }

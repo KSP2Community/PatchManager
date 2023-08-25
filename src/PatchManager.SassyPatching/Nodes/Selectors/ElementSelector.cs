@@ -34,4 +34,10 @@ public class ElementSelector : Selector
         rulesetMatchingObject = null;
         return new();
     }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        newAsset = null;
+        return new();
+    }
 }

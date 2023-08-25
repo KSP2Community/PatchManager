@@ -218,6 +218,28 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitRun_at_stage([NotNull] sassy_parser.Run_at_stageContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>new_asset</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterNew_asset([NotNull] sassy_parser.New_assetContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>new_asset</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitNew_asset([NotNull] sassy_parser.New_assetContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>

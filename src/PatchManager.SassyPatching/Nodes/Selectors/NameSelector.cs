@@ -19,13 +19,19 @@ public class NameSelector : Selector
     /// <inheritdoc />
     public override List<ISelectable> SelectAll(List<ISelectable> selectables)
     {
-        throw new NotImplementedException();
+        return selectables.Where(selectable => selectable.MatchesName(NamePattern)).ToList();
     }
 
     /// <inheritdoc />
     public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
     {
         rulesetMatchingObject = null;
+        return new();
+    }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        newAsset = null;
         return new();
     }
 }

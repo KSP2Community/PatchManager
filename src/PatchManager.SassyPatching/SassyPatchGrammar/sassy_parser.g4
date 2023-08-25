@@ -44,7 +44,10 @@ attributed_selector     : attributes=attribute* selector;
 attribute               : REQUIRE guid=STRING       #require_mod
                         | REQUIRE_NOT guid=STRING   #require_not_mod
                         | STAGE stage=STRING        #run_at_stage
+                        | NEW constructor_arguments #new_asset
                         ;
+                        
+constructor_arguments   : LEFT_PAREN (expression (COMMA expression)*)? RIGHT_PAREN ;
 
 selector                : ELEMENT                                                       #sel_element
                         | CLASS                                                         #sel_class

@@ -8,6 +8,7 @@ using PatchManager.Core.Flow;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using SpaceWarp.API.Mods.JSON;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace PatchManager.Core;
@@ -59,6 +60,8 @@ public class CoreModule : BaseModule
 
         if (!isValid)
         {
+            SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
+                () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
             SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
                 () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
         }

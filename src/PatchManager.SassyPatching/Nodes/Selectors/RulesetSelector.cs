@@ -48,4 +48,18 @@ public class RulesetSelector : Selector
             throw new InterpreterException(Coordinate, $"Ruleset: {RulesetName} does not exist!");
         }
     }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        if (Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
+        {
+            var newObject = ruleSet.CreateNew(rulesetArguments);
+            newAsset = newObject;
+            return new List<ISelectable> { newObject.Selectable };
+        }
+        else
+        {
+            throw new InterpreterException(Coordinate, $"Ruleset: {RulesetName} does not exist!");
+        }
+    }
 }

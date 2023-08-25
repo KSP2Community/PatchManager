@@ -51,6 +51,7 @@ public class Universe
                 {
                     var name = sassyLibraryAttribute.Mod + ":" + sassyLibraryAttribute.Library;
                     AllManagedLibraries[name] = new ManagedPatchLibrary(type);
+                    Console.WriteLine($"Registered a managed library, {name}");
                 }
             }
         }
@@ -69,6 +70,12 @@ public class Universe
     /// </summary>
     public readonly Action<ITextPatcher> RegisterPatcher;
 
+
+    /// <summary>
+    /// Register a generator patch
+    /// </summary>
+    public readonly Action<ITextAssetGenerator> RegisterGenerator;
+    
     /// <summary>
     /// This logs errors in this universe
     /// </summary>
@@ -93,11 +100,12 @@ public class Universe
     /// <param name="registerPatcher">This action receives patchers and registers them for later execution</param>
     /// <param name="errorLogger">The action to be taken to log an error</param>
     /// <param name="messageLogger">The action to be taken to log a message</param>
-    public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger)
+    public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger, Action<ITextAssetGenerator> registerGenerator)
     {
         RegisterPatcher = registerPatcher;
         _errorLogger = errorLogger;
         MessageLogger = messageLogger;
+        RegisterGenerator = registerGenerator;
         LoadedLabels = new List<string>(_preloadedLabels);
     }
 

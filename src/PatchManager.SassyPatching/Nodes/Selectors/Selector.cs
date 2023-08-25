@@ -30,6 +30,15 @@ public abstract class Selector : Node
     /// <returns>A list of all selections from the data</returns>
     public abstract List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject);
 
+
+    /// <summary>
+    /// Create a new asset (flows up until the ruleset statement)
+    /// </summary>
+    /// <param name="rulesetArguments">The arguments to the ruleset</param>
+    /// <param name="newAsset">The reference to the newly created asset</param>
+    /// <returns>The new assets selectables</returns>
+    public abstract List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset);
+
     /// <inheritdoc />
     public override void ExecuteIn(Environment environment)
     {

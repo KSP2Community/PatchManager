@@ -178,6 +178,12 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitRun_at_stage(sassy_parser.Run_at_stageContext context) =>
         new RunAtStageAttribute(context.GetCoordinate(), context.stage.Text.Unescape());
 
+    public override Node VisitNew_asset(sassy_parser.New_assetContext context)
+    {
+        var expressions = context.constructor_arguments().expression().Select(Visit).Cast<Expression>().ToList();
+        return new NewAttribute(context.GetCoordinate(), expressions);
+    }
+
     /// <inheritdoc />
     public override Node VisitSel_element(sassy_parser.Sel_elementContext context)
         => new ElementSelector(context.GetCoordinate(), context.ELEMENT().GetText());

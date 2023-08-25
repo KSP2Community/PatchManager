@@ -104,7 +104,17 @@ public class JTokenModifiable : IModifiable
         }
     }
 
-    public DataValue GetFieldValue(string fieldName) => DataValue.FromJToken(_jToken[fieldName]);
+    public DataValue GetFieldValue(string fieldName)
+    {
+        try
+        {
+            return DataValue.FromJToken(_jToken[fieldName]);
+        }
+        catch
+        {
+            return new DataValue(DataValue.DataType.None);
+        }
+    }
 
     public void SetFieldValue(string fieldName, DataValue dataValue)
     {
@@ -115,7 +125,10 @@ public class JTokenModifiable : IModifiable
         }
         else
         {
-            _jToken[fieldName].Replace(dataValue.ToJToken());
+            if (_jToken is JObject obj && !obj.ContainsKey(fieldName))
+                _jToken[fieldName] = dataValue.ToJToken();
+            else
+                _jToken[fieldName].Replace(dataValue.ToJToken());
         }
     }
 

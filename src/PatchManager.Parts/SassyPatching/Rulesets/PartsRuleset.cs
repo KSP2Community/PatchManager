@@ -1,4 +1,5 @@
 ﻿using PatchManager.Parts.SassyPatching.Selectables;
+using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Interfaces;
 
@@ -24,4 +25,6 @@ public class PartsRuleset : IPatcherRuleSet
     {
         return new PartSelectable(jsonData);
     }
+
+    public INewAsset CreateNew(List<DataValue> dataValues) => throw new NotImplementedException();
 }
