@@ -11,7 +11,13 @@ top_level_statement     : import_declaration
                         | mixin_def
                         | top_level_conditional
                         | selection_block
+                        | patch_declaration
                         ;
+
+
+patch_declaration       : PATCH patch_list SEMICOLON;
+
+patch_list              : STRING (COMMA STRING)*;
 
 import_declaration      : USE imp=STRING SEMICOLON;
 

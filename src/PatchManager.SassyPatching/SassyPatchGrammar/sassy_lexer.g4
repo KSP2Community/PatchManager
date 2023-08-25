@@ -31,6 +31,7 @@ STAGE               : '@stage';
 DEFINE_STAGE        : '@define-stage';
 INCLUDE             : '@include';
 RETURN              : '@return';
+PATCH               : '@patch';
 
 
 

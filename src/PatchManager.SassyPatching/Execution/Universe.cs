@@ -23,10 +23,13 @@ public class Universe
     /// </summary>
     public static readonly Dictionary<string, PatchLibrary> AllManagedLibraries;
 
+    private static List<string> _preloadedLabels;
+
     static Universe()
     {
         RuleSets = new();
         AllManagedLibraries = new();
+        _preloadedLabels = new();
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             // Only use public rule sets
@@ -37,7 +40,10 @@ public class Universe
                 {
                     var rsAttribute = type.GetCustomAttribute<PatcherRulesetAttribute>();
                     if (rsAttribute != null)
+                    {
                         RuleSets[rsAttribute.RulesetName] = (IPatcherRuleSet)Activator.CreateInstance(type);
+                        _preloadedLabels.AddRange(rsAttribute.PreloadLabels);
+                    }
                 }
 
                 var sassyLibraryAttribute = type.GetCustomAttribute<SassyLibraryAttribute>();
@@ -66,7 +72,13 @@ public class Universe
     /// <summary>
     /// This logs errors in this universe
     /// </summary>
-    public readonly Action<string> ErrorLogger;
+    private readonly Action<string> _errorLogger;
+
+
+    /// <summary>
+    /// The list of labels that this universe needs loaded to respond to
+    /// </summary>
+    public List<string> LoadedLabels;
 
     /// <summary>
     /// This logs any message that is not an error in the universe
@@ -84,8 +96,9 @@ public class Universe
     public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger)
     {
         RegisterPatcher = registerPatcher;
-        ErrorLogger = errorLogger;
+        _errorLogger = errorLogger;
         MessageLogger = messageLogger;
+        LoadedLabels = new List<string>(_preloadedLabels);
     }
 
     // TODO: Fix this so that other mods stages get their guids working
@@ -127,48 +140,59 @@ public class Universe
         var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
         foreach (var library in directory.EnumerateFiles("_*.patch", SearchOption.AllDirectories))
         {
-            string name = modId + ":" + library.Name.Replace(".patch", "").TrimFirst();
-            try
-            {
-                var charStream = CharStreams.fromPath(library.FullName);
-                var lexer = new sassy_lexer(charStream);
-                var tokenStream = new CommonTokenStream(lexer);
-                var parser = new sassy_parser(tokenStream);
-                parser.AddErrorListener(LoadListener.Instance);
-                var patchContext = parser.patch();
-                tokenTransformer.Errored = false;
-                var patch = tokenTransformer.Visit(patchContext) as SassyPatch;
-                var lib = new SassyPatchLibrary(patch);
-                AllLibraries[name] = lib;
-            }
-            catch (Exception e)
-            {
-                ErrorLogger($"Could not load library: {name} due to: {e.Message}");
-            }
+            LoadSingleLibrary(modId, library, tokenTransformer);
         }
 
         foreach (var patch in directory.EnumerateFiles("*.patch", SearchOption.AllDirectories))
         {
-            if (patch.Name.StartsWith("_")) continue;
-            try
-            {
-                var charStream = CharStreams.fromPath(patch.FullName);
-                var lexer = new sassy_lexer(charStream);
-                var tokenStream = new CommonTokenStream(lexer);
-                var parser = new sassy_parser(tokenStream);
-                parser.AddErrorListener(LoadListener.Instance);
-                var patchContext = parser.patch();
-                tokenTransformer.Errored = false;
-                // var gEnv = new GlobalEnvironment(this, modId);
-                // var env = new Environment(gEnv);
-                var ctx = tokenTransformer.Visit(patchContext) as SassyPatch;
-                ToRegister.Add((modId, ctx));
-                // lib = new SassyPatchLibrary(patch);
-            }
-            catch (Exception e)
-            {
-                ErrorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e.Message}");
-            }
+            LoadSinglePatch(modId, patch, tokenTransformer);
+        }
+    }
+
+    private void LoadSinglePatch(string modId, FileInfo patch, Transformer tokenTransformer)
+    {
+        if (patch.Name.StartsWith("_"))
+            return;
+        try
+        {
+            var charStream = CharStreams.fromPath(patch.FullName);
+            var lexer = new sassy_lexer(charStream);
+            var tokenStream = new CommonTokenStream(lexer);
+            var parser = new sassy_parser(tokenStream);
+            parser.AddErrorListener(LoadListener.Instance);
+            var patchContext = parser.patch();
+            tokenTransformer.Errored = false;
+            // var gEnv = new GlobalEnvironment(this, modId);
+            // var env = new Environment(gEnv);
+            var ctx = tokenTransformer.Visit(patchContext) as SassyPatch;
+            ToRegister.Add((modId, ctx));
+            // lib = new SassyPatchLibrary(patch);
+        }
+        catch (Exception e)
+        {
+            _errorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e.Message}");
+        }
+    }
+
+    private void LoadSingleLibrary(string modId, FileInfo library, Transformer tokenTransformer)
+    {
+        string name = modId + ":" + library.Name.Replace(".patch", "").TrimFirst();
+        try
+        {
+            var charStream = CharStreams.fromPath(library.FullName);
+            var lexer = new sassy_lexer(charStream);
+            var tokenStream = new CommonTokenStream(lexer);
+            var parser = new sassy_parser(tokenStream);
+            parser.AddErrorListener(LoadListener.Instance);
+            var patchContext = parser.patch();
+            tokenTransformer.Errored = false;
+            var patch = tokenTransformer.Visit(patchContext) as SassyPatch;
+            var lib = new SassyPatchLibrary(patch);
+            AllLibraries[name] = lib;
+        }
+        catch (Exception e)
+        {
+            _errorLogger($"Could not load library: {name} due to: {e.Message}");
         }
     }
 
@@ -183,5 +207,10 @@ public class Universe
             var env = new Environment(gEnv);
             patch.ExecuteIn(env);
         }
+    }
+
+    public void PatchLabels(params string[] labels)
+    {
+        LoadedLabels.AddRange(labels);
     }
 }

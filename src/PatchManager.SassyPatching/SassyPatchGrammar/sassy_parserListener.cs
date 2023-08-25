@@ -52,6 +52,26 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitTop_level_statement([NotNull] sassy_parser.Top_level_statementContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.patch_declaration"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterPatch_declaration([NotNull] sassy_parser.Patch_declarationContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.patch_declaration"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitPatch_declaration([NotNull] sassy_parser.Patch_declarationContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.patch_list"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterPatch_list([NotNull] sassy_parser.Patch_listContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.patch_list"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitPatch_list([NotNull] sassy_parser.Patch_listContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.import_declaration"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

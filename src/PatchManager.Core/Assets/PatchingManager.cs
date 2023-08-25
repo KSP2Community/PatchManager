@@ -208,15 +208,7 @@ internal static class PatchingManager
 
     public static void RebuildAllCache(Action resolve, Action<string> reject)
     {
-        var keys = GameManager.Instance.Game.Assets._registeredResourceLocators
-            .SelectMany(locator => locator.Keys)
-            .ToList();
-        keys.AddRange(Addressables.ResourceLocators.SelectMany(locator => locator.Keys));
-
-        var distinctKeys = keys.Select(key => key.ToString())
-            .Distinct()
-            .Where(key => !CacheManager.CacheValidLabels.Contains(key)).Where(IsUsefulKey).ToList();
-        bool allCompleted = false;
+        var distinctKeys = Universe.LoadedLabels.Distinct().ToList();
 
         LoadingBarPatch.InjectPatchManagerTips = true;
         GenericFlowAction CreateIndexedFlowAction(int idx)

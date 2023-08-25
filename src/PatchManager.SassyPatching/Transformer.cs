@@ -48,6 +48,13 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 .ToList());
 
     /// <inheritdoc />
+    public override Node VisitPatch_declaration(sassy_parser.Patch_declarationContext context)
+    {
+        var labels = context.patch_list().STRING().Select(x => x.GetText()).Select(x => x.Unescape()).ToList();
+        return new PatchDeclaration(context.GetCoordinate(), labels);
+    }
+
+    /// <inheritdoc />
     public override Node VisitImport_declaration(sassy_parser.Import_declarationContext context) =>
         new Import(context.GetCoordinate(),
             context.imp

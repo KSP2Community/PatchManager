@@ -45,6 +45,18 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTop_level_statement([NotNull] sassy_parser.Top_level_statementContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.patch_declaration"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPatch_declaration([NotNull] sassy_parser.Patch_declarationContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.patch_list"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPatch_list([NotNull] sassy_parser.Patch_listContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.import_declaration"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

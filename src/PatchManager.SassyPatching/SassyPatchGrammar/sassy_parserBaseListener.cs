@@ -61,6 +61,30 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitTop_level_statement([NotNull] sassy_parser.Top_level_statementContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.patch_declaration"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterPatch_declaration([NotNull] sassy_parser.Patch_declarationContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.patch_declaration"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitPatch_declaration([NotNull] sassy_parser.Patch_declarationContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.patch_list"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterPatch_list([NotNull] sassy_parser.Patch_listContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.patch_list"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitPatch_list([NotNull] sassy_parser.Patch_listContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.import_declaration"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
