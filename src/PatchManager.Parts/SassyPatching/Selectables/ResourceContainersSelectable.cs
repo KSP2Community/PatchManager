@@ -4,6 +4,7 @@ using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
+using PatchManager.SassyPatching.Selectables;
 
 namespace PatchManager.Parts.SassyPatching.Selectables;
 
@@ -22,6 +23,7 @@ public sealed class ResourceContainersSelectable : BaseSelectable
         ElementType = "resourceContainers";
         Classes = new();
         Name = "resourceContainers";
+        _selectable = selectable;
         foreach (var container in containers)
         {
             Children.Add(new ResourceContainerSelectable(container as JObject, selectable));
@@ -51,9 +53,23 @@ public sealed class ResourceContainersSelectable : BaseSelectable
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        throw new NotImplementedException("Adding resource containers has not yet been implemented");
+        _selectable.SetModified();
+        var obj = JObject.FromObject(new
+        {
+            name = elementType,
+            capacityUnits = 0.0,
+            initialUnits = 0.0,
+            NonStageable = false
+        });
+        _containers.Add(obj);
+        var child = new ResourceContainerSelectable(obj, _selectable);
+        Children.Add(child);
+        Console.WriteLine($"Added container: {obj}");
+        return child;
     }
 
     /// <inheritdoc />
     public override string Serialize() => _containers.ToString();
+
+    public override DataValue GetValue() => DataValue.FromJToken(_containers);
 }

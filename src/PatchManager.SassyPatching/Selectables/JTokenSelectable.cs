@@ -71,4 +71,7 @@ public class JTokenSelectable : BaseSelectable
 
     /// <inheritdoc />
     public override string Serialize() => Token.ToString();
+
+    /// <inheritdoc />
+    public override DataValue GetValue() => DataValue.FromJToken(Token);
 }

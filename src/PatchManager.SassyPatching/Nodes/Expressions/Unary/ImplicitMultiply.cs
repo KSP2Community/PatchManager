@@ -19,6 +19,20 @@ public class ImplicitMultiply : Implicit
             return leftHandSide.Real * rightHandSide.Real;
         }
 
+        if (leftHandSide.IsReal && rightHandSide.IsInteger)
+        {
+            return leftHandSide.Real * rightHandSide.Integer;
+        }
+
+        if (leftHandSide.IsInteger && rightHandSide.IsInteger)
+        {
+            return leftHandSide.Integer * rightHandSide.Integer;
+        }
+
+        if (leftHandSide.IsInteger && rightHandSide.IsReal)
+        {
+            return leftHandSide.Integer * rightHandSide.Real;
+        }
         if (leftHandSide.IsString && rightHandSide.IsInteger)
         {
             return StringRepeat(leftHandSide, rightHandSide);

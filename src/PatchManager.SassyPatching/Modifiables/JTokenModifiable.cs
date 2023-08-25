@@ -104,10 +104,7 @@ public class JTokenModifiable : IModifiable
         }
     }
 
-    public DataValue GetFieldValue(string fieldName)
-    {
-        return DataValue.FromJToken(_jToken[fieldName]);
-    }
+    public DataValue GetFieldValue(string fieldName) => DataValue.FromJToken(_jToken[fieldName]);
 
     public void SetFieldValue(string fieldName, DataValue dataValue)
     {

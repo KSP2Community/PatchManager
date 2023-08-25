@@ -28,6 +28,8 @@ public abstract class BaseSelectable : ISelectable
     /// <inheritdoc />
     public List<ISelectable> SelectByElement(string element) => Children.Where(child => child.MatchesElement(element)).ToList();
 
+    
+    
     /// <summary>
     /// The children of this selectable
     /// </summary>
@@ -66,10 +68,16 @@ public abstract class BaseSelectable : ISelectable
     /// <inheritdoc />
     public abstract IModifiable OpenModification();
 
+
+
     /// <inheritdoc />
     public abstract ISelectable AddElement(string elementType);
 
 
     /// <inheritdoc />
     public abstract string Serialize();
+
+    /// <inheritdoc />
+
+    public abstract DataValue GetValue();
 }

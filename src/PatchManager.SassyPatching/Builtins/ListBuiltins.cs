@@ -173,4 +173,12 @@ public class ListBuiltins
                         ArgumentDataValue = value
                     }
                 }));
+
+    /// <summary>
+    /// Gets the length of a list
+    /// </summary>
+    /// <param name="dataValues">The list</param>
+    /// <returns>The length of the list</returns>
+    [SassyMethod("list.length")]
+    public static int Length(List<DataValue> dataValues) => dataValues.Count;
 }

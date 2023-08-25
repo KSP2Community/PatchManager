@@ -95,8 +95,10 @@ public class SelectionBlock : Node, ISelectionAction
             }
         }
         var snapshot = environment.Snapshot();
+        
         var patcher = new SassyTextPatcher(snapshot, this);
         environment.GlobalEnvironment.Universe.RegisterPatcher(patcher);
+        
     }
 
     /// <inheritdoc />
@@ -127,11 +129,10 @@ public class SelectionBlock : Node, ISelectionAction
     private void ExecuteOnSingleSelection(Environment environment, ISelectable selection, DataValue parentDataValue)
     {
         var subModifiable = selection.OpenModification();
-        var subEnvironment = new Environment(environment.GlobalEnvironment, environment);
-        if (subModifiable != null)
+        var subEnvironment = new Environment(environment.GlobalEnvironment, environment)
         {
-            subEnvironment["current"] = subModifiable.Get();
-        }
+            ["current"] = selection.GetValue()
+        };
 
         if (parentDataValue != null)
         {

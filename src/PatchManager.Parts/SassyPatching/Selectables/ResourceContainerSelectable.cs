@@ -5,6 +5,9 @@ using PatchManager.SassyPatching.Selectables;
 
 namespace PatchManager.Parts.SassyPatching.Selectables;
 
+/// <summary>
+/// A selectable that operates on resource container objects specifically
+/// </summary>
 public sealed class ResourceContainerSelectable : JTokenSelectable
 {
     private PartSelectable _selectable;

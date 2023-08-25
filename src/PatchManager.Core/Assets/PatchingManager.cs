@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using HarmonyLib;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -61,6 +62,11 @@ internal static class PatchingManager
             {
                 Console.WriteLine($"Patch of {label}:{assetName} errored due to: {e}");
                 text = backup;
+            }
+
+            if (text == "")
+            {
+                break;
             }
         }
 
@@ -150,6 +156,12 @@ internal static class PatchingManager
                 if (patchedText != asset.text)
                 {
                     unchanged = false;
+                }
+
+                // Handle deletion
+                if (patchedText == "")
+                {
+                    return;
                 }
                 archiveFiles[asset.name] = patchedText;
                 labelCacheEntry.Assets.Add(asset.name);

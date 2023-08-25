@@ -22,8 +22,9 @@ public class ElementSelector : Selector
         return selectables.Where(selectable =>
         {
             var asBase = selectable as BaseSelectable;
-            Console.WriteLine($"Testing: {asBase?.ElementType} against {ElementName}");
-            return selectable.MatchesElement(ElementName);
+            var result = selectable.MatchesElement(ElementName);
+            //Console.WriteLine($"Testing: {asBase?.ElementType} against {ElementName} -> {result}");
+            return result;
         }).ToList();
     }
 

@@ -13,7 +13,7 @@ namespace PatchManager.Parts.SassyPatching.Modifiables;
 public sealed class PartModifiable : CustomJTokenModifiable
 {
     private PartSelectable _selectable;
-    internal PartModifiable(PartSelectable selectable) : base(selectable._jObject["data"],selectable.SetModified)
+    internal PartModifiable(PartSelectable selectable) : base(selectable.JObject["data"],selectable.SetModified)
     {
         _selectable = selectable;
         CustomIndexAdaptors = new();

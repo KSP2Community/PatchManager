@@ -36,20 +36,17 @@ public sealed class PartSelectable : BaseSelectable
     }
 
     private readonly string _originalData;
-    internal JObject _jObject;
-    private static Regex Sanitizer = new Regex("[^a-zA-Z0-9 -_]");
-    private string Sanitize(string str)
-    {
-        return Sanitizer.Replace(str, "");
-    }
+    internal readonly JObject JObject;
+    private static readonly Regex Sanitizer = new("[^a-zA-Z0-9 -_]");
+    private static string Sanitize(string str) => Sanitizer.Replace(str, "");
 
     internal PartSelectable(string data)
     {
         _originalData = data;
-        _jObject = JObject.Parse(data);
+        JObject = JObject.Parse(data);
         Classes = new();
         Children = new();
-        var partData = _jObject["data"];
+        var partData = JObject["data"];
         Name = (string)partData["partName"];
         foreach (var tag in ((string)partData["tags"]).Split(' '))
         {
@@ -105,8 +102,7 @@ public sealed class PartSelectable : BaseSelectable
 
 
     /// <inheritdoc />
-    public override string Serialize()
-    {
-        return !_modified ? _originalData : (!_deleted? _jObject.ToString() : "");
-    }
+    public override string Serialize() => _modified ? _deleted ? "" : JObject.ToString() : _originalData;
+
+    public override DataValue GetValue() => OpenModification().Get();
 }
