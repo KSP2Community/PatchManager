@@ -400,6 +400,11 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         new EqualTo(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
 
     /// <inheritdoc />
+    public override Node VisitLocal_variable_reference(sassy_parser.Local_variable_referenceContext context) =>
+        new LocalVariableReference(context.GetCoordinate(), context.LOCALVARIABLE().GetText().TrimFirst().TrimFirst());
+    
+
+    /// <inheritdoc />
     public override Node VisitIndexor(sassy_parser.IndexorContext context) =>
         new Subscript(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
 

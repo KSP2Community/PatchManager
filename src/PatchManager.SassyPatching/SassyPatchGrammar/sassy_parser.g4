@@ -121,6 +121,7 @@ expression              : ADD sub_expression        #implicit_add
 
 sub_expression          : value                                                                             #value_reference
                         | VARIABLE                                                                          #variable_reference
+                        | LOCALVARIABLE                                                                     #local_variable_reference
                         | LEFT_PAREN internal_expr=sub_expression RIGHT_PAREN                               #sub_sub_expression
                         | SUBTRACT child=sub_expression                                                     #negative
                         | ADD child=sub_expression                                                          #positive

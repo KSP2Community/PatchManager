@@ -470,19 +470,12 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitEqual_to([NotNull] sassy_parser.Equal_toContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>indexor</c>
+	/// Visit a parse tree produced by the <c>local_variable_reference</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitIndexor([NotNull] sassy_parser.IndexorContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>or</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitOr([NotNull] sassy_parser.OrContext context);
+	Result VisitLocal_variable_reference([NotNull] sassy_parser.Local_variable_referenceContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>member_call_ruleset</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
@@ -498,33 +491,12 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitValue_reference([NotNull] sassy_parser.Value_referenceContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>lesser_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitLesser_than_equal([NotNull] sassy_parser.Lesser_than_equalContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>subtraction</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitSubtraction([NotNull] sassy_parser.SubtractionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>positive</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitPositive([NotNull] sassy_parser.PositiveContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>simple_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSimple_call([NotNull] sassy_parser.Simple_callContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>division</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
@@ -589,13 +561,6 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitMultiplication([NotNull] sassy_parser.MultiplicationContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>remainder</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRemainder([NotNull] sassy_parser.RemainderContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>greater_than_equal</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// </summary>
@@ -603,19 +568,61 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitGreater_than_equal([NotNull] sassy_parser.Greater_than_equalContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>ternary</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitTernary([NotNull] sassy_parser.TernaryContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>addition</c>
 	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAddition([NotNull] sassy_parser.AdditionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>indexor</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIndexor([NotNull] sassy_parser.IndexorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>or</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitOr([NotNull] sassy_parser.OrContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>lesser_than_equal</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLesser_than_equal([NotNull] sassy_parser.Lesser_than_equalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>positive</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPositive([NotNull] sassy_parser.PositiveContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>simple_call</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSimple_call([NotNull] sassy_parser.Simple_callContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>remainder</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRemainder([NotNull] sassy_parser.RemainderContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>ternary</c>
+	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTernary([NotNull] sassy_parser.TernaryContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>value_deletion</c>
 	/// labeled alternative in <see cref="sassy_parser.value"/>.
