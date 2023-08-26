@@ -180,6 +180,8 @@ internal static class PatchingManager
                     Assets = new List<string> { name } 
                 });
             }
+            createdAsset.Clear();
+            _createdAssets.Remove(label);
         }
 
         var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
