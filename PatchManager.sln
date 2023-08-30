@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{5F1D0BAA-A518-423E-B128-A97490E64B50}") = "PatchManager", "src/PatchManager/PatchManager.csproj", "{CF1979BA-CAE1-4525-8C32-EA9F1A9324BD}"
+Project("{5F1D0BAA-A518-423E-B128-A97490E64B50}") = "PatchManager", "src\PatchManager\PatchManager.csproj", "{CF1979BA-CAE1-4525-8C32-EA9F1A9324BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Core", "src\PatchManager.Core\PatchManager.Core.csproj", "{F14D175D-865C-47E8-BCE8-AA14A39FB084}"
 EndProject
@@ -18,7 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandalonePatchTester", "St
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Generic", "src\PatchManager.Generic\PatchManager.Generic.csproj", "{47ABF55B-7102-4573-9281-AECD3F5B0F96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Resources", "PatchManager.Resources\PatchManager.Resources.csproj", "{39580E16-E50B-468A-BFAA-06FBF663AD98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Resources", "src\PatchManager.Resources\PatchManager.Resources.csproj", "{39580E16-E50B-468A-BFAA-06FBF663AD98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

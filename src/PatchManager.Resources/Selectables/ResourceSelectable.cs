@@ -5,7 +5,6 @@ using PatchManager.SassyPatching.Modifiables;
 
 namespace PatchManager.Resources.Selectables;
 
-
 /// <summary>
 /// Represents a selectable for the selection and transformation of resource data
 /// </summary>
@@ -31,7 +30,7 @@ public class ResourceSelectable : BaseSelectable
         SetModified();
         _deleted = true;
     }
-    
+
     private readonly string _originalData;
     internal readonly JObject JObject;
 
