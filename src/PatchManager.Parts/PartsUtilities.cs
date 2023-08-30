@@ -21,7 +21,7 @@ public static class PartsUtilities
                     var behaviour = mod.PartBehaviourModuleType;
                     var tuple = (type, behaviour);
                     var name1 = type.Name;
-                    var name2 = name1.Replace("PartComponentModule_", "");
+                    var name2 = name1.Replace("PartComponent", "");
                     _componentModules[name1] = tuple;
                     if (!name1.Equals(name2))
                     {
