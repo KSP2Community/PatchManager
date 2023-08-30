@@ -66,20 +66,15 @@ public sealed class ModuleSelectable : BaseSelectable
         {
             throw new Exception($"Unknown data module {elementType}");
         }
-
+        _selectable.SetModified();
         var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
-        var dataObject = new JObject(instance,
-            IOProvider._defaultUnitySerializerSettings)
+        var dataObject = JObject.Parse(IOProvider.ToJson(instance));
+        dataObject["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.FullName}";
+        var trueType = new JObject
         {
-            ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.FullName}"
-        };
-        var trueType = new JObject(new
-        {
-            dataModuleType.Name,
-            ModuleType = instance.ModuleType.FullName,
-            DataType = instance.DataType.FullName,
-        })
-        {
+            ["Name"] =  dataModuleType.Name,
+            ["ModuleType"] = instance.ModuleType.FullName,
+            ["DataType"] = instance.DataType.FullName,
             ["Data"] = null,
             ["DataObject"] = dataObject
         };

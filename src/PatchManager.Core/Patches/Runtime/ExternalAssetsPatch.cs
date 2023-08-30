@@ -9,7 +9,7 @@ namespace PatchManager.Core.Patches.Runtime;
 [HarmonyPatch]
 internal static class ExternalAssetsPatch
 {
-    private static AssetProvider Assets => GameManager.Instance.Game.Assets;
+    private static AssetProvider Assets => GameManager.Instance.Assets;
 
     [HarmonyPatch(typeof(AssetProvider), nameof(AssetProvider.LocateAssetInExternalData))]
     [HarmonyPrefix]

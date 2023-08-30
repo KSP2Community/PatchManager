@@ -43,5 +43,5 @@ internal static class AssetProviderPatch
         Action<T> assetLoadCallback
     ) => Locators.LocateAll(key, out var patchedLocations)
         ? Addressables.LoadAssetsAsync(patchedLocations, assetLoadCallback)
-        : GameManager.Instance.Game.Assets.LoadAssetsAsync(key, assetLoadCallback);
+        : GameManager.Instance.Assets.LoadAssetsAsync(key, assetLoadCallback);
 }

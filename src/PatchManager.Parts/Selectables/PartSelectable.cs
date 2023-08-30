@@ -100,14 +100,15 @@ public sealed class PartSelectable : BaseSelectable
         {
             throw new Exception($"Unknown part module {elementType}");
         }
-
-        var moduleObject = new JObject(new
+        SetModified();
+        var moduleObject = new JObject()
         {
-            mod.componentModule.Name,
-            ComponentType = mod.componentModule.AssemblyQualifiedName,
-            BehaviourType = mod.componentModule.AssemblyQualifiedName,
-            ModuleData = new List<ModuleData>()
-        });
+            ["Name"] = mod.componentModule.Name,
+            ["ComponentType"] = mod.componentModule.AssemblyQualifiedName,
+            ["BehaviourType"] =  mod.behaviour.AssemblyQualifiedName,
+            ["ModuleData"] = new JArray()
+        };
+        (JObject["data"]["serializedPartModules"] as JArray)?.Add(moduleObject);
         var selectable = new ModuleSelectable(moduleObject, this);
         Classes.Add(elementType.Replace("PartComponent", ""));
         Children.Add(selectable);

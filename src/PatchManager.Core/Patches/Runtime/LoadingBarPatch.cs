@@ -1,15 +1,17 @@
 ﻿using HarmonyLib;
+using JetBrains.Annotations;
 using PatchManager.Core.Assets;
 
 namespace PatchManager.Core.Patches.Runtime;
 
 [HarmonyPatch(typeof(LoadingBar))]
-public static class LoadingBarPatch
+internal static class LoadingBarPatch
 {
     public static bool InjectPatchManagerTips = false;
     [HarmonyPrefix]
-    [HarmonyPatch(nameof(LoadingBar.SetTips))]
-    public static bool SetTips(ref LoadingBar __instance)
+    [HarmonyPatch(nameof(LoadingBar.ShuffleLoadingTip))]
+    [UsedImplicitly]
+    public static bool ShuffleLoadingTip(ref LoadingBar __instance)
     {
         if (!InjectPatchManagerTips)
             return true;

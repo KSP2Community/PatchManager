@@ -26,7 +26,7 @@ public class ElementAdditionSelector : Selector
         }
         catch (Exception e)
         {
-            throw new InterpreterException(Coordinate, e.Message);
+            throw new InterpreterException(Coordinate, e.ToString());
         }
     }
 
