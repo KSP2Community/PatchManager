@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
-using PatchManager.Parts.SassyPatching.Selectables;
+using PatchManager.Parts.Selectables;
 using PatchManager.SassyPatching;
-using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
 
-
-namespace PatchManager.Parts.SassyPatching.Modifiables;
+namespace PatchManager.Parts.Modifiables;
 
 /// <summary>
 /// Represents the modifiable state of a part_json file

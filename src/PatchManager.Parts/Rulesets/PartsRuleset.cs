@@ -1,9 +1,9 @@
-﻿using PatchManager.Parts.SassyPatching.Selectables;
+﻿using PatchManager.Parts.Selectables;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Interfaces;
 
-namespace PatchManager.Parts.SassyPatching.Rulesets;
+namespace PatchManager.Parts.Rulesets;
 
 /// <summary>
 /// The `:parts` ruleset used by sassy patching

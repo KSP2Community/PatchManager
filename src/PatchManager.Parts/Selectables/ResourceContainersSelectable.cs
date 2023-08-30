@@ -1,12 +1,8 @@
-﻿using Antlr4.Runtime.Misc;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
-using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Interfaces;
-using PatchManager.SassyPatching.Modifiables;
-using PatchManager.SassyPatching.Selectables;
 
-namespace PatchManager.Parts.SassyPatching.Selectables;
+namespace PatchManager.Parts.Selectables;
 
 /// <summary>
 /// Represents the resourceContainers field of a part json as a selectable

@@ -1,13 +1,12 @@
 ﻿using System.Text.RegularExpressions;
+using KSP.Sim.Definitions;
+using Newtonsoft.Json.Linq;
+using PatchManager.Parts.Modifiables;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PatchManager.Parts.SassyPatching.Modifiables;
-using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Selectables;
 
-namespace PatchManager.Parts.SassyPatching.Selectables;
+namespace PatchManager.Parts.Selectables;
 
 /// <summary>
 /// Represents a selectable for selection and transformation of part data
@@ -97,7 +96,22 @@ public sealed class PartSelectable : BaseSelectable
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        throw new NotImplementedException("Module addition is not implemented in PatchManager.Core just yet");
+        if (!PartsUtilities.ComponentModules.TryGetValue(elementType, out var mod))
+        {
+            throw new Exception($"Unknown part module {elementType}");
+        }
+
+        var moduleObject = new JObject(new
+        {
+            mod.componentModule.Name,
+            ComponentType = mod.componentModule.AssemblyQualifiedName,
+            BehaviourType = mod.componentModule.AssemblyQualifiedName,
+            ModuleData = new List<ModuleData>()
+        });
+        var selectable = new ModuleSelectable(moduleObject, this);
+        Classes.Add(elementType.Replace("PartComponent", ""));
+        Children.Add(selectable);
+        return selectable;
     }
 
 
