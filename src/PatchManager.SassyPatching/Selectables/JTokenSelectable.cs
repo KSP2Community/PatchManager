@@ -29,7 +29,30 @@ public class JTokenSelectable : BaseSelectable
         _markDirty = markDirty;
         Token = token;
         ElementType = elementType ?? name;
-        Name = name;
+        getName = _ => name;
+        Classes = new();
+        Children = new();
+        foreach (var subToken in token)
+        {
+            if (subToken is not JProperty property) continue;
+            Classes.Add(property.Name);
+            Children.Add(new JTokenSelectable(markDirty,property.Value,property.Name));
+        }
+    }
+    
+    /// <summary>
+    /// Create a new JToken Selectable
+    /// </summary>
+    /// <param name="markDirty">How this should notify that it has been modified</param>
+    /// <param name="token">The token this operates over</param>
+    /// <param name="name">The function used to get the name of this token</param>
+    /// <param name="elementType">The type of element this is, can be different from the name</param>
+    public JTokenSelectable(Action markDirty, JToken token, Func<JToken,string> name, [CanBeNull] string elementType = null)
+    {
+        _markDirty = markDirty;
+        Token = token;
+        ElementType = elementType ?? name(token);
+        getName = name;
         Classes = new();
         Children = new();
         foreach (var subToken in token)
@@ -43,8 +66,10 @@ public class JTokenSelectable : BaseSelectable
     /// <inheritdoc />
     public sealed override List<ISelectable> Children { get; }
 
+    private Func<JToken, string> getName;
+
     /// <inheritdoc />
-    public override string Name { get; }
+    public override string Name => getName.Invoke(Token);
 
     /// <inheritdoc />
     public sealed override List<string> Classes { get; }

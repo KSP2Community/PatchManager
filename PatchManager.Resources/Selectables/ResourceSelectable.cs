@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
-using PatchManager.Resources.Modifiables;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
+using PatchManager.SassyPatching.Modifiables;
 
 namespace PatchManager.Resources.Selectables;
 
@@ -39,7 +39,7 @@ public class ResourceSelectable : BaseSelectable
     {
         _originalData = data;
         JObject = JObject.Parse(data);
-        Classes = new();
+        Classes = new() { "resource" };
         Children = new();
         var resourceData = JObject["data"];
         Name = (string)resourceData["name"];
@@ -62,7 +62,7 @@ public class ResourceSelectable : BaseSelectable
     public override bool IsSameAs(ISelectable other) => other is ResourceSelectable rs && rs.Name == Name;
 
     /// <inheritdoc />
-    public override IModifiable OpenModification() => new ResourceModifiable(this);
+    public override IModifiable OpenModification() => new JTokenModifiable(JObject["data"], SetModified);
 
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType) => throw new InvalidOperationException();
