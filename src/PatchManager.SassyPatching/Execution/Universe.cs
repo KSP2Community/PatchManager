@@ -138,7 +138,7 @@ public class Universe
             string msg, RecognitionException e)
         {
             Errored = true;
-            ErrorLogger.Invoke($"error lexing {File} - {line}:{charPositionInLine}: {msg}");
+            ErrorLogger.Invoke($"error parsing {File} - {line}:{charPositionInLine}: {msg}");
         }
     }
     
@@ -158,7 +158,7 @@ public class Universe
             string msg, RecognitionException e)
         {
             Errored = true;
-            ErrorLogger.Invoke($"error parsing {File} - {line}:{charPositionInLine}: {msg}");
+            ErrorLogger.Invoke($"error lexing {File} - {line}:{charPositionInLine}: {msg}");
         }
     }
     /// <summary>
@@ -218,14 +218,14 @@ public class Universe
         try
         {
             var charStream = CharStreams.fromPath(library.FullName);
-            var lexerErrorGenerator = new LexerListener($"{modId}:{library.Name}", _errorLogger);
+            var lexerErrorGenerator = new LexerListener(name, _errorLogger);
             var lexer = new sassy_lexer(charStream);
             lexer.AddErrorListener(lexerErrorGenerator);
             if (lexerErrorGenerator.Errored)
                 throw new LoadException("lexer errors detected");
             var tokenStream = new CommonTokenStream(lexer);
             var parser = new sassy_parser(tokenStream);
-            var parserErrorGenerator = new ParserListener($"{modId}:{library.Name}", _errorLogger);
+            var parserErrorGenerator = new ParserListener(name, _errorLogger);
             parser.AddErrorListener(parserErrorGenerator);
             if (parserErrorGenerator.Errored)
                 throw new LoadException("parser errors detected");
