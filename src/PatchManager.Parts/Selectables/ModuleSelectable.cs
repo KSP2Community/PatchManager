@@ -68,13 +68,21 @@ public sealed class ModuleSelectable : BaseSelectable
         }
         _selectable.SetModified();
         var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
-        var dataObject = JObject.Parse(IOProvider.ToJson(instance));
-        dataObject["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.FullName}";
+        // var dataObject = JObject.Parse(IOProvider.ToJson(instance));
+        var dataObject = new JObject
+        {
+            ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"
+        };
+        var otherObject = JObject.Parse(IOProvider.ToJson(instance));
+        foreach (var prop in otherObject)
+        {
+            dataObject[prop.Key] = prop.Value;
+        }
         var trueType = new JObject
         {
             ["Name"] =  dataModuleType.Name,
-            ["ModuleType"] = instance.ModuleType.FullName,
-            ["DataType"] = instance.DataType.FullName,
+            ["ModuleType"] = instance.ModuleType.AssemblyQualifiedName,
+            ["DataType"] = instance.DataType.AssemblyQualifiedName,
             ["Data"] = null,
             ["DataObject"] = dataObject
         };
