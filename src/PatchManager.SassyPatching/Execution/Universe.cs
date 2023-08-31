@@ -122,22 +122,45 @@ public class Universe
         }
     }
 
-    private class LoadListener : IAntlrErrorListener<IToken>
+    private class ParserListener : IAntlrErrorListener<IToken>
     {
-        internal static readonly LoadListener Instance = new();
-
-        private LoadListener()
+        internal bool Errored = false;
+        internal Action<string> ErrorLogger;
+        internal string File;
+        internal ParserListener(string file, Action<string> errorLogger)
         {
+            File = file;
+            ErrorLogger = errorLogger;
         }
 
         public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line,
             int charPositionInLine,
             string msg, RecognitionException e)
         {
-            throw new LoadException($"{line}:{charPositionInLine}: msg");
+            Errored = true;
+            ErrorLogger.Invoke($"error lexing {File} - {line}:{charPositionInLine}: {msg}");
         }
     }
+    
+    private class LexerListener : IAntlrErrorListener<int>
+    {
+        internal bool Errored = false;
+        internal Action<string> ErrorLogger;
+        internal string File;
+        internal LexerListener(string file, Action<string> errorLogger)
+        {
+            File = file;
+            ErrorLogger = errorLogger;
+        }
 
+        public void SyntaxError(TextWriter output, IRecognizer recognizer, int offendingSymbol, int line,
+            int charPositionInLine,
+            string msg, RecognitionException e)
+        {
+            Errored = true;
+            ErrorLogger.Invoke($"error parsing {File} - {line}:{charPositionInLine}: {msg}");
+        }
+    }
     /// <summary>
     /// Loads all patches from a directory
     /// </summary>
@@ -165,10 +188,17 @@ public class Universe
         {
             var charStream = CharStreams.fromPath(patch.FullName);
             var lexer = new sassy_lexer(charStream);
+            var lexerErrorGenerator = new LexerListener($"{modId}:{patch.Name}", _errorLogger);
+            lexer.AddErrorListener(lexerErrorGenerator);
+            if (lexerErrorGenerator.Errored)
+                throw new LoadException("lexer errors detected");
             var tokenStream = new CommonTokenStream(lexer);
             var parser = new sassy_parser(tokenStream);
-            parser.AddErrorListener(LoadListener.Instance);
+            var parserErrorGenerator = new ParserListener($"{modId}:{patch.Name}", _errorLogger);
+            parser.AddErrorListener(parserErrorGenerator);
             var patchContext = parser.patch();
+            if (parserErrorGenerator.Errored)
+                throw new LoadException("parser errors detected");
             tokenTransformer.Errored = false;
             // var gEnv = new GlobalEnvironment(this, modId);
             // var env = new Environment(gEnv);
@@ -188,10 +218,17 @@ public class Universe
         try
         {
             var charStream = CharStreams.fromPath(library.FullName);
+            var lexerErrorGenerator = new LexerListener($"{modId}:{library.Name}", _errorLogger);
             var lexer = new sassy_lexer(charStream);
+            lexer.AddErrorListener(lexerErrorGenerator);
+            if (lexerErrorGenerator.Errored)
+                throw new LoadException("lexer errors detected");
             var tokenStream = new CommonTokenStream(lexer);
             var parser = new sassy_parser(tokenStream);
-            parser.AddErrorListener(LoadListener.Instance);
+            var parserErrorGenerator = new ParserListener($"{modId}:{library.Name}", _errorLogger);
+            parser.AddErrorListener(parserErrorGenerator);
+            if (parserErrorGenerator.Errored)
+                throw new LoadException("parser errors detected");
             var patchContext = parser.patch();
             tokenTransformer.Errored = false;
             var patch = tokenTransformer.Visit(patchContext) as SassyPatch;
