@@ -290,14 +290,15 @@ internal static class PatchingManager
                 (resolve2, reject2) =>
                 {
                     var handle = RebuildCache(distinctKeys[idx]);
+                    var killTips = false;
                     if (idx + 1 < distinctKeys.Count)
                         GameManager.Instance.LoadingFlow._flowActions.Insert(GameManager.Instance.LoadingFlow._flowIndex + 1,
                             CreateIndexedFlowAction(idx+1));
                     else
                     {
-                        LoadingBarPatch.InjectPatchManagerTips = false;
+                        killTips = true;
                     }
-                    CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2));
+                    CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2,killTips));
                 });
         }
 
@@ -312,13 +313,18 @@ internal static class PatchingManager
 
     private static IEnumerator WaitForCacheRebuildSingleHandle(
         AsyncOperationHandle<IList<TextAsset>> handle,
-        Action resolve
+        Action resolve,
+        bool killLoadingBarTips
     )
     {
         while (!handle.IsDone)
         {
+            // "Shuffle" it 
+            GameManager.Instance.Game.UI.LoadingBar.ShuffleLoadingTip();
             yield return null;
         }
+
+        LoadingBarPatch.InjectPatchManagerTips = !killLoadingBarTips;
         resolve();
     }
 }
