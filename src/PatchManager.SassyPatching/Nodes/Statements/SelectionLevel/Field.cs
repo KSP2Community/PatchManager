@@ -52,7 +52,7 @@ public class Field : Node, ISelectionAction
             ClassIndexer classIndexer => modifiable.GetFieldByClass(FieldName, classIndexer.ClassName),
             _ => modifiable.GetFieldValue(FieldName)
         };
-        Console.WriteLine($"Field value: {value}");
+        // Console.WriteLine($"Field value: {value}");
         var subEnvironment = new Environment(environment.GlobalEnvironment, environment)
         {
             ["value"] = value
