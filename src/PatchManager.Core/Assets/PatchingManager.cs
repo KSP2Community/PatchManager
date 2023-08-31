@@ -20,11 +20,17 @@ internal static class PatchingManager
 {
     private static readonly List<ITextPatcher> Patchers = new();
     private static readonly List<ITextAssetGenerator> Generators = new();
-    private static readonly Universe Universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo,RegisterGenerator);
+    private static Universe _universe;
 
+
+    public static void GenerateUniverse()
+    {
+        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo,RegisterGenerator);
+    }
+    
     private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
-    private static readonly int InitialLibraryCount = Universe.AllLibraries.Count;
+    private static readonly int InitialLibraryCount = _universe.AllLibraries.Count;
     private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
 
     internal static int TotalPatchCount;
@@ -100,9 +106,9 @@ internal static class PatchingManager
 
     public static void ImportModPatches(string modName, string modFolder)
     {
-        Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
+        _universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-        var currentLibraryCount = Universe.AllLibraries.Count - InitialLibraryCount;
+        var currentLibraryCount = _universe.AllLibraries.Count - InitialLibraryCount;
 
         if (currentLibraryCount > _previousLibraryCount)
         {
@@ -120,7 +126,7 @@ internal static class PatchingManager
 
     public static void RegisterPatches()
     {
-        Universe.RegisterAllPatches();
+        _universe.RegisterAllPatches();
         Logging.LogInfo($"{Patchers.Count} patchers registered!");
         Logging.LogInfo($"{Generators.Count} generators registered!");
     }
@@ -280,7 +286,7 @@ internal static class PatchingManager
     {
         
         
-        var distinctKeys = Universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
+        var distinctKeys = _universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
         LoadingBarPatch.InjectPatchManagerTips = true;
         GenericFlowAction CreateIndexedFlowAction(int idx)

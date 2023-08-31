@@ -39,8 +39,8 @@ public class CoreModule : BaseModule
     /// </summary>
     public override void Preload()
     {
-        // TODO: Move this whole process into a SpaceWarp 1.3 per-mod flow action
-
+        // Go here instead so that the static constructor recognizes everything
+        PatchingManager.GenerateUniverse();
         var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
