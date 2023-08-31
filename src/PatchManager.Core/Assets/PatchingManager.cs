@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using HarmonyLib;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -18,11 +19,20 @@ namespace PatchManager.Core.Assets;
 internal static class PatchingManager
 {
     private static readonly List<ITextPatcher> Patchers = new();
-    private static readonly Universe Universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo);
+    private static readonly List<ITextAssetGenerator> Generators = new();
+    private static Universe _universe;
 
+
+    public static void GenerateUniverse()
+    {
+        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo,RegisterGenerator);
+    }
+    
     private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
-    private static readonly int InitialLibraryCount = Universe.AllLibraries.Count;
+    private static readonly int InitialLibraryCount = _universe.AllLibraries.Count;
+    private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
+
     internal static int TotalPatchCount;
 
     private static void RegisterPatcher(ITextPatcher patcher)
@@ -39,10 +49,25 @@ internal static class PatchingManager
         }
 
         Patchers.Add(patcher);
+    }    private static void RegisterGenerator(ITextAssetGenerator generator)
+    {
+        for (var index = 0; index < Generators.Count; index++)
+        {
+            if (Generators[index].Priority <= generator.Priority)
+            {
+                continue;
+            }
+
+            Generators.Insert(index, generator);
+            return;
+        }
+
+        Generators.Add(generator);
     }
 
     private static string PatchJson(string label, string assetName, string text)
     {
+        Console.WriteLine($"Patching {label}:{assetName}");
         var patchCount = 0;
 
         foreach (var patcher in Patchers)
@@ -58,15 +83,20 @@ internal static class PatchingManager
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Patch errored due to: {e.Message}");
+                Console.WriteLine($"Patch of {label}:{assetName} errored due to: {e}");
                 text = backup;
+            }
+
+            if (text == "")
+            {
+                break;
             }
         }
 
         TotalPatchCount += patchCount;
         if (patchCount > 0)
         {
-            Logging.LogDebug($"Patched {assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+            Console.WriteLine($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
         }
 
         return text;
@@ -76,9 +106,9 @@ internal static class PatchingManager
 
     public static void ImportModPatches(string modName, string modFolder)
     {
-        Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
+        _universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-        var currentLibraryCount = Universe.AllLibraries.Count - InitialLibraryCount;
+        var currentLibraryCount = _universe.AllLibraries.Count - InitialLibraryCount;
 
         if (currentLibraryCount > _previousLibraryCount)
         {
@@ -96,8 +126,9 @@ internal static class PatchingManager
 
     public static void RegisterPatches()
     {
-        Universe.RegisterAllPatches();
+        _universe.RegisterAllPatches();
         Logging.LogInfo($"{Patchers.Count} patchers registered!");
+        Logging.LogInfo($"{Generators.Count} generators registered!");
     }
 
     /// <summary>
@@ -125,6 +156,7 @@ internal static class PatchingManager
 
     private static AsyncOperationHandle<IList<TextAsset>> RebuildCache(string label)
     {
+        Logging.LogInfo($"Patching: {label}");
         var archiveFilename = $"{label.Replace("/", "")}.zip";
 
         var archiveFiles = new Dictionary<string, string>();
@@ -136,10 +168,28 @@ internal static class PatchingManager
             Assets = new List<string>()
         };
         var assetsCacheEntries = new Dictionary<string, CacheEntry>();
-        var unchanged = true;
-        
-        
-        
+        var unchanged = !_createdAssets.ContainsKey(label);
+
+
+        if (_createdAssets.TryGetValue(label, out var createdAsset))
+        {
+            foreach (var (name, text) in createdAsset)
+            {
+                var patchedText = PatchJson(label, name, text);
+                if (patchedText == "") continue;
+                archiveFiles[name] = text;
+                labelCacheEntry.Assets.Add(name);
+                assetsCacheEntries.Add(name, new CacheEntry
+                {
+                    Label = name,
+                    ArchiveFilename = archiveFilename,
+                    Assets = new List<string> { name } 
+                });
+            }
+            createdAsset.Clear();
+            _createdAssets.Remove(label);
+        }
+
         var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
         {
             try
@@ -148,6 +198,12 @@ internal static class PatchingManager
                 if (patchedText != asset.text)
                 {
                     unchanged = false;
+                }
+
+                // Handle deletion
+                if (patchedText == "")
+                {
+                    return;
                 }
                 archiveFiles[asset.name] = patchedText;
                 labelCacheEntry.Assets.Add(asset.name);
@@ -160,7 +216,7 @@ internal static class PatchingManager
             }
             catch (Exception e)
             {
-                Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
+                Console.WriteLine($"Unable to patch {asset.name} due to: {e.Message}");
             }
         });
 
@@ -183,7 +239,7 @@ internal static class PatchingManager
             CacheManager.SaveInventory();
 
             Addressables.Release(results);
-            Logging.LogDebug($"Cache for label '{label}' rebuilt.");
+            Console.WriteLine($"Cache for label '{label}' rebuilt.");
         };
 
         return handle;
@@ -201,20 +257,36 @@ internal static class PatchingManager
             return !key.All(x => "0123456789abcdef".Contains(x));
         }
 
-        return true;
+        return !key.EndsWith(".prefab") && !key.EndsWith(".png");
+    }
+
+    public static void CreateNewAssets(Action resolve, Action<string> reject)
+    {
+        foreach (var generator in Generators)
+        {
+            try
+            {
+                var text = generator.Create(out var label, out var name);
+                Logging.LogInfo($"Generated an asset with the label {label}, and name {name}:\n{text}");
+                
+                if (!_createdAssets.ContainsKey(label))
+                    _createdAssets[label] = new List<(string name, string text)>();
+                _createdAssets[label].Add((name, text));
+            }
+            catch (Exception e)
+            {
+                Logging.LogError($"Failed to generate an asset due to: {e}");
+            }
+        }
+
+        resolve();
     }
 
     public static void RebuildAllCache(Action resolve, Action<string> reject)
     {
-        var keys = GameManager.Instance.Game.Assets._registeredResourceLocators
-            .SelectMany(locator => locator.Keys)
-            .ToList();
-        keys.AddRange(Addressables.ResourceLocators.SelectMany(locator => locator.Keys));
-
-        var distinctKeys = keys.Select(key => key.ToString())
-            .Distinct()
-            .Where(key => !CacheManager.CacheValidLabels.Contains(key)).Where(IsUsefulKey).ToList();
-        bool allCompleted = false;
+        
+        
+        var distinctKeys = _universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
         LoadingBarPatch.InjectPatchManagerTips = true;
         GenericFlowAction CreateIndexedFlowAction(int idx)
@@ -224,14 +296,15 @@ internal static class PatchingManager
                 (resolve2, reject2) =>
                 {
                     var handle = RebuildCache(distinctKeys[idx]);
+                    var killTips = false;
                     if (idx + 1 < distinctKeys.Count)
                         GameManager.Instance.LoadingFlow._flowActions.Insert(GameManager.Instance.LoadingFlow._flowIndex + 1,
                             CreateIndexedFlowAction(idx+1));
                     else
                     {
-                        LoadingBarPatch.InjectPatchManagerTips = false;
+                        killTips = true;
                     }
-                    CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2));
+                    CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2,killTips));
                 });
         }
 
@@ -246,13 +319,18 @@ internal static class PatchingManager
 
     private static IEnumerator WaitForCacheRebuildSingleHandle(
         AsyncOperationHandle<IList<TextAsset>> handle,
-        Action resolve
+        Action resolve,
+        bool killLoadingBarTips
     )
     {
         while (!handle.IsDone)
         {
+            // "Shuffle" it 
+            GameManager.Instance.Game.UI.LoadingBar.ShuffleLoadingTip();
             yield return null;
         }
+
+        LoadingBarPatch.InjectPatchManagerTips = !killLoadingBarTips;
         resolve();
     }
 }

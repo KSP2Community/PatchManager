@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
-using PatchManager.SassyPatching;
-using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Selectables;
 
-namespace PatchManager.Parts.SassyPatching.Selectables;
+namespace PatchManager.Parts.Selectables;
 
+/// <summary>
+/// A selectable that operates on resource container objects specifically
+/// </summary>
 public sealed class ResourceContainerSelectable : JTokenSelectable
 {
     private PartSelectable _selectable;

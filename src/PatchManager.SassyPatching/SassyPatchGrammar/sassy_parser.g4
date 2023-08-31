@@ -11,7 +11,13 @@ top_level_statement     : import_declaration
                         | mixin_def
                         | top_level_conditional
                         | selection_block
+                        | patch_declaration
                         ;
+
+
+patch_declaration       : PATCH patch_list SEMICOLON;
+
+patch_list              : STRING (COMMA STRING)*;
 
 import_declaration      : USE imp=STRING SEMICOLON;
 
@@ -38,7 +44,10 @@ attributed_selector     : attributes=attribute* selector;
 attribute               : REQUIRE guid=STRING       #require_mod
                         | REQUIRE_NOT guid=STRING   #require_not_mod
                         | STAGE stage=STRING        #run_at_stage
+                        | NEW constructor_arguments #new_asset
                         ;
+                        
+constructor_arguments   : LEFT_PAREN (expression (COMMA expression)*)? RIGHT_PAREN ;
 
 selector                : ELEMENT                                                       #sel_element
                         | CLASS                                                         #sel_class
@@ -112,6 +121,7 @@ expression              : ADD sub_expression        #implicit_add
 
 sub_expression          : value                                                                             #value_reference
                         | VARIABLE                                                                          #variable_reference
+                        | LOCALVARIABLE                                                                     #local_variable_reference
                         | LEFT_PAREN internal_expr=sub_expression RIGHT_PAREN                               #sub_sub_expression
                         | SUBTRACT child=sub_expression                                                     #negative
                         | ADD child=sub_expression                                                          #positive

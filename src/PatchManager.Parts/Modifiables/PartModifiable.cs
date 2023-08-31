@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
-using PatchManager.Parts.SassyPatching.Selectables;
+using PatchManager.Parts.Selectables;
 using PatchManager.SassyPatching;
-using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
 
-
-namespace PatchManager.Parts.SassyPatching.Modifiables;
+namespace PatchManager.Parts.Modifiables;
 
 /// <summary>
 /// Represents the modifiable state of a part_json file
@@ -13,7 +11,7 @@ namespace PatchManager.Parts.SassyPatching.Modifiables;
 public sealed class PartModifiable : CustomJTokenModifiable
 {
     private PartSelectable _selectable;
-    internal PartModifiable(PartSelectable selectable) : base(selectable._jObject["data"],selectable.SetModified)
+    internal PartModifiable(PartSelectable selectable) : base(selectable.JObject["data"],selectable.SetModified)
     {
         _selectable = selectable;
         CustomIndexAdaptors = new();

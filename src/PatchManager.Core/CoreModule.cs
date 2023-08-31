@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using JetBrains.Annotations;
+using KSP.Game;
 using KSP.Game.Flow;
 using Newtonsoft.Json;
 using PatchManager.Core.Assets;
@@ -7,6 +8,7 @@ using PatchManager.Core.Flow;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using SpaceWarp.API.Mods.JSON;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace PatchManager.Core;
@@ -37,8 +39,8 @@ public class CoreModule : BaseModule
     /// </summary>
     public override void Preload()
     {
-        // TODO: Move this whole process into a SpaceWarp 1.3 per-mod flow action
-
+        // Go here instead so that the static constructor recognizes everything
+        PatchingManager.GenerateUniverse();
         var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -59,6 +61,8 @@ public class CoreModule : BaseModule
         if (!isValid)
         {
             SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
+                () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+            SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
                 () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
         }
     }
@@ -68,6 +72,7 @@ public class CoreModule : BaseModule
     /// </summary>
     public override void Load()
     {
+        
         Logging.LogInfo("Registering resource locator");
         Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
         Locators.Register(new ArchiveResourceLocator());

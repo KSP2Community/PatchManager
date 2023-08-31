@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Interfaces;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Interfaces;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -19,7 +20,14 @@ public class ElementAdditionSelector : Selector
     /// <inheritdoc />
     public override List<ISelectable> SelectAll(List<ISelectable> selectables)
     {
-        return selectables.Select(selectable => selectable.AddElement(ElementName)).ToList();
+        try
+        {
+            return selectables.Select(selectable => selectable.AddElement(ElementName)).ToList();
+        }
+        catch (Exception e)
+        {
+            throw new InterpreterException(Coordinate, e.ToString());
+        }
     }
 
     /// <inheritdoc />
@@ -27,5 +35,12 @@ public class ElementAdditionSelector : Selector
     {
         rulesetMatchingObject = null;
         return new();
+    }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        newAsset = null;
+        return new();
+        
     }
 }

@@ -1,13 +1,12 @@
 ﻿using System.Text.RegularExpressions;
+using KSP.Sim.Definitions;
+using Newtonsoft.Json.Linq;
+using PatchManager.Parts.Modifiables;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PatchManager.Parts.SassyPatching.Modifiables;
-using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Selectables;
 
-namespace PatchManager.Parts.SassyPatching.Selectables;
+namespace PatchManager.Parts.Selectables;
 
 /// <summary>
 /// Represents a selectable for selection and transformation of part data
@@ -36,20 +35,17 @@ public sealed class PartSelectable : BaseSelectable
     }
 
     private readonly string _originalData;
-    internal JObject _jObject;
-    private static Regex Sanitizer = new Regex("[^a-zA-Z0-9 -_]");
-    private string Sanitize(string str)
-    {
-        return Sanitizer.Replace(str, "");
-    }
+    internal readonly JObject JObject;
+    private static readonly Regex Sanitizer = new("[^a-zA-Z0-9 -_]");
+    private static string Sanitize(string str) => Sanitizer.Replace(str, "");
 
     internal PartSelectable(string data)
     {
         _originalData = data;
-        _jObject = JObject.Parse(data);
+        JObject = JObject.Parse(data);
         Classes = new();
         Children = new();
-        var partData = _jObject["data"];
+        var partData = JObject["data"];
         Name = (string)partData["partName"];
         foreach (var tag in ((string)partData["tags"]).Split(' '))
         {
@@ -100,13 +96,28 @@ public sealed class PartSelectable : BaseSelectable
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        throw new NotImplementedException("Module addition is not implemented in PatchManager.Core just yet");
+        if (!PartsUtilities.ComponentModules.TryGetValue(elementType, out var mod))
+        {
+            throw new Exception($"Unknown part module {elementType}");
+        }
+        SetModified();
+        var moduleObject = new JObject()
+        {
+            ["Name"] = mod.componentModule.Name,
+            ["ComponentType"] = mod.componentModule.AssemblyQualifiedName,
+            ["BehaviourType"] =  mod.behaviour.AssemblyQualifiedName,
+            ["ModuleData"] = new JArray()
+        };
+        (JObject["data"]["serializedPartModules"] as JArray)?.Add(moduleObject);
+        var selectable = new ModuleSelectable(moduleObject, this);
+        Classes.Add(elementType.Replace("PartComponent", ""));
+        Children.Add(selectable);
+        return selectable;
     }
 
 
     /// <inheritdoc />
-    public override string Serialize()
-    {
-        return !_modified ? _originalData : (!_deleted? _jObject.ToString() : "");
-    }
+    public override string Serialize() => _modified ? _deleted ? "" : JObject.ToString() : _originalData;
+
+    public override DataValue GetValue() => OpenModification().Get();
 }

@@ -87,4 +87,10 @@ public interface ISelectable
     /// </summary>
     /// <returns>A string representing all the data contained in the ISelectable, usually in JSON</returns>
     public string Serialize();
+
+    /// <summary>
+    /// Converts the selectable into a DataValue
+    /// </summary>
+    /// <returns>The value representation of the selectable</returns>
+    public DataValue GetValue();
 }

@@ -1,20 +1,18 @@
-﻿using PatchManager.Parts.SassyPatching.Selectables;
+﻿using PatchManager.Parts.Selectables;
+using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Interfaces;
 
-namespace PatchManager.Parts.SassyPatching.Rulesets;
+namespace PatchManager.Parts.Rulesets;
 
 /// <summary>
 /// The `:parts` ruleset used by sassy patching
 /// </summary>
-[PatcherRuleset("parts")]
+[PatcherRuleset("parts", "parts_data")]
 public class PartsRuleset : IPatcherRuleSet
 {
     /// <inheritdoc />
-    public bool Matches(string label)
-    {
-        return label == "parts_data";
-    }
+    public bool Matches(string label) => label == "parts_data";
 
     /// <summary>
     /// Converts the part json to an ISelectable following this ruleset
@@ -27,4 +25,6 @@ public class PartsRuleset : IPatcherRuleSet
     {
         return new PartSelectable(jsonData);
     }
+
+    public INewAsset CreateNew(List<DataValue> dataValues) => throw new NotImplementedException();
 }

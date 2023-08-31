@@ -20,4 +20,7 @@ public interface IPatcherRuleSet
     /// <param name="jsonData">The data to convert to an ISelectable</param>
     /// <returns>The selectable representing the data</returns>
     public ISelectable ConvertToSelectable(string type, string name, string jsonData);
+
+
+    public INewAsset CreateNew(List<DataValue> dataValues);
 }

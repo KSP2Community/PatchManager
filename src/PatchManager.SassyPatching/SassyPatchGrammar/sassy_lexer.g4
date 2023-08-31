@@ -31,6 +31,8 @@ STAGE               : '@stage';
 DEFINE_STAGE        : '@define-stage';
 INCLUDE             : '@include';
 RETURN              : '@return';
+PATCH               : '@patch';
+NEW                 : '@new';
 
 
 
@@ -116,5 +118,6 @@ fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_][a-zA-Z_.\-0-9]*;
 NAME                : '#' IDENTIFIER;
 CLASS               : '.' WILDCARDLESS_IDENTIFIER;
 VARIABLE            : '$' WILDCARDLESS_IDENTIFIER;
+LOCALVARIABLE       : '$$' WILDCARDLESS_IDENTIFIER;
 RULESET             : ':' WILDCARDLESS_IDENTIFIER;
 ELEMENT             : WILDCARDLESS_IDENTIFIER;

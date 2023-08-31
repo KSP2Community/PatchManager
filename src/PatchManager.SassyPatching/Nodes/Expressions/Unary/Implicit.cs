@@ -24,15 +24,5 @@ public abstract class Implicit : Unary
     }
 
     /// <inheritdoc />
-    public override DataValue Compute(Environment environment)
-    {
-        try
-        {
-            return GetResult(environment["value"], Child.Compute(environment));
-        }
-        catch
-        {
-            throw new InvalidVariableReferenceException(Coordinate, "$value does not exist in current scope");
-        }
-    }
+    public override DataValue Compute(Environment environment) => GetResult(environment["value"], Child.Compute(environment));
 }

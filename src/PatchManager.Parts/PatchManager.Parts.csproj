@@ -5,4 +5,7 @@
       <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
       <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.4" />
+    </ItemGroup>
 </Project>

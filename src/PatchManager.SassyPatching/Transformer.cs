@@ -48,6 +48,13 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 .ToList());
 
     /// <inheritdoc />
+    public override Node VisitPatch_declaration(sassy_parser.Patch_declarationContext context)
+    {
+        var labels = context.patch_list().STRING().Select(x => x.GetText()).Select(x => x.Unescape()).ToList();
+        return new PatchDeclaration(context.GetCoordinate(), labels);
+    }
+
+    /// <inheritdoc />
     public override Node VisitImport_declaration(sassy_parser.Import_declarationContext context) =>
         new Import(context.GetCoordinate(),
             context.imp
@@ -171,6 +178,12 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitRun_at_stage(sassy_parser.Run_at_stageContext context) =>
         new RunAtStageAttribute(context.GetCoordinate(), context.stage.Text.Unescape());
 
+    public override Node VisitNew_asset(sassy_parser.New_assetContext context)
+    {
+        var expressions = context.constructor_arguments().expression().Select(Visit).Cast<Expression>().ToList();
+        return new NewAttribute(context.GetCoordinate(), expressions);
+    }
+
     /// <inheritdoc />
     public override Node VisitSel_element(sassy_parser.Sel_elementContext context)
         => new ElementSelector(context.GetCoordinate(), context.ELEMENT().GetText());
@@ -186,7 +199,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     /// <inheritdoc />
     public override Node VisitSel_add_element(sassy_parser.Sel_add_elementContext context)
-        => new ElementAdditionSelector(context.GetCoordinate(), context.ELEMENT().GetText().TrimFirst());
+        => new ElementAdditionSelector(context.GetCoordinate(), context.ELEMENT().GetText());
 
     /// <inheritdoc />
     public override Node VisitSel_class(sassy_parser.Sel_classContext context)
@@ -385,6 +398,11 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitEqual_to(sassy_parser.Equal_toContext context) =>
         new EqualTo(context.GetCoordinate(), Visit(context.lhs) as Expression, Visit(context.rhs) as Expression);
+
+    /// <inheritdoc />
+    public override Node VisitLocal_variable_reference(sassy_parser.Local_variable_referenceContext context) =>
+        new LocalVariableReference(context.GetCoordinate(), context.LOCALVARIABLE().GetText().TrimFirst().TrimFirst());
+    
 
     /// <inheritdoc />
     public override Node VisitIndexor(sassy_parser.IndexorContext context) =>

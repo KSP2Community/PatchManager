@@ -19,13 +19,25 @@ public class ElementSelector : Selector
     /// <inheritdoc />
     public override List<ISelectable> SelectAll(List<ISelectable> selectables)
     {
-        return selectables.Where(selectable => selectable.MatchesElement(ElementName)).ToList();
+        return selectables.Where(selectable =>
+        {
+            var asBase = selectable as BaseSelectable;
+            var result = selectable.MatchesElement(ElementName);
+            //Console.WriteLine($"Testing: {asBase?.ElementType} against {ElementName} -> {result}");
+            return result;
+        }).ToList();
     }
 
     /// <inheritdoc />
     public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
     {
         rulesetMatchingObject = null;
+        return new();
+    }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        newAsset = null;
         return new();
     }
 }

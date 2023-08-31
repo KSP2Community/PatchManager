@@ -59,4 +59,10 @@ public class IntersectionSelector : Selector
         var start = Selectors[0].SelectAllTopLevel(type, name, data, out rulesetMatchingObject);
         return SelectAllSkippingFirst(start);
     }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        var start = Selectors[0].CreateNew(rulesetArguments, out newAsset);
+        return SelectAllSkippingFirst(start);
+    }
 }

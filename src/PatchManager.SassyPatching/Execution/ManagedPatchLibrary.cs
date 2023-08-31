@@ -19,6 +19,7 @@ internal class ManagedPatchLibrary : PatchLibrary
     {
         foreach (var function in _functions)
         {
+            environment.GlobalEnvironment.Universe.MessageLogger($"Registering function: {function.Key}");
             environment.GlobalEnvironment.AllFunctions[function.Key] = function.Value;
         }
     }

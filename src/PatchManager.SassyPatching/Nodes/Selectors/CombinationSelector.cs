@@ -60,4 +60,20 @@ public class CombinationSelector : Selector
         }
         return start;
     }
+
+    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    {
+        var start = new List<ISelectable>();
+        newAsset = null;
+        foreach (var selector in Selectors)
+        {
+            start = SelectionUtilities.CombineSelections(start, selector.CreateNew(rulesetArguments, out var na));
+            if (na != null && newAsset == null)
+            {
+                newAsset = na;
+            }
+        }
+
+        return start;
+    }
 }

@@ -1,12 +1,13 @@
-﻿using Antlr4.Runtime.Misc;
+﻿using KSP.IO;
+using KSP.Networking.MP.Utils;
+using KSP.Sim.Definitions;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
-using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
 using PatchManager.SassyPatching.Selectables;
 
-namespace PatchManager.Parts.SassyPatching.Selectables;
+namespace PatchManager.Parts.Selectables;
 
 /// <summary>
 /// Represents the selectable data in a part module;
@@ -31,6 +32,7 @@ public sealed class ModuleSelectable : BaseSelectable
         {
             Classes.Add((string)moduleData["Name"]);
             // Where we are going to have to add children ree
+            // TODO: Add a specialization for ModuleEngine
             Children.Add(new JTokenSelectable(selectable.SetModified, moduleData["DataObject"], (string)moduleData["Name"]));
         }
     }
@@ -60,9 +62,39 @@ public sealed class ModuleSelectable : BaseSelectable
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        throw new NotImplementedException("Module data addition is not implemented in PatchManager just yet");
+        if (!PartsUtilities.DataModules.TryGetValue(elementType, out var dataModuleType))
+        {
+            throw new Exception($"Unknown data module {elementType}");
+        }
+        _selectable.SetModified();
+        var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
+        // var dataObject = JObject.Parse(IOProvider.ToJson(instance));
+        var dataObject = new JObject
+        {
+            ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"
+        };
+        var otherObject = JObject.Parse(IOProvider.ToJson(instance));
+        foreach (var prop in otherObject)
+        {
+            dataObject[prop.Key] = prop.Value;
+        }
+        var trueType = new JObject
+        {
+            ["Name"] =  dataModuleType.Name,
+            ["ModuleType"] = instance.ModuleType.AssemblyQualifiedName,
+            ["DataType"] = instance.DataType.AssemblyQualifiedName,
+            ["Data"] = null,
+            ["DataObject"] = dataObject
+        };
+        (_jToken["ModuleData"] as JArray)?.Add(trueType);
+        Classes.Add(dataModuleType.Name);
+        var selectable = new JTokenSelectable(_selectable.SetModified, trueType["DataObject"], dataModuleType.Name);
+        Children.Add(selectable);
+        return selectable;
     }
 
     /// <inheritdoc />
     public override string Serialize() => _jToken.ToString();
+
+    public override DataValue GetValue() => DataValue.FromJToken(_jToken);
 }
