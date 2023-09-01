@@ -1,5 +1,7 @@
 ﻿using KSP.Sim.Definitions;
 using KSP.Sim.impl;
+using PatchManager.Parts.Attributes;
+using PatchManager.SassyPatching.Interfaces;
 
 namespace PatchManager.Parts;
 
@@ -81,6 +83,33 @@ public static class PartsUtilities
             }
 
             return _dataModules;
+        }
+    }
+
+    internal static readonly Dictionary<Type, Type> ModuleDataAdapters = new();
+
+    internal static void GrabModuleDataAdapters()
+    {
+        foreach (var type in AppDomain.CurrentDomain.GetAssemblies()
+                     .SelectMany(x => x.GetTypes())
+                     .Where(x => x.GetCustomAttributes(typeof(ModuleDataAdapterAttribute),
+                             false)
+                         .Any())
+                     .Select(x => (type: x, attr: (ModuleDataAdapterAttribute)x.GetCustomAttributes(typeof(ModuleDataAdapterAttribute),
+                             false)
+                         .FirstOrDefault())))
+        {
+            foreach (var dataType in type.attr.ValidTypes)
+            {
+                ModuleDataAdapters[dataType] = type.type;
+            }
+        }
+    }
+    public static void RegisterModuleDataAdapter<T>(params Type[] validTargets) where T : ISelectable
+    {
+        foreach (var type in validTargets)
+        {
+            ModuleDataAdapters[type] = typeof(T);
         }
     }
 }

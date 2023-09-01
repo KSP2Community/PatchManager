@@ -14,26 +14,39 @@ namespace PatchManager.Parts.Selectables;
 /// </summary>
 public sealed class ModuleSelectable : BaseSelectable
 {
-    private JToken _jToken;
-    private PartSelectable _selectable;
+    public readonly JToken SerializedData;
+    public readonly PartSelectable Selectable;
 
     /// <inheritdoc />
     public ModuleSelectable(JToken token, PartSelectable selectable)
     {
-        _jToken = token;
-        _selectable = selectable;
+        SerializedData = token;
+        Selectable = selectable;
         ElementType = ((string)token["Name"]).Replace("PartComponent", "");
         Name = ElementType;
         Classes = new();
         Children = new();
         // Now we go down the list in the data type
-        var data = token["ModuleData"];
+        var data = (JArray)token["ModuleData"];
         foreach (var moduleData in data)
         {
             Classes.Add((string)moduleData["Name"]);
             // Where we are going to have to add children ree
             // TODO: Add a specialization for ModuleEngine
-            Children.Add(new JTokenSelectable(selectable.SetModified, moduleData["DataObject"], (string)moduleData["Name"]));
+            Children.Add(GetSelectable((JObject)moduleData));
+        }
+    }
+
+    private ISelectable GetSelectable(JObject moduleData)
+    {
+        var type = Type.GetType((string)moduleData["DataType"]);
+        if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
+        {
+            return (ISelectable)Activator.CreateInstance(type, moduleData, this);
+        }
+        else
+        {
+            return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], (string)moduleData["Name"]);
         }
     }
 
@@ -51,12 +64,12 @@ public sealed class ModuleSelectable : BaseSelectable
 
     /// <inheritdoc />
     public override bool IsSameAs(ISelectable other) =>
-        other is ModuleSelectable moduleSelectable && moduleSelectable._jToken == _jToken;
+        other is ModuleSelectable moduleSelectable && moduleSelectable.SerializedData == SerializedData;
 
     /// <inheritdoc />
     public override IModifiable OpenModification()
     {
-        return new JTokenModifiable(_jToken, _selectable.SetModified);
+        return new JTokenModifiable(SerializedData, Selectable.SetModified);
     }
 
     /// <inheritdoc />
@@ -66,7 +79,7 @@ public sealed class ModuleSelectable : BaseSelectable
         {
             throw new Exception($"Unknown data module {elementType}");
         }
-        _selectable.SetModified();
+        Selectable.SetModified();
         var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
         // var dataObject = JObject.Parse(IOProvider.ToJson(instance));
         var dataObject = new JObject
@@ -86,15 +99,15 @@ public sealed class ModuleSelectable : BaseSelectable
             ["Data"] = null,
             ["DataObject"] = dataObject
         };
-        (_jToken["ModuleData"] as JArray)?.Add(trueType);
+        (SerializedData["ModuleData"] as JArray)?.Add(trueType);
         Classes.Add(dataModuleType.Name);
-        var selectable = new JTokenSelectable(_selectable.SetModified, trueType["DataObject"], dataModuleType.Name);
+        var selectable = GetSelectable(trueType);
         Children.Add(selectable);
         return selectable;
     }
 
     /// <inheritdoc />
-    public override string Serialize() => _jToken.ToString();
+    public override string Serialize() => SerializedData.ToString();
 
-    public override DataValue GetValue() => DataValue.FromJToken(_jToken);
+    public override DataValue GetValue() => DataValue.FromJToken(SerializedData);
 }
