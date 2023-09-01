@@ -42,7 +42,7 @@ if (Directory.Exists("json") && Directory.Exists("patches"))
         
     }
     
-    var universe = new Universe(Add, Console.WriteLine, Console.WriteLine, AddGenerator);
+    var universe = new Universe(Add, Console.WriteLine, Console.WriteLine, AddGenerator, new());
     universe.LoadPatchesInDirectory(new DirectoryInfo("patches"), "test");
 
     Console.WriteLine($"{universe.AllLibraries.Count} libraries loaded!");
