@@ -3,4 +3,8 @@
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
+
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);CS3021;CS1591;CS0168;CS1571;CS1573</NoWarn>
+    </PropertyGroup>
 </Project>

@@ -9,12 +9,12 @@ public class ArgumentValidator : ParseValidator<Argument>
     /// A field that is used to match against the corresponding field in a node of type <see cref="Argument"/>
     /// </summary>
     public string Name = "";
-    
+
     /// <summary>
     /// A validator that is used to match against the corresponding node in a node of type <see cref="Argument"/>
     /// </summary>
-    public ParseValidator? Value = null;    
-    
+    public ParseValidator Value = null;
+
     /// <summary>
     /// Determines if a node matches the tree defined by this validator
     /// </summary>

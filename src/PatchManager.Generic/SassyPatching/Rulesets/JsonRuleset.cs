@@ -26,6 +26,7 @@ public class JsonRuleset : IPatcherRuleSet
         return new JTokenSelectable(() => { }, JToken.Parse(jsonData), name, type);
     }
 
+    /// <inheritdoc />
     public INewAsset CreateNew(List<DataValue> dataValues)
     {
         var label = dataValues[0].String;

@@ -9,13 +9,13 @@ public class ConditionalValidator : ParseValidator<Conditional>
     /// </summary>
     public ParseValidator Condition = new FalseValidator();
     /// <summary>
-    /// A list of validators used to match against the corresponding list of nodes in a value of type <see cref="Conditional"/> 
+    /// A list of validators used to match against the corresponding list of nodes in a value of type <see cref="Conditional"/>
     /// </summary>
     public List<ParseValidator> Body = new();
     /// <summary>
     /// A validator that is used to match against the corresponding node in a node of type <see cref="Conditional"/>
     /// </summary>
-    public ParseValidator? Else = null;
+    public ParseValidator Else = null;
     /// <summary>
     /// Determines if a node matches the tree defined by this validator
     /// </summary>

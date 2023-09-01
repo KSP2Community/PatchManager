@@ -119,5 +119,6 @@ public sealed class PartSelectable : BaseSelectable
     /// <inheritdoc />
     public override string Serialize() => _modified ? _deleted ? "" : JObject.ToString() : _originalData;
 
+    /// <inheritdoc />
     public override DataValue GetValue() => OpenModification().Get();
 }

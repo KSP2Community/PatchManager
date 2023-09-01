@@ -5,6 +5,7 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <RootNamespace>PatchManager.SassyPatching.Tests</RootNamespace>
+        <NoWarn>$(NoWarn);NU1701</NoWarn>
     </PropertyGroup>
 
     <!-- References -->
