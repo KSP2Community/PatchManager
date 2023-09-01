@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection;
 using HarmonyLib;
 using KSP.Game;
 using KSP.Game.Flow;
@@ -9,6 +10,7 @@ using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Interfaces;
+using SpaceWarp.API.Mods;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -32,7 +34,13 @@ internal static class PatchingManager
     internal static int TotalPatchCount;
     public static void GenerateUniverse()
     {
-        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo,RegisterGenerator);
+        // Need to do some reflection here as I forgot to make something public :3
+        var manager = typeof(BaseSpaceWarpPlugin).Assembly.GetTypes()
+            .FirstOrDefault(type => type.Name == "SpaceWarpManager")!;
+        var field = manager.GetFields(BindingFlags.Static).FirstOrDefault(x => x.Name == "AllPlugins")!;
+        var plugins = (List<SpaceWarpPluginDescriptor>)field.GetValue(null);
+        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
+            plugins.Select(x => x.Guid).ToList());
         _initialLibraryCount = _universe.AllLibraries.Count;
     }
 
