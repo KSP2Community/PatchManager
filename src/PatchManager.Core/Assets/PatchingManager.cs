@@ -23,17 +23,18 @@ internal static class PatchingManager
     private static Universe _universe;
 
 
-    public static void GenerateUniverse()
-    {
-        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo,RegisterGenerator);
-    }
     
     private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
-    private static readonly int InitialLibraryCount = _universe.AllLibraries.Count;
+    private static int _initialLibraryCount;
     private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
 
     internal static int TotalPatchCount;
+    public static void GenerateUniverse()
+    {
+        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo,RegisterGenerator);
+        _initialLibraryCount = _universe.AllLibraries.Count;
+    }
 
     private static void RegisterPatcher(ITextPatcher patcher)
     {
@@ -108,7 +109,7 @@ internal static class PatchingManager
     {
         _universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-        var currentLibraryCount = _universe.AllLibraries.Count - InitialLibraryCount;
+        var currentLibraryCount = _universe.AllLibraries.Count - _initialLibraryCount;
 
         if (currentLibraryCount > _previousLibraryCount)
         {
