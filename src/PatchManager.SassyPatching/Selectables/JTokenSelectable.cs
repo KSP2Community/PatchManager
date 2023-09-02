@@ -90,8 +90,21 @@ public class JTokenSelectable : BaseSelectable
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        Token[elementType] = new JObject();
-        return new JTokenSelectable(_markDirty, Token[elementType],elementType);
+        var obj = new JObject();
+        if (Token is JArray jArray)
+        {
+            jArray[elementType] = obj;
+        } else if (Token is JObject jObject)
+        {
+            jObject[elementType] = obj;
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+        var n = new JTokenSelectable(_markDirty, obj, elementType);
+        Children.Add(n);
+        return n;
     }
 
     /// <inheritdoc />

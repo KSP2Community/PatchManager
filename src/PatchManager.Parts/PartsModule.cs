@@ -9,4 +9,8 @@ namespace PatchManager.Parts;
 [UsedImplicitly]
 public class PartsModule : BaseModule
 {
+    public override void Preload()
+    {
+        PartsUtilities.GrabModuleDataAdapters();
+    }
 }
