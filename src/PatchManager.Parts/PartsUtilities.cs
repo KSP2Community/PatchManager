@@ -3,9 +3,11 @@ using KSP.Sim.impl;
 
 namespace PatchManager.Parts;
 
+/// <summary>
+/// Utilities for parts patching.
+/// </summary>
 public static class PartsUtilities
 {
-    
     private static Dictionary<string, (Type componentModule, Type behaviour)> _componentModules;
 
     private static void BuildComponentModuleDictionary()
@@ -35,7 +37,7 @@ public static class PartsUtilities
             }
         }
     }
-    
+
     internal static IReadOnlyDictionary<string, (Type componentModule, Type behaviour)> ComponentModules
     {
         get
@@ -70,7 +72,7 @@ public static class PartsUtilities
             }
         }
     }
-    
+
     internal static IReadOnlyDictionary<string, Type> DataModules
     {
         get

@@ -11,13 +11,13 @@ namespace PatchManager.Resources.Selectables;
 /// </summary>
 public sealed class RecipeSelectable : BaseSelectable
 {
-    
-    private bool _modified = false;
-    private bool _deleted = false;
+
+    private bool _modified;
+    private bool _deleted;
     private readonly string _originalData;
     internal readonly JObject JObject;
     internal readonly JArray Ingredients;
-    
+
     /// <summary>
     /// Marks this resource selectable as having been modified any level down
     /// </summary>

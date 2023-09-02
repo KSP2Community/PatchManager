@@ -26,5 +26,6 @@ public class PartsRuleset : IPatcherRuleSet
         return new PartSelectable(jsonData);
     }
 
+    /// <inheritdoc />
     public INewAsset CreateNew(List<DataValue> dataValues) => throw new NotImplementedException();
 }

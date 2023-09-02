@@ -1,37 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <!-- NuGet package configuration -->
-    <PropertyGroup Label="NuGet package configuration">
-        <PackageIcon Label="Filename of the NuGet package's icon">icon.png</PackageIcon>
-        <PackageId Label="ID of the NuGet package">$(ProjectName)</PackageId>
-        <PackageLicenseUrl Label="URL to the license">https://raw.githubusercontent.com/jan-bures/PatchManager/main/LICENSE</PackageLicenseUrl>
-        <PackageOutputPath Label="Path to the NuGet package output">../../nuget</PackageOutputPath>
-        <PackageProjectUrl Label="URL to the project's website">$(RepositoryUrl)</PackageProjectUrl>
-        <PackageReadmeFile Label="Filename of the README file">README.md</PackageReadmeFile>
-        <PackageTags Label="Optional tags of the NuGet package">ksp2;mod;library</PackageTags>
-    </PropertyGroup>
-    <Target Name="IncludeAllFilesInTargetDir" AfterTargets="Build">
-        <ItemGroup>
-            <None Label="Path to NuGet package's icon" Include="$(SolutionDir)/images/icon.png" Pack="true" PackagePath="/" />
-            <None Label="Path to LICENSE file" Include="$(SolutionDir)/LICENSE" Pack="true" PackagePath="/" />
-            <None Label="Path to README file" Include="$(SolutionDir)/README.md" Pack="true" PackagePath="/" />
-            <None Label="Path to the target build" Include="$(TargetDir)/**" Pack="true" PackagePath="/lib/$(TargetFramework)" />
-        </ItemGroup>
-    </Target>
-
     <!-- References -->
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.4" PrivateAssets="all" />
-        <PackageReference Include="SpaceWarp" Version="1.3.1" />
+        <PackageReference Include="SpaceWarp" Version="1.4.0" PrivateAssets="all" />
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Core/PatchManager.Core.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Generic/PatchManager.Generic.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Parts/PatchManager.Parts.csproj" Private="false" />
-        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Resources/PatchManager.Resources.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
 </Project>

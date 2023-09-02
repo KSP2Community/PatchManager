@@ -100,13 +100,14 @@ public class Universe
     /// <param name="registerPatcher">This action receives patchers and registers them for later execution</param>
     /// <param name="errorLogger">The action to be taken to log an error</param>
     /// <param name="messageLogger">The action to be taken to log a message</param>
-    public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger, Action<ITextAssetGenerator> registerGenerator)
+    public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger, Action<ITextAssetGenerator> registerGenerator, List<string> allMods)
     {
         RegisterPatcher = registerPatcher;
         _errorLogger = errorLogger;
         MessageLogger = messageLogger;
         RegisterGenerator = registerGenerator;
         LoadedLabels = new List<string>(_preloadedLabels);
+        AllMods = allMods;
     }
 
     // TODO: Fix this so that other mods stages get their guids working

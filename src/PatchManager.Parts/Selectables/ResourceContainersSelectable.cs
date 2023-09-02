@@ -11,7 +11,7 @@ public sealed class ResourceContainersSelectable : BaseSelectable
 {
     private readonly JArray _containers;
     private PartSelectable _selectable;
-    
+
     internal ResourceContainersSelectable(JArray containers, PartSelectable selectable)
     {
         _containers = containers;
@@ -67,5 +67,6 @@ public sealed class ResourceContainersSelectable : BaseSelectable
     /// <inheritdoc />
     public override string Serialize() => _containers.ToString();
 
+    /// <inheritdoc />
     public override DataValue GetValue() => DataValue.FromJToken(_containers);
 }

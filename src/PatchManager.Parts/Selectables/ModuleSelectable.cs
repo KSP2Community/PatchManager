@@ -96,5 +96,6 @@ public sealed class ModuleSelectable : BaseSelectable
     /// <inheritdoc />
     public override string Serialize() => _jToken.ToString();
 
+    /// <inheritdoc />
     public override DataValue GetValue() => DataValue.FromJToken(_jToken);
 }
