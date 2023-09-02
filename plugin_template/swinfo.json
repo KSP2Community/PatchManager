@@ -5,7 +5,7 @@
   "name": "Patch Manager",
   "description": "A mod for generic patching needs similar to KSP 1's Module Manager.",
   "source": "https://github.com/KSP2Community/PatchManager",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "version_check": "https://raw.githubusercontent.com/KSP2Community/PatchManager/main/plugin_template/swinfo.json",
   "ksp2_version": {
     "min": "0.1.4",
