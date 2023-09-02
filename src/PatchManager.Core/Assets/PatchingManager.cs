@@ -226,17 +226,15 @@ internal static class PatchingManager
             }
         });
 
-        handle.Completed += results =>
+
+        void SaveArchive()
         {
-            if (results.Status != AsyncOperationStatus.Succeeded || unchanged)
-            {
-                return;
-            }
             var archive = CacheManager.CreateArchive(archiveFilename);
             foreach (var archiveFile in archiveFiles)
             {
-                archive.AddFile(archiveFile.Key,archiveFile.Value);
+                archive.AddFile(archiveFile.Key, archiveFile.Value);
             }
+
             archive.Save();
 
             CacheManager.CacheValidLabels.Add(label);
@@ -244,8 +242,22 @@ internal static class PatchingManager
             CacheManager.Inventory.CacheEntries.AddRangeUnique(assetsCacheEntries);
             CacheManager.SaveInventory();
 
-            Addressables.Release(results);
             Console.WriteLine($"Cache for label '{label}' rebuilt.");
+        }
+        if (handle.Status == AsyncOperationStatus.Failed && !unchanged)
+        {
+            SaveArchive();
+        }
+
+        handle.Completed += results =>
+        {
+            if (results.Status != AsyncOperationStatus.Succeeded || unchanged)
+            {
+                return;
+            }
+
+            SaveArchive();
+            Addressables.Release(results);
         };
 
         return handle;

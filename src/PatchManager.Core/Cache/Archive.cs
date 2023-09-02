@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using UnityEngine;
 
 namespace PatchManager.Core.Cache;
 
@@ -96,7 +97,6 @@ public class Archive : IDisposable
     public void Save()
     {
         AssertNotDisposed();
-
         using var fileStream = new FileStream(_path, FileMode.Create);
         _stream.Seek(0, SeekOrigin.Begin);
         _stream.CopyTo(fileStream);

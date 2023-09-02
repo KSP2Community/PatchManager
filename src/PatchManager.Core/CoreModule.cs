@@ -75,6 +75,8 @@ public class CoreModule : BaseModule
         
         Logging.LogInfo("Registering resource locator");
         Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
-        Locators.Register(new ArchiveResourceLocator());
+        var locator = new ArchiveResourceLocator();
+        Locators.Register(locator);
+        GameManager.Instance.Assets._registeredResourceLocators.Add(locator);
     }
 }
