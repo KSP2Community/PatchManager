@@ -108,6 +108,6 @@ public sealed class ModuleSelectable : BaseSelectable
 
     /// <inheritdoc />
     public override string Serialize() => SerializedData.ToString();
-
+    /// <inheritdoc />
     public override DataValue GetValue() => DataValue.FromJToken(SerializedData);
 }

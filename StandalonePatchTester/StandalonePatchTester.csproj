@@ -8,6 +8,7 @@
         <Nullable>enable</Nullable>
         <BaseOutputPath>$(SolutionDir)/build/bin/testing/$(MSBuildProjectName)</BaseOutputPath>
         <BaseIntermediateOutputPath>$(SolutionDir)build/obj/testing/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+        <NoWarn>$(NoWarn);MSB3539</NoWarn>
     </PropertyGroup>
 
     <!-- References -->

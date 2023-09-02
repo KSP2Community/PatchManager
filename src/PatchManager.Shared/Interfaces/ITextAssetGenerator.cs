@@ -1,12 +1,15 @@
 ﻿namespace PatchManager.Shared.Interfaces;
 
+/// <summary>
+/// Describes a patcher that can generate text assets
+/// </summary>
 public interface ITextAssetGenerator
 {
     /// <summary>
     /// The priority of this patcher compared to other patchers, so it can order the way they get executed
     /// </summary>
     public ulong Priority { get; }
-    
+
     /// <summary>
     /// Creates a new text asset
     /// </summary>

@@ -11,7 +11,7 @@ public class FieldValidator : ParseValidator<Field>
     /// <summary>
     /// A validator that is used to match against the corresponding node in a node of type <see cref="Field"/>
     /// </summary>
-    public ParseValidator? Indexer = null;
+    public ParseValidator Indexer = null;
     /// <summary>
     /// A validator that is used to match against the corresponding node in a node of type <see cref="Field"/>
     /// </summary>

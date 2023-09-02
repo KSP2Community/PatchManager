@@ -34,7 +34,7 @@ public class PartsRuleset : IPatcherRuleSet
     {
         return new PartSelectable(jsonData);
     }
-
+    /// <inheritdoc />
     /// <summary>
     /// Create a new part asset
     /// </summary>

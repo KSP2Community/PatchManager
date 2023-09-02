@@ -36,13 +36,9 @@
         <PackageReference Include="JsonPeek" Version="1.2.0" PrivateAssets="all"/>
     </ItemGroup>
 
-    <!-- Define the main target -->
     <Target Label="Reading properties from swinfo.json" Name="ReadPropertiesFromJson" BeforeTargets="PreBuildEvent">
         <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$">
             <Output TaskParameter="Result" ItemName="Swinfo"/>
-        </JsonPeek>
-        <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$.dependencies">
-            <Output TaskParameter="Result" ItemName="Dependencies"/>
         </JsonPeek>
 
         <!-- Extract properties from the JSON -->
@@ -55,5 +51,11 @@
             <RepositoryType>git</RepositoryType>
             <RepositoryUrl>@(Swinfo -> '%(source)')</RepositoryUrl>
         </PropertyGroup>
+    </Target>
+
+    <Target Name="ReadPackageVersionFromJson" BeforeTargets="PostBuild">
+        <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$.version">
+            <Output TaskParameter="Result" PropertyName="Version"/>
+        </JsonPeek>
     </Target>
 </Project>

@@ -1,9 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-    <PropertyGroup>
-        <GeneratePackageOnBuild Condition="$(ConfigurationName) == Release">true</GeneratePackageOnBuild>
-    </PropertyGroup>
-
     <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
         <!-- Cleanup of older builds -->
         <Message Text="Cleaning up previous build directory"/>
@@ -31,7 +27,7 @@
         <Message Text="Copying plugin dependencies to build directory"/>
         <Copy SourceFiles="$(NuGetPackageRoot)/Antlr4.Runtime.Standard/4.13.0/lib/netstandard2.0/Antlr4.Runtime.Standard.dll"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/lib"/>
-        
+
         <!-- Copying compiled plugin to build directory -->
         <Message Text="Copying plugin DLLs to build directory"/>
         <ItemGroup Label="Plugin DLLs to be copied">
@@ -74,6 +70,30 @@
         <Exec Condition="$(ConfigurationName) == Release"
               Command="powershell Compress-Archive -Path '$(SolutionDir)/dist/$(ConfigurationName)/BepInEx' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-$(Version).zip'"/>
 
+        <!-- Copy plugin DLLs and XMLs into a temporary folder for NuGet packing -->
+        <Message Text="Copying plugin DLLs and XMLs to temporary folder for NuGet packing" Condition="$(ConfigurationName) == Release"/>
+        <MakeDir Condition="$(ConfigurationName) == Release"
+                   Directories="$(SolutionDir)/temp_nuget"/>
+        <ItemGroup Label="Plugin XMLs to be copied">
+            <PluginXMLs Include="$(PluginBinPath)/**/*.xml"/>
+        </ItemGroup>
+        <Copy Condition="$(ConfigurationName) == Release"
+              SourceFiles="@(PluginDLLs)"
+              DestinationFolder="$(SolutionDir)/temp_nuget"/>
+        <Copy Condition="$(ConfigurationName) == Release"
+              SourceFiles="@(PluginXMLs)"
+              DestinationFolder="$(SolutionDir)/temp_nuget"/>
+
+        <!-- Packing NuGet package -->
+        <Message Text="Packing NuGet package" Condition="$(ConfigurationName) == Release"/>
+        <Exec Condition="$(ConfigurationName) == Release"
+              Command="nuget pack &quot;$(SolutionDir)/PatchManager.nuspec&quot; -OutputDirectory &quot;$(SolutionDir)/nuget&quot; -Properties NoWarn=NU5125;id=&quot;$(ProjectName)&quot;;version=&quot;$(Version)&quot;;authors=&quot;$(Authors)&quot;;description=&quot;$(Description)&quot;;repositoryType=&quot;$(RepositoryType)&quot;;repositoryUrl=&quot;$(RepositoryUrl)&quot;" />
+
+        <!-- Remove temporary folder -->
+        <Message Text="Removing temporary folder" Condition="$(ConfigurationName) == Release"/>
+        <RemoveDir Condition="$(ConfigurationName) == Release"
+                   Directories="$(SolutionDir)/temp_nuget"/>
+
         <!-- Deploying plugin to game folder -->
         <Message Text="Clean up the game's plugin folder" Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <RemoveDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
@@ -93,8 +113,7 @@
         <Copy Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="@(DistFolder)"
               DestinationFolder="$(KSP2DIR)/BepInEx/%(RecursiveDir)"/>
-        
-        
+
         <!-- Run game after deploy -->
         <Message Text="Run game" Condition="$(ConfigurationName) == DeployAndRun"/>
         <Exec Command="&quot;$(KSP2DIR)/KSP2_x64.exe&quot;" Condition="$(ConfigurationName) == DeployAndRun"/>

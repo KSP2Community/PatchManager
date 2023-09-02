@@ -8,7 +8,7 @@ public class CallArgumentValidator : ParseValidator<CallArgument>
     /// <summary>
     /// A field that is used to match against the corresponding field in a node of type <see cref="CallArgument"/>
     /// </summary>
-    public string? ArgumentName = null;
+    public string ArgumentName = null;
     /// <summary>
     /// A validator that is used to match against the corresponding node in a node of type <see cref="CallArgument"/>
     /// </summary>
