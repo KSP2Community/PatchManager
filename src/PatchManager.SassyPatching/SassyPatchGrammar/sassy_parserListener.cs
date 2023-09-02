@@ -240,30 +240,6 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>sel_element</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterSel_element([NotNull] sassy_parser.Sel_elementContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>sel_element</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitSel_element([NotNull] sassy_parser.Sel_elementContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>sel_ruleset</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterSel_ruleset([NotNull] sassy_parser.Sel_rulesetContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>sel_ruleset</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitSel_ruleset([NotNull] sassy_parser.Sel_rulesetContext context);
-	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_child</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
@@ -275,18 +251,6 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_child([NotNull] sassy_parser.Sel_childContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>sel_add_element</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>sel_add_element</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_class</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
@@ -324,6 +288,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_intersection([NotNull] sassy_parser.Sel_intersectionContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_ensure</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_ensure([NotNull] sassy_parser.Sel_ensureContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_ensure</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_ensure([NotNull] sassy_parser.Sel_ensureContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_everything</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
@@ -335,6 +311,42 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_everything([NotNull] sassy_parser.Sel_everythingContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_element([NotNull] sassy_parser.Sel_elementContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_element([NotNull] sassy_parser.Sel_elementContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_ruleset([NotNull] sassy_parser.Sel_rulesetContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_ruleset([NotNull] sassy_parser.Sel_rulesetContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_add_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_add_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_without_class</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.

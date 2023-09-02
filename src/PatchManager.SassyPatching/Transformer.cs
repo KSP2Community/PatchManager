@@ -214,6 +214,9 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new IntersectionSelector(context.GetCoordinate(), Visit(context.lhs) as Selector,
             Visit(context.rhs) as Selector);
 
+    public override Node VisitSel_ensure(sassy_parser.Sel_ensureContext context) =>
+        new EnsureSelector(context.GetCoordinate(), context.ENSURE().GetText().TrimFirst());
+
     /// <inheritdoc />
     public override Node VisitSel_everything(sassy_parser.Sel_everythingContext context)
         => new WildcardSelector(context.GetCoordinate());

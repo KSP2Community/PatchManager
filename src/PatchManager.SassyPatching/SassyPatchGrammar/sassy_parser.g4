@@ -53,6 +53,7 @@ selector                : ELEMENT                                               
                         | CLASS                                                         #sel_class
                         | NAME                                                          #sel_name
                         | RULESET                                                       #sel_ruleset
+                        | ENSURE                                                        #sel_ensure
                         | LEFT_PAREN internal_selector=selector RIGHT_PAREN             #sel_sub
                         | lhs=selector COMMA rhs=selector_no_children                   #sel_combination
                         | parent=selector GREATER_THAN child=selector_no_children       #sel_child
