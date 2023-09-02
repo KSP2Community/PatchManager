@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Reflection;
-using HarmonyLib;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -14,7 +13,6 @@ using SpaceWarp.API.Mods;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using Coroutine = MoonSharp.Interpreter.Coroutine;
 
 namespace PatchManager.Core.Assets;
 
@@ -24,8 +22,6 @@ internal static class PatchingManager
     private static readonly List<ITextAssetGenerator> Generators = new();
     private static Universe _universe;
 
-
-    
     private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
     private static int _initialLibraryCount;
@@ -37,7 +33,8 @@ internal static class PatchingManager
         // Need to do some reflection here as I forgot to make something public :3
         var manager = typeof(BaseSpaceWarpPlugin).Assembly.GetTypes()
             .FirstOrDefault(type => type.Name == "SpaceWarpManager")!;
-        var field = manager.GetFields(BindingFlags.Static).FirstOrDefault(x => x.Name == "AllPlugins")!;
+        var field = manager.GetFields(BindingFlags.Static|BindingFlags.NonPublic)
+            .FirstOrDefault(x => x.Name == "AllPlugins")!;
         var plugins = (List<SpaceWarpPluginDescriptor>)field.GetValue(null);
         _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
             plugins.Select(x => x.Guid).ToList());
@@ -192,7 +189,7 @@ internal static class PatchingManager
                 {
                     Label = name,
                     ArchiveFilename = archiveFilename,
-                    Assets = new List<string> { name } 
+                    Assets = new List<string> { name }
                 });
             }
             createdAsset.Clear();
@@ -277,7 +274,7 @@ internal static class PatchingManager
             {
                 var text = generator.Create(out var label, out var name);
                 Logging.LogInfo($"Generated an asset with the label {label}, and name {name}:\n{text}");
-                
+
                 if (!_createdAssets.ContainsKey(label))
                     _createdAssets[label] = new List<(string name, string text)>();
                 _createdAssets[label].Add((name, text));
@@ -293,8 +290,8 @@ internal static class PatchingManager
 
     public static void RebuildAllCache(Action resolve, Action<string> reject)
     {
-        
-        
+
+
         var distinctKeys = _universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
         LoadingBarPatch.InjectPatchManagerTips = true;
@@ -334,7 +331,7 @@ internal static class PatchingManager
     {
         while (!handle.IsDone)
         {
-            // "Shuffle" it 
+            // "Shuffle" it
             GameManager.Instance.Game.UI.LoadingBar.ShuffleLoadingTip();
             yield return null;
         }
