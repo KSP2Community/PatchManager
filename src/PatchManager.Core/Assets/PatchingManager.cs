@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -9,7 +10,9 @@ using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Interfaces;
+using SpaceWarp;
 using SpaceWarp.API.Mods;
+using SpaceWarp.API.Versions;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -28,16 +31,28 @@ internal static class PatchingManager
     private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
 
     internal static int TotalPatchCount;
+    private static Regex _versionPreprocessRegex = new Regex(@"[^0-9.]");
     public static void GenerateUniverse()
     {
-        // Need to do some reflection here as I forgot to make something public :3
-        var manager = typeof(BaseSpaceWarpPlugin).Assembly.GetTypes()
-            .FirstOrDefault(type => type.Name == "SpaceWarpManager")!;
-        var field = manager.GetFields(BindingFlags.Static|BindingFlags.NonPublic)
-            .FirstOrDefault(x => x.Name == "AllPlugins")!;
-        var plugins = (List<SpaceWarpPluginDescriptor>)field.GetValue(null);
+        List<string> loadedPlugins;
+        var swinfo = PluginList.TryGetSwinfo(SpaceWarpPlugin.ModGuid);
+        if (swinfo != null && VersionUtility.IsOlderThan(_versionPreprocessRegex.Replace(swinfo.Version, ""), "1.5.0"))
+        {
+            // Need to do some reflection here as I forgot to make something public :3
+            var manager = typeof(BaseSpaceWarpPlugin).Assembly.GetTypes()
+                .FirstOrDefault(type => type.Name == "SpaceWarpManager")!;
+            var field = manager.GetFields(BindingFlags.Static | BindingFlags.NonPublic)
+                .FirstOrDefault(x => x.Name == "AllPlugins")!;
+            var plugins = (List<SpaceWarpPluginDescriptor>)field.GetValue(null);
+            loadedPlugins = plugins.Select(x => x.Guid).ToList();
+        }
+        else
+        {
+            //TODO: Implement once SW 1.5 is out   
+            loadedPlugins = new();
+        }
         _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
-            plugins.Select(x => x.Guid).ToList());
+            loadedPlugins);
         _initialLibraryCount = _universe.AllLibraries.Count;
     }
 
