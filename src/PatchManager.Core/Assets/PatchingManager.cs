@@ -31,12 +31,12 @@ internal static class PatchingManager
     private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
 
     internal static int TotalPatchCount;
-    private static Regex _versionPreprocessRegex = new Regex(@"[^0-9.]");
+    private static readonly Regex VersionPreprocessRegex = new Regex(@"[^0-9.]");
     public static void GenerateUniverse()
     {
         List<string> loadedPlugins;
         var swinfo = PluginList.TryGetSwinfo(SpaceWarpPlugin.ModGuid);
-        if (swinfo != null && VersionUtility.IsOlderThan(_versionPreprocessRegex.Replace(swinfo.Version, ""), "1.5.0"))
+        if (swinfo != null && VersionUtility.IsOlderThan(VersionPreprocessRegex.Replace(swinfo.Version, ""), "1.5.0"))
         {
             // Need to do some reflection here as I forgot to make something public :3
             var manager = typeof(BaseSpaceWarpPlugin).Assembly.GetTypes()

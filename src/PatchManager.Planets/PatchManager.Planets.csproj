@@ -6,4 +6,14 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="HarmonyX" Version="2.10.2" />
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.4" />
+      <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PatchManager.Shared\PatchManager.Shared.csproj" />
+    </ItemGroup>
+
 </Project>
