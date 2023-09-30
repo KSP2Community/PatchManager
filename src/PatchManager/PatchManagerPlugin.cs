@@ -45,7 +45,7 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Parts.dll"));
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Generic.dll"));
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Resources.dll"));
-        ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Planets.dll"));
+        // ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Planets.dll"));
     }
 
     private void Start()
