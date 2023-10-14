@@ -75,7 +75,7 @@ public sealed class RecipeSelectable : BaseSelectable
     {
         var obj = new JObject
         {
-            ["name"] = "Unknown",
+            ["name"] = elementType,
             ["unitsPerRecipeUnit"] = 0.00
         };
         var child = new JTokenSelectable(SetModified, obj, tok => tok["name"].Value<string>(), "ingredient");
