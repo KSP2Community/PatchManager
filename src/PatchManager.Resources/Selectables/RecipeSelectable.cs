@@ -85,8 +85,8 @@ public sealed class RecipeSelectable : BaseSelectable
     }
 
     /// <inheritdoc />
-    public override string Serialize() => throw new NotImplementedException();
+    public override string Serialize() => _modified ? _deleted ? "" : JObject.ToString() : _originalData;
 
     /// <inheritdoc />
-    public override DataValue GetValue() => throw new NotImplementedException();
+    public override DataValue GetValue() => OpenModification().Get();
 }
