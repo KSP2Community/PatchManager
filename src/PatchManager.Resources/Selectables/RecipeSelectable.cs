@@ -40,7 +40,7 @@ public sealed class RecipeSelectable : BaseSelectable
         JObject = JObject.Parse(data);
         Classes = new() { "recipe" };
         Children = new();
-        var resourceData = JObject["data"];
+        var resourceData = JObject["recipeData"];
         Name = (string)resourceData["name"];
         Ingredients = (JArray)resourceData["ingredients"];
         ElementType = "recipe";
