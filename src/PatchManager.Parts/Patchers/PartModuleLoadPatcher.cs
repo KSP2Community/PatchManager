@@ -23,7 +23,21 @@ internal static class PartModuleLoadPatcher
             if (prefab.GetComponent(behaviourType) == null)
             {
                 // Debug.Log($"ApplyOnGameObjectOAB - {obj.PartData.partName} adding {behaviourType.FullName}");
-                prefab.AddComponent(behaviourType);
+                var instance = prefab.AddComponent(behaviourType);
+                var module = obj.PartData.serializedPartModules
+                    .FirstOrDefault(module => module.BehaviourType == behaviourType);
+                foreach (var field in behaviourType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+                             .Concat(behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance)))
+                {
+                    if (field.GetCustomAttributes(typeof(SerializeField), false).Any())
+                    {
+                        if (field.FieldType.IsSubclassOf(typeof(ModuleData)))
+                        {
+                            var data = module.ModuleData.FirstOrDefault(x => x.DataObject.GetType() == field.FieldType);
+                            field.SetValue(instance, data.DataObject);
+                        }    
+                    }
+                }
             }
         }
 
@@ -57,7 +71,21 @@ internal static class PartModuleLoadPatcher
             if (instance.GetComponent(behaviourType) == null)
             {
                 // Debug.Log($"ApplyOnGameObjectFlight - {model.Part.PartName} adding {behaviourType.FullName}");
-                instance.AddComponent(behaviourType);
+                var inst = instance.AddComponent(behaviourType);
+                var module = part.PartData.serializedPartModules
+                    .FirstOrDefault(module => module.BehaviourType == behaviourType);
+                foreach (var field in behaviourType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+                             .Concat(behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance)))
+                {
+                    if (field.GetCustomAttributes(typeof(SerializeField), false).Any())
+                    {
+                        if (field.FieldType.IsSubclassOf(typeof(ModuleData)))
+                        {
+                            var data = module.ModuleData.FirstOrDefault(x => x.DataObject.GetType() == field.FieldType);
+                            field.SetValue(inst, data.DataObject);
+                        }    
+                    }
+                }
             }
         }
 
