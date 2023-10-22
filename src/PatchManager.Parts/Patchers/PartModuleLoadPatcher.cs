@@ -4,6 +4,7 @@ using KSP.OAB;
 using KSP.Sim;
 using KSP.Sim.Definitions;
 using KSP.Sim.impl;
+using PatchManager.Shared;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,23 +18,27 @@ internal static class PartModuleLoadPatcher
     internal static void ApplyOnGameObjectOAB(IObjectAssemblyAvailablePart obj, ref GameObject prefab)
     {
         // Debug.Log($"ApplyOnGameObjectOAB - {obj.PartData.partName} beginning patch");
-        foreach (var behaviourType in obj.PartData.serializedPartModules.Select(module => module.BehaviourType))
+        foreach (var module in obj.PartData.serializedPartModules)
         {
+            var behaviourType = module.BehaviourType;
             // Debug.Log($"ApplyOnGameObjectOAB - {obj.PartData.partName} testing {behaviourType.FullName}");
             if (prefab.GetComponent(behaviourType) == null)
             {
                 // Debug.Log($"ApplyOnGameObjectOAB - {obj.PartData.partName} adding {behaviourType.FullName}");
                 var instance = prefab.AddComponent(behaviourType);
-                var module = obj.PartData.serializedPartModules
-                    .FirstOrDefault(module => module.BehaviourType == behaviourType);
+                // Logging.LogInfo($"Attempting to setup serialized fields on {obj.Name} of type {behaviourType}");
                 foreach (var field in behaviourType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
                              .Concat(behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance)))
                 {
+                    // Logging.LogInfo($"Found field: {field.Name} of type {field.FieldType}"); 
                     if (field.GetCustomAttributes(typeof(SerializeField), false).Any())
                     {
+                        // Logging.LogInfo($"Field has SerializeField attribute");
                         if (field.FieldType.IsSubclassOf(typeof(ModuleData)))
                         {
+                            // Logging.LogInfo($"Field type {field.FieldType} is subclass of ModuleData, setting value");
                             var data = module.ModuleData.FirstOrDefault(x => x.DataObject.GetType() == field.FieldType);
+                            data.DataObject.RebuildDataContext();
                             field.SetValue(instance, data.DataObject);
                         }    
                     }
@@ -65,23 +70,27 @@ internal static class PartModuleLoadPatcher
 
         var part = model.Part;
         // Debug.Log($"ApplyOnGameObjectFlight - {model.Part.PartName} beginning patch");
-        foreach (var behaviourType in part.PartData.serializedPartModules.Select(module => module.BehaviourType))
+        foreach (var module in part.PartData.serializedPartModules)
         {
+            var behaviourType = module.BehaviourType;
             // Debug.Log($"ApplyOnGameObjectFlight - {model.Part.PartName} testing {behaviourType.FullName}");
             if (instance.GetComponent(behaviourType) == null)
             {
                 // Debug.Log($"ApplyOnGameObjectFlight - {model.Part.PartName} adding {behaviourType.FullName}");
                 var inst = instance.AddComponent(behaviourType);
-                var module = part.PartData.serializedPartModules
-                    .FirstOrDefault(module => module.BehaviourType == behaviourType);
+                // Logging.LogInfo($"Attempting to setup serialized fields on {part.Name} of type {behaviourType}");
                 foreach (var field in behaviourType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
                              .Concat(behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance)))
                 {
+                    // Logging.LogInfo($"Found field: {field.Name} of type {field.FieldType}"); 
                     if (field.GetCustomAttributes(typeof(SerializeField), false).Any())
                     {
+                        // Logging.LogInfo($"Field has SerializeField attribute");
                         if (field.FieldType.IsSubclassOf(typeof(ModuleData)))
                         {
+                            // Logging.LogInfo($"Field type {field.FieldType} is subclass of ModuleData, setting value");
                             var data = module.ModuleData.FirstOrDefault(x => x.DataObject.GetType() == field.FieldType);
+                            data.DataObject.RebuildDataContext();
                             field.SetValue(inst, data.DataObject);
                         }    
                     }
