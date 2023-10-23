@@ -1,5 +1,7 @@
 ﻿using JetBrains.Annotations;
+using PatchManager.Parts.Patchers;
 using PatchManager.Shared.Modules;
+using SpaceWarp.API.Loading;
 
 namespace PatchManager.Parts;
 
@@ -12,5 +14,6 @@ public class PartsModule : BaseModule
     public override void Preload()
     {
         PartsUtilities.GrabModuleDataAdapters();
+        SaveLoad.AddFlowActionToCampaignLoadAfter<UpdateSavedVesselPartDefinitions>("Parsing parts text assets");
     }
 }
