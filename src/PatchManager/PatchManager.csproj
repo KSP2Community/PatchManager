@@ -6,7 +6,7 @@
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.4" PrivateAssets="all" />
-        <PackageReference Include="SpaceWarp" Version="1.4.0" PrivateAssets="all" />
+        <PackageReference Include="SpaceWarp" Version="1.5.1" PrivateAssets="all" />
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Core/PatchManager.Core.csproj" Private="false" />

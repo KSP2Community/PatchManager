@@ -34,23 +34,7 @@ internal static class PatchingManager
     private static readonly Regex VersionPreprocessRegex = new Regex(@"[^0-9.]");
     public static void GenerateUniverse()
     {
-        List<string> loadedPlugins;
-        var swinfo = PluginList.TryGetSwinfo(SpaceWarpPlugin.ModGuid);
-        if (swinfo != null && VersionUtility.IsOlderThan(VersionPreprocessRegex.Replace(swinfo.Version, ""), "1.5.0"))
-        {
-            // Need to do some reflection here as I forgot to make something public :3
-            var manager = typeof(BaseSpaceWarpPlugin).Assembly.GetTypes()
-                .FirstOrDefault(type => type.Name == "SpaceWarpManager")!;
-            var field = manager.GetFields(BindingFlags.Static | BindingFlags.NonPublic)
-                .FirstOrDefault(x => x.Name == "AllPlugins")!;
-            var plugins = (List<SpaceWarpPluginDescriptor>)field.GetValue(null);
-            loadedPlugins = plugins.Select(x => x.Guid).ToList();
-        }
-        else
-        {
-            //TODO: Implement once SW 1.5 is out   
-            loadedPlugins = new();
-        }
+        var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
         _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
             loadedPlugins);
         _initialLibraryCount = _universe.AllLibraries.Count;

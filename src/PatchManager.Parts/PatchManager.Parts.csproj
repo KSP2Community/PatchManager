@@ -7,6 +7,6 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.4" />
-      <PackageReference Include="SpaceWarp" Version="1.4.0" />
+      <PackageReference Include="SpaceWarp" Version="1.5.1" />
     </ItemGroup>
 </Project>
