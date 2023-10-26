@@ -3,7 +3,7 @@
     <!-- References -->
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.5" PrivateAssets="all" />
-        <PackageReference Include="SpaceWarp" Version="1.5.1" PrivateAssets="all" />
+        <PackageReference Include="SpaceWarp" Version="1.5.2" PrivateAssets="all" />
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
