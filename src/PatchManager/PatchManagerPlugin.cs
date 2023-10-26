@@ -6,6 +6,7 @@ using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using SpaceWarp;
 using SpaceWarp.API.Mods;
+using UnityEngine.UIElements;
 
 namespace PatchManager;
 
@@ -46,6 +47,10 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Generic.dll"));
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Resources.dll"));
         // ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Planets.dll"));
+        foreach (var module in ModuleManager.Modules)
+        {
+            module.BindConfiguration(SWConfiguration);
+        }
     }
 
     private void Start()
@@ -67,5 +72,48 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
     public override void OnInitialized()
     {
         ModuleManager.LoadAll();
+    }
+
+    public override void OnPostInitialized()
+    {
+        InitializePatchManagerDetailsFoldout();
+    }
+    
+    internal void InitializePatchManagerDetailsFoldout()
+    {
+        VisualElement GeneratePatchManagerText()
+        {
+            var detailsContainer = new ScrollView();
+            var str = "Loaded modules: ";
+            var toAdd = new List<VisualElement>();
+            foreach (var module in ModuleManager.Modules)
+            {
+                str += $"\n- {module.GetType().Assembly.GetName().Name}";
+                var details = module.GetDetails();
+                if (details != null)
+                {
+                    toAdd.Add(details);
+                }
+            }
+            str += "\n";
+            var loadedModules = new TextElement
+            {
+                text = str,
+                visible = true,
+                style =
+                {
+                    display = DisplayStyle.Flex
+                }
+            };
+            detailsContainer.Add(loadedModules);
+            foreach (var element in toAdd)
+            {
+                detailsContainer.Add(element);
+            }
+            detailsContainer.visible = true;
+            detailsContainer.style.display = DisplayStyle.Flex;
+            return detailsContainer;
+        }
+        SpaceWarp.API.UI.ModList.RegisterDetailsFoldoutGenerator(ModGuid, GeneratePatchManagerText);
     }
 }

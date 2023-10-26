@@ -1,4 +1,8 @@
-﻿namespace PatchManager.Shared.Modules;
+﻿using JetBrains.Annotations;
+using SpaceWarp.API.Configuration;
+using UnityEngine.UIElements;
+
+namespace PatchManager.Shared.Modules;
 
 /// <summary>
 /// Base interface for PatchManager DLL modules.
@@ -16,4 +20,17 @@ public interface IModule
     /// Use this to register resource locators and do things that require the GameInstance.
     /// </summary>
     public void Load();
+
+    /// <summary>
+    /// Called when getting the details information for patch manager after game load.
+    /// </summary>
+    /// <returns>A visual element describing information about the module or null for no information</returns>
+    [CanBeNull]
+    public VisualElement GetDetails();
+
+    /// <summary>
+    /// Called to bind configuration to this module specifically.
+    /// </summary>
+    /// <param name="modConfiguration">The configuration of the base Patch Manager mod to bind to</param>
+    public void BindConfiguration(IConfigFile modConfiguration);
 }

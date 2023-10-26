@@ -7,9 +7,11 @@ using PatchManager.Core.Assets;
 using PatchManager.Core.Flow;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using SpaceWarp.API.Configuration;
 using SpaceWarp.API.Mods.JSON;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.UIElements;
 
 namespace PatchManager.Core;
 
@@ -19,7 +21,9 @@ namespace PatchManager.Core;
 [UsedImplicitly]
 public class CoreModule : BaseModule
 {
+    private ConfigValue<bool> _shouldAlwaysInvalidate;
 
+    private bool _wasCacheInvalidated = false;
     private static bool ShouldLoad(string[] disabled, string modInfoLocation)
     {
         if (!File.Exists(modInfoLocation))
@@ -58,8 +62,9 @@ public class CoreModule : BaseModule
 
         var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
-        if (!isValid)
+        if (!isValid || _shouldAlwaysInvalidate.Value)
         {
+            _wasCacheInvalidated = true;
             SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
                 () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
             SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
@@ -76,5 +81,50 @@ public class CoreModule : BaseModule
         Logging.LogInfo("Registering resource locator");
         Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
         Locators.Register(new ArchiveResourceLocator());
+    }
+
+    /// <inheritdoc />
+    public override VisualElement GetDetails()
+    {
+        var foldout = new Foldout
+        {
+            text = "PatchManager.Core",
+            style =
+            {
+                display = DisplayStyle.Flex
+            },
+            visible = true
+        };
+        var text = new TextElement();
+        text.text += $"Amount of loaded patchers: {PatchingManager.Patchers.Count}\n";
+        text.text += $"Amount of loaded generators: {PatchingManager.Generators.Count}\n";
+        text.text += $"Amount of loaded libraries: {PatchingManager.Universe.AllLibraries.Count}\n";
+        if (_wasCacheInvalidated)
+        {
+            text.text += $"Total amount of patches: {PatchingManager.TotalPatchCount}\n";
+        }
+        else
+        {
+            text.text += "Total amount of patches: Unknown (loaded from cache)\n";
+        }
+
+        text.text += "Patched labels:";
+        foreach (var label in PatchingManager.Universe.LoadedLabels)
+        {
+            text.text += $"\n- {label}";
+        }
+
+        text.visible = true;
+        text.style.display = DisplayStyle.Flex;
+        foldout.Add(text);
+        
+        return foldout;
+    }
+
+    /// <inheritdoc />
+    public override void BindConfiguration(IConfigFile modConfiguration)
+    {
+        _shouldAlwaysInvalidate = new (modConfiguration.Bind("Core", "Always Invalidate Cache", false,
+            "Should patch manager always invalidate its cache upon load"));
     }
 }

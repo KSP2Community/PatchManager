@@ -21,9 +21,9 @@ namespace PatchManager.Core.Assets;
 
 internal static class PatchingManager
 {
-    private static readonly List<ITextPatcher> Patchers = new();
-    private static readonly List<ITextAssetGenerator> Generators = new();
-    private static Universe _universe;
+    internal static readonly List<ITextPatcher> Patchers = new();
+    internal static readonly List<ITextAssetGenerator> Generators = new();
+    internal static Universe Universe;
 
     private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
@@ -35,9 +35,9 @@ internal static class PatchingManager
     public static void GenerateUniverse()
     {
         var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
-        _universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
+        Universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
             loadedPlugins);
-        _initialLibraryCount = _universe.AllLibraries.Count;
+        _initialLibraryCount = Universe.AllLibraries.Count;
     }
 
     private static void RegisterPatcher(ITextPatcher patcher)
@@ -54,7 +54,8 @@ internal static class PatchingManager
         }
 
         Patchers.Add(patcher);
-    }    private static void RegisterGenerator(ITextAssetGenerator generator)
+    }    
+    private static void RegisterGenerator(ITextAssetGenerator generator)
     {
         for (var index = 0; index < Generators.Count; index++)
         {
@@ -111,9 +112,9 @@ internal static class PatchingManager
 
     public static void ImportModPatches(string modName, string modFolder)
     {
-        _universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
+        Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-        var currentLibraryCount = _universe.AllLibraries.Count - _initialLibraryCount;
+        var currentLibraryCount = Universe.AllLibraries.Count - _initialLibraryCount;
 
         if (currentLibraryCount > _previousLibraryCount)
         {
@@ -131,7 +132,7 @@ internal static class PatchingManager
 
     public static void RegisterPatches()
     {
-        _universe.RegisterAllPatches();
+        Universe.RegisterAllPatches();
         Logging.LogInfo($"{Patchers.Count} patchers registered!");
         Logging.LogInfo($"{Generators.Count} generators registered!");
     }
@@ -303,7 +304,7 @@ internal static class PatchingManager
     {
 
 
-        var distinctKeys = _universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
+        var distinctKeys = Universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
         LoadingBarPatch.InjectPatchManagerTips = true;
         GenericFlowAction CreateIndexedFlowAction(int idx)
