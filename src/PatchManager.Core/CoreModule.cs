@@ -4,6 +4,7 @@ using KSP.Game;
 using KSP.Game.Flow;
 using Newtonsoft.Json;
 using PatchManager.Core.Assets;
+using PatchManager.Core.Cache;
 using PatchManager.Core.Flow;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
@@ -60,7 +61,13 @@ public class CoreModule : BaseModule
 
         PatchingManager.RegisterPatches();
 
-        var isValid = PatchingManager.InvalidateCacheIfNeeded(_shouldAlwaysInvalidate.Value);
+        if (_shouldAlwaysInvalidate.Value)
+        {
+            CacheManager.CreateCacheFolderIfNotExists();
+            CacheManager.InvalidateCache();
+        }
+        
+        var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
         if (!isValid)
         {

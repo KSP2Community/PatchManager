@@ -141,15 +141,11 @@ internal static class PatchingManager
     /// Invalidates the cache if the checksum is different.
     /// </summary>
     /// <returns>True if the cache is valid, false if it was invalidated.</returns>
-    public static bool InvalidateCacheIfNeeded(bool alwaysInvalidate)
+    public static bool InvalidateCacheIfNeeded()
     {
         var checksum = Hash.FromJsonObject(CurrentPatchHashes);
 
-        if (alwaysInvalidate)
-        {
-            Logging.LogInfo("Invalidating cache due to settings");
-        }
-        else if (CacheManager.Inventory.Checksum == checksum)
+        if (CacheManager.Inventory.Checksum == checksum)
         {
             Logging.LogInfo("Cache is valid, skipping rebuild.");
             CacheManager.CacheValidLabels.AddRange(CacheManager.Inventory.CacheEntries.Keys);
