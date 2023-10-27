@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using KSP.Game;
@@ -54,7 +55,7 @@ internal static class PatchingManager
         }
 
         Patchers.Add(patcher);
-    }    
+    }
     private static void RegisterGenerator(ITextAssetGenerator generator)
     {
         for (var index = 0; index < Generators.Count; index++)
@@ -266,7 +267,7 @@ internal static class PatchingManager
     private static bool IsUsefulKey(string key)
     {
         key = key.Replace(".bundle", "").Replace(".json", "");
-        if (Int32.TryParse(key, out _))
+        if (int.TryParse(key, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
         {
             return false;
         }

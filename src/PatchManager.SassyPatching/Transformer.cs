@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Nodes;
+﻿using System.Globalization;
+using PatchManager.SassyPatching.Nodes;
 using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Nodes.Expressions.Binary;
@@ -10,6 +11,7 @@ using PatchManager.SassyPatching.Nodes.Statements.FunctionLevel;
 using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 using SassyPatchGrammar;
+using UnityEngine;
 
 namespace PatchManager.SassyPatching;
 
@@ -71,7 +73,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitStage_def(sassy_parser.Stage_defContext context)
     {
         var location = context.GetCoordinate();
-        return ulong.TryParse(context.priority.Text,
+        return ulong.TryParse(context.priority.Text, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var priority)
             ? new StageDefinition(location,
                 context.stage.Text.Unescape(),
@@ -100,6 +102,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 .ToList(),
             context.body.function_statement().Select(Visit)
                 .ToList());
+
     /// <inheritdoc />
     public override Node VisitMixin_def(sassy_parser.Mixin_defContext context) =>
         new Mixin(context.GetCoordinate(),
@@ -121,7 +124,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond) as Expression, 
+            Visit(context.cond) as Expression,
             context.top_level_statement()
                 .Select(Visit)
                 .ToList(),
@@ -145,7 +148,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond) as Expression, 
+            Visit(context.cond) as Expression,
             context.top_level_statement()
                 .Select(Visit)
                 .ToList(),
@@ -286,7 +289,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         }
 
         return new Conditional(context.GetCoordinate(),
-            Visit(context.cond) as Expression, 
+            Visit(context.cond) as Expression,
             context.selector_statement()
                 .Select(Visit)
                 .ToList(),
@@ -354,7 +357,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitNumber_indexor(sassy_parser.Number_indexorContext context)
     {
         var location = context.GetCoordinate();
-        return ulong.TryParse(context.num.Text,
+        return ulong.TryParse(context.num.Text, NumberStyles.Number, CultureInfo.InvariantCulture,
             out var index)
             ? new NumberIndexer(location,
                 index)
@@ -405,7 +408,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitLocal_variable_reference(sassy_parser.Local_variable_referenceContext context) =>
         new LocalVariableReference(context.GetCoordinate(), context.LOCALVARIABLE().GetText().TrimFirst().TrimFirst());
-    
+
 
     /// <inheritdoc />
     public override Node VisitIndexor(sassy_parser.IndexorContext context) =>
@@ -506,15 +509,17 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitNumber_value(sassy_parser.Number_valueContext context)
     {
         var location = context.GetCoordinate();
-        if (long.TryParse(context.NUMBER().GetText(), out var lng))
+        if (long.TryParse(context.NUMBER().GetText(), NumberStyles.Number, CultureInfo.InvariantCulture, out var lng))
         {
             return new ValueNode(location, lng);
         }
-        if (double.TryParse(context.NUMBER().GetText(), out var dbl))
+
+        if (double.TryParse(context.NUMBER().GetText(), NumberStyles.Number, CultureInfo.InvariantCulture, out var dbl))
         {
             return new ValueNode(location, dbl);
         }
 
+        Debug.Log($"Number: {context.NUMBER().GetText()}");
         return Error(location, "Numbers must be parsable as a double precision floating point number");
     }
 
