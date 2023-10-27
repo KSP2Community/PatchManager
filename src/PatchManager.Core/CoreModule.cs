@@ -60,9 +60,9 @@ public class CoreModule : BaseModule
 
         PatchingManager.RegisterPatches();
 
-        var isValid = PatchingManager.InvalidateCacheIfNeeded();
+        var isValid = PatchingManager.InvalidateCacheIfNeeded(_shouldAlwaysInvalidate.Value);
 
-        if (!isValid || _shouldAlwaysInvalidate.Value)
+        if (!isValid)
         {
             _wasCacheInvalidated = true;
             SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
