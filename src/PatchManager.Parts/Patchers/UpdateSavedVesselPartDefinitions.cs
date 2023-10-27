@@ -17,7 +17,10 @@ public class UpdateSavedVesselPartDefinitions : FlowAction
     public override void DoAction(Action resolve, Action<string> reject)
     {
         if (_loadGameData.SavedGame.Vessels == null)
+        {
+            resolve();
             return;
+        }
         foreach (var vessel in _loadGameData.SavedGame.Vessels)
         {
             // Lets change only a few things
