@@ -169,6 +169,7 @@ public class Universe
     /// <param name="modId">The ID of the mod to load the guid as</param>
     public void LoadPatchesInDirectory(DirectoryInfo directory, string modId)
     {
+        // MessageLogger.Invoke($"Loading patches from {directory} (modId: {modId})");
         var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
         foreach (var library in directory.EnumerateFiles("_*.patch", SearchOption.AllDirectories))
         {
@@ -187,6 +188,7 @@ public class Universe
             return;
         try
         {
+            MessageLogger.Invoke($"Loading patch {modId}:{patch.Name}");
             var charStream = CharStreams.fromPath(patch.FullName);
             var lexer = new sassy_lexer(charStream);
             var lexerErrorGenerator = new LexerListener($"{modId}:{patch.Name}", _errorLogger);
@@ -218,6 +220,7 @@ public class Universe
         string name = modId + ":" + library.Name.Replace(".patch", "").TrimFirst();
         try
         {
+            MessageLogger.Invoke($"Loading library {name}");
             var charStream = CharStreams.fromPath(library.FullName);
             var lexerErrorGenerator = new LexerListener(name, _errorLogger);
             var lexer = new sassy_lexer(charStream);

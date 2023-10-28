@@ -509,7 +509,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitNumber_value(sassy_parser.Number_valueContext context)
     {
         var location = context.GetCoordinate();
-        if (long.TryParse(context.NUMBER().GetText(), NumberStyles.Number, CultureInfo.InvariantCulture, out var lng))
+        if (long.TryParse(context.NUMBER().GetText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var lng))
         {
             return new ValueNode(location, lng);
         }

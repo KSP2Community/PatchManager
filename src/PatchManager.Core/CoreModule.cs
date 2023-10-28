@@ -50,13 +50,13 @@ public class CoreModule : BaseModule
             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
         var modFolders = Directory.GetDirectories(Paths.PluginPath, "*",SearchOption.AllDirectories)
-            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")));
+            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x => (Folder: x, Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))));
 
         foreach (var modFolder in modFolders)
         {
-            Logging.LogInfo($"Loading patchers from {modFolder}");
-            var modName = Path.GetDirectoryName(modFolder);
-            PatchingManager.ImportModPatches(modName, modFolder);
+            Logging.LogInfo($"Loading patchers from {modFolder.Folder}");
+            // var modName = Path.GetDirectoryName(modFolder);
+            PatchingManager.ImportModPatches(modFolder.Info.ModID, modFolder.Folder);
         }
 
         PatchingManager.RegisterPatches();
