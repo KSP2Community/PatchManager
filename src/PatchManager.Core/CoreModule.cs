@@ -61,7 +61,7 @@ public class CoreModule : BaseModule
 
         PatchingManager.RegisterPatches();
 
-        if (_shouldAlwaysInvalidate.Value)
+        if (_shouldAlwaysInvalidate.Value || SpaceWarp.API.Mods.PluginList.ModListChangedSinceLastRun)
         {
             CacheManager.CreateCacheFolderIfNotExists();
             CacheManager.InvalidateCache();
