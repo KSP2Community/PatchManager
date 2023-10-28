@@ -157,33 +157,12 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>sel_element</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSel_element([NotNull] sassy_parser.Sel_elementContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>sel_ruleset</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSel_ruleset([NotNull] sassy_parser.Sel_rulesetContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_child</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitSel_child([NotNull] sassy_parser.Sel_childContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>sel_add_element</c>
-	/// labeled alternative in <see cref="sassy_parser.selector"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_class</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
@@ -206,12 +185,40 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitSel_intersection([NotNull] sassy_parser.Sel_intersectionContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_ensure</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_ensure([NotNull] sassy_parser.Sel_ensureContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_everything</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitSel_everything([NotNull] sassy_parser.Sel_everythingContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_element([NotNull] sassy_parser.Sel_elementContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_ruleset</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_ruleset([NotNull] sassy_parser.Sel_rulesetContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_add_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_without_class</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.

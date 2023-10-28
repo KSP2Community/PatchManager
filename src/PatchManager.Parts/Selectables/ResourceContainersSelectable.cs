@@ -60,7 +60,7 @@ public sealed class ResourceContainersSelectable : BaseSelectable
         _containers.Add(obj);
         var child = new ResourceContainerSelectable(obj, _selectable);
         Children.Add(child);
-        Console.WriteLine($"Added container: {obj}");
+        // Console.WriteLine($"Added container: {obj}");
         return child;
     }
 

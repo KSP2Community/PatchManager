@@ -40,7 +40,7 @@ public sealed class RecipeSelectable : BaseSelectable
         JObject = JObject.Parse(data);
         Classes = new() { "recipe" };
         Children = new();
-        var resourceData = JObject["data"];
+        var resourceData = JObject["recipeData"];
         Name = (string)resourceData["name"];
         Ingredients = (JArray)resourceData["ingredients"];
         ElementType = "recipe";
@@ -73,11 +73,11 @@ public sealed class RecipeSelectable : BaseSelectable
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
-        var obj = new JObject(new
+        var obj = new JObject
         {
-            name = "Unknown",
-            unitsPerRecipeUnit = 0.00
-        });
+            ["name"] = elementType,
+            ["unitsPerRecipeUnit"] = 0.00
+        };
         var child = new JTokenSelectable(SetModified, obj, tok => tok["name"].Value<string>(), "ingredient");
         Children.Add(child);
         Ingredients.Add(obj);
@@ -85,8 +85,8 @@ public sealed class RecipeSelectable : BaseSelectable
     }
 
     /// <inheritdoc />
-    public override string Serialize() => throw new NotImplementedException();
+    public override string Serialize() => _modified ? _deleted ? "" : JObject.ToString() : _originalData;
 
     /// <inheritdoc />
-    public override DataValue GetValue() => throw new NotImplementedException();
+    public override DataValue GetValue() => OpenModification().Get();
 }

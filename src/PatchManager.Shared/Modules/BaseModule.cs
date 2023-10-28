@@ -1,4 +1,7 @@
-﻿namespace PatchManager.Shared.Modules;
+﻿using SpaceWarp.API.Configuration;
+using UnityEngine.UIElements;
+
+namespace PatchManager.Shared.Modules;
 
 /// <summary>
 /// Base class for PatchManager modules.
@@ -12,6 +15,15 @@ public class BaseModule : IModule
 
     /// <inheritdoc/>
     public virtual void Load()
+    {
+    }
+
+    /// <inheritdoc />
+    public virtual VisualElement GetDetails() => null;
+
+
+    /// <inheritdoc />
+    public virtual void BindConfiguration(IConfigFile modConfiguration)
     {
     }
 }

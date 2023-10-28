@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System.Collections;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
 
 namespace PatchManager.SassyPatching;
@@ -361,6 +363,241 @@ public class DataValue
         return "<unknown>";
     }
 
+    public T To<T>() => (T)To(typeof(T));
+
+    public object To(Type t)
+    {
+        if (t == typeof(DataValue))
+        {
+            return this;
+        }
+        
+        if (t == typeof(string))
+        {
+            return String;
+        }
+
+        if (t == typeof(Dictionary<string, DataValue>))
+        {
+            return Dictionary;
+        }
+
+        if (t == typeof(List<DataValue>))
+        {
+            return List;
+        }
+
+        if (t == typeof(DataValue[]))
+        {
+            return List.ToArray();
+        }
+
+        if (t == typeof(byte))
+        {
+            return (byte)Integer;
+        }
+
+        if (t == typeof(sbyte))
+        {
+            return (sbyte)Integer;
+        }
+
+        if (t == typeof(short))
+        {
+            return (short)Integer;
+        }
+
+        if (t == typeof(ushort))
+        {
+            return (ushort)Integer;
+        }
+
+        if (t == typeof(int))
+        {
+            return (int)Integer;
+        }
+
+        if (t == typeof(uint))
+        {
+            return (uint)Integer;
+        }
+
+        if (t == typeof(long))
+        {
+            return (long)Integer;
+        }
+
+        if (t == typeof(ulong))
+        {
+            return (ulong)Integer;
+        }
+
+        if (t == typeof(float))
+        {
+            return (float)Real;
+        }
+
+        if (t == typeof(double))
+        {
+            return Real;
+        }
+
+        if (t == typeof(bool))
+        {
+            return Boolean;
+        }
+
+        if (t == typeof(PatchFunction))
+        {
+            return Closure;
+        }
+
+        if (Type == DataValue.DataType.None)
+        {
+            return null;
+        }
+
+        if (ConvertValueToSingleRankArray(t, out var singleRankArray)) return singleRankArray;
+
+        if (ConvertValueToMultiRankArray(t, out var multiRankArray)) return multiRankArray;
+
+        if (ConvertValueToList(t, out var list)) return list;
+        
+        if (ConvertValueToDictionary(t, out var convertParameterValue)) return convertParameterValue;
+        
+        var obj = Activator.CreateInstance(t);
+        var dictionary = Dictionary;
+        foreach (var field in t.GetFields())
+        {
+            field.SetValue(obj, dictionary[field.Name].To(field.FieldType));
+        }
+
+        return obj;
+    }
+
+    private bool ConvertValueToDictionary(Type type, out object dictionary)
+    {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+        {
+            var keyType = type.GetGenericArguments()[0];
+            var valueType = type.GetGenericArguments()[1];
+            if (keyType != typeof(string))
+            {
+                throw new TypeConversionException("Value", type.Name);
+            }
+
+            var id = (IDictionary)Activator.CreateInstance(type);
+            var dict = Dictionary;
+            foreach (var kv in dict)
+            {
+                id[kv.Key] = kv.Value.To(valueType);
+            }
+
+            {
+                dictionary = id;
+                return true;
+            }
+        }
+
+        dictionary = null;
+        return false;
+    }
+
+    private bool ConvertValueToList(Type type, out object list)
+    {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+        {
+            var valueType = type.GetGenericArguments()[0];
+            var il = (IList)Activator.CreateInstance(type);
+            var tab = List;
+            foreach (var x in tab)
+            {
+                il.Add(x.To(valueType));
+            }
+
+            {
+                list = il;
+                return true;
+            }
+        }
+
+        list = null;
+        return false;
+    }
+
+    private bool ConvertValueToMultiRankArray(Type type, out object multiRankArray)
+    {
+        if (type.IsArray)
+        {
+            var tab = List;
+            var rank = type.GetArrayRank();
+            var dimensions = new int[rank];
+            var dimCounter = tab;
+            for (var i = 0; i < rank; i++)
+            {
+                dimensions[i] = dimCounter.Count;
+                if (i != rank - 1)
+                {
+                    dimCounter = dimCounter[0].List;
+                }
+            }
+
+            var arr = Array.CreateInstance(type.GetElementType()!, dimensions);
+
+            void BuildArray(Array array, List<DataValue> data, params int[] idx)
+            {
+                var idxCopy = new int[idx.Length + 1];
+                idx.CopyTo(idxCopy, 0);
+                if (idx.Length == rank - 1)
+                {
+                    for (var i = 0; i < array.GetLength(idx.Length); i++)
+                    {
+                        idxCopy[idx.Length] = i;
+                        array.SetValue(tab[i].To(type.GetElementType()), idxCopy);
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < array.GetLength(idx.Length); i++)
+                    {
+                        idxCopy[idx.Length] = i;
+                        BuildArray(array, data[i].List, idxCopy);
+                    }
+                }
+            }
+
+            BuildArray(arr, tab);
+            {
+                multiRankArray = arr;
+                return true;
+            }
+        }
+
+        multiRankArray = null;
+        return false;
+    }
+
+    private bool ConvertValueToSingleRankArray(Type type, out object singleRankArray)
+    {
+        if (type.IsArray && type.GetArrayRank() == 1)
+        {
+            var tab = List;
+            var arr = Array.CreateInstance(type.GetElementType()!, tab.Count);
+            for (var i = 0; i < tab.Count; i++)
+            {
+                arr.SetValue(tab[i].To(type.GetElementType()), i);
+            }
+
+            {
+                singleRankArray = arr;
+                return true;
+            }
+        }
+
+        singleRankArray = null;
+        return false;
+    }
+
     /// <summary>
     /// Creates a Value from a <see cref="JToken"/>
     /// </summary>
@@ -452,5 +689,167 @@ public class DataValue
         }
         
         return null;
+    }
+    private static bool ConvertGenericListOrDictionaryToValue(object value, Type type, out DataValue listOrDictionaryDataValue)
+    {
+        switch (type.IsGenericType)
+        {
+            case true when type.GetGenericTypeDefinition() == typeof(Dictionary<,>):
+            {
+                var keyType = type.GetGenericArguments()[0];
+                if (keyType != typeof(string))
+                {
+                    throw new TypeConversionException(type.FullName, "Value");
+                }
+
+                var dict = (IDictionary)value;
+                Dictionary<string, DataValue> newData = new();
+                foreach (var k in dict.Keys)
+                {
+                    var ks = (string)k;
+                    newData[ks] = From(dict[k]);
+                }
+
+                {
+                    listOrDictionaryDataValue = newData;
+                    return true;
+                }
+            }
+            case true when type.GetGenericTypeDefinition() == typeof(List<>):
+            {
+                listOrDictionaryDataValue = ((from object v in (IList)value select From(v)).ToList());
+                return true;
+            }
+        }
+
+        listOrDictionaryDataValue = null;
+        return false;
+    }
+
+    private static bool ConvertMultiRankArrayToValue(object value, Type t, out DataValue multiRankArrayDataValue)
+    {
+        if (t.IsArray)
+        {
+            var a = (Array)value;
+            var rank = a.Rank;
+            var outermostDimension = new List<DataValue>();
+
+            void TraverseRank(List<DataValue> containingDimension, Array arr, int r, params int[] idx)
+            {
+                var size = a.GetLength(r);
+                var idxCopy = new int[idx.Length + 1];
+                idx.CopyTo(idxCopy, 0);
+                if (r == a.Rank - 1)
+                {
+                    for (var i = 0; i < size; i++)
+                    {
+                        idxCopy[idx.Length] = i;
+                        var v = arr.GetValue(idxCopy);
+                        containingDimension.Add(From(v));
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < size; i++)
+                    {
+                        idxCopy[idx.Length] = i;
+                        var currentDimension = new List<DataValue>();
+                        TraverseRank(currentDimension, arr, r + 1, idxCopy);
+                        outermostDimension.Add(currentDimension);
+                    }
+                }
+            }
+
+
+            TraverseRank(outermostDimension, a, 0);
+            {
+                multiRankArrayDataValue = outermostDimension;
+                return true;
+            }
+        }
+
+        multiRankArrayDataValue = null;
+        return false;
+    }
+
+    private static bool ConvertSingleRankArrayToValue(object value, Type type, out DataValue singleRankArray)
+    {
+        if (type.IsArray && type.GetArrayRank() == 1)
+        {
+            var arr = (Array)value;
+            List<DataValue> vs = new List<DataValue>();
+            foreach (var obj in arr)
+            {
+                vs.Add(From(obj));
+            }
+
+            {
+                singleRankArray = vs;
+                return true;
+            }
+        }
+
+        singleRankArray = null;
+        return false;
+    }
+    public static DataValue From(object value)
+    {
+        switch (value)
+        {
+            case null:
+                return new DataValue(DataValue.DataType.None);
+            case DataValue v:
+                return v;
+            case bool b:
+                return b;
+            case byte bv:
+                return bv;
+            case sbyte sbv:
+                return sbv;
+            case short sv:
+                return sv;
+            case ushort usv:
+                return usv;
+            case int iv:
+                return iv;
+            case uint uiv:
+                return uiv;
+            case long slv:
+                return slv;
+            case ulong ulv:
+                return ulv;
+            case float f:
+                return f;
+            case double d:
+                return d;
+            case string s:
+                return s;
+            case List<DataValue> lv:
+                return lv;
+            case DataValue[] av:
+                return av.ToList();
+            case Dictionary<string, DataValue> dv:
+                return dv;
+            case PatchFunction pf:
+                return pf;
+            case Delegate d:
+                return new ManagedPatchFunction(d.Method, d.Target);
+        }
+
+        var t = value.GetType();
+        
+        if (ConvertSingleRankArrayToValue(value, t, out var singleRankArray)) return singleRankArray;
+        if (ConvertMultiRankArrayToValue(value, t, out var multiRankArrayValue)) return multiRankArrayValue;
+        if (ConvertGenericListOrDictionaryToValue(value, t, out var listOrDictionaryValue)) return listOrDictionaryValue;
+        Dictionary<string, DataValue> objectData = new();
+
+
+        // Only store public data
+        foreach (var field in t.GetFields())
+        {
+            objectData[field.Name] = From(field.GetValue(value));
+        }
+
+        return objectData;
     }
 }

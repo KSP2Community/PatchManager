@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HarmonyX" Version="2.10.2" />
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.5" />
+      <PackageReference Include="UnityEngine.Modules" Version="2022.3.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PatchManager.Shared\PatchManager.Shared.csproj" />
+    </ItemGroup>
+
+</Project>
