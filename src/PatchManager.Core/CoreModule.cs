@@ -80,6 +80,10 @@ public class CoreModule : BaseModule
             // SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
             //     () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
         }
+        else
+        {
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+        }
     }
     /// <summary>
     /// Registers the provider and locator for cached assets.
