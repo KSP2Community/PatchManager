@@ -21,6 +21,8 @@ public class UpdateSavedVesselPartDefinitions : FlowAction
             resolve();
             return;
         }
+        List<int> toRemove = new();
+        int idx = 0;
         foreach (var vessel in _loadGameData.SavedGame.Vessels)
         {
             // Lets change only a few things
@@ -29,6 +31,12 @@ public class UpdateSavedVesselPartDefinitions : FlowAction
             {
                 var name = part.partName;
                 var def = GameManager.Instance.Game.Parts.Get(name);
+                if (def == null)
+                {
+                    Logging.LogWarning($"Invalid part {name} found on vessel {vessel.AssemblyDefinition.assemblyName}, removing vessel from save file\n");
+                    toRemove.Add(idx);
+                    break;
+                }
                 for (var i = part.PartModulesState.Count - 1; i >= 0; i--)
                 {
                     var i2 = i;
@@ -59,7 +67,16 @@ public class UpdateSavedVesselPartDefinitions : FlowAction
                     }
                 }
             }
+            idx += 1;
         }
+
+        toRemove.Reverse();
+        var vesselList = _loadGameData.SavedGame.Vessels.ToList();
+        foreach (var removal in toRemove)
+        {
+            vesselList.RemoveAt(removal);
+        }
+        _loadGameData.SavedGame.Vessels = vesselList.ToArray();
         resolve();
     }
 }

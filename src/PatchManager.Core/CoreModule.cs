@@ -72,24 +72,28 @@ public class CoreModule : BaseModule
         if (!isValid)
         {
             _wasCacheInvalidated = true;
-            SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
-                () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-            SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
-                () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,() => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1,() => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+            // SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
+            //     () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+            // SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
+            //     () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+        }
+        else
+        {
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
         }
     }
-
     /// <summary>
     /// Registers the provider and locator for cached assets.
     /// </summary>
-    public override void Load()
+    private void RegisterResourceLocator(Action resolve, Action<string> reject)
     {
-        
-        Logging.LogInfo("Registering resource locator");
         Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
         Locators.Register(new ArchiveResourceLocator());
+        resolve();
     }
-
     /// <inheritdoc />
     public override VisualElement GetDetails()
     {
