@@ -1,5 +1,7 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -18,17 +20,29 @@ public class EnsureSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
         try
         {
-            var baseList = selectables.Where(selectable =>
+            var baseList = selectableWithEnvironments.Where(selectable =>
             {
-                var result = selectable.MatchesElement(ElementName);
-                //Console.WriteLine($"Testing: {asBase?.ElementType} against {ElementName} -> {result}");
+                var result = selectable.Selectable.MatchesElement(ElementName);
                 return result;
             }).ToList();
-            return baseList.Count == 0 ? selectables.Select(selectable => selectable.AddElement(ElementName)).ToList() : baseList;
+            // return baseList.Count == 0 ? selectables.Select(selectable => selectable.AddElement(ElementName)).ToList() : baseList;
+            if (baseList.Count == 0)
+            {
+                foreach (var selectable in selectableWithEnvironments)
+                {
+                    var addedElement = selectable.Selectable.AddElement(ElementName);
+                    baseList.Add(new SelectableWithEnvironment
+                    {
+                        Selectable = addedElement,
+                        Environment = new Execution.Environment(selectable.Environment.GlobalEnvironment,selectable.Environment)
+                    });
+                }
+            }
+            return baseList;
         }
         catch (Exception e)
         {
@@ -37,13 +51,13 @@ public class EnsureSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
         rulesetMatchingObject = null;
         return new();
     }
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
         newAsset = null;
         return new();

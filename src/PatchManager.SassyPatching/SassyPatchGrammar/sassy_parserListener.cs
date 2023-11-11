@@ -240,6 +240,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_class_capture([NotNull] sassy_parser.Sel_class_captureContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_class_capture([NotNull] sassy_parser.Sel_class_captureContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_child</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
@@ -419,6 +431,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>without_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.

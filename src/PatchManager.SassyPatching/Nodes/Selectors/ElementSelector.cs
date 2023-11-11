@@ -1,4 +1,6 @@
-﻿using PatchManager.SassyPatching.Interfaces;
+﻿using PatchManager.SassyPatching.Execution;
+using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -17,25 +19,23 @@ public class ElementSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
-        return selectables.Where(selectable =>
+        return selectableWithEnvironments.Where(selectable =>
         {
-            var asBase = selectable as BaseSelectable;
-            var result = selectable.MatchesElement(ElementName);
-            //Console.WriteLine($"Testing: {asBase?.ElementType} against {ElementName} -> {result}");
+            var result = selectable.Selectable.MatchesElement(ElementName);
             return result;
         }).ToList();
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
         rulesetMatchingObject = null;
         return new();
     }
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
         newAsset = null;
         return new();

@@ -1,4 +1,6 @@
-﻿using PatchManager.SassyPatching.Interfaces;
+﻿using PatchManager.SassyPatching.Execution;
+using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -34,17 +36,17 @@ public class IntersectionSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var selector in Selectors)
         {
-            selectables = SelectionUtilities.IntersectSelections(selectables, selector.SelectAll(selectables));
+            selectableWithEnvironments = SelectionUtilities.IntersectSelections(selectableWithEnvironments, selector.SelectAll(selectableWithEnvironments));
         }
-        return selectables;
+        return selectableWithEnvironments;
     }
 
-    private List<ISelectable> SelectAllSkippingFirst(List<ISelectable> selectables)
+    private List<SelectableWithEnvironment> SelectAllSkippingFirst(List<SelectableWithEnvironment> selectables)
     {
         for (var i = 1; i < Selectors.Count; i++)
         {
@@ -54,15 +56,15 @@ public class IntersectionSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
-        var start = Selectors[0].SelectAllTopLevel(type, name, data, out rulesetMatchingObject);
+        var start = Selectors[0].SelectAllTopLevel(type, name, data, baseEnvironment, out rulesetMatchingObject);
         return SelectAllSkippingFirst(start);
     }
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
-        var start = Selectors[0].CreateNew(rulesetArguments, out newAsset);
+        var start = Selectors[0].CreateNew(rulesetArguments,baseEnvironment, out newAsset);
         return SelectAllSkippingFirst(start);
     }
 }

@@ -157,6 +157,13 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_class_capture([NotNull] sassy_parser.Sel_class_captureContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_child</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
@@ -261,6 +268,13 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>without_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.

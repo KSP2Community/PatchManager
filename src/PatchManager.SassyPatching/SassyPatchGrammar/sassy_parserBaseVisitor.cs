@@ -240,6 +240,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_class_capture([NotNull] sassy_parser.Sel_class_captureContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_child</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// <para>
@@ -404,6 +415,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>without_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.

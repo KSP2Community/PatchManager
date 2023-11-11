@@ -5,6 +5,7 @@ using PatchManager.Parts.Modifiables;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Selectables;
+using UnityEngine;
 
 namespace PatchManager.Parts.Selectables;
 
@@ -38,11 +39,13 @@ public sealed class PartSelectable : BaseSelectable
     internal readonly JObject JObject;
     private static readonly Regex Sanitizer = new("[^a-zA-Z0-9 -_]");
     private static string Sanitize(string str) => Sanitizer.Replace(str, "");
-
+    private readonly Dictionary<string, int> _moduleIndices;
+    private static JArray SerializedPartModules;
     internal PartSelectable(string data)
     {
         _originalData = data;
         JObject = JObject.Parse(data);
+        _moduleIndices = new Dictionary<string, int>();
         Classes = new();
         Children = new();
         var partData = JObject["data"];
@@ -53,10 +56,14 @@ public sealed class PartSelectable : BaseSelectable
         }
 
         var serializedPartModules = partData["serializedPartModules"];
+        SerializedPartModules = serializedPartModules as JArray;
+        var index = 0;
         foreach (var module in serializedPartModules)
         {
             // var moduleData = module["ModuleData"];
-            Classes.Add(((string)module["Name"]).Replace("PartComponent", ""));
+            _moduleIndices[module["Name"].Value<string>().Replace("PartComponent", "")] = index++;
+            Classes.Add(module["Name"].Value<string>().Replace("PartComponent", ""));
+            Classes.Add(module["Name"].Value<string>());
             // Classes.Add((string)moduleData["name"]);
             Children.Add(new ModuleSelectable(module,this));
         }
@@ -80,6 +87,32 @@ public sealed class PartSelectable : BaseSelectable
 
     /// <inheritdoc />
     public override List<string> Classes { get; }
+
+    private DataValue ConcatenateModuleData(int index)
+    {
+        DataValue value = new DataValue(DataValue.DataType.Dictionary, new Dictionary<string, DataValue>());
+        foreach (var data in SerializedPartModules[index]["ModuleData"])
+        {
+            var dataObject = DataValue.FromJToken(data["DataObject"]);
+            foreach (var kv in dataObject.Dictionary.Where(kv => kv.Key != "$type"))
+            {
+                value.Dictionary[kv.Key] = kv.Value;
+            }
+        }
+        return value;
+    }
+
+    /// <inheritdoc />
+    public override bool MatchesClass(string @class, out DataValue classValue)
+    {
+        if (_moduleIndices.TryGetValue(@class.Replace("PartComponent", ""), out var index))
+        {
+            classValue = ConcatenateModuleData(index);
+            return true;
+        }
+        classValue = null;
+        return false;
+    }
 
     /// <inheritdoc />
     public override string ElementType => "parts_data";

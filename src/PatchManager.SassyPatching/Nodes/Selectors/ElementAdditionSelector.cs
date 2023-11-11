@@ -1,5 +1,7 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -18,11 +20,22 @@ public class ElementAdditionSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
         try
         {
-            return selectables.Select(selectable => selectable.AddElement(ElementName)).ToList();
+            List<SelectableWithEnvironment> result = new();
+            foreach (var selectable in selectableWithEnvironments)
+            {
+                var addedElement = selectable.Selectable.AddElement(ElementName);
+                result.Add(new SelectableWithEnvironment
+                {
+                    Selectable = addedElement,
+                    Environment = new Environment(selectable.Environment.GlobalEnvironment,selectable.Environment)
+                });
+            }
+
+            return result;
         }
         catch (Exception e)
         {
@@ -31,13 +44,13 @@ public class ElementAdditionSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
         rulesetMatchingObject = null;
         return new();
     }
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
         newAsset = null;
         return new();

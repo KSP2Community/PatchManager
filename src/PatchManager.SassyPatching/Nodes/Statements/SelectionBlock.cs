@@ -45,7 +45,7 @@ public class SelectionBlock : Node, ISelectionAction
     public bool ExecuteFresh(Environment snapshot, string datasetType, string name, ref string dataset)
     {
         // var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
-        var selections = Selector.SelectAllTopLevel(datasetType, name, dataset, out var rulesetMatchingObject);
+        var selections = Selector.SelectAllTopLevel(datasetType, name, dataset, snapshot, out var rulesetMatchingObject);
         
         if (rulesetMatchingObject == null || selections.Count == 0)
         {
@@ -53,8 +53,8 @@ public class SelectionBlock : Node, ISelectionAction
         }
         // Get the first matching selection if there are somehow more than one
         foreach (var selectable in selections) {
-            var modifiable = selectable.OpenModification();
-            var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
+            var modifiable = selectable.Selectable.OpenModification();
+            var subEnvironment = new Environment(selectable.Environment.GlobalEnvironment, selectable.Environment);
             if (modifiable != null)
             {
                 subEnvironment["current"] = modifiable.Get();
@@ -64,7 +64,7 @@ public class SelectionBlock : Node, ISelectionAction
             {
                 if (action is ISelectionAction selectionAction)
                 {
-                    selectionAction.ExecuteOn(subEnvironment, selectable, modifiable);
+                    selectionAction.ExecuteOn(subEnvironment, selectable.Selectable, modifiable);
                 }
                 else
                 {
@@ -83,10 +83,10 @@ public class SelectionBlock : Node, ISelectionAction
 
     public INewAsset ExecuteCreation(Environment snapshot, List<DataValue> arguments)
     {
-        var selections = Selector.CreateNew(arguments, out var resultingAsset);
+        var selections = Selector.CreateNew(arguments, snapshot, out var resultingAsset);
         foreach (var selectable in selections) {
-            var modifiable = selectable.OpenModification();
-            var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
+            var modifiable = selectable.Selectable.OpenModification();
+            var subEnvironment = new Environment(selectable.Environment.GlobalEnvironment, selectable.Environment);
             if (modifiable != null)
             {
                 subEnvironment["current"] = modifiable.Get();
@@ -96,7 +96,7 @@ public class SelectionBlock : Node, ISelectionAction
             {
                 if (action is ISelectionAction selectionAction)
                 {
-                    selectionAction.ExecuteOn(subEnvironment, selectable, modifiable);
+                    selectionAction.ExecuteOn(subEnvironment, selectable.Selectable, modifiable);
                 }
                 else
                 {
@@ -168,13 +168,17 @@ public class SelectionBlock : Node, ISelectionAction
             }
         }
 
-        var selections = Selector.SelectAll(new List<ISelectable> { selectable });
+        var selections = Selector.SelectAll(new List<SelectableWithEnvironment> { new()
+        {
+            Selectable = selectable,
+            Environment = new Environment(environment.GlobalEnvironment,environment.Snapshot())
+        } });
         if (selections.Count == 0) return;
         // Takes a snapshot of the parent in its current state
         var parentValue = modifiable?.Get();
         foreach (var selection in selections)
         {
-            ExecuteOnSingleSelection(environment, selection, parentValue);
+            ExecuteOnSingleSelection(selection.Environment, selection.Selectable, parentValue);
         }
     }
 

@@ -6,43 +6,10 @@
 public interface ISelectable
 {
     /// <summary>
-    /// Select from children by name pattern
-    /// </summary>
-    /// <param name="name">The name pattern being matched against</param>
-    /// <returns>All children that match the name pattern</returns>
-    public List<ISelectable> SelectByName(string name);
-    /// <summary>
-    /// Select from children by class
-    /// </summary>
-    /// <param name="class">The class being selected by</param>
-    /// <returns>All children that have the class</returns>
-    public List<ISelectable> SelectByClass(string @class);
-    /// <summary>
-    /// Select from children by class
-    /// </summary>
-    /// <param name="class">The class being selected by</param>
-    /// <returns>All children that don't have the class</returns>
-    public List<ISelectable> SelectWithoutClass(string @class);
-    
-    /// <summary>
-    /// Select from children by name pattern
-    /// </summary>
-    /// <param name="name">The name pattern being matched against</param>
-    /// <returns>All children that don't match the name pattern</returns>
-    public List<ISelectable> SelectWithoutName(string name);
-    /// <summary>
-    /// Select from children by element
-    /// </summary>
-    /// <param name="element">The element being selected by</param>
-    /// <returns>All children that are the element</returns>
-    public List<ISelectable> SelectByElement(string element);
-    
-    /// <summary>
     /// Select all children
     /// </summary>
     /// <returns>All children</returns>
     public List<ISelectable> SelectEverything();
-
     
     /// <summary>
     /// Test if this selectable matches a name pattern
@@ -56,6 +23,13 @@ public interface ISelectable
     /// <param name="class">The class</param>
     /// <returns>True if it has the class</returns>
     public bool MatchesClass(string @class);
+
+    /// <summary>
+    /// Get the value for a class
+    /// </summary>
+    public bool MatchesClass(string @class, out DataValue classValue);
+    
+    
     /// <summary>
     /// Test if this selectable is an element
     /// </summary>

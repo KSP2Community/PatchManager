@@ -54,6 +54,17 @@ public class ResourceSelectable : BaseSelectable
     /// <inheritdoc />
     public override List<string> Classes { get; }
 
+    public override bool MatchesClass(string @class, out DataValue classValue)
+    {
+        classValue = null;
+        if (@class == "resource")
+        {
+            classValue = DataValue.FromJToken(JObject["data"]);
+            return true;
+        }
+        return false;
+    }
+
     /// <inheritdoc />
     public override string ElementType { get; }
 
