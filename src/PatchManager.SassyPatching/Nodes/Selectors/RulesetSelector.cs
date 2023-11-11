@@ -1,6 +1,7 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -19,29 +20,30 @@ public class RulesetSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
         return new();
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
         if (Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
         {
             if (ruleSet.Matches(type))
             {
                 rulesetMatchingObject = ruleSet.ConvertToSelectable(type, name,data);
-                return new List<ISelectable>
+                return new List<SelectableWithEnvironment>
                 {
-                    rulesetMatchingObject
+                    new()
+                    {
+                        Selectable = rulesetMatchingObject,
+                        Environment = new Environment(baseEnvironment.GlobalEnvironment,baseEnvironment)
+                    }
                 };
             }
-            else
-            {
-                rulesetMatchingObject = null;
-                return new();
-            }
+            rulesetMatchingObject = null;
+            return new();
         }
         else
         {
@@ -49,13 +51,17 @@ public class RulesetSelector : Selector
         }
     }
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
         if (Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
         {
             var newObject = ruleSet.CreateNew(rulesetArguments);
             newAsset = newObject;
-            return new List<ISelectable> { newObject.Selectable };
+            return new List<SelectableWithEnvironment> { new()
+            {
+                Selectable = newAsset.Selectable,
+                Environment = new Environment(baseEnvironment.GlobalEnvironment,baseEnvironment)
+            } };
         }
         else
         {

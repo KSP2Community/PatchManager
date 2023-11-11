@@ -16,21 +16,25 @@ public sealed class ModuleSelectable : BaseSelectable
 {
     public readonly JToken SerializedData;
     public readonly PartSelectable Selectable;
+    private Dictionary<string, int> _dataIndices;
 
     /// <inheritdoc />
     public ModuleSelectable(JToken token, PartSelectable selectable)
     {
         SerializedData = token;
         Selectable = selectable;
+        _dataIndices = new Dictionary<string, int>();
         ElementType = ((string)token["Name"]).Replace("PartComponent", "");
         Name = ElementType;
         Classes = new();
         Children = new();
         // Now we go down the list in the data type
         var data = (JArray)token["ModuleData"];
+        var index = 0;
         foreach (var moduleData in data)
         {
-            Classes.Add((string)moduleData["Name"]);
+            _dataIndices[moduleData["Name"].Value<string>()] = index++;
+            Classes.Add(moduleData["Name"].Value<string>());
             // Where we are going to have to add children ree
             // TODO: Add a specialization for ModuleEngine
             Children.Add(GetSelectable((JObject)moduleData));
@@ -39,14 +43,14 @@ public sealed class ModuleSelectable : BaseSelectable
 
     private ISelectable GetSelectable(JObject moduleData)
     {
-        var type = Type.GetType((string)moduleData["DataType"]);
+        var type = Type.GetType(moduleData["DataType"].Value<string>());
         if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
         {
             return (ISelectable)Activator.CreateInstance(type, moduleData, this);
         }
         else
         {
-            return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], (string)moduleData["Name"]);
+            return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
         }
     }
 
@@ -60,7 +64,21 @@ public sealed class ModuleSelectable : BaseSelectable
     public override List<string> Classes { get; }
 
     /// <inheritdoc />
+    public override bool MatchesClass(string @class, out DataValue classValue) {
+        
+        if (_dataIndices.TryGetValue(@class.Replace("PartComponent", ""), out var index))
+        {
+            classValue = DataValue.FromJToken(SerializedData["ModuleData"][index]["DataObject"]);
+            return true;
+        }
+        classValue = null;
+        return false;
+    }
+
+    /// <inheritdoc />
     public override string ElementType { get; }
+    
+
 
     /// <inheritdoc />
     public override bool IsSameAs(ISelectable other) =>

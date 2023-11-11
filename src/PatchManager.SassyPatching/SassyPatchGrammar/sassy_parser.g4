@@ -49,32 +49,34 @@ attribute               : REQUIRE guid=STRING       #require_mod
                         
 constructor_arguments   : LEFT_PAREN (expression (COMMA expression)*)? RIGHT_PAREN ;
 
-selector                : ELEMENT                                                       #sel_element
-                        | CLASS                                                         #sel_class
-                        | NAME                                                          #sel_name
-                        | RULESET                                                       #sel_ruleset
-                        | ENSURE                                                        #sel_ensure
-                        | LEFT_PAREN internal_selector=selector RIGHT_PAREN             #sel_sub
-                        | lhs=selector COMMA rhs=selector_no_children                   #sel_combination
-                        | parent=selector GREATER_THAN child=selector_no_children       #sel_child
-                        | lhs=selector rhs=selector_no_children                         #sel_intersection
-                        | ADD element=ELEMENT                                           #sel_add_element // Adds an element and selects the added element
-                        | WITHOUT field=CLASS                                           #sel_without_class
-                        | WITHOUT name=NAME                                             #sel_without_name
-                        | MULTIPLY                                                      #sel_everything
+selector                : ELEMENT                                                               #sel_element
+                        | CLASS                                                                 #sel_class
+                        | CLASS COLON LEFT_BRACKET body=function_statement* RIGHT_BRACKET       #sel_class_capture
+                        | NAME                                                                  #sel_name
+                        | RULESET                                                               #sel_ruleset
+                        | ENSURE                                                                #sel_ensure
+                        | LEFT_PAREN internal_selector=selector RIGHT_PAREN                     #sel_sub
+                        | lhs=selector COMMA rhs=selector_no_children                           #sel_combination
+                        | parent=selector GREATER_THAN child=selector_no_children               #sel_child
+                        | lhs=selector rhs=selector_no_children                                 #sel_intersection
+                        | ADD element=ELEMENT                                                   #sel_add_element // Adds an element and selects the added element
+                        | WITHOUT field=CLASS                                                   #sel_without_class
+                        | WITHOUT name=NAME                                                     #sel_without_name
+                        | MULTIPLY                                                              #sel_everything
                         ;
                         
-selector_no_children    : ELEMENT                                                       #element
-                        | CLASS                                                         #class_selector
-                        | NAME                                                          #name
-                        | RULESET                                                       #ruleset_selector
-                        | LEFT_PAREN internal_selector=selector_no_children RIGHT_PAREN #sub_selector
-                        | lhs=selector_no_children COMMA rhs=selector_no_children       #combination_selector
-                        | lhs=selector_no_children rhs=selector_no_children             #intersection_selector
-                        | ADD element=ELEMENT                                           #add_element // Adds an element and selects the added element
-                        | WITHOUT field=CLASS                                           #without_class
-                        | WITHOUT name=NAME                                             #without_name
-                        | MULTIPLY                                                      #everything
+selector_no_children    : ELEMENT                                                               #element
+                        | CLASS                                                                 #class_selector
+                        | CLASS COLON LEFT_BRACKET body=function_statement* RIGHT_BRACKET       #class_capture_selector
+                        | NAME                                                                  #name
+                        | RULESET                                                               #ruleset_selector
+                        | LEFT_PAREN internal_selector=selector_no_children RIGHT_PAREN         #sub_selector
+                        | lhs=selector_no_children COMMA rhs=selector_no_children               #combination_selector
+                        | lhs=selector_no_children rhs=selector_no_children                     #intersection_selector
+                        | ADD element=ELEMENT                                                   #add_element // Adds an element and selects the added element
+                        | WITHOUT field=CLASS                                                   #without_class
+                        | WITHOUT name=NAME                                                     #without_name
+                        | MULTIPLY                                                              #everything
                         ;
 
 selector_body           : selector_statement*;

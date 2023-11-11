@@ -1,4 +1,6 @@
-﻿using PatchManager.SassyPatching.Interfaces;
+﻿using PatchManager.SassyPatching.Execution;
+using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
@@ -22,27 +24,31 @@ public class ChildSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables) =>
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectables) =>
         SelectChildren(Parent.SelectAll(selectables));
 
-    private List<ISelectable> SelectChildren(List<ISelectable> selectedParents)
+    private List<SelectableWithEnvironment> SelectChildren(List<SelectableWithEnvironment> selectedParents)
     {
         
-        List<ISelectable> result = new();
+        List<SelectableWithEnvironment> result = new();
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var selectable in selectedParents)
         {
             // We are going to get every child of this selectable
-            var allChildren = Child.SelectAll(selectable.SelectEverything());
+            var allChildren = Child.SelectAll(selectable.Selectable.SelectEverything().Select(x => new SelectableWithEnvironment
+            {
+                Selectable = x,
+                Environment = new Execution.Environment(selectable.Environment.GlobalEnvironment, selectable.Environment)
+            }).ToList());
             result = SelectionUtilities.CombineSelections(result, allChildren);
         }
         return result;
     }
     
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject) =>
-        SelectChildren(Parent.SelectAllTopLevel(type, name, data, out rulesetMatchingObject));
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject) =>
+        SelectChildren(Parent.SelectAllTopLevel(type, name, data, baseEnvironment, out rulesetMatchingObject));
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset) =>
-        SelectChildren(Parent.CreateNew(rulesetArguments, out newAsset));
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset) =>
+        SelectChildren(Parent.CreateNew(rulesetArguments, baseEnvironment, out newAsset));
 }

@@ -74,6 +74,19 @@ public class JTokenSelectable : BaseSelectable
     /// <inheritdoc />
     public sealed override List<string> Classes { get; }
 
+    public override bool MatchesClass(string @class, out DataValue classValue)
+    {
+        classValue = null;
+        if (!MatchesClass(@class))
+        {
+            return false;
+        }
+
+        classValue = DataValue.FromJToken(Token[@class]);
+        return true;
+
+    }
+
     /// <inheritdoc />
     public override string ElementType { get; }
 

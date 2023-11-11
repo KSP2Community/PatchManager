@@ -1,4 +1,6 @@
-﻿using PatchManager.SassyPatching.Interfaces;
+﻿using PatchManager.SassyPatching.Execution;
+using PatchManager.SassyPatching.Interfaces;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 /// <summary>
@@ -33,26 +35,26 @@ public class CombinationSelector : Selector
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAll(List<ISelectable> selectables)
+    public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
-        var result = new List<ISelectable>();
+        var result = new List<SelectableWithEnvironment>();
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var selector in Selectors)
         {
-            result = SelectionUtilities.CombineSelections(result, selector.SelectAll(selectables));
+            result = SelectionUtilities.CombineSelections(result, selector.SelectAll(selectableWithEnvironments));
         }
         return result;
     }
 
     /// <inheritdoc />
-    public override List<ISelectable> SelectAllTopLevel(string type, string name, string data, out ISelectable rulesetMatchingObject)
+    public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
-        var start = new List<ISelectable>();
+        var start = new List<SelectableWithEnvironment>();
         rulesetMatchingObject = null;
         foreach (var selector in Selectors)
         {
             // ReSharper disable once IdentifierTypo
-            start = SelectionUtilities.CombineSelections(start,selector.SelectAllTopLevel(type, name, data, out var rsmo));
+            start = SelectionUtilities.CombineSelections(start,selector.SelectAllTopLevel(type, name, data,baseEnvironment, out var rsmo));
             if (rsmo != null && rulesetMatchingObject == null)
             {
                 rulesetMatchingObject = rsmo;
@@ -61,13 +63,13 @@ public class CombinationSelector : Selector
         return start;
     }
 
-    public override List<ISelectable> CreateNew(List<DataValue> rulesetArguments, out INewAsset newAsset)
+    public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
-        var start = new List<ISelectable>();
+        var start = new List<SelectableWithEnvironment>();
         newAsset = null;
         foreach (var selector in Selectors)
         {
-            start = SelectionUtilities.CombineSelections(start, selector.CreateNew(rulesetArguments, out var na));
+            start = SelectionUtilities.CombineSelections(start, selector.CreateNew(rulesetArguments,baseEnvironment, out var na));
             if (na != null && newAsset == null)
             {
                 newAsset = na;

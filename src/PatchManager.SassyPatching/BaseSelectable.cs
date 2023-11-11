@@ -9,24 +9,6 @@ namespace PatchManager.SassyPatching;
 [PublicAPI]
 public abstract class BaseSelectable : ISelectable
 {
-    /// <inheritdoc />
-    public List<ISelectable> SelectByName(string name) =>
-        Children.Where(child => child.MatchesName(name)).ToList();
-
-    /// <inheritdoc />
-    public List<ISelectable> SelectByClass(string @class)=> 
-        Children.Where(child => child.MatchesClass(@class)).ToList();
-
-    /// <inheritdoc />
-    public List<ISelectable> SelectWithoutClass(string @class) => 
-        Children.Where(child => !child.MatchesClass(@class)).ToList();
-
-    /// <inheritdoc />
-    public List<ISelectable> SelectWithoutName(string name) =>
-        Children.Where(child => !child.MatchesName(name)).ToList();
-
-    /// <inheritdoc />
-    public List<ISelectable> SelectByElement(string element) => Children.Where(child => child.MatchesElement(element)).ToList();
 
     
     
@@ -53,6 +35,8 @@ public abstract class BaseSelectable : ISelectable
 
     /// <inheritdoc />
     public bool MatchesClass(string @class) => Classes.Contains(@class);
+
+    public abstract bool MatchesClass(string @class, out DataValue classValue);
 
     /// <summary>
     /// The type of this selectable element (usually corresponds to the field name it is defined as, or the module type)

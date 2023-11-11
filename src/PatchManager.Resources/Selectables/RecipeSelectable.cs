@@ -17,7 +17,8 @@ public sealed class RecipeSelectable : BaseSelectable
     private readonly string _originalData;
     internal readonly JObject JObject;
     internal readonly JArray Ingredients;
-
+    internal readonly Dictionary<string, int> IngredientIndices;
+    
     /// <summary>
     /// Marks this resource selectable as having been modified any level down
     /// </summary>
@@ -34,18 +35,22 @@ public sealed class RecipeSelectable : BaseSelectable
         SetModified();
         _deleted = true;
     }
+    
     internal RecipeSelectable(string data)
     {
         _originalData = data;
         JObject = JObject.Parse(data);
+        IngredientIndices = new Dictionary<string, int>();
         Classes = new() { "recipe" };
         Children = new();
         var resourceData = JObject["recipeData"];
         Name = (string)resourceData["name"];
         Ingredients = (JArray)resourceData["ingredients"];
         ElementType = "recipe";
+        var index = 0;
         foreach (var ingredient in Ingredients)
         {
+            IngredientIndices[ingredient["name"].Value<string>()] = index++;
             Classes.Add(ingredient["name"].Value<string>());
             Children.Add(
                 new JTokenSelectable(SetModified, ingredient, tok => tok["name"].Value<string>(), "ingredient"));
@@ -60,6 +65,24 @@ public sealed class RecipeSelectable : BaseSelectable
 
     /// <inheritdoc />
     public override List<string> Classes { get; }
+
+    public override bool MatchesClass(string @class, out DataValue classValue)
+    {
+        classValue = null;
+        if (@class == "recipe")
+        {
+            classValue = DataValue.FromJToken(JObject["recipeData"]);
+            return true;
+        }
+        if (IngredientIndices.TryGetValue(@class, out var index))
+        {
+            classValue = DataValue.FromJToken(Ingredients[index]);
+            return true;
+        }
+
+        return false;
+
+    }
 
     /// <inheritdoc />
     public override string ElementType { get; }

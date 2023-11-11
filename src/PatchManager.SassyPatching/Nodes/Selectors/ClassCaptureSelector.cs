@@ -4,24 +4,34 @@ using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Selectors;
 
-/// <summary>
-/// Represents a selector that selects selectables that have a class
-/// </summary>
-public class ClassSelector : Selector
+public class ClassCaptureSelector : Selector
 {
-    /// <summary>
-    /// The class to select against
-    /// </summary>
     public readonly string ClassName;
-    internal ClassSelector(Coordinate c, string className) : base(c)
+    public List<Node> Captures;
+    internal ClassCaptureSelector(Coordinate c, string className, List<Node> captures) : base(c)
     {
         ClassName = className;
+        Captures = captures;
     }
 
     /// <inheritdoc />
     public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
-        return selectableWithEnvironments.Where(selectable => selectable.Selectable.MatchesClass(ClassName)).ToList();
+        List<SelectableWithEnvironment> newList = new();
+        foreach (var selectableWithEnvironment in selectableWithEnvironments)
+        {
+            if (selectableWithEnvironment.Selectable.MatchesClass(ClassName,out var value))
+            {
+                selectableWithEnvironment.Environment["current"] = value;
+                foreach (var node in Captures)
+                {
+                    node.ExecuteIn(selectableWithEnvironment.Environment);
+                }
+                selectableWithEnvironment.Environment.ScopedValues.Remove("current");
+                newList.Add(selectableWithEnvironment);
+            }
+        }
+        return newList;
     }
 
     /// <inheritdoc />

@@ -285,6 +285,20 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitConstructor_arguments([NotNull] sassy_parser.Constructor_argumentsContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterSel_class_capture([NotNull] sassy_parser.Sel_class_captureContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitSel_class_capture([NotNull] sassy_parser.Sel_class_captureContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_child</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -494,6 +508,20 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by the <c>without_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.

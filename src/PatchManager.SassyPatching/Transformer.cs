@@ -195,6 +195,11 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitSel_ruleset(sassy_parser.Sel_rulesetContext context)
         => new RulesetSelector(context.GetCoordinate(), context.RULESET().GetText().TrimFirst());
 
+    
+    public override Node VisitSel_class_capture(sassy_parser.Sel_class_captureContext context) =>
+        new ClassCaptureSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst(),
+            context.function_statement().Select(Visit).ToList());
+
     /// <inheritdoc />
     public override Node VisitSel_child(sassy_parser.Sel_childContext context)
         => new ChildSelector(context.GetCoordinate(), Visit(context.parent) as Selector,
@@ -245,6 +250,10 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitCombination_selector(sassy_parser.Combination_selectorContext context)
         => new CombinationSelector(context.GetCoordinate(), Visit(context.lhs) as Selector,
             Visit(context.rhs) as Selector);
+
+    public override Node VisitClass_capture_selector(sassy_parser.Class_capture_selectorContext context) =>
+        new ClassCaptureSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst(),
+            context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
     public override Node VisitWithout_name(sassy_parser.Without_nameContext context)
