@@ -53,29 +53,29 @@ public class SassyTextPatcher : ITextPatcher
             {
                 case RunBeforeStageAttribute runBeforeStageAttribute:
                 {
-                    if (universe.AllStages.TryGetValue(runBeforeStageAttribute.Stage, out var minStageValue))
+                    if (universe.AllStages.TryGetValue(runBeforeStageAttribute.Stage, out var maxStageValue))
                     {
                         doAverage = true;
-                        minPriority = Math.Max(minPriority, minStageValue);
+                        maxPriority = Math.Max(maxPriority, maxStageValue);
                     } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runBeforeStageAttribute.Stage}",
-                                   out minStageValue))
+                                   out maxStageValue))
                     {
                         doAverage = true;
-                        minPriority = Math.Max(minPriority, minStageValue);
+                        maxPriority = Math.Max(maxPriority, maxStageValue);
                     }
                     break;
                 }
                 case RunAfterStageAttribute runAfterStageAttribute:
                 {
-                    if (universe.AllStages.TryGetValue(runAfterStageAttribute.Stage, out var maxStageValue))
+                    if (universe.AllStages.TryGetValue(runAfterStageAttribute.Stage, out var minStageValue))
                     {
                         doAverage = true;
-                        maxPriority = Math.Max(maxPriority, maxStageValue);
+                        minPriority = Math.Max(minPriority, minStageValue);
                     } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runAfterStageAttribute.Stage}",
-                                   out maxStageValue))
+                                   out minStageValue))
                     {
                         doAverage = true;
-                        maxPriority = Math.Max(maxPriority, maxStageValue);
+                        minPriority = Math.Max(minPriority, minStageValue);
                     }
                     break;
                 }
