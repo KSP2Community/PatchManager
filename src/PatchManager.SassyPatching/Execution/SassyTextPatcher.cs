@@ -84,7 +84,7 @@ public class SassyTextPatcher : ITextPatcher
 
         if (doAverage)
         {
-            chosenPriority = (minPriority >> 1) + (maxPriority >> 1);
+            chosenPriority = minPriority + ((maxPriority - minPriority) / 2);
         }
 
         Priority = chosenPriority;
