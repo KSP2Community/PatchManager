@@ -7,6 +7,7 @@ patch                   : top_level_statement+ EOF;
 top_level_statement     : import_declaration
                         | var_decl
                         | stage_def
+                        | global_stage_def
                         | function_def
                         | mixin_def
                         | top_level_conditional
@@ -24,6 +25,8 @@ import_declaration      : USE imp=STRING SEMICOLON;
 var_decl                : variable=VARIABLE COLON val=expression SEMICOLON;
 
 stage_def               : DEFINE_STAGE stage=STRING COMMA priority=NUMBER SEMICOLON;
+
+global_stage_def        : DEFINE_GLOBAL_STAGE stage=STRING COMMA priority=NUMBER SEMICOLON;
 
 function_def            : FUNCTION name=ELEMENT LEFT_PAREN args=arg_decl_list RIGHT_PAREN LEFT_BRACE body=function_body RIGHT_BRACE;
 
@@ -45,6 +48,8 @@ attribute               : REQUIRE guid=STRING       #require_mod
                         | REQUIRE_NOT guid=STRING   #require_not_mod
                         | STAGE stage=STRING        #run_at_stage
                         | NEW constructor_arguments #new_asset
+                        | BEFORE stage=STRING       #run_before_stage
+                        | AFTER stage=STRING        #run_after_stage
                         ;
                         
 constructor_arguments   : LEFT_PAREN (expression (COMMA expression)*)? RIGHT_PAREN ;

@@ -75,6 +75,12 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitStage_def([NotNull] sassy_parser.Stage_defContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.global_stage_def"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.function_def"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -150,6 +156,20 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitNew_asset([NotNull] sassy_parser.New_assetContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>run_before_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRun_before_stage([NotNull] sassy_parser.Run_before_stageContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>run_after_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRun_after_stage([NotNull] sassy_parser.Run_after_stageContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
 	/// </summary>

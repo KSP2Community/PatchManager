@@ -82,6 +82,18 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 "stage priority must be an unsigned integer");
     }
 
+    public override Node VisitGlobal_stage_def(sassy_parser.Global_stage_defContext context)
+    {
+        var location = context.GetCoordinate();
+        return ulong.TryParse(context.priority.Text, NumberStyles.Number, CultureInfo.InvariantCulture,
+            out var priority)
+            ? new GlobalStageDefinition(location,
+                context.stage.Text.Unescape(),
+                priority)
+            : Error(location,
+                "stage priority must be an unsigned integer");
+    }
+
     /// <inheritdoc />
     public override Node VisitFunction_def(sassy_parser.Function_defContext context) =>
         new Function(context.GetCoordinate(),
@@ -180,6 +192,12 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitRun_at_stage(sassy_parser.Run_at_stageContext context) =>
         new RunAtStageAttribute(context.GetCoordinate(), context.stage.Text.Unescape());
+
+    public override Node VisitRun_before_stage(sassy_parser.Run_before_stageContext context) => 
+        new RunBeforeStageAttribute(context.GetCoordinate(), context.stage.Text.Unescape());
+
+    public override Node VisitRun_after_stage(sassy_parser.Run_after_stageContext context) =>  
+        new RunBeforeStageAttribute(context.GetCoordinate(), context.stage.Text.Unescape());
 
     public override Node VisitNew_asset(sassy_parser.New_assetContext context)
     {

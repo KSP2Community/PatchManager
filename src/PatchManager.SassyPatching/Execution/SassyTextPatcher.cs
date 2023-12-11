@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Nodes.Attributes;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Statements;
 using PatchManager.Shared.Interfaces;
 
@@ -19,27 +20,74 @@ public class SassyTextPatcher : ITextPatcher
     {
         _environmentSnapshot = environmentSnapshot;
         _rootSelectionBlock = rootSelectionBlock;
-        var stage = rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault();
-        if (stage == null)
+        // var stage = rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault();
+        // if (stage == null)
+        // {
+        //     Priority = ulong.MaxValue;
+        // }
+        // else
+        // {
+        //     var global = environmentSnapshot.GlobalEnvironment;
+        //     string stageName;
+        //     if (stage.Stage.Contains(':'))
+        //     {
+        //         stageName = stage.Stage;
+        //     }
+        //     else
+        //     {
+        //         stageName = global.ModGuid + ":" + stage.Stage;
+        //     }
+        //
+        //     // If this errors then we don't register the patch, but we should give a more friendly thing to this at some point
+        //     Priority = global.Universe.AllStages[stageName];
+        // }
+        var global = environmentSnapshot.GlobalEnvironment;
+        var universe = global.Universe;
+        ulong minPriority = 0;
+        ulong maxPriority = ulong.MaxValue;
+        ulong chosenPriority = universe.AllStages[global.ModGuid];
+        bool doAverage = false;
+        foreach (var attribute in rootSelectionBlock.Attributes)
         {
-            Priority = ulong.MaxValue;
+            switch (attribute)
+            {
+                case RunBeforeStageAttribute runBeforeStageAttribute:
+                {
+                    if (universe.AllStages.TryGetValue(runBeforeStageAttribute.Stage, out var minStageValue))
+                    {
+                        doAverage = true;
+                        minPriority = Math.Max(minPriority, minStageValue);
+                    } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runBeforeStageAttribute.Stage}",
+                                   out minStageValue))
+                    {
+                        doAverage = true;
+                        minPriority = Math.Max(minPriority, minStageValue);
+                    }
+                    break;
+                }
+                case RunAfterStageAttribute runAfterStageAttribute:
+                {
+                    if (universe.AllStages.TryGetValue(runAfterStageAttribute.Stage, out var maxStageValue))
+                    {
+                        doAverage = true;
+                        maxPriority = Math.Max(maxPriority, maxStageValue);
+                    } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runAfterStageAttribute.Stage}",
+                                   out maxStageValue))
+                    {
+                        doAverage = true;
+                        maxPriority = Math.Max(maxPriority, maxStageValue);
+                    }
+                    break;
+                }
+            }
         }
-        else
-        {
-            var global = environmentSnapshot.GlobalEnvironment;
-            string stageName;
-            if (stage.Stage.Contains(':'))
-            {
-                stageName = stage.Stage;
-            }
-            else
-            {
-                stageName = global.ModGuid + ":" + stage.Stage;
-            }
 
-            // If this errors then we don't register the patch, but we should give a more friendly thing to this at some point
-            Priority = global.Universe.AllStages[stageName];
+        if (doAverage)
+        {
+            chosenPriority = (minPriority >> 1) + (maxPriority >> 1);
         }
+
+        Priority = chosenPriority;
     }
 
     /// <inheritdoc />

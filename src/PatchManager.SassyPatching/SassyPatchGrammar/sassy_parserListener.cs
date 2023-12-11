@@ -102,6 +102,16 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitStage_def([NotNull] sassy_parser.Stage_defContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.global_stage_def"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.global_stage_def"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.function_def"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -229,6 +239,30 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitNew_asset([NotNull] sassy_parser.New_assetContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>run_before_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterRun_before_stage([NotNull] sassy_parser.Run_before_stageContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>run_before_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitRun_before_stage([NotNull] sassy_parser.Run_before_stageContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>run_after_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterRun_after_stage([NotNull] sassy_parser.Run_after_stageContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>run_after_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitRun_after_stage([NotNull] sassy_parser.Run_after_stageContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
 	/// </summary>

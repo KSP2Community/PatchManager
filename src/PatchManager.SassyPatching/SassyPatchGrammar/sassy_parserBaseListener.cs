@@ -121,6 +121,18 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitStage_def([NotNull] sassy_parser.Stage_defContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.global_stage_def"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.global_stage_def"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.function_def"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -272,6 +284,34 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitNew_asset([NotNull] sassy_parser.New_assetContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>run_before_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRun_before_stage([NotNull] sassy_parser.Run_before_stageContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>run_before_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRun_before_stage([NotNull] sassy_parser.Run_before_stageContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>run_after_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRun_after_stage([NotNull] sassy_parser.Run_after_stageContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>run_after_stage</c>
+	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRun_after_stage([NotNull] sassy_parser.Run_after_stageContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
 	/// <para>The default implementation does nothing.</para>

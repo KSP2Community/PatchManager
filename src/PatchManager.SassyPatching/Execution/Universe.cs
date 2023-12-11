@@ -5,6 +5,7 @@ using PatchManager.SassyPatching.Nodes;
 using PatchManager.Shared.Interfaces;
 using SassyPatchGrammar;
 using System.Reflection;
+using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
 namespace PatchManager.SassyPatching.Execution;
 
@@ -108,6 +109,7 @@ public class Universe
         RegisterGenerator = registerGenerator;
         LoadedLabels = new List<string>(_preloadedLabels);
         AllMods = allMods;
+        SetupBasePriorities(allMods);
     }
 
     // TODO: Fix this so that other mods stages get their guids working
@@ -252,6 +254,25 @@ public class Universe
     {
         foreach (var (modId, patch) in ToRegister)
         {
+            var modBase = AllStages[modId];
+            // Lets first extract every single stage
+            foreach (var child in patch.Children)
+            {
+                switch (child)
+                {
+                    // Stage definitions have to be top level
+                    case StageDefinition stageDefinition:
+                        AllStages[$"{modId}:{stageDefinition.StageName}"] =
+                            stageDefinition.StagePriority * 10 + modBase;
+                        break;
+                    case GlobalStageDefinition globalStageDefinition:
+                        AllStages[$"{modId}:{globalStageDefinition.StageName}"] = globalStageDefinition.StagePriority * 10 + _baseGlobalStage;
+                        break;
+                }
+            }
+        }
+        foreach (var (modId, patch) in ToRegister)
+        {
             var gEnv = new GlobalEnvironment(this, modId);
             var env = new Environment(gEnv);
             patch.ExecuteIn(env);
@@ -261,5 +282,21 @@ public class Universe
     public void PatchLabels(params string[] labels)
     {
         LoadedLabels.AddRange(labels);
+    }
+
+    private static ulong _baseGlobalStage;
+
+    private void SetupBasePriorities(List<string> modLoadOrder)
+    {
+        ulong i = 0;
+        foreach (var mod in modLoadOrder)
+        {
+            var stagePriority = i * 10000ul;
+            var stagePostPriority = stagePriority + 9995ul;
+            AllStages[mod] = stagePriority;
+            AllStages[$"{mod}:post"] = stagePostPriority;
+            i++;
+        }
+        _baseGlobalStage = i * 10000ul;
     }
 }

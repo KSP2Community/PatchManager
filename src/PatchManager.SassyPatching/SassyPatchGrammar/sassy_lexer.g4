@@ -29,10 +29,13 @@ REQUIRE             : '@require';
 REQUIRE_NOT         : '@require-not';
 STAGE               : '@stage';
 DEFINE_STAGE        : '@define-stage';
+DEFINE_GLOBAL_STAGE : '@define-global-stage';
 INCLUDE             : '@include';
 RETURN              : '@return';
 PATCH               : '@patch';
 NEW                 : '@new';
+BEFORE              : '@before';
+AFTER               : '@after';
 
 
 
