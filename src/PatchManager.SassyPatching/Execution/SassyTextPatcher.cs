@@ -79,6 +79,18 @@ public class SassyTextPatcher : ITextPatcher
                     }
                     break;
                 }
+                case RunAtStageAttribute runAtStageAttribute:
+                {
+                    if (universe.AllStages.TryGetValue(runAtStageAttribute.Stage, out var toBeChosen))
+                    {
+                        chosenPriority = toBeChosen;
+                    } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runAtStageAttribute.Stage}",
+                                   out toBeChosen))
+                    {
+                        chosenPriority = toBeChosen;
+                    }
+                    break;
+                }
             }
         }
 
