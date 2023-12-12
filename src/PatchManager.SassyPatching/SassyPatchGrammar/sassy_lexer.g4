@@ -26,16 +26,16 @@ IN                  : 'in';
 SET                 : '@set';
 MERGE               : '@merge';
 REQUIRE             : '@require';
-REQUIRE_NOT         : '@require-not';
 STAGE               : '@stage';
 DEFINE_STAGE        : '@define-stage';
-DEFINE_GLOBAL_STAGE : '@define-global-stage';
+//DEFINE_GLOBAL_STAGE : '@define-global-stage'; get rid of this, as you just need to do an `@after mod_id` into your stage definition
 INCLUDE             : '@include';
 RETURN              : '@return';
 PATCH               : '@patch';
 NEW                 : '@new';
 BEFORE              : '@before';
 AFTER               : '@after';
+GLOBAL              : '@global';
 
 
 
@@ -57,7 +57,7 @@ SUBTRACT            : '-';
 MULTIPLY            : '*';
 DIVIDE              : '/';
 MODULUS             : '%';
-NOT                 : '!';
+NOT                 : 'not';
 GREATER_THAN        : '>';
 GREATER_THAN_EQUAL  : '>=';
 LESSER_THAN         : '<';

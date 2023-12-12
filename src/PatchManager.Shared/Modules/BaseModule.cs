@@ -9,13 +9,19 @@ namespace PatchManager.Shared.Modules;
 public class BaseModule : IModule
 {
     /// <inheritdoc/>
-    public virtual void Preload()
+    public virtual void Init()
     {
     }
 
     /// <inheritdoc/>
     public virtual void Load()
     {
+    }
+
+    /// <inheritdoc/>
+    public virtual void PreLoad()
+    {
+        
     }
 
     /// <inheritdoc />

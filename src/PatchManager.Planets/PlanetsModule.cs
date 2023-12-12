@@ -9,7 +9,7 @@ namespace PatchManager.Planets;
 [UsedImplicitly]
 public class PlanetsModule : BaseModule
 {
-    public override void Preload()
+    public override void Init()
     {
     }
 

@@ -1,33 +1,73 @@
-﻿using PatchManager.SassyPatching.Exceptions;
+﻿using PatchManager.SassyPatching.Execution;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
-/// <summary>
-/// Represents a stage definition
-/// </summary>
 public class StageDefinition : Node
 {
-    /// <summary>
-    /// The name of the stage being defined
-    /// </summary>
-    public readonly string StageName;
-    /// <summary>
-    /// The priority of the stage [between 0 and 999]
-    /// </summary>
-    public readonly ulong StagePriority;
 
-    internal StageDefinition(Coordinate c, string stageName, ulong stagePriority) : base(c)
+    public string Name;
+    public bool Implicit;
+    public bool Global;
+    public List<string> Before;
+    public List<string> After;
+    public StageDefinition(Coordinate c, string name) : base(c)
     {
-        StageName = stageName;
-        StagePriority = stagePriority;
+        Name = name;
+        Implicit = true;
+        Global = false;
+        Before = new();
+        After = new();
     }
 
-    /// <inheritdoc />
+    public StageDefinition(Coordinate c, string name, bool global) : base(c)
+    {
+        Name = name;
+        Global = global;
+        Implicit = !global;
+        Before = new();
+        After = new();
+    }
+
+    public StageDefinition(Coordinate c, string name, List<StageDefinitionAttribute> attributes) : base(c)
+    {
+        Name = name;
+        Global = false;
+        Implicit = false;
+        Before = new();
+        After = new();
+        foreach (var attribute in attributes)
+        {
+            if (attribute.After)
+                After.Add(attribute.Relative);
+            else
+                Before.Add(attribute.Relative);
+        }
+    }
+    
     public override void ExecuteIn(Environment environment)
     {
-        if (StagePriority > 999)
-            throw new InterpreterException(Coordinate,
-                "Stage priority outside of global stages must be between 0 and 999");
+        var universe = environment.GlobalEnvironment.Universe;
+        var id = environment.GlobalEnvironment.ModGuid;
+        var name = $"{id}:{Name}";
+        var stage = new Stage();
+        if (Global) // @global
+        {
+            stage.RunsAfter.Add(universe.LastImplicitGlobal);
+            universe.LastImplicitGlobal = name;
+        } else if (Implicit) // implicit
+        {
+            stage.RunsAfter.Add(universe.LastImplicitWithinMod[id]);
+            var post = universe.UnsortedStages[$"{id}:post"];
+            post.RunsAfter.Clear();
+            post.RunsAfter.Add(name);
+            universe.LastImplicitWithinMod[id] = name;
+        }
+        else // defined relations
+        {
+            stage.RunsAfter.AddRange(After);
+            stage.RunsBefore.AddRange(Before);
+        }
+        universe.UnsortedStages[name] = stage;
     }
 }

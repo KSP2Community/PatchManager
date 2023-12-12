@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using BepInEx.Logging;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -36,9 +37,21 @@ internal static class PatchingManager
     public static void GenerateUniverse()
     {
         var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
-        Universe = new(RegisterPatcher, Logging.LogError, Logging.LogInfo, RegisterGenerator,
+        UniverseLogMessage($"{string.Join(", ", loadedPlugins)}");
+        Universe = new(RegisterPatcher, UniverseLogError, UniverseLogMessage, RegisterGenerator,
             loadedPlugins);
         _initialLibraryCount = Universe.AllLibraries.Count;
+
+        void UniverseLogError(string error)
+        {
+            Debug.Log($"[PatchManager.Universe] [ERR]: {error}");
+        }
+
+        void UniverseLogMessage(string message)
+        {
+            
+            Debug.Log($"[PatchManager.Universe] [MSG]: {message}");
+        }
     }
 
     private static void RegisterPatcher(ITextPatcher patcher)
@@ -133,6 +146,7 @@ internal static class PatchingManager
 
     public static void RegisterPatches()
     {
+        Logging.LogInfo($"Registering all patches!");
         Universe.RegisterAllPatches();
         Logging.LogInfo($"{Patchers.Count} patchers registered!");
         Logging.LogInfo($"{Generators.Count} generators registered!");

@@ -43,67 +43,18 @@ public class SassyTextPatcher : ITextPatcher
         // }
         var global = environmentSnapshot.GlobalEnvironment;
         var universe = global.Universe;
-        ulong minPriority = 0;
-        ulong maxPriority = ulong.MaxValue;
-        ulong chosenPriority = universe.AllStages[global.ModGuid];
-        bool doAverage = false;
-        foreach (var attribute in rootSelectionBlock.Attributes)
-        {
-            switch (attribute)
-            {
-                case RunBeforeStageAttribute runBeforeStageAttribute:
-                {
-                    if (universe.AllStages.TryGetValue(runBeforeStageAttribute.Stage, out var maxStageValue))
-                    {
-                        doAverage = true;
-                        maxPriority = Math.Max(maxPriority, maxStageValue);
-                    } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runBeforeStageAttribute.Stage}",
-                                   out maxStageValue))
-                    {
-                        doAverage = true;
-                        maxPriority = Math.Max(maxPriority, maxStageValue);
-                    }
-                    break;
-                }
-                case RunAfterStageAttribute runAfterStageAttribute:
-                {
-                    if (universe.AllStages.TryGetValue(runAfterStageAttribute.Stage, out var minStageValue))
-                    {
-                        doAverage = true;
-                        minPriority = Math.Max(minPriority, minStageValue);
-                    } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runAfterStageAttribute.Stage}",
-                                   out minStageValue))
-                    {
-                        doAverage = true;
-                        minPriority = Math.Max(minPriority, minStageValue);
-                    }
-                    break;
-                }
-                case RunAtStageAttribute runAtStageAttribute:
-                {
-                    if (universe.AllStages.TryGetValue(runAtStageAttribute.Stage, out var toBeChosen))
-                    {
-                        chosenPriority = toBeChosen;
-                    } else if (universe.AllStages.TryGetValue($"{global.ModGuid}:{runAtStageAttribute.Stage}",
-                                   out toBeChosen))
-                    {
-                        chosenPriority = toBeChosen;
-                    }
-                    break;
-                }
-            }
-        }
-
-        if (doAverage)
-        {
-            chosenPriority = minPriority + ((maxPriority - minPriority) / 2);
-        }
-
-        Priority = chosenPriority;
+        PriorityString =
+            rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault() is { } runAtStageAttribute
+                ? runAtStageAttribute.Stage
+                : environmentSnapshot.GlobalEnvironment.ModGuid;
+        
     }
 
+    public string OriginalGuid { get; internal set; }
+    public string PriorityString { get; internal set; }
+
     /// <inheritdoc />
-    public ulong Priority { get; }
+    public ulong Priority { get; set; }
 
     /// <inheritdoc />
     public bool TryPatch(string patchType, string name, ref string patchData)

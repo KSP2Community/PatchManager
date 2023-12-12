@@ -7,7 +7,6 @@ patch                   : top_level_statement+ EOF;
 top_level_statement     : import_declaration
                         | var_decl
                         | stage_def
-                        | global_stage_def
                         | function_def
                         | mixin_def
                         | top_level_conditional
@@ -24,9 +23,15 @@ import_declaration      : USE imp=STRING SEMICOLON;
 
 var_decl                : variable=VARIABLE COLON val=expression SEMICOLON;
 
-stage_def               : DEFINE_STAGE stage=STRING COMMA priority=NUMBER SEMICOLON;
-
-global_stage_def        : DEFINE_GLOBAL_STAGE stage=STRING COMMA priority=NUMBER SEMICOLON;
+stage_def               : DEFINE_STAGE stage=STRING SEMICOLON #implicit_stage_def
+                        | DEFINE_STAGE stage=STRING COLON GLOBAL SEMICOLON #global_stage_def
+                        | DEFINE_STAGE stage=STRING COLON LEFT_BRACE attributes=stage_attribute* RIGHT_BRACE SEMICOLON #relative_stage_def
+                        ;
+                        
+stage_attribute         : BEFORE stage=STRING #stage_value_before
+                        | AFTER stage=STRING #stage_value_after
+                        ;
+                        
 
 function_def            : FUNCTION name=ELEMENT LEFT_PAREN args=arg_decl_list RIGHT_PAREN LEFT_BRACE body=function_body RIGHT_BRACE;
 
@@ -44,12 +49,9 @@ selection_block         : attributed_selector LEFT_BRACE selector_body RIGHT_BRA
 
 attributed_selector     : attributes=attribute* selector;
 
-attribute               : REQUIRE guid=STRING       #require_mod
-                        | REQUIRE_NOT guid=STRING   #require_not_mod
-                        | STAGE stage=STRING        #run_at_stage
-                        | NEW constructor_arguments #new_asset
-                        | BEFORE stage=STRING       #run_before_stage
-                        | AFTER stage=STRING        #run_after_stage
+attribute               : REQUIRE expr=require_expression       #require_mod
+                        | STAGE stage=STRING                    #run_at_stage
+                        | NEW constructor_arguments             #new_asset
                         ;
                         
 constructor_arguments   : LEFT_PAREN (expression (COMMA expression)*)? RIGHT_PAREN ;
@@ -163,6 +165,13 @@ value                   : DELETE                                                
                         | FUNCTION LEFT_PAREN args=arg_decl_list RIGHT_PAREN LEFT_BRACE body=function_body RIGHT_BRACE  #closure
                         | list                                                                                          #list_value
                         | obj                                                                                           #object_value
+                        ;
+                        
+require_expression      : LEFT_PAREN internal_expr = require_expression RIGHT_PAREN                                     #require_sub
+                        | lhs = require_expression AND rhs = require_expression                                         #require_and
+                        | lhs = require_expression OR  rhs = require_expression                                         #require_or
+                        | NOT internal_expr = require_expression                                                        #require_not
+                        | modid=STRING                                                                                  #require_guid
                         ;
 
 list                    : LEFT_BRACKET values=list_values COMMA? RIGHT_BRACKET;

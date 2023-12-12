@@ -109,6 +109,7 @@ public class Universe
         RegisterGenerator = registerGenerator;
         LoadedLabels = new List<string>(_preloadedLabels);
         AllMods = allMods;
+        MessageLogger("Setup universe!");
         SetupBasePriorities(allMods);
     }
 
@@ -247,6 +248,12 @@ public class Universe
         }
     }
 
+    public List<SassyTextPatcher> SassyTextPatchers = new();
+    public void RegisterPatcherToUniverse(SassyTextPatcher sassyTextPatcher)
+    {
+        SassyTextPatchers.Add(sassyTextPatcher);
+    }
+    
     /// <summary>
     /// This registers every patch in the files in the to register list
     /// </summary>
@@ -254,29 +261,83 @@ public class Universe
     {
         foreach (var (modId, patch) in ToRegister)
         {
-            var modBase = AllStages[modId];
-            // Lets first extract every single stage
-            foreach (var child in patch.Children)
-            {
-                switch (child)
-                {
-                    // Stage definitions have to be top level
-                    case StageDefinition stageDefinition:
-                        AllStages[$"{modId}:{stageDefinition.StageName}"] =
-                            stageDefinition.StagePriority * 10 + modBase;
-                        break;
-                    case GlobalStageDefinition globalStageDefinition:
-                        AllStages[$"{modId}:{globalStageDefinition.StageName}"] = globalStageDefinition.StagePriority * 10 + _baseGlobalStage;
-                        break;
-                }
-            }
-        }
-        foreach (var (modId, patch) in ToRegister)
-        {
             var gEnv = new GlobalEnvironment(this, modId);
             var env = new Environment(gEnv);
             patch.ExecuteIn(env);
         }
+        // Now we get to do the fun stuff with stages
+        foreach (var stage in UnsortedStages.Values)
+            stage.UpdateRequirements(UnsortedStages.Keys.ToList());
+        SortStages();
+        foreach (var patcher in SassyTextPatchers)
+        {
+            var stage = patcher.PriorityString;
+            var modId = patcher.OriginalGuid;
+            if (AllStages.TryGetValue(stage, out var priority))
+            {
+                patcher.Priority = priority;
+            } else if (AllStages.TryGetValue($"{modId}:{stage}", out priority))
+            {
+                patcher.Priority = priority;
+            } else if (AllStages.TryGetValue(modId, out priority))
+            {
+                patcher.Priority = priority;
+            }
+
+            RegisterPatcher(patcher);
+        }
+    }
+
+    private void SortStages()
+    {
+        MessageLogger($"Sorting {UnsortedStages.Count} stages");
+        List<string> sortedStages = new();
+        Dictionary<string, Stage> toSort = new(UnsortedStages);
+        while (toSort.Count > 0)
+        {
+            if (!SingleSortStep(toSort, sortedStages))
+            {
+                throw new Exception(
+                    $"Unable to sort stages to define patch order, the following stages cause a circular dependency: {string.Join(", ", toSort.Keys)}");
+            }
+        }
+
+        // For debug purposes
+        MessageLogger("Sorted stages!");
+        ulong n = 0;
+        foreach (var stage in sortedStages)
+        {
+            MessageLogger($"{stage}: {n}");
+            AllStages[stage] = n++;
+        }
+    }
+
+    
+    private static bool SingleSortStep(
+        Dictionary<string, Stage> toBeSorted,
+        List<string> sortedStages
+    )
+    {
+        var remove = "";
+        var found = false;
+        foreach (var (name, stage) in toBeSorted)
+        {
+            if (!stage.RunsAfter.All(sortedStages.Contains) || toBeSorted.Values.Any(x => x.RunsBefore.Contains(name)))
+            {
+                continue;
+            }
+
+            remove = name;
+            found = true;
+            sortedStages.Add(name);
+            break;
+        }
+
+        if (found)
+        {
+            toBeSorted.Remove(remove);
+        }
+        return found;
     }
 
     public void PatchLabels(params string[] labels)
@@ -284,19 +345,29 @@ public class Universe
         LoadedLabels.AddRange(labels);
     }
 
-    private static ulong _baseGlobalStage;
-
+    public readonly Dictionary<string, Stage> UnsortedStages = new();
+    public readonly Dictionary<string, string> LastImplicitWithinMod = new();
+    public string LastImplicitGlobal = "";
+    
     private void SetupBasePriorities(List<string> modLoadOrder)
     {
-        ulong i = 0;
+        MessageLogger($"Setting up base priorities with mod load order: {string.Join(", ", modLoadOrder)}");
+        var lastPost = "";
         foreach (var mod in modLoadOrder)
         {
-            var stagePriority = i * 10000ul;
-            var stagePostPriority = stagePriority + 9995ul;
-            AllStages[mod] = stagePriority;
-            AllStages[$"{mod}:post"] = stagePostPriority;
-            i++;
+            var stage = new Stage();
+            if (lastPost.Length > 0)
+                stage.RunsAfter.Add(lastPost);
+            UnsortedStages[mod] = stage;
+            MessageLogger($"Adding stage: {mod}");
+            var post = new Stage();
+            post.RunsAfter.Add(mod);
+            lastPost = $"{mod}:post";
+            UnsortedStages[lastPost] = post;
+            MessageLogger($"Adding stage: {lastPost}");
+            LastImplicitWithinMod[mod] = mod;
         }
-        _baseGlobalStage = i * 10000ul;
+        LastImplicitGlobal = lastPost;
+        MessageLogger($"Last implicit global: {lastPost}");
     }
 }

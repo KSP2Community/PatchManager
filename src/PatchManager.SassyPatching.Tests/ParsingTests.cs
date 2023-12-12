@@ -160,27 +160,6 @@ $variable: 5;
     }
 
     /// <summary>
-    /// Tests a stage definition
-    /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese", Description = "Tests a stage definition")]
-    public void StageDefinition()
-    {
-        const string patch =
-            @"
-@define-stage 'create-engines', 42;
-";
-        var validator = new PatchValidator
-        {
-            new StageDefinitionValidator
-            {
-                StageName = "create-engines",
-                StagePriority = 42
-            }
-        };
-        Match(patch, validator);
-    }
-
-    /// <summary>
     /// Tests a function definition w/o any arguments or body
     /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
@@ -701,70 +680,6 @@ $variable: 5;
     #region Attribute Tests
 
     /// <summary>
-    /// Tests a selection block w/ an @require attribute
-    /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a selection block w/ an @require attribute")]
-    public void RequireAttribute()
-    {
-        const string patch =
-            @"
-@require 'mod'
-* {
-    // Empty
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new()
-                {
-                    new RequireModAttributeValidator
-                    {
-                        Guid = "mod"
-                    }
-                },
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-            }
-        };
-        Match(patch, validator);
-    }
-
-    /// <summary>
-    /// Tests a selection block w/ an @require-not attribute
-    /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a selection block w/ an @require-not attribute")]
-    public void RequireNotAttribute()
-    {
-        const string patch =
-            @"
-@require-not 'mod'
-* {
-    // Empty
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new()
-                {
-                    new RequireNotModAttributeValidator
-                    {
-                        Guid = "mod"
-                    }
-                },
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-            }
-        };
-        Match(patch, validator);
-    }
-
-    /// <summary>
     /// Tests a selection block w/ an @stage attribute
     /// </summary>
     [Test(TestOf = typeof(Transformer), Author = "Cheese",
@@ -795,49 +710,7 @@ $variable: 5;
         };
         Match(patch, validator);
     }
-
-    /// <summary>
-    /// Tests a selection block w/ a @require, a @require-not, and a @stage attribute
-    /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a selection block w/ a @require, a @require-not, and a @stage attribute")]
-    public void MultipleAttributes()
-    {
-        const string patch =
-            @"
-@require 'mod'
-@require-not 'mod'
-@stage 'init'
-* {
-    // Empty
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new()
-                {
-                    new RequireModAttributeValidator
-                    {
-                        Guid = "mod"
-                    },
-                    new RequireNotModAttributeValidator
-                    {
-                        Guid = "mod"
-                    },
-                    new RunAtStageAttributeValidator()
-                    {
-                        Stage = "init"
-                    }
-                },
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-            }
-        };
-        Match(patch, validator);
-    }
-
+    
     #endregion
 
     #region Selector Tests

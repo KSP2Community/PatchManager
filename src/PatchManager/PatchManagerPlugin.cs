@@ -62,8 +62,13 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
             harmony.PatchAll(module.GetType().Assembly);
         }
 
-        // Preload modules
+        // Init modules
         ModuleManager.InitAll();
+    }
+
+    public override void OnPreInitialized()
+    {
+        ModuleManager.PreLoadAll();
     }
 
     /// <summary>

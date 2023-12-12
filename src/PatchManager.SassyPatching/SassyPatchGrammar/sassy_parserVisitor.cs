@@ -69,17 +69,40 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitVar_decl([NotNull] sassy_parser.Var_declContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="sassy_parser.stage_def"/>.
+	/// Visit a parse tree produced by the <c>implicit_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitStage_def([NotNull] sassy_parser.Stage_defContext context);
+	Result VisitImplicit_stage_def([NotNull] sassy_parser.Implicit_stage_defContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="sassy_parser.global_stage_def"/>.
+	/// Visit a parse tree produced by the <c>global_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>relative_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRelative_stage_def([NotNull] sassy_parser.Relative_stage_defContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>stage_value_before</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitStage_value_before([NotNull] sassy_parser.Stage_value_beforeContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>stage_value_after</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitStage_value_after([NotNull] sassy_parser.Stage_value_afterContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.function_def"/>.
 	/// </summary>
@@ -136,13 +159,6 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitRequire_mod([NotNull] sassy_parser.Require_modContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>require_not_mod</c>
-	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRequire_not_mod([NotNull] sassy_parser.Require_not_modContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>run_at_stage</c>
 	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
 	/// </summary>
@@ -156,20 +172,6 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitNew_asset([NotNull] sassy_parser.New_assetContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>run_before_stage</c>
-	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRun_before_stage([NotNull] sassy_parser.Run_before_stageContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>run_after_stage</c>
-	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRun_after_stage([NotNull] sassy_parser.Run_after_stageContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.constructor_arguments"/>.
 	/// </summary>
@@ -727,6 +729,41 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitObject_value([NotNull] sassy_parser.Object_valueContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>require_sub</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRequire_sub([NotNull] sassy_parser.Require_subContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>require_or</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRequire_or([NotNull] sassy_parser.Require_orContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>require_not</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRequire_not([NotNull] sassy_parser.Require_notContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>require_guid</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRequire_guid([NotNull] sassy_parser.Require_guidContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>require_and</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRequire_and([NotNull] sassy_parser.Require_andContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.list"/>.
 	/// </summary>
