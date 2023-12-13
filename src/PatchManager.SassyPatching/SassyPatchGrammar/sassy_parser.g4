@@ -28,8 +28,8 @@ stage_def               : DEFINE_STAGE stage=STRING SEMICOLON #implicit_stage_de
                         | DEFINE_STAGE stage=STRING COLON LEFT_BRACE attributes=stage_attribute* RIGHT_BRACE SEMICOLON #relative_stage_def
                         ;
                         
-stage_attribute         : BEFORE stage=STRING #stage_value_before
-                        | AFTER stage=STRING #stage_value_after
+stage_attribute         : BEFORE stage=STRING SEMICOLON #stage_value_before
+                        | AFTER stage=STRING SEMICOLON #stage_value_after
                         ;
                         
 
