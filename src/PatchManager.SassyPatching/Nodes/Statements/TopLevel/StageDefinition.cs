@@ -65,8 +65,8 @@ public class StageDefinition : Node
         }
         else // defined relations
         {
-            stage.RunsAfter.AddRange(After);
-            stage.RunsBefore.AddRange(Before);
+            stage.RunsAfter.AddRange(After.Select(x => (x.Contains(":") || universe.AllMods.Contains(x)) ? x : $"{id}:x"));
+            stage.RunsBefore.AddRange(Before.Select(x => (x.Contains(":") || universe.AllMods.Contains(x)) ? x : $"{id}:x"));
         }
         universe.UnsortedStages[name] = stage;
     }
