@@ -115,8 +115,8 @@ UNICODE_ESC
    :   '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
    ;
 
-fragment IDENTIFIER : [a-zA-Z_*?][a-zA-Z_.\-*?0-9]*;
-fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_][a-zA-Z_.\-0-9]*;
+fragment IDENTIFIER : [a-zA-Z_*?]([a-zA-Z_.*?0-9]|[\-][a-zA-Z_.*?])*;
+fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_]([a-zA-Z_.0-9]|[\-][a-zA-Z_.])*;
 
 NAME                : '#' IDENTIFIER;
 CLASS               : '.' WILDCARDLESS_IDENTIFIER;
