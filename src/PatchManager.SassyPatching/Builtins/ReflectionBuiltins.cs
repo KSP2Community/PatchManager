@@ -14,11 +14,11 @@ public class ReflectionBuiltins
     /// <summary>
     /// Gets the type of a value
     /// </summary>
-    /// <param name="dataValue">The value to get the type of</param>
+    /// <param name="value">The value to get the type of</param>
     /// <returns>The values type as a lowercase string</returns>
     [SassyMethod("typeof")]
-    public static string GetValueType(DataValue dataValue)
+    public static string GetValueType(DataValue value)
     {
-        return dataValue.Type.ToString().ToLowerInvariant();
+        return value.Type.ToString().ToLowerInvariant();
     }
 }

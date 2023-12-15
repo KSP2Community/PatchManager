@@ -17,10 +17,10 @@ public class ListBuiltins
     /// Copies a list and appends a value onto the copy and returns the copy
     /// </summary>
     /// <param name="list">The list to copy</param>
-    /// <param name="dataValue">The value to append</param>
+    /// <param name="value">The value to append</param>
     /// <returns>The new list w/ the value appended to it</returns>
     [SassyMethod("list.append")]
-    public static List<DataValue> Append(List<DataValue> list, DataValue dataValue) => new(list) { dataValue };
+    public static List<DataValue> Append(List<DataValue> list, DataValue value) => new(list) { value };
 
     /// <summary>
     /// Copies a list and appends a list of values onto the copy and returns the copy
@@ -113,13 +113,13 @@ public class ListBuiltins
     /// Sorts a list, using a comparison function if one is provided otherwise uses a default comparison algorithm
     /// </summary>
     /// <param name="env"></param>
-    /// <param name="dataValues"></param>
+    /// <param name="list"></param>
     /// <param name="comparator">The function to sort with, default null (due to closures not existing in the program yet), follows the C# comparison function</param>
     /// <returns></returns>
     [SassyMethod("list.sort")]
-    public static List<DataValue> Sort(Environment env, List<DataValue> dataValues, PatchFunction comparator = null)
+    public static List<DataValue> Sort(Environment env, List<DataValue> list, PatchFunction comparator = null)
     {
-        var copy = new List<DataValue>(dataValues);
+        var copy = new List<DataValue>(list);
         Comparison<DataValue> comparison =
             comparator != null ? (x, y) => InvokeComparison(env, comparator, x, y) : DefaultComparison;
         copy.Sort(comparison);
@@ -131,14 +131,16 @@ public class ListBuiltins
     /// Copy a list, apply a function over the copy and return that copy
     /// </summary>
     /// <param name="env">The environment this is being ran in</param>
-    /// <param name="dataValues">The list of values</param>
+    /// <param name="list"></param>
     /// <param name="closure">The function to apply to the list</param>
     /// <returns>The copy w/ the function applied over it</returns>
     [SassyMethod("list.map")]
-    public static List<DataValue> Map(Environment env,
-        List<DataValue> dataValues,
-        PatchFunction closure) =>
-        dataValues.Select(value => closure.Execute(env,
+    public static List<DataValue> Map(
+        Environment env,
+        List<DataValue> list,
+        PatchFunction closure
+    ) =>
+        list.Select(value => closure.Execute(env,
                 new List<PatchArgument>
                 {
                     new()
@@ -149,17 +151,44 @@ public class ListBuiltins
             .ToList();
 
     /// <summary>
+    /// Copy a list, apply a function over the copy to filter the lists
+    /// </summary>
+    /// <param name="env">The environment this is being ran in</param>
+    /// <param name="list"></param>
+    /// <param name="closure">The function to apply to the list</param>
+    /// <returns>The copy w/ the function applied over it</returns>
+    [SassyMethod("list.map")]
+    public static List<DataValue> Filter(
+        Environment env,
+        List<DataValue> list,
+        PatchFunction closure
+    ) =>
+        list.Where(value => closure.Execute(env,
+                new List<PatchArgument>
+                {
+                    new()
+                    {
+                        ArgumentDataValue = value
+                    }
+                }).Truthy)
+            .ToList();
+    
+    /// <summary>
     /// Aggregate a list into one value
     /// </summary>
     /// <param name="env">The environment of the list</param>
-    /// <param name="dataValues">The list</param>
+    /// <param name="list"></param>
     /// <param name="initialValue">The starting value of the aggregation</param>
     /// <param name="closure">The function to apply to take the aggregate</param>
     /// <returns>The aggregate value</returns>
     [SassyMethod("list.reduce")]
-    public static DataValue Reduce(Environment env, List<DataValue> dataValues, DataValue initialValue,
-        PatchFunction closure) =>
-        dataValues.Aggregate(initialValue,
+    public static DataValue Reduce(
+        Environment env,
+        List<DataValue> list,
+        [SassyName("initial-value")] DataValue initialValue,
+        PatchFunction closure
+    ) =>
+        list.Aggregate(initialValue,
             (current,
                 value) => closure.Execute(env,
                 new List<PatchArgument>
@@ -177,8 +206,12 @@ public class ListBuiltins
     /// <summary>
     /// Gets the length of a list
     /// </summary>
-    /// <param name="dataValues">The list</param>
+    /// <param name="list">The list</param>
     /// <returns>The length of the list</returns>
     [SassyMethod("list.length")]
-    public static int Length(List<DataValue> dataValues) => dataValues.Count;
+    public static int Length(List<DataValue> list) => list.Count;
+    
+    [SassyMethod("list.join")]
+    public static string ToString(List<DataValue> list, string separator = "") => string.Join("", list.Select(x => x.IsString ? x.String : x.ToString()));
+
 }

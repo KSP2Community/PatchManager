@@ -13,41 +13,38 @@ public class TypeConversion
     /// <summary>
     /// Used in a patch to convert a value to a boolean
     /// </summary>
-    /// <param name="v">The value</param>
+    /// <param name="value">The value</param>
     /// <returns>A boolean form of the value</returns>
     [SassyMethod("to-bool")]
-    public static bool ToBoolean(DataValue v)
-    {
-        return v.Truthy;
-    }
+    public static bool ToBoolean(DataValue value) => value.Truthy;
 
 
     /// <summary>
     /// Used in a patch to convert a value to a real
     /// </summary>
-    /// <param name="v">The value</param>
+    /// <param name="value">The value</param>
     /// <returns>The value interpreted as a real</returns>
     [SassyMethod("to-real")]
-    public static double ToReal(DataValue v)
+    public static double ToReal(DataValue value)
     {
-        if (v.IsInteger) return v.Integer;
-        if (v.IsReal) return v.Real;
-        if (v.IsString) return double.Parse(v.String);
-        throw new InvalidCastException($"Cannot convert value of type {v.Type.ToString().ToLowerInvariant()} to real");
+        if (value.IsInteger) return value.Integer;
+        if (value.IsReal) return value.Real;
+        if (value.IsString) return double.Parse(value.String);
+        throw new InvalidCastException($"Cannot convert value of type {value.Type.ToString().ToLowerInvariant()} to real");
     }
     
     /// <summary>
     /// Used in a patch to convert a value to a real
     /// </summary>
-    /// <param name="v">The value</param>
+    /// <param name="value">The value</param>
     /// <returns>The value interpreted as a real</returns>
     [SassyMethod("to-integer")]
-    public static long ToInteger(DataValue v)
+    public static long ToInteger(DataValue value)
     {
-        if (v.IsInteger) return v.Integer;
-        if (v.IsReal) return (long)v.Real;
-        if (v.IsString) return long.Parse(v.String);
-        throw new InvalidCastException($"Cannot convert value of type {v.Type.ToString().ToLowerInvariant()} to integer");
+        if (value.IsInteger) return value.Integer;
+        if (value.IsReal) return (long)value.Real;
+        if (value.IsString) return long.Parse(value.String);
+        throw new InvalidCastException($"Cannot convert value of type {value.Type.ToString().ToLowerInvariant()} to integer");
     }
     
     /// <summary>
@@ -56,13 +53,13 @@ public class TypeConversion
     /// <param name="v">The value</param>
     /// <returns>A string form of the value</returns>
     [SassyMethod("to-string")]
-    public static string ToString(DataValue v)
+    public static string ToString(DataValue value)
     {
-        return v.IsString ? v.String : v.ToString();
+        return value.IsString ? value.String : value.ToString();
     }
 
     [SassyMethod("dictionary.to-list")]
-    public static List<List<DataValue>> ToList(Dictionary<string, DataValue> dictionary) => dictionary.Select(kv =>
+    public static List<List<DataValue>> ToList(Dictionary<string, DataValue> dict) => dict.Select(kv =>
         new List<DataValue>()
         {
             DataValue.From(kv.Key),
@@ -83,4 +80,8 @@ public class TypeConversion
         }
         return newDict;
     }
-}
+
+    [SassyMethod("string.to-list")]
+    public static List<string> ToList([SassyName("string")] string str) => str.Select(x => $"{x}").ToList();
+
+    }

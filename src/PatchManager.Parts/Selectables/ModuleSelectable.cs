@@ -99,7 +99,6 @@ public sealed class ModuleSelectable : BaseSelectable
         }
         Selectable.SetModified();
         var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
-        // var dataObject = JObject.Parse(IOProvider.ToJson(instance));
         var dataObject = new JObject
         {
             ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"

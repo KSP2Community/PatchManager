@@ -1,4 +1,7 @@
 ﻿using JetBrains.Annotations;
+using KSP.IO;
+using KSP.Sim.Definitions;
+using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Attributes;
 
@@ -19,7 +22,7 @@ public class PartsBuiltins
     /// <param name="moduleName">The module name</param>
     /// <returns></returns>
     [SassyMethod("find-module")]
-    public DataValue FindModule(Dictionary<string, DataValue> partObject, string moduleName)
+    public DataValue FindModule([SassyName("part-object")] Dictionary<string, DataValue> partObject, [SassyName("module-name")] string moduleName)
     {
         if (moduleName.StartsWith("PartComponent"))
             moduleName = moduleName.Replace("PartComponent", "");
@@ -36,7 +39,7 @@ public class PartsBuiltins
     }
 
     [SassyMethod("add-module")]
-    public Dictionary<string,DataValue> AddModule(Dictionary<string, DataValue> partObject, Dictionary<string, DataValue> module)
+    public Dictionary<string,DataValue> AddModule([SassyName("part-object")] Dictionary<string, DataValue> partObject, Dictionary<string, DataValue> module)
     {
         var newObject = new Dictionary<string, DataValue>(partObject);
         newObject["serializedPartModules"].List.Add(module);
@@ -44,7 +47,7 @@ public class PartsBuiltins
     }
 
     [SassyMethod("remove-module")]
-    public Dictionary<string, DataValue> RemoveModule(Dictionary<string, DataValue> partObject, string moduleName)
+    public Dictionary<string, DataValue> RemoveModule([SassyName("part-object")] Dictionary<string, DataValue> partObject, [SassyName("module-name")] string moduleName)
     {
         if (moduleName.StartsWith("PartComponent"))
             moduleName = moduleName.Replace("PartComponent", "");
@@ -72,8 +75,8 @@ public class PartsBuiltins
 
     [SassyMethod("replace-module")]
     public Dictionary<string, DataValue> ReplaceModule(
-        Dictionary<string, DataValue> partObject,
-        string moduleName,
+        [SassyName("part-object")] Dictionary<string, DataValue> partObject,
+        [SassyName("module-name")] string moduleName,
         Dictionary<string, DataValue> module
     )
     {
@@ -103,6 +106,24 @@ public class PartsBuiltins
         }
         return newObject;
     }
+
+    [SassyMethod("create-module")]
+    public Dictionary<string, DataValue> CreateModule(string type)
+    {
+        
+        if (!PartsUtilities.ComponentModules.TryGetValue(type, out var mod))
+        {
+            throw new Exception($"Unknown part module {type}");
+        }
+        var moduleObject = new JObject()
+        {
+            ["Name"] = mod.componentModule.Name,
+            ["ComponentType"] = mod.componentModule.AssemblyQualifiedName,
+            ["BehaviourType"] =  mod.behaviour.AssemblyQualifiedName,
+            ["ModuleData"] = new JArray()
+        };
+        return DataValue.FromJToken(moduleObject).Dictionary;
+    }
     
     
     /// <summary>
@@ -112,21 +133,21 @@ public class PartsBuiltins
     /// <param name="moduleDataName"></param>
     /// <returns></returns>
     [SassyMethod("find-module-data")]
-    public DataValue FindModuleData(Dictionary<string, DataValue> partModule, string moduleDataName)
+    public DataValue FindModuleData([SassyName("part-module")] Dictionary<string, DataValue> partModule, [SassyName("module-data-name")] string moduleDataName)
     {
         var data = partModule["ModuleData"].List.Select(x => x.Dictionary);
         foreach (var moduleData in data)
         {
             if (moduleData["Name"].String == moduleDataName)
             {
-                return moduleData["DataObject"];
+                return moduleData;
             }
         }
         return DataValue.Null;
     }
     
     [SassyMethod("add-module-data")]
-    public Dictionary<string, DataValue> AddModuleData(Dictionary<string, DataValue> partModule, Dictionary<string, DataValue> moduleData)
+    public Dictionary<string, DataValue> AddModuleData([SassyName("part-module")] Dictionary<string, DataValue> partModule, [SassyName("module-data")] Dictionary<string, DataValue> moduleData)
     {
         var newObject = new Dictionary<string, DataValue>(partModule);
         newObject["ModuleData"].List.Add(moduleData);
@@ -135,8 +156,8 @@ public class PartsBuiltins
 
     [SassyMethod("remove-module-data")]
     public Dictionary<string, DataValue> RemoveModuleData(
-        Dictionary<string, DataValue> partModule,
-        string moduleDataName
+        [SassyName("part-module")] Dictionary<string, DataValue> partModule,
+        [SassyName("module-data-name")] string moduleDataName
     )
     {
         var newObject = new Dictionary<string, DataValue>(partModule);
@@ -163,9 +184,9 @@ public class PartsBuiltins
     
     [SassyMethod("replace-module-data")]
     public Dictionary<string, DataValue> ReplaceModuleData(
-        Dictionary<string, DataValue> partModule,
-        string moduleDataName,
-        Dictionary<string, DataValue> moduleData
+        [SassyName("part-module")] Dictionary<string, DataValue> partModule,
+        [SassyName("module-data-name")] string moduleDataName,
+        [SassyName("module-data")] Dictionary<string, DataValue> moduleData
     )
     {
         var newObject = new Dictionary<string, DataValue>(partModule);
@@ -193,5 +214,49 @@ public class PartsBuiltins
 
         return newObject;
     }
-    
+
+    [SassyMethod("create-module-data")]
+    public Dictionary<string, DataValue> CreateModuleData(string type)
+    {
+        if (!PartsUtilities.DataModules.TryGetValue(type, out var dataModuleType))
+        {
+            throw new Exception($"Unknown data module {type}");
+        }
+        
+        var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
+        var dataObject = new JObject
+        {
+            ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"
+        };
+        var otherObject = JObject.Parse(IOProvider.ToJson(instance));
+        foreach (var prop in otherObject)
+        {
+            dataObject[prop.Key] = prop.Value;
+        }
+        var trueType = new JObject
+        {
+            ["Name"] =  dataModuleType.Name,
+            ["ModuleType"] = instance.ModuleType.AssemblyQualifiedName,
+            ["DataType"] = instance.DataType.AssemblyQualifiedName,
+            ["Data"] = null,
+            ["DataObject"] = dataObject
+        };
+        return DataValue.FromJToken(trueType).Dictionary;
+    }
+
+    [SassyMethod("get-data-object")]
+    public static Dictionary<string, DataValue> GetDataObject(
+        [SassyName("module-data")] Dictionary<string, DataValue> moduleData
+    ) => moduleData["DataObject"].Dictionary;
+
+    [SassyMethod("set-data-object")]
+    public static Dictionary<string, DataValue> SetDataObject(
+        [SassyName("module-data")] Dictionary<string, DataValue> moduleData,
+        [SassyName("data-object")] Dictionary<string, DataValue> dataObject
+    )
+    {
+        var result = new Dictionary<string, DataValue>(moduleData);
+        result["DataObject"] = dataObject;
+        return result;
+    }
 }

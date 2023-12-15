@@ -32,6 +32,12 @@ internal class ManagedPatchFunction : PatchFunction
         
         foreach (var parameter in _info.GetParameters())
         {
+            var argumentName = parameter.Name;
+            if (parameter.ParameterType.GetCustomAttribute<SassyNameAttribute>() is { } attribute)
+            {
+                argumentName = attribute.ArgumentName;
+            }
+            
             if (parameter.ParameterType == typeof(Environment))
             {
                 args.Add(env);
@@ -109,7 +115,7 @@ internal class ManagedPatchFunction : PatchFunction
                     argument = arguments[i].ArgumentDataValue;
                 }
 
-                if (arguments[i].ArgumentName != parameter.Name) continue;
+                if (arguments[i].ArgumentName != argumentName) continue;
                 removalIndex = i;
                 argument = arguments[i].ArgumentDataValue;
                 break;
@@ -128,7 +134,7 @@ internal class ManagedPatchFunction : PatchFunction
                 }
                 else
                 {
-                    throw new InvocationException($"No value found for argument: {parameter.Name}");
+                    throw new InvocationException($"No value found for argument: {argumentName}");
                 }
             }
             else
