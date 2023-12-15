@@ -128,6 +128,40 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitRelative_stage_def([NotNull] sassy_parser.Relative_stage_defContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.config_creation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterConfig_creation([NotNull] sassy_parser.Config_creationContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.config_creation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitConfig_creation([NotNull] sassy_parser.Config_creationContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>update_config_full</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterUpdate_config_full([NotNull] sassy_parser.Update_config_fullContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>update_config_full</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitUpdate_config_full([NotNull] sassy_parser.Update_config_fullContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>update_config_label</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterUpdate_config_label([NotNull] sassy_parser.Update_config_labelContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>update_config_label</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitUpdate_config_label([NotNull] sassy_parser.Update_config_labelContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>stage_value_before</c>
 	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
 	/// </summary>

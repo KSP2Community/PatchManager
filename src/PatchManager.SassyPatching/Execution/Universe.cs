@@ -5,6 +5,8 @@ using PatchManager.SassyPatching.Nodes;
 using PatchManager.Shared.Interfaces;
 using SassyPatchGrammar;
 using System.Reflection;
+using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
 namespace PatchManager.SassyPatching.Execution;
@@ -58,6 +60,28 @@ public class Universe
         }
     }
 
+
+    public Dictionary<string, Dictionary<string, DataValue>> Configs = new();
+#nullable enable
+    public List<(long priority, string label, string? name, Expression updateExpression, Environment snapshot)> ConfigUpdates = new();
+    public void AddConfigUpdater(long priority, string label, string? name, Expression updateExpression, Environment snapshot)
+    {
+        if (ConfigUpdates.Count == 0)
+        {
+            ConfigUpdates.Add((priority, label, name, updateExpression,snapshot));
+            return;
+        }
+
+        for (var i = 0; i < ConfigUpdates.Count; i++)
+        {
+            if (ConfigUpdates[i].priority < priority) continue;
+
+            ConfigUpdates.Insert(i,(priority, label, name, updateExpression,snapshot));
+            return;
+        }
+        ConfigUpdates.Add((priority, label, name, updateExpression,snapshot));
+    } 
+#nullable disable
     /// <summary>
     /// All stages defined by every mod
     /// </summary>
@@ -265,10 +289,58 @@ public class Universe
             var env = new Environment(gEnv);
             patch.ExecuteIn(env);
         }
+
         // Now we get to do the fun stuff with stages
         foreach (var stage in UnsortedStages.Values)
             stage.UpdateRequirements(UnsortedStages.Keys.ToList());
         SortStages();
+        // Now lets update configs
+        foreach (var (_,label,name,updateExpression,environment) in ConfigUpdates)
+        {
+            if (!Configs.TryGetValue(label, out var labelDict))
+                labelDict = Configs[label] = new Dictionary<string, DataValue>();
+            var subEnv = new Environment(environment.GlobalEnvironment,environment);
+            if (name != null)
+            {
+                if (labelDict.TryGetValue(name, out var toAddValue))
+                {
+                    subEnv["value"] = toAddValue;
+                }
+                else
+                {
+                    subEnv["value"] = labelDict[name] = new DataValue(DataValue.DataType.None);
+                }
+
+                var result = updateExpression.Compute(subEnv);
+                if (result.IsDeletion)
+                {
+                    labelDict.Remove(name);
+                }
+                else
+                {
+                    labelDict[name] = result;
+                }
+            }
+            else
+            {
+                subEnv["value"] = DataValue.From(labelDict);
+                var result = updateExpression.Compute(subEnv);
+                if (result.IsDeletion)
+                {
+                    labelDict.Clear();
+                }
+                else if (!result.IsDictionary)
+                {
+                    throw new InterpreterException(updateExpression.Coordinate,
+                        "Updating a config label must result in a dictionary or deletion value.");
+                }
+                else
+                {
+                    Configs[label] = result.Dictionary;
+                }
+            }
+        }
+        
         foreach (var patcher in SassyTextPatchers)
         {
             var stage = patcher.PriorityString;

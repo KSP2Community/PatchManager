@@ -12,6 +12,8 @@ top_level_statement     : import_declaration
                         | top_level_conditional
                         | selection_block
                         | patch_declaration
+                        | config_creation
+                        | config_mutation
                         ;
 
 
@@ -26,6 +28,12 @@ var_decl                : variable=VARIABLE COLON val=expression SEMICOLON;
 stage_def               : DEFINE_STAGE stage=STRING SEMICOLON #implicit_stage_def
                         | DEFINE_STAGE stage=STRING COLON GLOBAL SEMICOLON #global_stage_def
                         | DEFINE_STAGE stage=STRING COLON LEFT_BRACE attributes=stage_attribute* RIGHT_BRACE SEMICOLON #relative_stage_def
+                        ;
+                        
+config_creation         : CREATE_CONFIG label=STRING COMMA config_name=STRING COLON config_value=sub_expression SEMICOLON;
+                        
+config_mutation         : UPDATE_CONFIG priority=sub_expression COMMA label=STRING COMMA config_name=STRING COLON config_update=expression SEMICOLON    #update_config_full
+                        | UPDATE_CONFIG priority=sub_expression COMMA label=STRING COLON config_update=expression SEMICOLON                             #update_config_label
                         ;
                         
 stage_attribute         : BEFORE stage=STRING SEMICOLON #stage_value_before

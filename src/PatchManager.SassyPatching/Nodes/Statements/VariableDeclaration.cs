@@ -26,7 +26,7 @@ public class VariableDeclaration : Node
     /// <inheritdoc />
     public override void ExecuteIn(Environment environment)
     {
-        var subEnv = environment.Snapshot();
+        var subEnv = new Environment(environment.GlobalEnvironment, environment);
         try
         {
             subEnv["value"] = environment[Variable];

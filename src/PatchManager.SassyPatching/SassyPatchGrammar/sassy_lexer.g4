@@ -36,7 +36,8 @@ NEW                 : '@new';
 BEFORE              : '@before';
 AFTER               : '@after';
 GLOBAL              : '@global';
-
+CREATE_CONFIG       : '@create-config';
+UPDATE_CONFIG       : '@update-config';
 
 
 

@@ -70,7 +70,6 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             context.variable.Text.TrimFirst(),
             Visit(context.val) as Expression);
 
-    
 
     /// <inheritdoc />
     public override Node VisitFunction_def(sassy_parser.Function_defContext context) =>
@@ -169,7 +168,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitRequire_and(sassy_parser.Require_andContext context) =>
         new RequireAnd(context.GetCoordinate(), Visit(context.lhs) as RequireExpression,
             Visit(context.rhs) as RequireExpression);
-    
+
     public override Node VisitRequire_or(sassy_parser.Require_orContext context) =>
         new RequireOr(context.GetCoordinate(), Visit(context.lhs) as RequireExpression,
             Visit(context.rhs) as RequireExpression);
@@ -195,7 +194,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitSel_ruleset(sassy_parser.Sel_rulesetContext context)
         => new RulesetSelector(context.GetCoordinate(), context.RULESET().GetText().TrimFirst());
 
-    
+
     public override Node VisitSel_class_capture(sassy_parser.Sel_class_captureContext context) =>
         new ClassCaptureSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst(),
             context.function_statement().Select(Visit).ToList());
@@ -659,12 +658,20 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             context.function_statement().Select(Visit).ToList());
 
     public override Node VisitGlobal_stage_def(sassy_parser.Global_stage_defContext context) =>
-        new StageDefinition(context.GetCoordinate(), context.stage.Text.Unescape(),true);
+        new StageDefinition(context.GetCoordinate(), context.stage.Text.Unescape(), true);
 
     public override Node VisitImplicit_stage_def(sassy_parser.Implicit_stage_defContext context) =>
         new StageDefinition(context.GetCoordinate(), context.stage.Text.Unescape());
 
     public override Node VisitRelative_stage_def(sassy_parser.Relative_stage_defContext context) => new StageDefinition(
-        context.GetCoordinate(), context.stage.Text.Unescape(), context.stage_attribute().Select(Visit).Cast<StageDefinitionAttribute>().ToList());
-    
+        context.GetCoordinate(), context.stage.Text.Unescape(),
+        context.stage_attribute().Select(Visit).Cast<StageDefinitionAttribute>().ToList());
+
+    public override Node VisitConfig_creation(sassy_parser.Config_creationContext context) => new ConfigCreation(
+        context.GetCoordinate(), context.label.Text.Unescape(), context.config_name.Text.Unescape(),
+        Visit(context.config_value) as Expression);
+
+    public override Node VisitUpdate_config_full(sassy_parser.Update_config_fullContext context) => new ConfigUpdate(context.GetCoordinate(),Visit(context.priority) as Expression, context.label.Text.Unescape(),context.config_name.Text.Unescape(),Visit(context.config_update) as Expression);
+
+    public override Node VisitUpdate_config_label(sassy_parser.Update_config_labelContext context) => new ConfigUpdate(context.GetCoordinate(),Visit(context.priority) as Expression, context.label.Text.Unescape(),null,Visit(context.config_update) as Expression);
 }
