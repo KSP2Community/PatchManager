@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
 using PatchManager.Core.Flow;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using SpaceWarp.API.Configuration;
@@ -139,4 +140,9 @@ public class CoreModule : BaseModule
         _shouldAlwaysInvalidate = new (modConfiguration.Bind("Core", "Always Invalidate Cache", false,
             "Should patch manager always invalidate its cache upon load"));
     }
+
+    /// <summary>
+    /// This is the current universe that patch manager is using (used for interop reasons)
+    /// </summary>
+    [PublicAPI] public Universe CurrentUniverse => PatchingManager.Universe;
 }
