@@ -41,4 +41,7 @@ public class DictionaryBuiltins
     [SassyMethod("dictionary.remove")]
     public static Dictionary<string, DataValue> Remove(Dictionary<string, DataValue> from, string key) =>
         from.Where(kv => kv.Key != key).ToDictionary(kv => kv.Key,kv=>kv.Value);
+
+    [SassyMethod("dictionary.count")]
+    public static int Count(Dictionary<string, DataValue> dictionary) => dictionary.Count;
 }
