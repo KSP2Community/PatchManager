@@ -13,7 +13,14 @@ public class DictionaryBuiltins
     public static Dictionary<string, DataValue> Set(Dictionary<string, DataValue> from, string key, DataValue value)
     {
         var result = new Dictionary<string, DataValue>(from);
-        result[key] = value;
+        if (value.IsDeletion)
+        {
+            result.Remove(key);
+        }
+        else
+        {
+            result[key] = value;
+        }
         return result;
     }
 
