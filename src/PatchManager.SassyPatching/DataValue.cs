@@ -852,4 +852,6 @@ public class DataValue
 
         return objectData;
     }
+
+    public static DataValue Null => new(DataType.None);
 }
