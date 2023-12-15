@@ -60,5 +60,27 @@ public class TypeConversion
     {
         return v.IsString ? v.String : v.ToString();
     }
-    
+
+    [SassyMethod("dictionary.to-list")]
+    public static List<List<DataValue>> ToList(Dictionary<string, DataValue> dictionary) => dictionary.Select(kv =>
+        new List<DataValue>()
+        {
+            DataValue.From(kv.Key),
+            kv.Value
+        }).ToList();
+
+    [SassyMethod("list.to-dictionary")]
+    public static Dictionary<string, DataValue> ToDictionary(List<List<DataValue>> list)
+    {
+        var newDict = new Dictionary<string, DataValue>();
+        foreach (var value in list)
+        {
+            if (value.Count != 2)
+                throw new InvalidCastException("All values in $list must be 2-pairs of key, value");
+            if (!value[0].IsString)
+                throw new InvalidCastException("Dictionary keys must be strings");
+            newDict[value[0].String] = value[1];
+        }
+        return newDict;
+    }
 }
