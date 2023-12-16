@@ -48,10 +48,7 @@ public sealed class ModuleSelectable : BaseSelectable
         {
             return (ISelectable)Activator.CreateInstance(type, moduleData, this);
         }
-        else
-        {
-            return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
-        }
+        return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
     }
 
     /// <inheritdoc />
