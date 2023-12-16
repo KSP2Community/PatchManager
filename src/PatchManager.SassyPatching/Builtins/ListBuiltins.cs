@@ -157,7 +157,7 @@ public class ListBuiltins
     /// <param name="list"></param>
     /// <param name="closure">The function to apply to the list</param>
     /// <returns>The copy w/ the function applied over it</returns>
-    [SassyMethod("list.map")]
+    [SassyMethod("list.filter")]
     public static List<DataValue> Filter(
         Environment env,
         List<DataValue> list,
