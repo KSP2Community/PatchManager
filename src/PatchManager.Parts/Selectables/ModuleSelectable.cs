@@ -46,7 +46,7 @@ public sealed class ModuleSelectable : BaseSelectable
         var type = Type.GetType(moduleData["DataType"].Value<string>());
         if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
         {
-            return (ISelectable)Activator.CreateInstance(type, moduleData, this);
+            return (ISelectable)Activator.CreateInstance(adapterType, moduleData, this);
         }
         return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
     }
