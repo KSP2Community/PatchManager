@@ -11,6 +11,9 @@ namespace PatchManager.Parts;
 [UsedImplicitly]
 public class PartsModule : BaseModule
 {
+    /// <summary>
+    /// Initialize the module
+    /// </summary>
     public override void Init()
     {
         PartsUtilities.GrabModuleDataAdapters();

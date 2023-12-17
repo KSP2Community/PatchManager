@@ -50,7 +50,7 @@ public class TypeConversion
     /// <summary>
     /// Used in a patch to convert a value to a string
     /// </summary>
-    /// <param name="v">The value</param>
+    /// <param name="value">The value</param>
     /// <returns>A string form of the value</returns>
     [SassyMethod("to-string")]
     public static string ToString(DataValue value)

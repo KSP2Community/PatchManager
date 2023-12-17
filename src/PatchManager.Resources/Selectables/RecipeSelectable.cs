@@ -66,6 +66,7 @@ public sealed class RecipeSelectable : BaseSelectable
     /// <inheritdoc />
     public override List<string> Classes { get; }
 
+    /// <inheritdoc />
     public override bool MatchesClass(string @class, out DataValue classValue)
     {
         classValue = null;

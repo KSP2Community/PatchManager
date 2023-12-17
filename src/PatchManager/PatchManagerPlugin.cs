@@ -66,6 +66,9 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         ModuleManager.InitAll();
     }
 
+    /// <summary>
+    /// Called before the game is initialized
+    /// </summary>
     public override void OnPreInitialized()
     {
         ModuleManager.PreLoadAll();
@@ -79,12 +82,15 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         ModuleManager.LoadAll();
     }
 
+    /// <summary>
+    /// Called after all mods are initialized
+    /// </summary>
     public override void OnPostInitialized()
     {
         InitializePatchManagerDetailsFoldout();
     }
     
-    internal void InitializePatchManagerDetailsFoldout()
+    private static void InitializePatchManagerDetailsFoldout()
     {
         VisualElement GeneratePatchManagerText()
         {

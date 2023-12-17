@@ -25,7 +25,7 @@ public class DebugBuiltins
     /// <summary>
     /// Serializes a value
     /// </summary>
-    /// <param name="v">The value to serialize</param>
+    /// <param name="value">The value to serialize</param>
     /// <returns>The serialized form of the value</returns>
     [SassyMethod("serialize")]
     public static string Serialize(DataValue value)

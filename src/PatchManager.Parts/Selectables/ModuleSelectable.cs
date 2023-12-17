@@ -14,8 +14,16 @@ namespace PatchManager.Parts.Selectables;
 /// </summary>
 public sealed class ModuleSelectable : BaseSelectable
 {
+    /// <summary>
+    /// The serialized data for this selectable
+    /// </summary>
     public readonly JToken SerializedData;
+
+    /// <summary>
+    /// The part selectable that owns this selectable
+    /// </summary>
     public readonly PartSelectable Selectable;
+
     private Dictionary<string, int> _dataIndices;
 
     /// <inheritdoc />

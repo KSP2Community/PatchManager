@@ -11,13 +11,28 @@ using UnityEngine;
 
 namespace PatchManager.Parts.Selectables;
 
+/// <summary>
+/// Represents a selectable for the selection and transformation of Data_Engine
+/// </summary>
 [ModuleDataAdapter(typeof(Data_Engine))]
 [UsedImplicitly]
 public sealed class DataEngineSelectable : BaseSelectable
 {
+    /// <summary>
+    /// The serialized data for this selectable
+    /// </summary>
     public readonly JObject SerializedData;
+
+    /// <summary>
+    /// The part selectable that owns this selectable
+    /// </summary>
     public readonly PartSelectable Selectable;
 
+    /// <summary>
+    /// Initialize the selectable
+    /// </summary>
+    /// <param name="moduleData">Module data</param>
+    /// <param name="moduleSelectable">Module selectable</param>
     public DataEngineSelectable(JObject moduleData, ModuleSelectable moduleSelectable)
     {
         SerializedData = (JObject)moduleData["DataObject"];
@@ -57,9 +72,14 @@ public sealed class DataEngineSelectable : BaseSelectable
 
     /// <inheritdoc />
     public override List<ISelectable> Children { get; }
+
+    /// <inheritdoc />
     public override string Name { get; }
+
+    /// <inheritdoc />
     public override List<string> Classes { get; }
 
+    /// <inheritdoc />
     public override bool MatchesClass(string @class, out DataValue classValue)
     {
         if (SerializedData.TryGetValue(@class, out var value))
@@ -84,12 +104,15 @@ public sealed class DataEngineSelectable : BaseSelectable
         return false;
     }
 
+    /// <inheritdoc />
     public override bool IsSameAs(ISelectable other) =>
         (other is DataEngineSelectable dataEngineSelectable) &&
         SerializedData == dataEngineSelectable.SerializedData;
 
+    /// <inheritdoc />
     public override IModifiable OpenModification() => new JTokenModifiable(SerializedData, Selectable.SetModified);
 
+    /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
     {
         var engineModeData = new Data_Engine.EngineMode()
@@ -102,9 +125,12 @@ public sealed class DataEngineSelectable : BaseSelectable
             "engine_mode");
     }
 
+    /// <inheritdoc />
     public override string Serialize() => SerializedData.ToString();
 
+    /// <inheritdoc />
     public override DataValue GetValue() => DataValue.FromJToken(SerializedData);
 
+    /// <inheritdoc />
     public override string ElementType { get; }
 }
