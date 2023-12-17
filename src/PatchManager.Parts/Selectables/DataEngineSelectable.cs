@@ -1,5 +1,5 @@
-﻿using JetBrains.Annotations;
-using KSP.IO;
+﻿using BepInEx.Logging;
+using JetBrains.Annotations;
 using KSP.Modules;
 using Newtonsoft.Json.Linq;
 using PatchManager.Parts.Attributes;
@@ -7,6 +7,7 @@ using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
 using PatchManager.SassyPatching.Selectables;
+using UnityEngine;
 
 namespace PatchManager.Parts.Selectables;
 
@@ -19,13 +20,13 @@ public sealed class DataEngineSelectable : BaseSelectable
 
     public DataEngineSelectable(JObject moduleData, ModuleSelectable moduleSelectable)
     {
-        SerializedData = moduleData;
+        SerializedData = (JObject)moduleData["DataObject"];
         Name = "Data_Engine";
         Selectable = moduleSelectable.Selectable;
         ElementType = moduleData["Name"].Value<string>();
         Classes = new();
         Children = new();
-        foreach (var field in moduleData)
+        foreach (var field in SerializedData)
         {
             Classes.Add(field.Key);
             if (field.Value.Type == JTokenType.Object)
@@ -33,12 +34,25 @@ public sealed class DataEngineSelectable : BaseSelectable
                 Children.Add(new JTokenSelectable(Selectable.SetModified, field.Value, field.Key, field.Key));
             }
         }
-        foreach (var jToken in (JArray)moduleData["engineModes"])
+
+        var index = 0;
+        List<int> removals = new();
+        foreach (var jToken in (JArray)SerializedData["engineModes"])
         {
+            var currentIdx = index++;
+            if (jToken.Type is JTokenType.Null or JTokenType.None)
+            {
+                removals.Add(currentIdx);
+                continue;
+            }
             var mode = (JObject)jToken;
             Classes.Add(mode["engineID"].Value<string>());
             Children.Add(new JTokenSelectable(Selectable.SetModified,mode,m => m["engineID"].Value<string>(),"engine_mode"));
         }
+
+        removals.Reverse();
+        foreach (var idx in removals)
+            ((JArray)SerializedData["engineModes"])[idx].Remove();
     }
 
     /// <inheritdoc />

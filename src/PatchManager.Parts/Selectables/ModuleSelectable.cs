@@ -28,6 +28,7 @@ public sealed class ModuleSelectable : BaseSelectable
         Name = ElementType;
         Classes = new();
         Children = new();
+        Classes.Add("ModuleData");
         // Now we go down the list in the data type
         var data = (JArray)token["ModuleData"];
         var index = 0;
