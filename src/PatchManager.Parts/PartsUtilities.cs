@@ -107,6 +107,12 @@ public static class PartsUtilities
             }
         }
     }
+
+    /// <summary>
+    /// Registers a module data adapter for the given types
+    /// </summary>
+    /// <param name="validTargets">The types that this adapter is valid for</param>
+    /// <typeparam name="T">The type of the adapter</typeparam>
     public static void RegisterModuleDataAdapter<T>(params Type[] validTargets) where T : ISelectable
     {
         foreach (var type in validTargets)

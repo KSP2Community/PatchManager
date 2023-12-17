@@ -16,11 +16,11 @@ public class PartsBuiltins
 {
     
     /// <summary>
-    /// 
+    /// Finds a module in a part data object
     /// </summary>
     /// <param name="partObject">The part data object</param>
     /// <param name="moduleName">The module name</param>
-    /// <returns></returns>
+    /// <returns>The found module or a null value</returns>
     [SassyMethod("find-module")]
     public DataValue FindModule([SassyName("part-object")] Dictionary<string, DataValue> partObject, [SassyName("module-name")] string moduleName)
     {
@@ -38,6 +38,12 @@ public class PartsBuiltins
         return DataValue.Null;
     }
 
+    /// <summary>
+    /// Adds a module to a part data object
+    /// </summary>
+    /// <param name="partObject">The part data object</param>
+    /// <param name="module">The module to add</param>
+    /// <returns>The new part data object</returns>
     [SassyMethod("add-module")]
     public Dictionary<string,DataValue> AddModule([SassyName("part-object")] Dictionary<string, DataValue> partObject, Dictionary<string, DataValue> module)
     {
@@ -46,6 +52,12 @@ public class PartsBuiltins
         return newObject;
     }
 
+    /// <summary>
+    /// Removes a module from a part data object
+    /// </summary>
+    /// <param name="partObject">The part data object</param>
+    /// <param name="moduleName">The name of the module to remove</param>
+    /// <returns>The new part data object</returns>
     [SassyMethod("remove-module")]
     public Dictionary<string, DataValue> RemoveModule([SassyName("part-object")] Dictionary<string, DataValue> partObject, [SassyName("module-name")] string moduleName)
     {
@@ -73,6 +85,13 @@ public class PartsBuiltins
         return newObject;
     }
 
+    /// <summary>
+    /// Replaces a module in a part data object
+    /// </summary>
+    /// <param name="partObject">The part data object</param>
+    /// <param name="moduleName">The name of the module to replace</param>
+    /// <param name="module">The new module</param>
+    /// <returns>The new part data object</returns>
     [SassyMethod("replace-module")]
     public Dictionary<string, DataValue> ReplaceModule(
         [SassyName("part-object")] Dictionary<string, DataValue> partObject,
@@ -107,6 +126,12 @@ public class PartsBuiltins
         return newObject;
     }
 
+    /// <summary>
+    /// Creates a new module object
+    /// </summary>
+    /// <param name="type">The type of module to create</param>
+    /// <returns>The new module object</returns>
+    /// <exception cref="Exception">If the module type is unknown</exception>
     [SassyMethod("create-module")]
     public Dictionary<string, DataValue> CreateModule(string type)
     {
@@ -127,10 +152,10 @@ public class PartsBuiltins
     
     
     /// <summary>
-    /// 
+    /// Finds a module data object in a part module
     /// </summary>
-    /// <param name="partModule"></param>
-    /// <param name="moduleDataName"></param>
+    /// <param name="partModule">The part module</param>
+    /// <param name="moduleDataName">The name of the module data</param>
     /// <returns></returns>
     [SassyMethod("find-module-data")]
     public DataValue FindModuleData([SassyName("part-module")] Dictionary<string, DataValue> partModule, [SassyName("module-data-name")] string moduleDataName)
@@ -145,7 +170,13 @@ public class PartsBuiltins
         }
         return DataValue.Null;
     }
-    
+
+    /// <summary>
+    /// Adds a module data object to a part module
+    /// </summary>
+    /// <param name="partModule">The part module</param>
+    /// <param name="moduleData">The module data object</param>
+    /// <returns>The new part module</returns>
     [SassyMethod("add-module-data")]
     public Dictionary<string, DataValue> AddModuleData([SassyName("part-module")] Dictionary<string, DataValue> partModule, [SassyName("module-data")] Dictionary<string, DataValue> moduleData)
     {
@@ -154,6 +185,12 @@ public class PartsBuiltins
         return newObject;
     }
 
+    /// <summary>
+    /// Removes a module data object from a part module
+    /// </summary>
+    /// <param name="partModule">The part module</param>
+    /// <param name="moduleDataName">The name of the module data object to remove</param>
+    /// <returns>The new part module</returns>
     [SassyMethod("remove-module-data")]
     public Dictionary<string, DataValue> RemoveModuleData(
         [SassyName("part-module")] Dictionary<string, DataValue> partModule,
@@ -181,7 +218,14 @@ public class PartsBuiltins
 
         return newObject;
     }
-    
+
+    /// <summary>
+    /// Replaces a module data object in a part module
+    /// </summary>
+    /// <param name="partModule">The part module</param>
+    /// <param name="moduleDataName">The name of the module data object to replace</param>
+    /// <param name="moduleData">The new module data object</param>
+    /// <returns>The new part module</returns>
     [SassyMethod("replace-module-data")]
     public Dictionary<string, DataValue> ReplaceModuleData(
         [SassyName("part-module")] Dictionary<string, DataValue> partModule,
@@ -215,6 +259,12 @@ public class PartsBuiltins
         return newObject;
     }
 
+    /// <summary>
+    /// Creates a new module data object
+    /// </summary>
+    /// <param name="type">The type of module data to create</param>
+    /// <returns>The new module data object</returns>
+    /// <exception cref="Exception">If the module data type is unknown</exception>
     [SassyMethod("create-module-data")]
     public Dictionary<string, DataValue> CreateModuleData(string type)
     {
@@ -244,11 +294,22 @@ public class PartsBuiltins
         return DataValue.FromJToken(trueType).Dictionary;
     }
 
+    /// <summary>
+    /// Gets the data object from a module data object
+    /// </summary>
+    /// <param name="moduleData">The module data object</param>
+    /// <returns>The data object</returns>
     [SassyMethod("get-data-object")]
     public static Dictionary<string, DataValue> GetDataObject(
         [SassyName("module-data")] Dictionary<string, DataValue> moduleData
     ) => moduleData["DataObject"].Dictionary;
 
+    /// <summary>
+    /// Sets the data object in a module data object
+    /// </summary>
+    /// <param name="moduleData">The module data object</param>
+    /// <param name="dataObject">The data object</param>
+    /// <returns>The new module data object</returns>
     [SassyMethod("set-data-object")]
     public static Dictionary<string, DataValue> SetDataObject(
         [SassyName("module-data")] Dictionary<string, DataValue> moduleData,

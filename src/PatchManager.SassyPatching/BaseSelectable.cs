@@ -36,6 +36,12 @@ public abstract class BaseSelectable : ISelectable
     /// <inheritdoc />
     public bool MatchesClass(string @class) => Classes.Contains(@class);
 
+    /// <summary>
+    /// Test if this selectable has a class, and if so, output the value of that class
+    /// </summary>
+    /// <param name="class">The class</param>
+    /// <param name="classValue">The value of the class</param>
+    /// <returns>True if it has the class, false otherwise</returns>
     public abstract bool MatchesClass(string @class, out DataValue classValue);
 
     /// <summary>
