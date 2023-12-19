@@ -1,15 +1,12 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Attributes;
+﻿using PatchManager.SassyPatching.Nodes.Attributes.RequireExpressions;
+
+namespace PatchManager.SassyPatching.Nodes.Attributes;
 /// <summary>
 /// Represents an attribute that modifies a selection block to only run if a mod is loaded
 /// </summary>
 public class RequireModAttribute : SelectorAttribute
-{    /// <summary>
-    /// The GUID of the mod
-    /// </summary>
-    public readonly string Guid;
+{
+    public readonly RequireExpression Expression;
 
-    internal RequireModAttribute(Coordinate c, string guid) : base(c)
-    {
-        Guid = guid;
-    }
+    internal RequireModAttribute(Coordinate c, RequireExpression expression) : base(c) => Expression = expression;
 }

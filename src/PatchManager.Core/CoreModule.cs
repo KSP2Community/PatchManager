@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
 using PatchManager.Core.Flow;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using SpaceWarp.API.Configuration;
@@ -42,24 +43,8 @@ public class CoreModule : BaseModule
     /// <summary>
     /// Reads all patch files.
     /// </summary>
-    public override void Preload()
+    public override void Init()
     {
-        // Go here instead so that the static constructor recognizes everything
-        PatchingManager.GenerateUniverse();
-        var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
-            .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-        var modFolders = Directory.GetDirectories(Paths.PluginPath, "*",SearchOption.AllDirectories)
-            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x => (Folder: x, Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))));
-
-        foreach (var modFolder in modFolders)
-        {
-            Logging.LogInfo($"Loading patchers from {modFolder.Folder}");
-            // var modName = Path.GetDirectoryName(modFolder);
-            PatchingManager.ImportModPatches(modFolder.Info.ModID, modFolder.Folder);
-        }
-
-        PatchingManager.RegisterPatches();
 
         if (_shouldAlwaysInvalidate.Value || SpaceWarp.API.Mods.PluginList.ModListChangedSinceLastRun)
         {
@@ -75,16 +60,33 @@ public class CoreModule : BaseModule
             SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,() => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
             SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1,() => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
             SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
-            // SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
-            //     () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-            // SpaceWarp.API.Loading.Loading.AddGeneralLoadingAction(
-            //     () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
         }
         else
         {
             SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
         }
     }
+
+    /// <inheritdoc />
+    public override void PreLoad()
+    {
+        // Go here instead so that the static constructor recognizes everything
+        PatchingManager.GenerateUniverse();
+        var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
+            .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        var modFolders = Directory.GetDirectories(Paths.PluginPath, "*",SearchOption.AllDirectories)
+            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x => (Folder: x, Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))));
+
+        foreach (var modFolder in modFolders)
+        {
+            Logging.LogInfo($"Loading patchers from {modFolder.Folder}");
+            // var modName = Path.GetDirectoryName(modFolder);
+            PatchingManager.ImportModPatches(modFolder.Info.ModID, modFolder.Folder);
+        }
+        PatchingManager.RegisterPatches();
+    }
+
     /// <summary>
     /// Registers the provider and locator for cached assets.
     /// </summary>
@@ -138,4 +140,9 @@ public class CoreModule : BaseModule
         _shouldAlwaysInvalidate = new (modConfiguration.Bind("Core", "Always Invalidate Cache", false,
             "Should patch manager always invalidate its cache upon load"));
     }
+
+    /// <summary>
+    /// This is the current universe that patch manager is using (used for interop reasons)
+    /// </summary>
+    [PublicAPI] public Universe CurrentUniverse => PatchingManager.Universe;
 }

@@ -109,17 +109,115 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitVar_decl([NotNull] sassy_parser.Var_declContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="sassy_parser.stage_def"/>.
+	/// Enter a parse tree produced by the <c>implicit_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterStage_def([NotNull] sassy_parser.Stage_defContext context) { }
+	public virtual void EnterImplicit_stage_def([NotNull] sassy_parser.Implicit_stage_defContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="sassy_parser.stage_def"/>.
+	/// Exit a parse tree produced by the <c>implicit_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitStage_def([NotNull] sassy_parser.Stage_defContext context) { }
+	public virtual void ExitImplicit_stage_def([NotNull] sassy_parser.Implicit_stage_defContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>global_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>global_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitGlobal_stage_def([NotNull] sassy_parser.Global_stage_defContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>relative_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRelative_stage_def([NotNull] sassy_parser.Relative_stage_defContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>relative_stage_def</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRelative_stage_def([NotNull] sassy_parser.Relative_stage_defContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.config_creation"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterConfig_creation([NotNull] sassy_parser.Config_creationContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.config_creation"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitConfig_creation([NotNull] sassy_parser.Config_creationContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>update_config_full</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterUpdate_config_full([NotNull] sassy_parser.Update_config_fullContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>update_config_full</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitUpdate_config_full([NotNull] sassy_parser.Update_config_fullContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>update_config_label</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterUpdate_config_label([NotNull] sassy_parser.Update_config_labelContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>update_config_label</c>
+	/// labeled alternative in <see cref="sassy_parser.config_mutation"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitUpdate_config_label([NotNull] sassy_parser.Update_config_labelContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>stage_value_before</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterStage_value_before([NotNull] sassy_parser.Stage_value_beforeContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>stage_value_before</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitStage_value_before([NotNull] sassy_parser.Stage_value_beforeContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>stage_value_after</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterStage_value_after([NotNull] sassy_parser.Stage_value_afterContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>stage_value_after</c>
+	/// labeled alternative in <see cref="sassy_parser.stage_attribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitStage_value_after([NotNull] sassy_parser.Stage_value_afterContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.function_def"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -230,20 +328,6 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitRequire_mod([NotNull] sassy_parser.Require_modContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by the <c>require_not_mod</c>
-	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRequire_not_mod([NotNull] sassy_parser.Require_not_modContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by the <c>require_not_mod</c>
-	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRequire_not_mod([NotNull] sassy_parser.Require_not_modContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by the <c>run_at_stage</c>
 	/// labeled alternative in <see cref="sassy_parser.attribute"/>.
@@ -1386,6 +1470,76 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitObject_value([NotNull] sassy_parser.Object_valueContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>require_sub</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRequire_sub([NotNull] sassy_parser.Require_subContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>require_sub</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRequire_sub([NotNull] sassy_parser.Require_subContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>require_or</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRequire_or([NotNull] sassy_parser.Require_orContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>require_or</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRequire_or([NotNull] sassy_parser.Require_orContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>require_not</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRequire_not([NotNull] sassy_parser.Require_notContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>require_not</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRequire_not([NotNull] sassy_parser.Require_notContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>require_guid</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRequire_guid([NotNull] sassy_parser.Require_guidContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>require_guid</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRequire_guid([NotNull] sassy_parser.Require_guidContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>require_and</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRequire_and([NotNull] sassy_parser.Require_andContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>require_and</c>
+	/// labeled alternative in <see cref="sassy_parser.require_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRequire_and([NotNull] sassy_parser.Require_andContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.list"/>.
 	/// <para>The default implementation does nothing.</para>

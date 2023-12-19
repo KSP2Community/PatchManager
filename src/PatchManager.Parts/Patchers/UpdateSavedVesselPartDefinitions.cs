@@ -6,7 +6,7 @@ using PatchManager.Shared;
 
 namespace PatchManager.Parts.Patchers;
 
-public class UpdateSavedVesselPartDefinitions : FlowAction
+internal class UpdateSavedVesselPartDefinitions : FlowAction
 {
     private LoadGameData _loadGameData;
 

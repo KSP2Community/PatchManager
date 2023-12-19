@@ -11,7 +11,10 @@ namespace PatchManager.Parts;
 [UsedImplicitly]
 public class PartsModule : BaseModule
 {
-    public override void Preload()
+    /// <summary>
+    /// Initialize the module
+    /// </summary>
+    public override void Init()
     {
         PartsUtilities.GrabModuleDataAdapters();
         SaveLoad.AddFlowActionToCampaignLoadAfter<UpdateSavedVesselPartDefinitions>("Parsing parts text assets");

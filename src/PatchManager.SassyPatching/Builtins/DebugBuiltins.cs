@@ -15,21 +15,21 @@ public class DebugBuiltins
     /// Logs a value into the console for debugging
     /// </summary>
     /// <param name="universe">The universe in which this function is being called</param>
-    /// <param name="v">The value to log</param>
+    /// <param name="value">The value to log</param>
     [SassyMethod("debug-log")]
-    public static void Log(Universe universe, DataValue v)
+    public static void Log(Universe universe, DataValue value)
     {
-        universe.MessageLogger(v.Type == DataValue.DataType.String ? v.String : v.ToString());
+        universe.MessageLogger(value.Type == DataValue.DataType.String ? value.String : value.ToString());
     }
 
     /// <summary>
     /// Serializes a value
     /// </summary>
-    /// <param name="v">The value to serialize</param>
+    /// <param name="value">The value to serialize</param>
     /// <returns>The serialized form of the value</returns>
     [SassyMethod("serialize")]
-    public static string Serialize(DataValue v)
+    public static string Serialize(DataValue value)
     {
-        return v.ToString();
+        return value.ToString();
     }
 }

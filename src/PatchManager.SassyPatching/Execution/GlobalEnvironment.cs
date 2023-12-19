@@ -33,15 +33,39 @@ public class GlobalEnvironment
     internal void Import(Environment rootEnvironment, string libraryName)
     {
         var fullyQualifiedLibraryName = libraryName.Contains(":") ? libraryName : $"{ModGuid}:{libraryName}";
-        if (ImportedLibraries.Contains(fullyQualifiedLibraryName)) return;
-        if (Universe.AllLibraries.TryGetValue(fullyQualifiedLibraryName, out var library))
+        if (fullyQualifiedLibraryName.EndsWith(":*"))
         {
-            library.RegisterInto(rootEnvironment);
-            ImportedLibraries.Add(fullyQualifiedLibraryName);
-        }
-        else
+            var baseName = fullyQualifiedLibraryName.Replace(":*", ":");
+            var anyFound = false;
+            foreach (var library in Universe.AllLibraries.Where(library => library.Key.StartsWith(baseName)))
+            {
+                anyFound = true;
+                if (ImportedLibraries.Contains(library.Key))
+                {
+                    continue;
+                }
+
+                library.Value.RegisterInto(rootEnvironment);
+                ImportedLibraries.Add(library.Key);
+            }
+
+            if (!anyFound)
+            {
+                throw new ImportException();
+            }
+        } else 
         {
-            throw new ImportException();
+            if (ImportedLibraries.Contains(fullyQualifiedLibraryName))
+                return;
+            if (Universe.AllLibraries.TryGetValue(fullyQualifiedLibraryName, out var library))
+            {
+                library.RegisterInto(rootEnvironment);
+                ImportedLibraries.Add(fullyQualifiedLibraryName);
+            }
+            else
+            {
+                throw new ImportException();
+            }
         }
     }
 }

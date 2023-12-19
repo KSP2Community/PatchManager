@@ -46,6 +46,7 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Parts.dll"));
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Generic.dll"));
         ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Resources.dll"));
+        ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Science.dll"));
         // ModuleManager.Register(Path.Combine(dir.FullName, "PatchManager.Planets.dll"));
         foreach (var module in ModuleManager.Modules)
         {
@@ -62,8 +63,16 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
             harmony.PatchAll(module.GetType().Assembly);
         }
 
-        // Preload modules
+        // Init modules
         ModuleManager.InitAll();
+    }
+
+    /// <summary>
+    /// Called before the game is initialized
+    /// </summary>
+    public override void OnPreInitialized()
+    {
+        ModuleManager.PreLoadAll();
     }
 
     /// <summary>
@@ -74,12 +83,15 @@ public class PatchManagerPlugin : BaseSpaceWarpPlugin
         ModuleManager.LoadAll();
     }
 
+    /// <summary>
+    /// Called after all mods are initialized
+    /// </summary>
     public override void OnPostInitialized()
     {
         InitializePatchManagerDetailsFoldout();
     }
     
-    internal void InitializePatchManagerDetailsFoldout()
+    private static void InitializePatchManagerDetailsFoldout()
     {
         VisualElement GeneratePatchManagerText()
         {

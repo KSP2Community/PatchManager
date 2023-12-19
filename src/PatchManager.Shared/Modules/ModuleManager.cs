@@ -6,7 +6,7 @@ namespace PatchManager.Shared.Modules;
 /// <summary>
 /// Manages the loading of PatchManager DLL modules.
 /// </summary>
-public static class ModuleManager
+internal static class ModuleManager
 {
     private static readonly HashSet<string> ModulePaths = new();
     internal static readonly List<IModule> Modules = new();
@@ -47,7 +47,7 @@ public static class ModuleManager
     {
         foreach (var module in Modules)
         {
-            module.Preload();
+            module.Init();
         }
     }
 
@@ -56,6 +56,15 @@ public static class ModuleManager
         foreach (var module in Modules)
         {
             module.Load();
+        }
+    }
+
+    internal static void PreLoadAll()
+    {
+        
+        foreach (var module in Modules)
+        {
+            module.PreLoad();
         }
     }
 }

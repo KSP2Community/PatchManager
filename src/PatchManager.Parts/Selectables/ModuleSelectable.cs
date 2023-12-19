@@ -14,8 +14,16 @@ namespace PatchManager.Parts.Selectables;
 /// </summary>
 public sealed class ModuleSelectable : BaseSelectable
 {
+    /// <summary>
+    /// The serialized data for this selectable
+    /// </summary>
     public readonly JToken SerializedData;
+
+    /// <summary>
+    /// The part selectable that owns this selectable
+    /// </summary>
     public readonly PartSelectable Selectable;
+
     private Dictionary<string, int> _dataIndices;
 
     /// <inheritdoc />
@@ -28,6 +36,7 @@ public sealed class ModuleSelectable : BaseSelectable
         Name = ElementType;
         Classes = new();
         Children = new();
+        Classes.Add("ModuleData");
         // Now we go down the list in the data type
         var data = (JArray)token["ModuleData"];
         var index = 0;
@@ -46,12 +55,9 @@ public sealed class ModuleSelectable : BaseSelectable
         var type = Type.GetType(moduleData["DataType"].Value<string>());
         if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
         {
-            return (ISelectable)Activator.CreateInstance(type, moduleData, this);
+            return (ISelectable)Activator.CreateInstance(adapterType, moduleData, this);
         }
-        else
-        {
-            return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
-        }
+        return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
     }
 
     /// <inheritdoc />
@@ -99,7 +105,6 @@ public sealed class ModuleSelectable : BaseSelectable
         }
         Selectable.SetModified();
         var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
-        // var dataObject = JObject.Parse(IOProvider.ToJson(instance));
         var dataObject = new JObject
         {
             ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"

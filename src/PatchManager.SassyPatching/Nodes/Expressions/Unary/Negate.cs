@@ -13,6 +13,10 @@ public class Negate : Unary
 
     internal override DataValue GetResult(DataValue child)
     {
+        if (child.IsInteger)
+        {
+            return -child.Integer;
+        }
         if (child.IsReal)
         {
             return -child.Real;

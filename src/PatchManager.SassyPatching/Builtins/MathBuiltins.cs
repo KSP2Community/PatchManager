@@ -10,9 +10,7 @@ namespace PatchManager.SassyPatching.Builtins;
 public class MathBuiltins
 {
     #region Basic Math
-
-
-
+    
     [SassyMethod("square-root")]
     public static double SquareRoot(double value) => Math.Sqrt(value);
 
@@ -47,10 +45,10 @@ public class MathBuiltins
     public static double Min([VarArgs] List<DataValue> values) => values.Select(x => x.To<double>()).Min();
 
     [SassyMethod("list.max")]
-    public static double Max(List<double> values) => values.Max();
+    public static double Max(List<double> list) => list.Max();
 
     [SassyMethod("list.min")]
-    public static double Min(List<double> values) => values.Min();
+    public static double Min(List<double> list) => list.Min();
 
     [SassyMethod("round")]
     public static double Round(double x) => Math.Round(x, MidpointRounding.AwayFromZero);

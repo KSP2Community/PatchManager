@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Nodes.Attributes;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Statements;
 using PatchManager.Shared.Interfaces;
 
@@ -19,31 +20,41 @@ public class SassyTextPatcher : ITextPatcher
     {
         _environmentSnapshot = environmentSnapshot;
         _rootSelectionBlock = rootSelectionBlock;
-        var stage = rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault();
-        if (stage == null)
-        {
-            Priority = ulong.MaxValue;
-        }
-        else
-        {
-            var global = environmentSnapshot.GlobalEnvironment;
-            string stageName;
-            if (stage.Stage.Contains(':'))
-            {
-                stageName = stage.Stage;
-            }
-            else
-            {
-                stageName = global.ModGuid + ":" + stage.Stage;
-            }
-
-            // If this errors then we don't register the patch, but we should give a more friendly thing to this at some point
-            Priority = global.Universe.AllStages[stageName];
-        }
+        // var stage = rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault();
+        // if (stage == null)
+        // {
+        //     Priority = ulong.MaxValue;
+        // }
+        // else
+        // {
+        //     var global = environmentSnapshot.GlobalEnvironment;
+        //     string stageName;
+        //     if (stage.Stage.Contains(':'))
+        //     {
+        //         stageName = stage.Stage;
+        //     }
+        //     else
+        //     {
+        //         stageName = global.ModGuid + ":" + stage.Stage;
+        //     }
+        //
+        //     // If this errors then we don't register the patch, but we should give a more friendly thing to this at some point
+        //     Priority = global.Universe.AllStages[stageName];
+        // }
+        var global = environmentSnapshot.GlobalEnvironment;
+        var universe = global.Universe;
+        PriorityString =
+            rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault() is { } runAtStageAttribute
+                ? runAtStageAttribute.Stage
+                : environmentSnapshot.GlobalEnvironment.ModGuid;
+        
     }
 
+    public string OriginalGuid { get; internal set; }
+    public string PriorityString { get; internal set; }
+
     /// <inheritdoc />
-    public ulong Priority { get; }
+    public ulong Priority { get; set; }
 
     /// <inheritdoc />
     public bool TryPatch(string patchType, string name, ref string patchData)

@@ -117,9 +117,7 @@ public class SelectionBlock : Node, ISelectionAction
             switch (attribute)
             {
                 case RequireModAttribute requireModAttribute when
-                    !environment.GlobalEnvironment.Universe.AllMods.Contains(requireModAttribute.Guid):
-                case RequireNotModAttribute requireNotModAttribute when
-                    environment.GlobalEnvironment.Universe.AllMods.Contains(requireNotModAttribute.Guid):
+                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods):
                     return;
             }
         }
@@ -137,9 +135,7 @@ public class SelectionBlock : Node, ISelectionAction
             switch (attribute)
             {
                 case RequireModAttribute requireModAttribute when
-                    !environment.GlobalEnvironment.Universe.AllMods.Contains(requireModAttribute.Guid):
-                case RequireNotModAttribute requireNotModAttribute when
-                    environment.GlobalEnvironment.Universe.AllMods.Contains(requireNotModAttribute.Guid):
+                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods):
                     return;
                 case NewAttribute na:
                     CreateGenerator(environment, na.Arguments);
@@ -149,7 +145,7 @@ public class SelectionBlock : Node, ISelectionAction
         var snapshot = environment.Snapshot();
         
         var patcher = new SassyTextPatcher(snapshot, this);
-        environment.GlobalEnvironment.Universe.RegisterPatcher(patcher);
+        environment.GlobalEnvironment.Universe.RegisterPatcherToUniverse(patcher);
         
     }
 
@@ -161,9 +157,7 @@ public class SelectionBlock : Node, ISelectionAction
             switch (attribute)
             {
                 case RequireModAttribute requireModAttribute when
-                    !environment.GlobalEnvironment.Universe.AllMods.Contains(requireModAttribute.Guid):
-                case RequireNotModAttribute requireNotModAttribute when
-                    environment.GlobalEnvironment.Universe.AllMods.Contains(requireNotModAttribute.Guid):
+                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods):
                     return;
             }
         }

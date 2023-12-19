@@ -26,14 +26,18 @@ IN                  : 'in';
 SET                 : '@set';
 MERGE               : '@merge';
 REQUIRE             : '@require';
-REQUIRE_NOT         : '@require-not';
 STAGE               : '@stage';
 DEFINE_STAGE        : '@define-stage';
+//DEFINE_GLOBAL_STAGE : '@define-global-stage'; get rid of this, as you just need to do an `@after mod_id` into your stage definition
 INCLUDE             : '@include';
 RETURN              : '@return';
 PATCH               : '@patch';
 NEW                 : '@new';
-
+BEFORE              : '@before';
+AFTER               : '@after';
+GLOBAL              : '@global';
+CREATE_CONFIG       : '@create-config';
+UPDATE_CONFIG       : '@update-config';
 
 
 
@@ -54,7 +58,7 @@ SUBTRACT            : '-';
 MULTIPLY            : '*';
 DIVIDE              : '/';
 MODULUS             : '%';
-NOT                 : '!';
+NOT                 : 'not';
 GREATER_THAN        : '>';
 GREATER_THAN_EQUAL  : '>=';
 LESSER_THAN         : '<';
@@ -112,8 +116,8 @@ UNICODE_ESC
    :   '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
    ;
 
-fragment IDENTIFIER : [a-zA-Z_*?][a-zA-Z_.\-*?0-9]*;
-fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_][a-zA-Z_.\-0-9]*;
+fragment IDENTIFIER : [a-zA-Z_*?]([a-zA-Z_.*?0-9]|[\-][a-zA-Z*?])*;
+fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_]([a-zA-Z_.0-9]|[\-][a-zA-Z])*;
 
 NAME                : '#' IDENTIFIER;
 CLASS               : '.' WILDCARDLESS_IDENTIFIER;
