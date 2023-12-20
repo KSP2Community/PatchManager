@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Planets", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Science", "src\PatchManager.Science\PatchManager.Science.csproj", "{E6AD9C2A-D53E-47DD-B48F-7A9AF6ACDC55}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Missions", "src\PatchManager.Missions\PatchManager.Missions.csproj", "{67F415B1-5651-4426-8D4C-F607CA31A338}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,5 +130,13 @@ Global
 		{E6AD9C2A-D53E-47DD-B48F-7A9AF6ACDC55}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
 		{E6AD9C2A-D53E-47DD-B48F-7A9AF6ACDC55}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
 		{E6AD9C2A-D53E-47DD-B48F-7A9AF6ACDC55}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.Deploy|Any CPU.ActiveCfg = Deploy|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
+		{67F415B1-5651-4426-8D4C-F607CA31A338}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" />
+      <ProjectReference Include="..\PatchManager.Shared\PatchManager.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" />
+    </ItemGroup>
+
+</Project>

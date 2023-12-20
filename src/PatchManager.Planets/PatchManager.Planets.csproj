@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="HarmonyX" Version="2.10.2" />
-      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.5" />
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" />
       <PackageReference Include="UnityEngine.Modules" Version="2022.3.5" />
     </ItemGroup>
 

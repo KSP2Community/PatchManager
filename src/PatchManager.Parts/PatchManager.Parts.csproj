@@ -6,7 +6,11 @@
       <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.5" />
+      <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" Publicize="true" />
       <PackageReference Include="SpaceWarp" Version="1.5.2" />
     </ItemGroup>
 </Project>
