@@ -61,6 +61,7 @@ public sealed class StagesSelectable : BaseSelectable
         Classes.Add(elementType);
         var selectable = new StageSelectable(MissionSelectable, stage);
         Children.Add(selectable);
+        Stages.Add(stage);
         return selectable;
     }
 

@@ -61,6 +61,7 @@ public sealed class ContentBranchesSelectable : BaseSelectable
         var selectable = new ContentBranchSelectable(Selectable, obj);
         Children.Add(selectable);
         Classes.Add(elementType);
+        ContentBranches.Add(obj);
         return selectable;
     }
 

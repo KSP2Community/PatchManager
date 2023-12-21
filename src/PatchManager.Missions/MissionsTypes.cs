@@ -20,7 +20,7 @@ public static class MissionsTypes
                 Conditions.Add(type.Name,type);
             }
 
-            if (type.IsSubclassOf(typeof(IMissionAction)))
+            if (typeof(IMissionAction).IsAssignableFrom(type))
             {
                 Actions.Add(type.Name, type);
             }

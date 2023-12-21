@@ -46,7 +46,11 @@ public sealed class MissionSelectable : BaseSelectable
 
         var stages = (JArray)MissionObject["missionStages"]!;
         Children.Add(new StagesSelectable(this, stages));
-        var branches = (JArray)MissionObject["ContentBranches"]!;
+        if (missionObject.ContainsKey("ContentBranches"))
+        {
+            var branches = (JArray)MissionObject["ContentBranches"]!;
+            Children.Add(new ContentBranchesSelectable(this, branches));
+        }
     }
     
     public JObject MissionObject;

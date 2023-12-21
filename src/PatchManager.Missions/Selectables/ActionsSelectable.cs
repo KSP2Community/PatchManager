@@ -62,17 +62,26 @@ public sealed class ActionsSelectable : BaseSelectable
         return false;
     }
 
-    public override bool IsSameAs(ISelectable other) => throw new NotImplementedException();
+    public override bool IsSameAs(ISelectable other) =>
+        other is ActionsSelectable actionsSelectable && actionsSelectable.Actions == Actions;
 
     public override IModifiable OpenModification() => new JTokenModifiable(Actions, Selectable.SetModified);
 
     public override ISelectable AddElement(string elementType)
     {
         var actualType = MissionsTypes.Actions[elementType];
-        var elementObject = JObject.FromObject(Activator.CreateInstance(actualType));
+        var elementObject = new JObject()
+        {
+            ["$type"] = actualType.AssemblyQualifiedName
+        };
+        foreach (var (key, value) in JObject.FromObject(Activator.CreateInstance(actualType)))
+        {
+            elementObject[key] = value;
+        }
         var selectable = new JTokenSelectable(Selectable.SetModified, elementObject, token => TrimTypeName(((JObject)token)!.Value<string>()!), elementType);
         Children.Add(selectable);
         Classes.Add(elementType);
+        Actions.Add(elementObject);
         return selectable;
     }
 

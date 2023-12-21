@@ -65,8 +65,14 @@ public sealed class ConditionSetSelectable : BaseSelectable
     public override ISelectable AddElement(string elementType)
     {
         var conditionType = MissionsTypes.Conditions[elementType];
-        var conditionObject = JObject.FromObject(Activator.CreateInstance(conditionType));
-        conditionObject["$type"] = conditionType.AssemblyQualifiedName;
+        var conditionObject = new JObject()
+        {
+            ["$type"] = conditionType.AssemblyQualifiedName
+        };
+        foreach (var (key, value) in JObject.FromObject(Activator.CreateInstance(conditionType)))
+        {
+            conditionObject[key] = value;
+        }
         _children.Add(conditionObject);
         if (conditionType == typeof(ConditionSet))
         {

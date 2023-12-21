@@ -20,7 +20,7 @@ public class MissionRuleset : IPatcherRuleSet
     {
         var missionDataObject = new MissionData
         {
-            name = dataValues[0].String
+            ID = dataValues[0].String
         };
 
         return new NewGenericAsset("missions", dataValues[0].String,

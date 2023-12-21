@@ -43,7 +43,7 @@ public class Conditional : Node, ISelectionAction
         }
         else
         {
-            Else.ExecuteIn(environment);
+            Else?.ExecuteIn(environment);
         }
     }
 

@@ -104,16 +104,19 @@ public class JTokenSelectable : BaseSelectable
     public override ISelectable AddElement(string elementType)
     {
         var obj = new JObject();
-        if (Token is JArray jArray)
+        var token = Token;
+        while (token is JProperty prop)
+            token = prop.Value;
+        switch (token)
         {
-            jArray[elementType] = obj;
-        } else if (Token is JObject jObject)
-        {
-            jObject[elementType] = obj;
-        }
-        else
-        {
-            throw new InvalidOperationException();
+            case JArray jArray:
+                jArray.Add(obj);
+                break;
+            case JObject jObject:
+                jObject[elementType] = obj;
+                break;
+            default:
+                throw new InvalidOperationException();
         }
         var n = new JTokenSelectable(_markDirty, obj, elementType);
         Children.Add(n);

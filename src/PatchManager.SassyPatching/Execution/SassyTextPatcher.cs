@@ -42,6 +42,7 @@ public class SassyTextPatcher : ITextPatcher
         //     Priority = global.Universe.AllStages[stageName];
         // }
         var global = environmentSnapshot.GlobalEnvironment;
+        OriginalGuid = environmentSnapshot.GlobalEnvironment.ModGuid;
         var universe = global.Universe;
         PriorityString =
             rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault() is { } runAtStageAttribute
@@ -50,8 +51,8 @@ public class SassyTextPatcher : ITextPatcher
         
     }
 
-    public string OriginalGuid { get; internal set; }
-    public string PriorityString { get; internal set; }
+    public string OriginalGuid { get; }
+    public string PriorityString { get; }
 
     /// <inheritdoc />
     public ulong Priority { get; set; }

@@ -9,4 +9,8 @@
       <ProjectReference Include="..\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" />
+    </ItemGroup>
+
 </Project>

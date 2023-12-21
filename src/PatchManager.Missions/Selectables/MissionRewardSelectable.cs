@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
+using PatchManager.SassyPatching.Modifiables;
 using PatchManager.SassyPatching.Selectables;
 
 namespace PatchManager.Missions.Selectables;
@@ -47,9 +48,11 @@ public sealed class MissionRewardSelectable : BaseSelectable
         return false;
     }
 
-    public override bool IsSameAs(ISelectable other) => throw new NotImplementedException();
+    public override bool IsSameAs(ISelectable other) => other is MissionRewardSelectable missionRewardSelectable &&
+                                                        missionRewardSelectable.MissionReward == MissionReward;
 
-    public override IModifiable OpenModification() => throw new NotImplementedException();
+    public override IModifiable OpenModification() =>
+        new JTokenModifiable(MissionReward, MissionSelectable.SetModified);
 
     public override ISelectable AddElement(string elementType)
     {
