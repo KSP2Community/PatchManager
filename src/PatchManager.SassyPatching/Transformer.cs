@@ -272,7 +272,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     /// <inheritdoc />
     public override Node VisitAdd_element(sassy_parser.Add_elementContext context)
-        => new ElementAdditionSelector(context.GetCoordinate(), context.ELEMENT().GetText().TrimFirst());
+        => new ElementAdditionSelector(context.GetCoordinate(), context.ELEMENT().GetText());
 
     /// <inheritdoc />
     public override Node VisitEverything(sassy_parser.EverythingContext context)

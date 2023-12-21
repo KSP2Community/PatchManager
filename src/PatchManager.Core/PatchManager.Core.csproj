@@ -3,7 +3,7 @@
     <!-- References -->
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
-        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.5" PrivateAssets="all" />
+        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" PrivateAssets="all" Publicize="true" />
         <PackageReference Include="SpaceWarp" Version="1.5.2" PrivateAssets="all" Publicize="true"/>
     </ItemGroup>
     <ItemGroup Label="Project references">

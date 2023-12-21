@@ -132,7 +132,7 @@ public class JTokenModifiable : IModifiable
         }
     }
 
-    public void Set(DataValue dataValue)
+    public virtual void Set(DataValue dataValue)
     {
         _setDirty();
         if (dataValue.IsDeletion)
