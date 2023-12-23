@@ -1,4 +1,7 @@
-﻿namespace PatchManager.SassyPatching.Attributes;
+﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Interfaces;
+
+namespace PatchManager.SassyPatching.Attributes;
 
 
 
@@ -8,6 +11,7 @@
 /// </summary>
 
 [AttributeUsage(AttributeTargets.Class)]
+[BaseTypeRequired(typeof(IPatcherRuleSet))]
 public class PatcherRulesetAttribute : Attribute
 {
     /// <summary>

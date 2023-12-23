@@ -300,7 +300,7 @@ internal static class PatchingManager
             try
             {
                 var text = generator.Create(out var label, out var name);
-                Logging.LogInfo($"Generated an asset with the label {label}, and name {name}:\n{text}");
+                Logging.LogDebug($"Generated an asset with the label {label}, and name {name}:\n{text}");
 
                 if (!_createdAssets.ContainsKey(label))
                     _createdAssets[label] = new List<(string name, string text)>();
