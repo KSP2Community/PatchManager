@@ -1,9 +1,12 @@
-﻿namespace PatchManager.SassyPatching.Attributes;
+﻿using JetBrains.Annotations;
+
+namespace PatchManager.SassyPatching.Attributes;
 
 /// <summary>
 /// Represents a builtin (C#) library for the sassy patcher execution engine
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
+[MeansImplicitUse]
 public class SassyLibraryAttribute : Attribute
 {
     /// <summary>

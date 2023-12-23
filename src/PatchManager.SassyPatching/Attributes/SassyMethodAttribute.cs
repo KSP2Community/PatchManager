@@ -1,10 +1,13 @@
-﻿namespace PatchManager.SassyPatching.Attributes;
+﻿using JetBrains.Annotations;
+
+namespace PatchManager.SassyPatching.Attributes;
 
 /// <summary>
 /// Defines this as a method for sassy patcher, it can define any argument type it wants, and reflection will be used to convert them at runtime
 /// Method overloading is not allowed
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
+[MeansImplicitUse]
 public class SassyMethodAttribute : Attribute
 {
     /// <summary>
