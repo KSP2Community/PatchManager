@@ -25,6 +25,7 @@ public class DeleteValue : Node, ISelectionAction
         {
             throw new InterpreterException(Coordinate, "Attempting to delete an unmodifiable selection");
         }
+        Console.WriteLine($"Deleting modifiable of type {modifiable}");
         modifiable.Set(new DataValue(DataValue.DataType.Deletion));
     }
 }
