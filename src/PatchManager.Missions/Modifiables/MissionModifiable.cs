@@ -18,6 +18,7 @@ public class MissionModifiable : JTokenModifiable
         if (dataValue.IsDeletion)
         {
             _missionSelectable.SetDeleted();
+            return;
         }
         base.Set(dataValue);
     }
