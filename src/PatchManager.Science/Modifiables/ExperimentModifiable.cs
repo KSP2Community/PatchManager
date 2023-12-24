@@ -18,6 +18,7 @@ public class ExperimentModifiable : JTokenModifiable
         if (dataValue.IsDeletion)
         {
             _experimentSelectable.SetDeleted();
+            return;
         }
         base.Set(dataValue);
     }

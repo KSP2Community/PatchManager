@@ -19,6 +19,7 @@ public class ScienceModifiable : JTokenModifiable
         if (dataValue.IsDeletion)
         {
             _scienceSelectable.SetDeleted();
+            return;
         }
         base.Set(dataValue);
     }

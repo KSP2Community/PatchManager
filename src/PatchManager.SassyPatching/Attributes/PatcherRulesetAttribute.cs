@@ -12,6 +12,7 @@ namespace PatchManager.SassyPatching.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 [BaseTypeRequired(typeof(IPatcherRuleSet))]
+[MeansImplicitUse]
 public class PatcherRulesetAttribute : Attribute
 {
     /// <summary>
