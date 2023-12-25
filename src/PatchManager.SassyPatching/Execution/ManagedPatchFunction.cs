@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Reflection;
+﻿using System.Reflection;
 using JetBrains.Annotations;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Exceptions;

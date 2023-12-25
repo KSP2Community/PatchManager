@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Nodes.Expressions;
-using PatchManager.Shared;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.FunctionLevel;

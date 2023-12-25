@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using PatchManager.SassyPatching;
+﻿using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Modifiables;
 using PatchManager.Science.Selectables;
 

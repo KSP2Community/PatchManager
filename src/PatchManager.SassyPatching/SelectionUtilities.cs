@@ -1,5 +1,4 @@
 ﻿using PatchManager.SassyPatching.Execution;
-using PatchManager.SassyPatching.Interfaces;
 
 namespace PatchManager.SassyPatching;
 

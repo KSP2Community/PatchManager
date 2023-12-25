@@ -1,6 +1,5 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Nodes.Expressions;
-using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 
 namespace PatchManager.SassyPatching.Execution;
 

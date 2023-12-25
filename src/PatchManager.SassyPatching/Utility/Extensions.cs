@@ -1,8 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Antlr4.Runtime;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using SassyPatchGrammar;
 
 namespace PatchManager.SassyPatching.Utility;
 

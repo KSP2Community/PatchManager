@@ -1,11 +1,9 @@
 ﻿using System.Text.RegularExpressions;
-using KSP.Sim.Definitions;
 using Newtonsoft.Json.Linq;
 using PatchManager.Parts.Modifiables;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Selectables;
-using UnityEngine;
 
 namespace PatchManager.Parts.Selectables;
 

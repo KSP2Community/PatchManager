@@ -1,5 +1,4 @@
-﻿using PatchManager.SassyPatching.Exceptions;
-using PatchManager.SassyPatching.Nodes.Attributes;
+﻿using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Statements;
 using PatchManager.Shared.Interfaces;
 

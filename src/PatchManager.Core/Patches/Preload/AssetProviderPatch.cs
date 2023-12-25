@@ -16,7 +16,7 @@ internal static class AssetProviderPatch
         string label,
         Action<T> assetLoadCallback,
         Action<IList<T>> resultCallback = null
-    ) where T : UnityEngine.Object
+    ) where T : UnityObject
     {
         if (AssetProvider.IsComponent(typeof(T)))
         {

@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using PatchManager.SassyPatching.Exceptions;
+﻿using PatchManager.SassyPatching.Exceptions;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Binary;
 

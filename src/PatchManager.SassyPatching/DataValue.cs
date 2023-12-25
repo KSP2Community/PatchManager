@@ -1,8 +1,5 @@
 ﻿using System.Collections;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using HarmonyLib;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;

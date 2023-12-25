@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using BepInEx.Logging;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -12,9 +10,7 @@ using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Interfaces;
-using SpaceWarp;
 using SpaceWarp.API.Mods;
-using SpaceWarp.API.Versions;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;

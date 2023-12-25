@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Execution;
-using PatchManager.Shared;
 
 namespace PatchManager.SassyPatching.Builtins;
 
