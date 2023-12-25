@@ -79,7 +79,7 @@ public class Universe
             return;
         }
         ConfigUpdates.Add((priority, label, name, updateExpression,snapshot));
-    } 
+    }
 #nullable disable
     /// <summary>
     /// All stages defined by every mod
@@ -87,7 +87,7 @@ public class Universe
     public Dictionary<string, ulong> AllStages = new();
 
     // Populated from Space Warps mod list come 1.3.0
-    public List<string> AllMods = new();
+    public List<string> AllMods;
 
     /// <summary>
     /// This is an action that is taken
@@ -99,7 +99,7 @@ public class Universe
     /// Register a generator patch
     /// </summary>
     public readonly Action<ITextAssetGenerator> RegisterGenerator;
-    
+
     /// <summary>
     /// This logs errors in this universe
     /// </summary>
@@ -116,7 +116,7 @@ public class Universe
     /// </summary>
     public readonly Action<string> MessageLogger;
 
-    private readonly List<(string id, SassyPatch patch)> ToRegister = new();
+    private readonly List<(string id, SassyPatch patch)> _toRegister = new();
 
     /// <summary>
     /// Create a new universal state
@@ -151,7 +151,7 @@ public class Universe
 
     private class ParserListener : IAntlrErrorListener<IToken>
     {
-        internal bool Errored = false;
+        internal bool Errored;
         internal Action<string> ErrorLogger;
         internal string File;
         internal ParserListener(string file, Action<string> errorLogger)
@@ -168,10 +168,10 @@ public class Universe
             ErrorLogger.Invoke($"error parsing {File} - {line}:{charPositionInLine}: {msg}");
         }
     }
-    
+
     private class LexerListener : IAntlrErrorListener<int>
     {
-        internal bool Errored = false;
+        internal bool Errored;
         internal Action<string> ErrorLogger;
         internal string File;
         internal LexerListener(string file, Action<string> errorLogger)
@@ -232,7 +232,7 @@ public class Universe
             // var gEnv = new GlobalEnvironment(this, modId);
             // var env = new Environment(gEnv);
             var ctx = tokenTransformer.Visit(patchContext) as SassyPatch;
-            ToRegister.Add((modId, ctx));
+            _toRegister.Add((modId, ctx));
             // lib = new SassyPatchLibrary(patch);
         }
         catch (Exception e)
@@ -276,13 +276,13 @@ public class Universe
     {
         SassyTextPatchers.Add(sassyTextPatcher);
     }
-    
+
     /// <summary>
     /// This registers every patch in the files in the to register list
     /// </summary>
     public void RegisterAllPatches()
     {
-        foreach (var (modId, patch) in ToRegister)
+        foreach (var (modId, patch) in _toRegister)
         {
             var gEnv = new GlobalEnvironment(this, modId);
             var env = new Environment(gEnv);
@@ -339,7 +339,7 @@ public class Universe
                 }
             }
         }
-        
+
         foreach (var patcher in SassyTextPatchers)
         {
             var stage = patcher.PriorityString;
@@ -383,7 +383,7 @@ public class Universe
         }
     }
 
-    
+
     private static bool SingleSortStep(
         Dictionary<string, Stage> toBeSorted,
         List<string> sortedStages
@@ -419,7 +419,7 @@ public class Universe
     public readonly Dictionary<string, Stage> UnsortedStages = new();
     public readonly Dictionary<string, string> LastImplicitWithinMod = new();
     public string LastImplicitGlobal = "";
-    
+
     private void SetupBasePriorities(List<string> modLoadOrder)
     {
         MessageLogger($"Setting up base priorities with mod load order: {string.Join(", ", modLoadOrder)}");

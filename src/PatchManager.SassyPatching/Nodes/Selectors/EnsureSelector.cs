@@ -38,7 +38,7 @@ public class EnsureSelector : Selector
                     baseList.Add(new SelectableWithEnvironment
                     {
                         Selectable = addedElement,
-                        Environment = new Execution.Environment(selectable.Environment.GlobalEnvironment,selectable.Environment)
+                        Environment = new Environment(selectable.Environment.GlobalEnvironment,selectable.Environment)
                     });
                 }
             }
@@ -61,6 +61,6 @@ public class EnsureSelector : Selector
     {
         newAsset = null;
         return new();
-        
+
     }
 }

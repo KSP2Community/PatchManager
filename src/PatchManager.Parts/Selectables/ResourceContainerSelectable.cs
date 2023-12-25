@@ -8,11 +8,9 @@ namespace PatchManager.Parts.Selectables;
 /// </summary>
 public sealed class ResourceContainerSelectable : JTokenSelectable
 {
-    private PartSelectable _selectable;
-
-    internal ResourceContainerSelectable(JObject container, PartSelectable selectable) : base(selectable.SetModified,container,"resource_container")
+    internal ResourceContainerSelectable(JObject container, PartSelectable selectable)
+        : base(selectable.SetModified, container, "resource_container")
     {
-        _selectable = selectable;
         Classes.Add((string)container["name"]);
     }
 }

@@ -9,6 +9,7 @@ internal static class PartDataDeserializePatcher
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PartCore), nameof(PartCore.UpgradeAndRead))]
+    // ReSharper disable once InconsistentNaming
     internal static void PartCore_UpgradeAndRead(string rawFileData, ref PartCore __result)
     {
         var prefabAddress = Regex.Match(rawFileData, "\"PrefabAddress\":\\s*\"([^\"]*)\"").Groups[1].Value;
@@ -20,7 +21,7 @@ internal static class PartDataDeserializePatcher
         var iconAddress = Regex.Match(rawFileData, "\"IconAddress\":\\s*\"([^\"]*)\"").Groups[1].Value;
         if (!string.IsNullOrEmpty(iconAddress))
         {
-            OABUtilsPatcher.PartIconMap[__result.data.partName] = iconAddress;
+            OabUtilsPatcher.PartIconMap[__result.data.partName] = iconAddress;
         }
     }
 }

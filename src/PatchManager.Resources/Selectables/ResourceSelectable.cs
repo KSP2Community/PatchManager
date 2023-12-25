@@ -10,8 +10,8 @@ namespace PatchManager.Resources.Selectables;
 /// </summary>
 public class ResourceSelectable : BaseSelectable
 {
-    private bool _modified = false;
-    private bool _deleted = false;
+    private bool _modified;
+    private bool _deleted;
 
 
     /// <summary>

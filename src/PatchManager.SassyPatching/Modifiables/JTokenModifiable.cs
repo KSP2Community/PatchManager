@@ -19,7 +19,7 @@ public class JTokenModifiable : IModifiable
             token.Remove();
         }
     }
-    
+
     public JTokenModifiable(JToken jToken, Action setDirty)
     {
         _jToken = jToken;
@@ -153,6 +153,5 @@ public class JTokenModifiable : IModifiable
 
     public void Complete()
     {
-        return;
     }
 }

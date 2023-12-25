@@ -12,9 +12,8 @@ namespace PatchManager.Parts.Selectables;
 /// </summary>
 public sealed class PartSelectable : BaseSelectable
 {
-    private bool _modified = false;
-    private bool _deleted = false;
-
+    private bool _modified;
+    private bool _deleted;
 
     /// <summary>
     /// Marks this part selectable as having been modified any level down
@@ -38,14 +37,15 @@ public sealed class PartSelectable : BaseSelectable
     private static readonly Regex Sanitizer = new("[^a-zA-Z0-9 -_]");
     private static string Sanitize(string str) => Sanitizer.Replace(str, "");
     private readonly Dictionary<string, int> _moduleIndices;
-    private static JArray SerializedPartModules;
+    private static JArray _serializedPartModules;
+
     internal PartSelectable(string data)
     {
         _originalData = data;
         JObject = JObject.Parse(data);
         _moduleIndices = new Dictionary<string, int>();
-        Classes = new();
-        Children = new();
+        Classes = new List<string>();
+        Children = new List<ISelectable>();
         var partData = JObject["data"];
         Name = (string)partData["partName"];
         foreach (var tag in ((string)partData["tags"]).Split(' '))
@@ -54,7 +54,7 @@ public sealed class PartSelectable : BaseSelectable
         }
 
         var serializedPartModules = partData["serializedPartModules"];
-        SerializedPartModules = serializedPartModules as JArray;
+        _serializedPartModules = serializedPartModules as JArray;
         var index = 0;
         foreach (var module in serializedPartModules)
         {
@@ -89,7 +89,7 @@ public sealed class PartSelectable : BaseSelectable
     private DataValue ConcatenateModuleData(int index)
     {
         DataValue value = new DataValue(DataValue.DataType.Dictionary, new Dictionary<string, DataValue>());
-        foreach (var data in SerializedPartModules[index]["ModuleData"])
+        foreach (var data in _serializedPartModules[index]["ModuleData"])
         {
             var dataObject = DataValue.FromJToken(data["DataObject"]);
             foreach (var kv in dataObject.Dictionary.Where(kv => kv.Key != "$type"))

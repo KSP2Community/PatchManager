@@ -22,7 +22,7 @@ public class CoreModule : BaseModule
 {
     private ConfigValue<bool> _shouldAlwaysInvalidate;
 
-    private bool _wasCacheInvalidated = false;
+    private bool _wasCacheInvalidated;
     private static bool ShouldLoad(string[] disabled, string modInfoLocation)
     {
         if (!File.Exists(modInfoLocation))
@@ -36,7 +36,7 @@ public class CoreModule : BaseModule
             return false;
         }
     }
-    
+
     /// <summary>
     /// Reads all patch files.
     /// </summary>
@@ -48,7 +48,7 @@ public class CoreModule : BaseModule
             CacheManager.CreateCacheFolderIfNotExists();
             CacheManager.InvalidateCache();
         }
-        
+
         var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
         if (!isValid)
@@ -127,7 +127,7 @@ public class CoreModule : BaseModule
         text.visible = true;
         text.style.display = DisplayStyle.Flex;
         foldout.Add(text);
-        
+
         return foldout;
     }
 

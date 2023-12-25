@@ -7,15 +7,20 @@ using PatchManager.Science.Selectables;
 
 namespace PatchManager.Science.Rulesets;
 
+/// <summary>
+/// This ruleset is used to patch the science tech tree.
+/// </summary>
 [PatcherRuleset("science","techNodeData")]
 public class ScienceRuleset : IPatcherRuleSet
 {
+    /// <inheritdoc />
     public bool Matches(string label) => label == "techNodeData";
 
+    /// <inheritdoc />
     public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
     new ScienceSelectable(JObject.Parse(jsonData));
 
-
+    /// <inheritdoc />
     public INewAsset CreateNew(List<DataValue> dataValues)
     {
         return new NewGenericAsset("techNodeData", dataValues[0].String,

@@ -6,11 +6,15 @@ using PatchManager.Science.Modifiables;
 
 namespace PatchManager.Science.Selectables;
 
+/// <summary>
+/// A selectable that represents a science experiment
+/// </summary>
 public class ExperimentSelectable : BaseSelectable
 {
-    private bool _modified = false;
-    private bool _deleted = false;
-
+#pragma warning disable CS0414 // Field is assigned but its value is never used
+    private bool _modified;
+#pragma warning restore CS0414 // Field is assigned but its value is never used
+    private bool _deleted;
 
     /// <summary>
     /// Marks this part selectable as having been modified any level down
@@ -29,25 +33,36 @@ public class ExperimentSelectable : BaseSelectable
         _deleted = true;
     }
 
+    /// <summary>
+    /// The science object that this selectable represents
+    /// </summary>
     public JObject ScienceObject;
+
+    /// <summary>
+    /// The data object that this selectable represents
+    /// </summary>
     public JObject DataObject;
-    
+
+    /// <summary>
+    /// Creates a new experiment selectable
+    /// </summary>
+    /// <param name="scienceData">The science data that this selectable represents</param>
     public ExperimentSelectable(JObject scienceData)
     {
         ElementType = "scienceExperiment";
         ScienceObject = scienceData;
         DataObject = (JObject)scienceData["data"]!;
-        Classes = new();
-        Children = new();
+        Classes = new List<string>();
+        Children = new List<ISelectable>();
         foreach (var subToken in DataObject)
         {
             Classes.Add(subToken.Key);
             Children.Add(new JTokenSelectable(SetModified,subToken.Value,subToken.Key));
         }
     }
+
     /// <inheritdoc />
     public sealed override List<ISelectable> Children { get; }
-
 
     /// <inheritdoc />
     public override string Name => DataObject["ExperimentID"]!.Value<string>()!;
@@ -55,6 +70,7 @@ public class ExperimentSelectable : BaseSelectable
     /// <inheritdoc />
     public sealed override List<string> Classes { get; }
 
+    /// <inheritdoc />
     public override bool MatchesClass(string @class, out DataValue classValue)
     {
         classValue = null;
