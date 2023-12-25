@@ -214,4 +214,12 @@ public class ListBuiltins
     [SassyMethod("list.join")]
     public static string ToString(List<DataValue> list, string separator = "") => string.Join("", list.Select(x => x.IsString ? x.String : x.ToString()));
 
+    [SassyMethod("list.remove")]
+    public static List<DataValue> Remove(List<DataValue> list, [SassyName("to-remove")] DataValue toRemove) =>
+        list.Where(x => x != toRemove).ToList();
+
+    [SassyMethod("list.remove-all")]
+    public static List<DataValue> RemoveAll(List<DataValue> list, [SassyName("to-remove")] List<DataValue> toRemove) =>
+        list.Where(x => toRemove.All(y => y != x)).ToList();
+
 }
