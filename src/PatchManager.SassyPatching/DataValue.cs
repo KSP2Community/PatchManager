@@ -932,4 +932,51 @@ public class DataValue
         return true;
     }
     public static bool operator !=(DataValue a, DataValue b) => !(a == b);
+
+    public override bool Equals(object obj) => this == (DataValue)obj;
+
+    public override int GetHashCode()
+    {
+        if (IsNone || IsDeletion)
+        {
+            return 0;
+        }
+
+        if (IsBoolean)
+        {
+            return Boolean.GetHashCode();
+        }
+
+        if (IsInteger)
+        {
+            return Integer.GetHashCode();
+        }
+
+        if (IsReal)
+        {
+            return Real.GetHashCode();
+        }
+
+        if (IsString)
+        {
+            return String.GetHashCode();
+        }
+
+        if (IsList)
+        {
+            return List.GetHashCode();
+        }
+
+        if (IsDictionary)
+        {
+            return Dictionary.GetHashCode();
+        }
+
+        if (IsClosure)
+        {
+            return Closure.GetHashCode();
+        }
+
+        return -1;
+    }
 }

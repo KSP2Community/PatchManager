@@ -13,7 +13,6 @@ using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 using SassyPatchGrammar;
 using UnityEngine;
-
 namespace PatchManager.SassyPatching;
 
 /// <summary>
