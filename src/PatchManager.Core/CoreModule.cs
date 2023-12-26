@@ -26,6 +26,7 @@ public class CoreModule : BaseModule
     private ConfigValue<bool> _shouldAlwaysInvalidate;
 
     private bool _wasCacheInvalidated = false;
+
     private static bool ShouldLoad(string[] disabled, string modInfoLocation)
     {
         if (!File.Exists(modInfoLocation))
@@ -34,36 +35,52 @@ public class CoreModule : BaseModule
         {
             var metadata = JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(modInfoLocation));
             return metadata.ModID == null || !disabled.Contains(metadata.ModID);
-        } catch
+        }
+        catch
         {
             return false;
         }
     }
-    
+
+    private static bool NoSwinfo(DirectoryInfo directory, DirectoryInfo gameRoot)
+    {
+        while (directory != null && directory != gameRoot)
+        {
+            if (directory.GetFiles().Any(x => x.Name == "swinfo.json"))
+                return false;
+            directory = directory.Parent;
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Reads all patch files.
     /// </summary>
     public override void Init()
     {
-
         if (_shouldAlwaysInvalidate.Value || SpaceWarp.API.Mods.PluginList.ModListChangedSinceLastRun)
         {
             CacheManager.CreateCacheFolderIfNotExists();
             CacheManager.InvalidateCache();
         }
-        
+
         var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
         if (!isValid)
         {
             _wasCacheInvalidated = true;
-            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,() => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1,() => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,
+                () => new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1,
+                () => new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2,
+                () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
         }
         else
         {
-            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+            SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,
+                () => new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
         }
     }
 
@@ -71,19 +88,41 @@ public class CoreModule : BaseModule
     public override void PreLoad()
     {
         // Go here instead so that the static constructor recognizes everything
-        PatchingManager.GenerateUniverse();
         var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-        var modFolders = Directory.GetDirectories(Paths.PluginPath, "*",SearchOption.AllDirectories)
-            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x => (Folder: x, Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))));
+        var modFolders = Directory.GetDirectories(Paths.PluginPath, "*", SearchOption.AllDirectories)
+            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x =>
+                (Folder: x,
+                    Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))))
+            .ToList();
+        modFolders.AddRange(Directory
+            .GetDirectories(Path.Combine(Paths.GameRootPath, "GameData/Mods"), "*", SearchOption.AllDirectories)
+            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x =>
+                (Folder: x,
+                    Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json"))))));
+        var gameRoot = new DirectoryInfo(Paths.GameRootPath);
 
+        var standalonePatches = Directory.EnumerateFiles(Path.Combine(Paths.GameRootPath, "GameData/Mods"), "*.patch",
+                SearchOption.AllDirectories)
+            .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot)).Select(x => new FileInfo(x)).ToList();
+        standalonePatches.AddRange(Directory.EnumerateFiles(Paths.PluginPath, "*.patch", SearchOption.AllDirectories)
+            .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot)).Select(x => new FileInfo(x)));
+
+        PatchingManager.GenerateUniverse(standalonePatches
+            .Select(x => x.Directory!.FullName.MakeRelativePathTo(gameRoot.FullName).Replace("\\","-")).ToHashSet());
         foreach (var modFolder in modFolders)
         {
             Logging.LogInfo($"Loading patchers from {modFolder.Folder}");
             // var modName = Path.GetDirectoryName(modFolder);
             PatchingManager.ImportModPatches(modFolder.Info.ModID, modFolder.Folder);
         }
+
+        foreach (var standalonePatch in standalonePatches)
+        {
+            PatchingManager.ImportSinglePatch(standalonePatch);
+        }
+
         PatchingManager.RegisterPatches();
     }
 
@@ -96,6 +135,7 @@ public class CoreModule : BaseModule
         Locators.Register(new ArchiveResourceLocator());
         resolve();
     }
+
     /// <inheritdoc />
     public override VisualElement GetDetails()
     {
@@ -130,19 +170,20 @@ public class CoreModule : BaseModule
         text.visible = true;
         text.style.display = DisplayStyle.Flex;
         foldout.Add(text);
-        
+
         return foldout;
     }
 
     /// <inheritdoc />
     public override void BindConfiguration(IConfigFile modConfiguration)
     {
-        _shouldAlwaysInvalidate = new (modConfiguration.Bind("Core", "Always Invalidate Cache", false,
+        _shouldAlwaysInvalidate = new(modConfiguration.Bind("Core", "Always Invalidate Cache", false,
             "Should patch manager always invalidate its cache upon load"));
     }
 
     /// <summary>
     /// This is the current universe that patch manager is using (used for interop reasons)
     /// </summary>
-    [PublicAPI] public Universe CurrentUniverse => PatchingManager.Universe;
+    [PublicAPI]
+    public Universe CurrentUniverse => PatchingManager.Universe;
 }

@@ -53,24 +53,45 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitPatch_declaration(sassy_parser.Patch_declarationContext context)
     {
-        var labels = context.patch_list().STRING().Select(x => x.GetText()).Select(x => x.Unescape()).ToList();
+        var labels = context.patch_list().sassy_string().Select(x => x.GetStringValue()).ToList();
         return new PatchDeclaration(context.GetCoordinate(), labels);
     }
 
     /// <inheritdoc />
     public override Node VisitImport_declaration(sassy_parser.Import_declarationContext context) =>
         new Import(context.GetCoordinate(),
-            context.imp
-                .Text
-                .Unescape());
+            context.imp.GetStringValue());
 
     /// <inheritdoc />
-    public override Node VisitVar_decl(sassy_parser.Var_declContext context) =>
-        new VariableDeclaration(context.GetCoordinate(),
-            context.variable.Text.TrimFirst(),
-            Visit(context.val) as Expression);
+    public override Node VisitNormal_var_decl(sassy_parser.Normal_var_declContext context)
+        => new VariableDeclaration(context.GetCoordinate(),
+        context.variable.Text.TrimFirst(),
+        Visit(context.val) as Expression);
 
+    /// <inheritdoc />
+    public override Node VisitAdd_var_decl(sassy_parser.Add_var_declContext context) => new VariableDeclaration(
+        context.GetCoordinate(),
+        context.variable.Text.TrimFirst(),
+        new ImplicitAdd(context.GetCoordinate(),Visit(context.val) as Expression));
 
+    /// <inheritdoc />
+    public override Node VisitSubtract_var_decl(sassy_parser.Subtract_var_declContext context) => new VariableDeclaration(
+        context.GetCoordinate(),
+        context.variable.Text.TrimFirst(),
+        new ImplicitSubtract(context.GetCoordinate(),Visit(context.val) as Expression));
+    
+    /// <inheritdoc />
+    public override Node VisitMultiply_var_decl(sassy_parser.Multiply_var_declContext context) => new VariableDeclaration(
+        context.GetCoordinate(),
+        context.variable.Text.TrimFirst(),
+        new ImplicitMultiply(context.GetCoordinate(),Visit(context.val) as Expression));
+    
+    /// <inheritdoc />
+    public override Node VisitDivide_var_decl(sassy_parser.Divide_var_declContext context) => new VariableDeclaration(
+        context.GetCoordinate(),
+        context.variable.Text.TrimFirst(),
+        new ImplicitDivide(context.GetCoordinate(),Visit(context.val) as Expression));
+    
     /// <inheritdoc />
     public override Node VisitFunction_def(sassy_parser.Function_defContext context) =>
         new Function(context.GetCoordinate(),
@@ -174,11 +195,11 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             Visit(context.rhs) as RequireExpression);
 
     public override Node VisitRequire_guid(sassy_parser.Require_guidContext context) =>
-        new RequireGuid(context.GetCoordinate(), context.modid.Text.Unescape());
+        new RequireGuid(context.GetCoordinate(), context.modid.GetStringValue());
 
     /// <inheritdoc />
     public override Node VisitRun_at_stage(sassy_parser.Run_at_stageContext context) =>
-        new RunAtStageAttribute(context.GetCoordinate(), context.stage.Text.Unescape());
+        new RunAtStageAttribute(context.GetCoordinate(), context.stage.GetStringValue());
 
     public override Node VisitNew_asset(sassy_parser.New_assetContext context)
     {
@@ -190,13 +211,22 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitSel_element(sassy_parser.Sel_elementContext context)
         => new ElementSelector(context.GetCoordinate(), context.ELEMENT().GetText());
 
+    public override Node VisitSel_element_string(sassy_parser.Sel_element_stringContext context) =>
+        new ElementSelector(context.GetCoordinate(), context.STRING().GetText().Unescape());
+
     /// <inheritdoc />
     public override Node VisitSel_ruleset(sassy_parser.Sel_rulesetContext context)
         => new RulesetSelector(context.GetCoordinate(), context.RULESET().GetText().TrimFirst());
 
 
+    /// <inheritdoc />
     public override Node VisitSel_class_capture(sassy_parser.Sel_class_captureContext context) =>
         new ClassCaptureSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst(),
+            context.function_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitSel_string_class_capture(sassy_parser.Sel_string_class_captureContext context) =>
+        new ClassCaptureSelector(context.GetCoordinate(), context.STRING_CLASS().GetText().TrimFirst().Unescape(),
             context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
@@ -209,6 +239,10 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new ElementAdditionSelector(context.GetCoordinate(), context.ELEMENT().GetText());
 
     /// <inheritdoc />
+    public override Node VisitSel_add_string_element(sassy_parser.Sel_add_string_elementContext context)
+        => new ElementAdditionSelector(context.GetCoordinate(), context.STRING().GetText().Unescape());
+
+    /// <inheritdoc />
     public override Node VisitSel_class(sassy_parser.Sel_classContext context)
         => new ClassSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst());
 
@@ -217,12 +251,21 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new NameSelector(context.GetCoordinate(), context.NAME().GetText().TrimFirst());
 
     /// <inheritdoc />
+    public override Node VisitSel_string_name(sassy_parser.Sel_string_nameContext context) =>
+        new NameSelector(context.GetCoordinate(), context.STRING_NAME().GetText().TrimFirst().Unescape());
+
+    /// <inheritdoc />
     public override Node VisitSel_intersection(sassy_parser.Sel_intersectionContext context)
         => new IntersectionSelector(context.GetCoordinate(), Visit(context.lhs) as Selector,
             Visit(context.rhs) as Selector);
 
+    /// <inheritdoc />
     public override Node VisitSel_ensure(sassy_parser.Sel_ensureContext context) =>
         new EnsureSelector(context.GetCoordinate(), context.ENSURE().GetText().TrimFirst());
+
+    /// <inheritdoc />
+    public override Node VisitSel_string_ensure(sassy_parser.Sel_string_ensureContext context) =>
+        new EnsureSelector(context.GetCoordinate(), context.STRING_ENSURE().GetText().TrimFirst().Unescape());
 
     /// <inheritdoc />
     public override Node VisitSel_everything(sassy_parser.Sel_everythingContext context)
@@ -233,8 +276,16 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new WithoutClassSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst());
 
     /// <inheritdoc />
+    public override Node VisitSel_without_string_class(sassy_parser.Sel_without_string_classContext context) =>
+        new WithoutClassSelector(context.GetCoordinate(), context.STRING_CLASS().GetText().TrimFirst().Unescape());
+
+    /// <inheritdoc />
     public override Node VisitSel_without_name(sassy_parser.Sel_without_nameContext context)
         => new WithoutNameSelector(context.GetCoordinate(), context.NAME().GetText().TrimFirst());
+
+    /// <inheritdoc />
+    public override Node VisitSel_without_string_name(sassy_parser.Sel_without_string_nameContext context)
+        => new WithoutNameSelector(context.GetCoordinate(), context.STRING_NAME().GetText().TrimFirst().Unescape());
 
     /// <inheritdoc />
     public override Node VisitSel_combination(sassy_parser.Sel_combinationContext context)
@@ -250,8 +301,16 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new CombinationSelector(context.GetCoordinate(), Visit(context.lhs) as Selector,
             Visit(context.rhs) as Selector);
 
+    /// <inheritdoc />
     public override Node VisitClass_capture_selector(sassy_parser.Class_capture_selectorContext context) =>
         new ClassCaptureSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst(),
+            context.function_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitString_class_capture_selector(
+        sassy_parser.String_class_capture_selectorContext context
+    ) =>
+        new ClassCaptureSelector(context.GetCoordinate(), context.STRING_CLASS().GetText().TrimFirst().Unescape(),
             context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
@@ -259,20 +318,40 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new WithoutNameSelector(context.GetCoordinate(), context.NAME().GetText().TrimFirst());
 
     /// <inheritdoc />
+    public override Node VisitWithout_string_name(sassy_parser.Without_string_nameContext context) =>
+        new WithoutNameSelector(context.GetCoordinate(), context.STRING_NAME().GetText().TrimFirst().Unescape());
+
+    /// <inheritdoc />
     public override Node VisitClass_selector(sassy_parser.Class_selectorContext context)
         => new ClassSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst());
+
+    /// <inheritdoc />
+    public override Node VisitString_class_selector(sassy_parser.String_class_selectorContext context) =>
+        new ClassSelector(context.GetCoordinate(), context.STRING_CLASS().GetText().TrimFirst().Unescape());
 
     /// <inheritdoc />
     public override Node VisitWithout_class(sassy_parser.Without_classContext context)
         => new WithoutClassSelector(context.GetCoordinate(), context.CLASS().GetText().TrimFirst());
 
     /// <inheritdoc />
+    public override Node VisitWithout_string_class(sassy_parser.Without_string_classContext context) =>
+        new WithoutClassSelector(context.GetCoordinate(), context.STRING_CLASS().GetText().TrimFirst().Unescape());
+
+    /// <inheritdoc />
     public override Node VisitName(sassy_parser.NameContext context)
         => new NameSelector(context.GetCoordinate(), context.NAME().GetText().TrimFirst());
 
     /// <inheritdoc />
+    public override Node VisitString_name(sassy_parser.String_nameContext context)
+        => new NameSelector(context.GetCoordinate(), context.STRING_NAME().GetText().TrimFirst().Unescape());
+
+    /// <inheritdoc />
     public override Node VisitAdd_element(sassy_parser.Add_elementContext context)
         => new ElementAdditionSelector(context.GetCoordinate(), context.ELEMENT().GetText());
+
+    /// <inheritdoc />
+    public override Node VisitAdd_string_element(sassy_parser.Add_string_elementContext context)
+        => new ElementAdditionSelector(context.GetCoordinate(), context.STRING().GetText().Unescape());
 
     /// <inheritdoc />
     public override Node VisitEverything(sassy_parser.EverythingContext context)
@@ -286,6 +365,10 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitElement(sassy_parser.ElementContext context)
         => new ElementSelector(context.GetCoordinate(), context.ELEMENT().GetText());
+
+    /// <inheritdoc />
+    public override Node VisitString_element(sassy_parser.String_elementContext context) =>
+        new ElementSelector(context.GetCoordinate(), context.STRING().GetText().Unescape());
 
     /// <inheritdoc />
     public override Node VisitSel_level_conditional(sassy_parser.Sel_level_conditionalContext context)
@@ -341,25 +424,51 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new MergeValue(context.GetCoordinate(), Visit(context.expr) as Expression);
 
     /// <inheritdoc />
-    public override Node VisitElement_key_field(sassy_parser.Element_key_fieldContext context) =>
+    public override Node VisitNormal_field_set(sassy_parser.Normal_field_setContext context) =>
         new Field(context.GetCoordinate(),
-            context.ELEMENT()
-                .GetText(),
+            context.sassy_string().GetStringValue(),
             context.indexor != null
                 ? Visit(context.indexor) as Indexer
                 : null,
             Visit(context.expr) as Expression);
 
     /// <inheritdoc />
-    public override Node VisitString_key_field(sassy_parser.String_key_fieldContext context) =>
+    public override Node VisitAdd_field_set(sassy_parser.Add_field_setContext context) =>
         new Field(context.GetCoordinate(),
-            context.STRING()
-                .GetText()
-                .Unescape(),
+            context.sassy_string().GetStringValue(),
             context.indexor != null
                 ? Visit(context.indexor) as Indexer
                 : null,
-            Visit(context.expr) as Expression);
+            new ImplicitAdd(context.GetCoordinate(),Visit(context.expr) as Expression));
+
+    /// <inheritdoc />
+    public override Node VisitSubtract_field_set(sassy_parser.Subtract_field_setContext context) =>
+        new Field(context.GetCoordinate(),
+            context.sassy_string().GetStringValue(),
+            context.indexor != null
+                ? Visit(context.indexor) as Indexer
+                : null,
+            new ImplicitSubtract(context.GetCoordinate(),Visit(context.expr) as Expression));
+
+    /// <inheritdoc />
+    public override Node VisitMultiply_field_set(sassy_parser.Multiply_field_setContext context) =>
+        new Field(context.GetCoordinate(),
+            context.sassy_string().GetStringValue(),
+            context.indexor != null
+                ? Visit(context.indexor) as Indexer
+                : null,
+            new ImplicitMultiply(context.GetCoordinate(), Visit(context.expr) as Expression));
+    
+    
+    /// <inheritdoc />
+    public override Node VisitDivide_field_set(sassy_parser.Divide_field_setContext context) =>
+        new Field(context.GetCoordinate(),
+            context.sassy_string().GetStringValue(),
+            context.indexor != null
+                ? Visit(context.indexor) as Indexer
+                : null,
+            new ImplicitDivide(context.GetCoordinate(),Visit(context.expr) as Expression));
+    
 
     /// <inheritdoc />
     public override Node VisitNumber_indexor(sassy_parser.Number_indexorContext context)
@@ -384,22 +493,6 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitString_indexor(sassy_parser.String_indexorContext context) =>
         new StringIndexer(context.GetCoordinate(), context.elem.Text.Unescape());
-
-    /// <inheritdoc />
-    public override Node VisitImplicit_add(sassy_parser.Implicit_addContext context) =>
-        new ImplicitAdd(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
-
-    /// <inheritdoc />
-    public override Node VisitImplicit_subtract(sassy_parser.Implicit_subtractContext context) =>
-        new ImplicitSubtract(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
-
-    /// <inheritdoc />
-    public override Node VisitImplicit_multiply(sassy_parser.Implicit_multiplyContext context) =>
-        new ImplicitMultiply(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
-
-    /// <inheritdoc />
-    public override Node VisitImplicit_divide(sassy_parser.Implicit_divideContext context) =>
-        new ImplicitDivide(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
 
     /// <inheritdoc />
     public override Node VisitNot_equal_to(sassy_parser.Not_equal_toContext context) =>
@@ -542,7 +635,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitList_value(sassy_parser.List_valueContext context)
         => new ListNode(context.GetCoordinate(),
-            context.list().list_values().sub_expression().Select(Visit).Cast<Expression>().ToList());
+            context.list().list_values().expression().Select(Visit).Cast<Expression>().ToList());
 
     /// <inheritdoc />
     public override Node VisitObject_value(sassy_parser.Object_valueContext context)
@@ -609,7 +702,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitFn_return(sassy_parser.Fn_returnContext context)
     {
-        return new Return(context.GetCoordinate(), Visit(context.sub_expression()) as Expression);
+        return new Return(context.GetCoordinate(), Visit(context.expression()) as Expression);
     }
 
     /// <inheritdoc />
@@ -639,12 +732,12 @@ public class Transformer : sassy_parserBaseVisitor<Node>
 
     /// <inheritdoc />
     public override Node VisitFor_to_loop(sassy_parser.For_to_loopContext context)
-        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.start) as Expression, false,
+        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, false,
             Visit(context.end) as Expression, context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
     public override Node VisitFor_through_loop(sassy_parser.For_through_loopContext context)
-        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.start) as Expression, true,
+        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, true,
             Visit(context.end) as Expression, context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
@@ -657,21 +750,35 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         => new While(context.GetCoordinate(), Visit(context.cond) as Expression,
             context.function_statement().Select(Visit).ToList());
 
+    /// <inheritdoc />
     public override Node VisitGlobal_stage_def(sassy_parser.Global_stage_defContext context) =>
-        new StageDefinition(context.GetCoordinate(), context.stage.Text.Unescape(), true);
+        new StageDefinition(context.GetCoordinate(), context.stage.GetStringValue(), true);
 
+    /// <inheritdoc />
     public override Node VisitImplicit_stage_def(sassy_parser.Implicit_stage_defContext context) =>
-        new StageDefinition(context.GetCoordinate(), context.stage.Text.Unescape());
+        new StageDefinition(context.GetCoordinate(), context.stage.GetStringValue());
 
+    /// <inheritdoc />
     public override Node VisitRelative_stage_def(sassy_parser.Relative_stage_defContext context) => new StageDefinition(
-        context.GetCoordinate(), context.stage.Text.Unescape(),
+        context.GetCoordinate(), context.stage.GetStringValue(),
         context.stage_attribute().Select(Visit).Cast<StageDefinitionAttribute>().ToList());
 
+    /// <inheritdoc />
     public override Node VisitConfig_creation(sassy_parser.Config_creationContext context) => new ConfigCreation(
-        context.GetCoordinate(), context.label.Text.Unescape(), context.config_name.Text.Unescape(),
+        context.GetCoordinate(), context.label.GetStringValue(), context.config_name.GetStringValue(),
         Visit(context.config_value) as Expression);
 
-    public override Node VisitUpdate_config_full(sassy_parser.Update_config_fullContext context) => new ConfigUpdate(context.GetCoordinate(),Visit(context.priority) as Expression, context.label.Text.Unescape(),context.config_name.Text.Unescape(),Visit(context.config_update) as Expression);
+    /// <inheritdoc />
+    public override Node VisitElement_string(sassy_parser.Element_stringContext context) =>
+        new ValueNode(context.GetCoordinate(), context.ELEMENT().GetText());
 
-    public override Node VisitUpdate_config_label(sassy_parser.Update_config_labelContext context) => new ConfigUpdate(context.GetCoordinate(),Visit(context.priority) as Expression, context.label.Text.Unescape(),null,Visit(context.config_update) as Expression);
+    /// <inheritdoc />
+    public override Node VisitUpdate_config_full(sassy_parser.Update_config_fullContext context) => new ConfigUpdate(
+        context.GetCoordinate(), Visit(context.priority) as Expression, context.label.GetStringValue(),
+        context.config_name.GetStringValue(), Visit(context.config_update) as Expression);
+
+    /// <inheritdoc />
+    public override Node VisitUpdate_config_label(sassy_parser.Update_config_labelContext context) => new ConfigUpdate(
+        context.GetCoordinate(), Visit(context.priority) as Expression, context.label.GetStringValue(), null,
+        Visit(context.config_update) as Expression);
 }

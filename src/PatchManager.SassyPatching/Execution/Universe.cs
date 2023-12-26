@@ -8,6 +8,7 @@ using System.Reflection;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
+using PatchManager.Shared;
 
 namespace PatchManager.SassyPatching.Execution;
 
@@ -206,6 +207,21 @@ public class Universe
         foreach (var patch in directory.EnumerateFiles("*.patch", SearchOption.AllDirectories))
         {
             LoadSinglePatch(modId, patch, tokenTransformer);
+        }
+    }
+
+    public void LoadSinglePatchFile(FileInfo patch, DirectoryInfo cwd)
+    {   
+        var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
+        var name = Path.GetFileNameWithoutExtension(patch.FullName);
+        var id = patch.Directory!.FullName.MakeRelativePathTo(cwd.FullName).Replace("\\", "-");
+        if (name.StartsWith("_"))
+        {
+            LoadSingleLibrary(id, patch, tokenTransformer);
+        }
+        else
+        {
+            LoadSinglePatch(id, patch, tokenTransformer);
         }
     }
 

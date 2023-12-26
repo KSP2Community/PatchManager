@@ -33,4 +33,14 @@ internal static class Extensions
         return JsonConvert.ToString(@this);
     }
 
+    public static string GetStringValue(this sassy_parser.Sassy_stringContext ctx)
+    {
+        if (ctx is sassy_parser.Quoted_stringContext quotedStringContext)
+        {
+            return quotedStringContext.STRING().GetText().Unescape();
+        }
+
+        var unquotedStringContext = ctx as sassy_parser.Unquoted_stringContext;
+        return unquotedStringContext!.ELEMENT().GetText();
+    }
 }

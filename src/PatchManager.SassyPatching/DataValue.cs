@@ -854,4 +854,85 @@ public class DataValue
     }
 
     public static DataValue Null => new(DataType.None);
+    
+    public static bool operator ==(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        if (ReferenceEquals(leftHandSide, null) || ReferenceEquals(rightHandSide, null))
+        {
+            return ReferenceEquals(leftHandSide, rightHandSide);
+        }
+
+        if (leftHandSide.Type != rightHandSide.Type) return false;
+        
+        if (leftHandSide.IsBoolean)
+        {
+            return leftHandSide.Boolean == rightHandSide.Boolean;
+        }
+
+        if (leftHandSide.IsReal)
+        {
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            return leftHandSide.Real == rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsInteger)
+        {
+            return leftHandSide.Integer == rightHandSide.Integer;
+        }
+
+        if (leftHandSide.IsString)
+        {
+            return leftHandSide.String == rightHandSide.String;
+        }
+
+        if (leftHandSide.IsList)
+        {
+            return ListCompare(leftHandSide.List,rightHandSide.List);
+        }
+
+        if (leftHandSide.IsDictionary)
+        {
+            return DictionaryCompare(leftHandSide.Dictionary, rightHandSide.Dictionary);
+        }
+
+        if (leftHandSide.IsClosure && rightHandSide.IsClosure)
+        {
+            return leftHandSide.Closure == rightHandSide.Closure;
+        }
+
+        return true;
+    }
+    private static bool ListCompare(List<DataValue> leftHandSide, List<DataValue> rightHandSide)
+    {
+        if (leftHandSide.Count != rightHandSide.Count)
+        {
+            return false;
+        }
+        return !leftHandSide.Where((t, index) => t != rightHandSide[index]).Any();
+    }
+
+    private static bool DictionaryCompare(Dictionary<string, DataValue> leftHandSide, Dictionary<string, DataValue> rightHandSide)
+    {
+        if (leftHandSide.Count != rightHandSide.Count)
+        {
+            return false;
+        }
+
+        foreach (var kv in leftHandSide)
+        {
+            if (rightHandSide.TryGetValue(kv.Key, out var rvalue))
+            {
+                if (kv.Value != rvalue)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static bool operator !=(DataValue a, DataValue b) => !(a == b);
 }

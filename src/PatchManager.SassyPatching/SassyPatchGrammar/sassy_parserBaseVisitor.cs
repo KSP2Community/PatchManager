@@ -76,6 +76,28 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitPatch_list([NotNull] sassy_parser.Patch_listContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>quoted_string</c>
+	/// labeled alternative in <see cref="sassy_parser.sassy_string"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitQuoted_string([NotNull] sassy_parser.Quoted_stringContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>unquoted_string</c>
+	/// labeled alternative in <see cref="sassy_parser.sassy_string"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitUnquoted_string([NotNull] sassy_parser.Unquoted_stringContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.import_declaration"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
@@ -86,7 +108,8 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitImport_declaration([NotNull] sassy_parser.Import_declarationContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="sassy_parser.var_decl"/>.
+	/// Visit a parse tree produced by the <c>normal_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -94,7 +117,51 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitVar_decl([NotNull] sassy_parser.Var_declContext context) { return VisitChildren(context); }
+	public virtual Result VisitNormal_var_decl([NotNull] sassy_parser.Normal_var_declContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>add_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitAdd_var_decl([NotNull] sassy_parser.Add_var_declContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>subtract_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSubtract_var_decl([NotNull] sassy_parser.Subtract_var_declContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>divide_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitDivide_var_decl([NotNull] sassy_parser.Divide_var_declContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>multiply_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitMultiply_var_decl([NotNull] sassy_parser.Multiply_var_declContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>implicit_stage_def</c>
 	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
@@ -361,6 +428,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitSel_intersection([NotNull] sassy_parser.Sel_intersectionContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_string_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_string_class_capture([NotNull] sassy_parser.Sel_string_class_captureContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_ensure</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// <para>
@@ -382,6 +460,39 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitSel_everything([NotNull] sassy_parser.Sel_everythingContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_without_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_without_string_class([NotNull] sassy_parser.Sel_without_string_classContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_string_class([NotNull] sassy_parser.Sel_string_classContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_string_name([NotNull] sassy_parser.Sel_string_nameContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
@@ -416,6 +527,39 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_element_string</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_element_string([NotNull] sassy_parser.Sel_element_stringContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_add_string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_add_string_element([NotNull] sassy_parser.Sel_add_string_elementContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_without_string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_without_string_name([NotNull] sassy_parser.Sel_without_string_nameContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_without_class</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// <para>
@@ -426,6 +570,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitSel_without_class([NotNull] sassy_parser.Sel_without_classContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_string_ensure</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSel_string_ensure([NotNull] sassy_parser.Sel_string_ensureContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>sel_without_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
@@ -471,7 +626,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitRuleset_selector([NotNull] sassy_parser.Ruleset_selectorContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by the <c>combination_selector</c>
+	/// Visit a parse tree produced by the <c>string_class_capture_selector</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
@@ -480,9 +635,9 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context) { return VisitChildren(context); }
+	public virtual Result VisitString_class_capture_selector([NotNull] sassy_parser.String_class_capture_selectorContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by the <c>class_capture_selector</c>
+	/// Visit a parse tree produced by the <c>without_string_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
@@ -491,18 +646,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>without_name</c>
-	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitWithout_name([NotNull] sassy_parser.Without_nameContext context) { return VisitChildren(context); }
+	public virtual Result VisitWithout_string_name([NotNull] sassy_parser.Without_string_nameContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>sub_selector</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
@@ -537,6 +681,72 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitWithout_class([NotNull] sassy_parser.Without_classContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitString_name([NotNull] sassy_parser.String_nameContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>string_class_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitString_class_selector([NotNull] sassy_parser.String_class_selectorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>add_string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitAdd_string_element([NotNull] sassy_parser.Add_string_elementContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>combination_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>without_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitWithout_name([NotNull] sassy_parser.Without_nameContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// <para>
@@ -559,6 +769,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitAdd_element([NotNull] sassy_parser.Add_elementContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>without_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitWithout_string_class([NotNull] sassy_parser.Without_string_classContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>everything</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// <para>
@@ -580,6 +801,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitIntersection_selector([NotNull] sassy_parser.Intersection_selectorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitString_element([NotNull] sassy_parser.String_elementContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
@@ -682,7 +914,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitMerge_value([NotNull] sassy_parser.Merge_valueContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by the <c>element_key_field</c>
+	/// Visit a parse tree produced by the <c>normal_field_set</c>
 	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
@@ -691,9 +923,9 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitElement_key_field([NotNull] sassy_parser.Element_key_fieldContext context) { return VisitChildren(context); }
+	public virtual Result VisitNormal_field_set([NotNull] sassy_parser.Normal_field_setContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by the <c>string_key_field</c>
+	/// Visit a parse tree produced by the <c>add_field_set</c>
 	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
@@ -702,7 +934,40 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitString_key_field([NotNull] sassy_parser.String_key_fieldContext context) { return VisitChildren(context); }
+	public virtual Result VisitAdd_field_set([NotNull] sassy_parser.Add_field_setContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>subtract_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitSubtract_field_set([NotNull] sassy_parser.Subtract_field_setContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>multiply_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitMultiply_field_set([NotNull] sassy_parser.Multiply_field_setContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>divide_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitDivide_field_set([NotNull] sassy_parser.Divide_field_setContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>number_indexor</c>
 	/// labeled alternative in <see cref="sassy_parser.index"/>.
@@ -748,63 +1013,8 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitString_indexor([NotNull] sassy_parser.String_indexorContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by the <c>implicit_add</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitImplicit_add([NotNull] sassy_parser.Implicit_addContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>implicit_subtract</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitImplicit_subtract([NotNull] sassy_parser.Implicit_subtractContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>implicit_multiply</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitImplicit_multiply([NotNull] sassy_parser.Implicit_multiplyContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>implicit_divide</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitImplicit_divide([NotNull] sassy_parser.Implicit_divideContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>normal</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitNormal([NotNull] sassy_parser.NormalContext context) { return VisitChildren(context); }
-	/// <summary>
 	/// Visit a parse tree produced by the <c>not_equal_to</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -815,7 +1025,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitNot_equal_to([NotNull] sassy_parser.Not_equal_toContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>variable_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -826,7 +1036,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitVariable_reference([NotNull] sassy_parser.Variable_referenceContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>equal_to</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -837,7 +1047,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitEqual_to([NotNull] sassy_parser.Equal_toContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>local_variable_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -848,7 +1058,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitLocal_variable_reference([NotNull] sassy_parser.Local_variable_referenceContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>member_call_ruleset</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -859,7 +1069,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>value_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -870,7 +1080,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitValue_reference([NotNull] sassy_parser.Value_referenceContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>subtraction</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -881,7 +1091,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitSubtraction([NotNull] sassy_parser.SubtractionContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>division</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -892,7 +1102,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitDivision([NotNull] sassy_parser.DivisionContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>negative</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -903,7 +1113,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitNegative([NotNull] sassy_parser.NegativeContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>not</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -914,7 +1124,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitNot([NotNull] sassy_parser.NotContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>lesser_than</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -925,7 +1135,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitLesser_than([NotNull] sassy_parser.Lesser_thanContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>member_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -936,7 +1146,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitMember_call([NotNull] sassy_parser.Member_callContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>greater_than</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -947,7 +1157,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitGreater_than([NotNull] sassy_parser.Greater_thanContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>and</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -958,7 +1168,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitAnd([NotNull] sassy_parser.AndContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>sub_sub_expression</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -969,7 +1179,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitSub_sub_expression([NotNull] sassy_parser.Sub_sub_expressionContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>multiplication</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -980,7 +1190,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitMultiplication([NotNull] sassy_parser.MultiplicationContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>greater_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -991,7 +1201,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitGreater_than_equal([NotNull] sassy_parser.Greater_than_equalContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>addition</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1002,7 +1212,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitAddition([NotNull] sassy_parser.AdditionContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>indexor</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1013,7 +1223,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitIndexor([NotNull] sassy_parser.IndexorContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>or</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1024,7 +1234,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitOr([NotNull] sassy_parser.OrContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>lesser_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1035,7 +1245,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitLesser_than_equal([NotNull] sassy_parser.Lesser_than_equalContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>positive</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1046,7 +1256,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitPositive([NotNull] sassy_parser.PositiveContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>simple_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1056,8 +1266,19 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <return>The visitor result.</return>
 	public virtual Result VisitSimple_call([NotNull] sassy_parser.Simple_callContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>string_local_variable_reference</c>
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitString_local_variable_reference([NotNull] sassy_parser.String_local_variable_referenceContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>remainder</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1068,7 +1289,7 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	public virtual Result VisitRemainder([NotNull] sassy_parser.RemainderContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>ternary</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -1132,6 +1353,17 @@ public partial class sassy_parserBaseVisitor<Result> : AbstractParseTreeVisitor<
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitString_value([NotNull] sassy_parser.String_valueContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>element_string</c>
+	/// labeled alternative in <see cref="sassy_parser.value"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitElement_string([NotNull] sassy_parser.Element_stringContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>none</c>
 	/// labeled alternative in <see cref="sassy_parser.value"/>.

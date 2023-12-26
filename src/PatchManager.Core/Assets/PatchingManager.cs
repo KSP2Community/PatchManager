@@ -34,24 +34,13 @@ internal static class PatchingManager
 
     internal static int TotalPatchCount;
     private static readonly Regex VersionPreprocessRegex = new Regex(@"[^0-9.]");
-    public static void GenerateUniverse()
+    public static void GenerateUniverse(HashSet<string> singleFileModIds)
     {
         var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
-        UniverseLogMessage($"{string.Join(", ", loadedPlugins)}");
-        Universe = new(RegisterPatcher, UniverseLogError, UniverseLogMessage, RegisterGenerator,
+        loadedPlugins.AddRange(singleFileModIds);
+        Universe = new(RegisterPatcher, Logging.LogError, Logging.LogMessage, RegisterGenerator,
             loadedPlugins);
         _initialLibraryCount = Universe.AllLibraries.Count;
-
-        void UniverseLogError(string error)
-        {
-            Debug.Log($"[PatchManager.Universe] [ERR]: {error}");
-        }
-
-        void UniverseLogMessage(string message)
-        {
-            
-            Debug.Log($"[PatchManager.Universe] [MSG]: {message}");
-        }
     }
 
     private static void RegisterPatcher(ITextPatcher patcher)
@@ -143,6 +132,8 @@ internal static class PatchingManager
             CurrentPatchHashes.Patches.Add(patchFile, patchHash);
         }
     }
+
+    public static void ImportSinglePatch(FileInfo fileInfo) => Universe.LoadSinglePatchFile(fileInfo,new DirectoryInfo(BepInEx.Paths.GameRootPath));
 
     public static void RegisterPatches()
     {

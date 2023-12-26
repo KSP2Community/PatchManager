@@ -42,39 +42,41 @@ public partial class sassy_parser : Parser {
 		SET=16, MERGE=17, REQUIRE=18, STAGE=19, DEFINE_STAGE=20, INCLUDE=21, RETURN=22, 
 		PATCH=23, NEW=24, BEFORE=25, AFTER=26, GLOBAL=27, CREATE_CONFIG=28, UPDATE_CONFIG=29, 
 		LEFT_BRACE=30, RIGHT_BRACE=31, LEFT_PAREN=32, RIGHT_PAREN=33, LEFT_BRACKET=34, 
-		RIGHT_BRACKET=35, SEMICOLON=36, COLON=37, COMMA=38, ADD=39, SUBTRACT=40, 
-		MULTIPLY=41, DIVIDE=42, MODULUS=43, NOT=44, GREATER_THAN=45, GREATER_THAN_EQUAL=46, 
-		LESSER_THAN=47, LESSER_THAN_EQUAL=48, EQUAL_TO=49, NOT_EQUAL_TO=50, AND=51, 
-		OR=52, IF=53, ELSE=54, WITHOUT=55, NONE=56, TRUE=57, FALSE=58, HEX_NUMBER=59, 
-		NUMBER=60, STRING=61, DELETE=62, NAME=63, CLASS=64, VARIABLE=65, LOCALVARIABLE=66, 
-		RULESET=67, ENSURE=68, ELEMENT=69;
+		RIGHT_BRACKET=35, SEMICOLON=36, COLON=37, PLUS_COLON=38, MINUS_COLON=39, 
+		DIVIDE_COLON=40, MULTIPLY_COLON=41, COMMA=42, ADD=43, SUBTRACT=44, MULTIPLY=45, 
+		DIVIDE=46, MODULUS=47, NOT=48, GREATER_THAN=49, GREATER_THAN_EQUAL=50, 
+		LESSER_THAN=51, LESSER_THAN_EQUAL=52, EQUAL_TO=53, NOT_EQUAL_TO=54, AND=55, 
+		OR=56, IF=57, ELSE=58, WITHOUT=59, NONE=60, TRUE=61, FALSE=62, HEX_NUMBER=63, 
+		NUMBER=64, STRING=65, DELETE=66, NAME=67, STRING_NAME=68, CLASS=69, STRING_CLASS=70, 
+		VARIABLE=71, LOCALVARIABLE=72, STRING_LOCALVARIABLE=73, RULESET=74, ENSURE=75, 
+		STRING_ENSURE=76, ELEMENT=77;
 	public const int
 		RULE_patch = 0, RULE_top_level_statement = 1, RULE_patch_declaration = 2, 
-		RULE_patch_list = 3, RULE_import_declaration = 4, RULE_var_decl = 5, RULE_stage_def = 6, 
-		RULE_config_creation = 7, RULE_config_mutation = 8, RULE_stage_attribute = 9, 
-		RULE_function_def = 10, RULE_mixin_def = 11, RULE_top_level_conditional = 12, 
-		RULE_top_level_else = 13, RULE_top_level_else_else = 14, RULE_top_level_else_if = 15, 
-		RULE_selection_block = 16, RULE_attributed_selector = 17, RULE_attribute = 18, 
-		RULE_constructor_arguments = 19, RULE_selector = 20, RULE_selector_no_children = 21, 
-		RULE_selector_body = 22, RULE_selector_statement = 23, RULE_sel_level_conditional = 24, 
-		RULE_sel_level_else = 25, RULE_sel_level_else_else = 26, RULE_sel_level_else_if = 27, 
-		RULE_set_value = 28, RULE_delete_value = 29, RULE_merge_value = 30, RULE_field_set = 31, 
-		RULE_index = 32, RULE_expression = 33, RULE_sub_expression = 34, RULE_value = 35, 
-		RULE_require_expression = 36, RULE_list = 37, RULE_list_values = 38, RULE_obj = 39, 
-		RULE_obj_values = 40, RULE_key_value = 41, RULE_argument_list = 42, RULE_argument = 43, 
-		RULE_arg_decl_list = 44, RULE_arg_decl = 45, RULE_function_body = 46, 
+		RULE_patch_list = 3, RULE_sassy_string = 4, RULE_import_declaration = 5, 
+		RULE_var_decl = 6, RULE_stage_def = 7, RULE_config_creation = 8, RULE_config_mutation = 9, 
+		RULE_stage_attribute = 10, RULE_function_def = 11, RULE_mixin_def = 12, 
+		RULE_top_level_conditional = 13, RULE_top_level_else = 14, RULE_top_level_else_else = 15, 
+		RULE_top_level_else_if = 16, RULE_selection_block = 17, RULE_attributed_selector = 18, 
+		RULE_attribute = 19, RULE_constructor_arguments = 20, RULE_selector = 21, 
+		RULE_selector_no_children = 22, RULE_selector_body = 23, RULE_selector_statement = 24, 
+		RULE_sel_level_conditional = 25, RULE_sel_level_else = 26, RULE_sel_level_else_else = 27, 
+		RULE_sel_level_else_if = 28, RULE_set_value = 29, RULE_delete_value = 30, 
+		RULE_merge_value = 31, RULE_field_set = 32, RULE_index = 33, RULE_expression = 34, 
+		RULE_value = 35, RULE_require_expression = 36, RULE_list = 37, RULE_list_values = 38, 
+		RULE_obj = 39, RULE_obj_values = 40, RULE_key_value = 41, RULE_argument_list = 42, 
+		RULE_argument = 43, RULE_arg_decl_list = 44, RULE_arg_decl = 45, RULE_function_body = 46, 
 		RULE_function_statement = 47, RULE_fn_level_conditional = 48, RULE_fn_level_else = 49, 
 		RULE_fn_level_else_else = 50, RULE_fn_level_else_if = 51, RULE_fn_return = 52, 
 		RULE_mixin_include = 53, RULE_for_loop = 54, RULE_each_loop = 55, RULE_while_loop = 56;
 	public static readonly string[] ruleNames = {
-		"patch", "top_level_statement", "patch_declaration", "patch_list", "import_declaration", 
-		"var_decl", "stage_def", "config_creation", "config_mutation", "stage_attribute", 
-		"function_def", "mixin_def", "top_level_conditional", "top_level_else", 
-		"top_level_else_else", "top_level_else_if", "selection_block", "attributed_selector", 
-		"attribute", "constructor_arguments", "selector", "selector_no_children", 
-		"selector_body", "selector_statement", "sel_level_conditional", "sel_level_else", 
-		"sel_level_else_else", "sel_level_else_if", "set_value", "delete_value", 
-		"merge_value", "field_set", "index", "expression", "sub_expression", "value", 
+		"patch", "top_level_statement", "patch_declaration", "patch_list", "sassy_string", 
+		"import_declaration", "var_decl", "stage_def", "config_creation", "config_mutation", 
+		"stage_attribute", "function_def", "mixin_def", "top_level_conditional", 
+		"top_level_else", "top_level_else_else", "top_level_else_if", "selection_block", 
+		"attributed_selector", "attribute", "constructor_arguments", "selector", 
+		"selector_no_children", "selector_body", "selector_statement", "sel_level_conditional", 
+		"sel_level_else", "sel_level_else_else", "sel_level_else_if", "set_value", 
+		"delete_value", "merge_value", "field_set", "index", "expression", "value", 
 		"require_expression", "list", "list_values", "obj", "obj_values", "key_value", 
 		"argument_list", "argument", "arg_decl_list", "arg_decl", "function_body", 
 		"function_statement", "fn_level_conditional", "fn_level_else", "fn_level_else_else", 
@@ -88,10 +90,10 @@ public partial class sassy_parser : Parser {
 		"'in'", "'@set'", "'@merge'", "'@require'", "'@stage'", "'@define-stage'", 
 		"'@include'", "'@return'", "'@patch'", "'@new'", "'@before'", "'@after'", 
 		"'@global'", "'@create-config'", "'@update-config'", "'{'", "'}'", "'('", 
-		"')'", "'['", "']'", "';'", "':'", "','", "'+'", "'-'", "'*'", "'/'", 
-		"'%'", "'not'", "'>'", "'>='", "'<'", "'<='", "'=='", "'!='", "'and'", 
-		"'or'", "'if'", "'else'", "'~'", "'null'", "'true'", "'false'", null, 
-		null, null, "'@delete'"
+		"')'", "'['", "']'", "';'", "':'", "'+:'", "'-:'", "'/:'", "'*:'", "','", 
+		"'+'", "'-'", "'*'", "'/'", "'%'", "'not'", "'>'", "'>='", "'<'", "'<='", 
+		"'=='", "'!='", "'and'", "'or'", "'if'", "'else'", "'~'", "'null'", "'true'", 
+		"'false'", null, null, null, "'@delete'"
 	};
 	private static readonly string[] _SymbolicNames = {
 		null, "COMMENT", "SPACE", "USE", "FUNCTION", "PRE_IF", "PRE_ELSE", "PRE_ELSE_IF", 
@@ -99,12 +101,13 @@ public partial class sassy_parser : Parser {
 		"MERGE", "REQUIRE", "STAGE", "DEFINE_STAGE", "INCLUDE", "RETURN", "PATCH", 
 		"NEW", "BEFORE", "AFTER", "GLOBAL", "CREATE_CONFIG", "UPDATE_CONFIG", 
 		"LEFT_BRACE", "RIGHT_BRACE", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET", 
-		"RIGHT_BRACKET", "SEMICOLON", "COLON", "COMMA", "ADD", "SUBTRACT", "MULTIPLY", 
-		"DIVIDE", "MODULUS", "NOT", "GREATER_THAN", "GREATER_THAN_EQUAL", "LESSER_THAN", 
-		"LESSER_THAN_EQUAL", "EQUAL_TO", "NOT_EQUAL_TO", "AND", "OR", "IF", "ELSE", 
-		"WITHOUT", "NONE", "TRUE", "FALSE", "HEX_NUMBER", "NUMBER", "STRING", 
-		"DELETE", "NAME", "CLASS", "VARIABLE", "LOCALVARIABLE", "RULESET", "ENSURE", 
-		"ELEMENT"
+		"RIGHT_BRACKET", "SEMICOLON", "COLON", "PLUS_COLON", "MINUS_COLON", "DIVIDE_COLON", 
+		"MULTIPLY_COLON", "COMMA", "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULUS", 
+		"NOT", "GREATER_THAN", "GREATER_THAN_EQUAL", "LESSER_THAN", "LESSER_THAN_EQUAL", 
+		"EQUAL_TO", "NOT_EQUAL_TO", "AND", "OR", "IF", "ELSE", "WITHOUT", "NONE", 
+		"TRUE", "FALSE", "HEX_NUMBER", "NUMBER", "STRING", "DELETE", "NAME", "STRING_NAME", 
+		"CLASS", "STRING_CLASS", "VARIABLE", "LOCALVARIABLE", "STRING_LOCALVARIABLE", 
+		"RULESET", "ENSURE", "STRING_ENSURE", "ELEMENT"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -190,7 +193,7 @@ public partial class sassy_parser : Parser {
 				State = 117;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & -9187340485929467592L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737895809336L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7805L) != 0) );
 			State = 119;
 			Match(Eof);
 			}
@@ -317,10 +320,14 @@ public partial class sassy_parser : Parser {
 			case ADD:
 			case MULTIPLY:
 			case WITHOUT:
+			case STRING:
 			case NAME:
+			case STRING_NAME:
 			case CLASS:
+			case STRING_CLASS:
 			case RULESET:
 			case ENSURE:
+			case STRING_ENSURE:
 			case ELEMENT:
 				EnterOuterAlt(_localctx, 7);
 				{
@@ -420,9 +427,11 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Patch_listContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] STRING() { return GetTokens(sassy_parser.STRING); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING(int i) {
-			return GetToken(sassy_parser.STRING, i);
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext[] sassy_string() {
+			return GetRuleContexts<Sassy_stringContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string(int i) {
+			return GetRuleContext<Sassy_stringContext>(i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(sassy_parser.COMMA); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA(int i) {
@@ -460,7 +469,7 @@ public partial class sassy_parser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 137;
-			Match(STRING);
+			sassy_string();
 			State = 142;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
@@ -470,7 +479,7 @@ public partial class sassy_parser : Parser {
 				State = 138;
 				Match(COMMA);
 				State = 139;
-				Match(STRING);
+				sassy_string();
 				}
 				}
 				State = 144;
@@ -490,11 +499,105 @@ public partial class sassy_parser : Parser {
 		return _localctx;
 	}
 
+	public partial class Sassy_stringContext : ParserRuleContext {
+		public Sassy_stringContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_sassy_string; } }
+	 
+		public Sassy_stringContext() { }
+		public virtual void CopyFrom(Sassy_stringContext context) {
+			base.CopyFrom(context);
+		}
+	}
+	public partial class Quoted_stringContext : Sassy_stringContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		public Quoted_stringContext(Sassy_stringContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterQuoted_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitQuoted_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitQuoted_string(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Unquoted_stringContext : Sassy_stringContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELEMENT() { return GetToken(sassy_parser.ELEMENT, 0); }
+		public Unquoted_stringContext(Sassy_stringContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterUnquoted_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitUnquoted_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitUnquoted_string(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public Sassy_stringContext sassy_string() {
+		Sassy_stringContext _localctx = new Sassy_stringContext(Context, State);
+		EnterRule(_localctx, 8, RULE_sassy_string);
+		try {
+			State = 147;
+			ErrorHandler.Sync(this);
+			switch (TokenStream.LA(1)) {
+			case STRING:
+				_localctx = new Quoted_stringContext(_localctx);
+				EnterOuterAlt(_localctx, 1);
+				{
+				State = 145;
+				Match(STRING);
+				}
+				break;
+			case ELEMENT:
+				_localctx = new Unquoted_stringContext(_localctx);
+				EnterOuterAlt(_localctx, 2);
+				{
+				State = 146;
+				Match(ELEMENT);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
 	public partial class Import_declarationContext : ParserRuleContext {
-		public IToken imp;
+		public Sassy_stringContext imp;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode USE() { return GetToken(sassy_parser.USE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Import_declarationContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -521,15 +624,15 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Import_declarationContext import_declaration() {
 		Import_declarationContext _localctx = new Import_declarationContext(Context, State);
-		EnterRule(_localctx, 8, RULE_import_declaration);
+		EnterRule(_localctx, 10, RULE_import_declaration);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 145;
+			State = 149;
 			Match(USE);
-			State = 146;
-			_localctx.imp = Match(STRING);
-			State = 147;
+			State = 150;
+			_localctx.imp = sassy_string();
+			State = 151;
 			Match(SEMICOLON);
 			}
 		}
@@ -545,6 +648,99 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Var_declContext : ParserRuleContext {
+		public Var_declContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_var_decl; } }
+	 
+		public Var_declContext() { }
+		public virtual void CopyFrom(Var_declContext context) {
+			base.CopyFrom(context);
+		}
+	}
+	public partial class Add_var_declContext : Var_declContext {
+		public IToken variable;
+		public ExpressionContext val;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PLUS_COLON() { return GetToken(sassy_parser.PLUS_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		public Add_var_declContext(Var_declContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterAdd_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitAdd_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAdd_var_decl(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Divide_var_declContext : Var_declContext {
+		public IToken variable;
+		public ExpressionContext val;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DIVIDE_COLON() { return GetToken(sassy_parser.DIVIDE_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		public Divide_var_declContext(Var_declContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterDivide_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitDivide_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitDivide_var_decl(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Multiply_var_declContext : Var_declContext {
+		public IToken variable;
+		public ExpressionContext val;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MULTIPLY_COLON() { return GetToken(sassy_parser.MULTIPLY_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		public Multiply_var_declContext(Var_declContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterMultiply_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitMultiply_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMultiply_var_decl(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Normal_var_declContext : Var_declContext {
 		public IToken variable;
 		public ExpressionContext val;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
@@ -553,25 +749,48 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
 			return GetRuleContext<ExpressionContext>(0);
 		}
-		public Var_declContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_var_decl; } }
+		public Normal_var_declContext(Var_declContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterVar_decl(this);
+			if (typedListener != null) typedListener.EnterNormal_var_decl(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitVar_decl(this);
+			if (typedListener != null) typedListener.ExitNormal_var_decl(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitVar_decl(this);
+			if (typedVisitor != null) return typedVisitor.VisitNormal_var_decl(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Subtract_var_declContext : Var_declContext {
+		public IToken variable;
+		public ExpressionContext val;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MINUS_COLON() { return GetToken(sassy_parser.MINUS_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		public Subtract_var_declContext(Var_declContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSubtract_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSubtract_var_decl(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSubtract_var_decl(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -579,18 +798,81 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Var_declContext var_decl() {
 		Var_declContext _localctx = new Var_declContext(Context, State);
-		EnterRule(_localctx, 10, RULE_var_decl);
+		EnterRule(_localctx, 12, RULE_var_decl);
 		try {
-			EnterOuterAlt(_localctx, 1);
-			{
-			State = 149;
-			_localctx.variable = Match(VARIABLE);
-			State = 150;
-			Match(COLON);
-			State = 151;
-			_localctx.val = expression();
-			State = 152;
-			Match(SEMICOLON);
+			State = 178;
+			ErrorHandler.Sync(this);
+			switch ( Interpreter.AdaptivePredict(TokenStream,4,Context) ) {
+			case 1:
+				_localctx = new Normal_var_declContext(_localctx);
+				EnterOuterAlt(_localctx, 1);
+				{
+				State = 153;
+				((Normal_var_declContext)_localctx).variable = Match(VARIABLE);
+				State = 154;
+				Match(COLON);
+				State = 155;
+				((Normal_var_declContext)_localctx).val = expression(0);
+				State = 156;
+				Match(SEMICOLON);
+				}
+				break;
+			case 2:
+				_localctx = new Add_var_declContext(_localctx);
+				EnterOuterAlt(_localctx, 2);
+				{
+				State = 158;
+				((Add_var_declContext)_localctx).variable = Match(VARIABLE);
+				State = 159;
+				Match(PLUS_COLON);
+				State = 160;
+				((Add_var_declContext)_localctx).val = expression(0);
+				State = 161;
+				Match(SEMICOLON);
+				}
+				break;
+			case 3:
+				_localctx = new Subtract_var_declContext(_localctx);
+				EnterOuterAlt(_localctx, 3);
+				{
+				State = 163;
+				((Subtract_var_declContext)_localctx).variable = Match(VARIABLE);
+				State = 164;
+				Match(MINUS_COLON);
+				State = 165;
+				((Subtract_var_declContext)_localctx).val = expression(0);
+				State = 166;
+				Match(SEMICOLON);
+				}
+				break;
+			case 4:
+				_localctx = new Divide_var_declContext(_localctx);
+				EnterOuterAlt(_localctx, 4);
+				{
+				State = 168;
+				((Divide_var_declContext)_localctx).variable = Match(VARIABLE);
+				State = 169;
+				Match(DIVIDE_COLON);
+				State = 170;
+				((Divide_var_declContext)_localctx).val = expression(0);
+				State = 171;
+				Match(SEMICOLON);
+				}
+				break;
+			case 5:
+				_localctx = new Multiply_var_declContext(_localctx);
+				EnterOuterAlt(_localctx, 5);
+				{
+				State = 173;
+				((Multiply_var_declContext)_localctx).variable = Match(VARIABLE);
+				State = 174;
+				Match(MULTIPLY_COLON);
+				State = 175;
+				((Multiply_var_declContext)_localctx).val = expression(0);
+				State = 176;
+				Match(SEMICOLON);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -617,10 +899,12 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Implicit_stage_defContext : Stage_defContext {
-		public IToken stage;
+		public Sassy_stringContext stage;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DEFINE_STAGE() { return GetToken(sassy_parser.DEFINE_STAGE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Implicit_stage_defContext(Stage_defContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
@@ -640,14 +924,16 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Relative_stage_defContext : Stage_defContext {
-		public IToken stage;
+		public Sassy_stringContext stage;
 		public Stage_attributeContext attributes;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DEFINE_STAGE() { return GetToken(sassy_parser.DEFINE_STAGE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		[System.Diagnostics.DebuggerNonUserCode] public Stage_attributeContext[] stage_attribute() {
 			return GetRuleContexts<Stage_attributeContext>();
 		}
@@ -673,12 +959,14 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Global_stage_defContext : Stage_defContext {
-		public IToken stage;
+		public Sassy_stringContext stage;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DEFINE_STAGE() { return GetToken(sassy_parser.DEFINE_STAGE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode GLOBAL() { return GetToken(sassy_parser.GLOBAL, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Global_stage_defContext(Stage_defContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
@@ -701,21 +989,21 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Stage_defContext stage_def() {
 		Stage_defContext _localctx = new Stage_defContext(Context, State);
-		EnterRule(_localctx, 12, RULE_stage_def);
+		EnterRule(_localctx, 14, RULE_stage_def);
 		int _la;
 		try {
-			State = 174;
+			State = 203;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,4,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,6,Context) ) {
 			case 1:
 				_localctx = new Implicit_stage_defContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 154;
+				State = 180;
 				Match(DEFINE_STAGE);
-				State = 155;
-				((Implicit_stage_defContext)_localctx).stage = Match(STRING);
-				State = 156;
+				State = 181;
+				((Implicit_stage_defContext)_localctx).stage = sassy_string();
+				State = 182;
 				Match(SEMICOLON);
 				}
 				break;
@@ -723,15 +1011,15 @@ public partial class sassy_parser : Parser {
 				_localctx = new Global_stage_defContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 157;
+				State = 184;
 				Match(DEFINE_STAGE);
-				State = 158;
-				((Global_stage_defContext)_localctx).stage = Match(STRING);
-				State = 159;
+				State = 185;
+				((Global_stage_defContext)_localctx).stage = sassy_string();
+				State = 186;
 				Match(COLON);
-				State = 160;
+				State = 187;
 				Match(GLOBAL);
-				State = 161;
+				State = 188;
 				Match(SEMICOLON);
 				}
 				break;
@@ -739,31 +1027,31 @@ public partial class sassy_parser : Parser {
 				_localctx = new Relative_stage_defContext(_localctx);
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 162;
+				State = 190;
 				Match(DEFINE_STAGE);
-				State = 163;
-				((Relative_stage_defContext)_localctx).stage = Match(STRING);
-				State = 164;
+				State = 191;
+				((Relative_stage_defContext)_localctx).stage = sassy_string();
+				State = 192;
 				Match(COLON);
-				State = 165;
+				State = 193;
 				Match(LEFT_BRACE);
-				State = 169;
+				State = 197;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				while (_la==BEFORE || _la==AFTER) {
 					{
 					{
-					State = 166;
+					State = 194;
 					((Relative_stage_defContext)_localctx).attributes = stage_attribute();
 					}
 					}
-					State = 171;
+					State = 199;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
-				State = 172;
+				State = 200;
 				Match(RIGHT_BRACE);
-				State = 173;
+				State = 201;
 				Match(SEMICOLON);
 				}
 				break;
@@ -781,19 +1069,21 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Config_creationContext : ParserRuleContext {
-		public IToken label;
-		public IToken config_name;
-		public Sub_expressionContext config_value;
+		public Sassy_stringContext label;
+		public Sassy_stringContext config_name;
+		public ExpressionContext config_value;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CREATE_CONFIG() { return GetToken(sassy_parser.CREATE_CONFIG, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA() { return GetToken(sassy_parser.COMMA, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] STRING() { return GetTokens(sassy_parser.STRING); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING(int i) {
-			return GetToken(sassy_parser.STRING, i);
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext[] sassy_string() {
+			return GetRuleContexts<Sassy_stringContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string(int i) {
+			return GetRuleContext<Sassy_stringContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public Config_creationContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -821,23 +1111,23 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Config_creationContext config_creation() {
 		Config_creationContext _localctx = new Config_creationContext(Context, State);
-		EnterRule(_localctx, 14, RULE_config_creation);
+		EnterRule(_localctx, 16, RULE_config_creation);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 176;
+			State = 205;
 			Match(CREATE_CONFIG);
-			State = 177;
-			_localctx.label = Match(STRING);
-			State = 178;
+			State = 206;
+			_localctx.label = sassy_string();
+			State = 207;
 			Match(COMMA);
-			State = 179;
-			_localctx.config_name = Match(STRING);
-			State = 180;
+			State = 208;
+			_localctx.config_name = sassy_string();
+			State = 209;
 			Match(COLON);
-			State = 181;
-			_localctx.config_value = sub_expression(0);
-			State = 182;
+			State = 210;
+			_localctx.config_value = expression(0);
+			State = 211;
 			Match(SEMICOLON);
 			}
 		}
@@ -865,19 +1155,21 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Update_config_labelContext : Config_mutationContext {
-		public Sub_expressionContext priority;
-		public IToken label;
+		public ExpressionContext priority;
+		public Sassy_stringContext label;
 		public ExpressionContext config_update;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode UPDATE_CONFIG() { return GetToken(sassy_parser.UPDATE_CONFIG, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA() { return GetToken(sassy_parser.COMMA, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
-			return GetRuleContext<ExpressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
 		}
 		public Update_config_labelContext(Config_mutationContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -898,9 +1190,9 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Update_config_fullContext : Config_mutationContext {
-		public Sub_expressionContext priority;
-		public IToken label;
-		public IToken config_name;
+		public ExpressionContext priority;
+		public Sassy_stringContext label;
+		public Sassy_stringContext config_name;
 		public ExpressionContext config_update;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode UPDATE_CONFIG() { return GetToken(sassy_parser.UPDATE_CONFIG, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(sassy_parser.COMMA); }
@@ -909,15 +1201,17 @@ public partial class sassy_parser : Parser {
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] STRING() { return GetTokens(sassy_parser.STRING); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING(int i) {
-			return GetToken(sassy_parser.STRING, i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
-			return GetRuleContext<ExpressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext[] sassy_string() {
+			return GetRuleContexts<Sassy_stringContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string(int i) {
+			return GetRuleContext<Sassy_stringContext>(i);
 		}
 		public Update_config_fullContext(Config_mutationContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -941,32 +1235,32 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Config_mutationContext config_mutation() {
 		Config_mutationContext _localctx = new Config_mutationContext(Context, State);
-		EnterRule(_localctx, 16, RULE_config_mutation);
+		EnterRule(_localctx, 18, RULE_config_mutation);
 		try {
-			State = 202;
+			State = 231;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,5,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,7,Context) ) {
 			case 1:
 				_localctx = new Update_config_fullContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 184;
+				State = 213;
 				Match(UPDATE_CONFIG);
-				State = 185;
-				((Update_config_fullContext)_localctx).priority = sub_expression(0);
-				State = 186;
+				State = 214;
+				((Update_config_fullContext)_localctx).priority = expression(0);
+				State = 215;
 				Match(COMMA);
-				State = 187;
-				((Update_config_fullContext)_localctx).label = Match(STRING);
-				State = 188;
+				State = 216;
+				((Update_config_fullContext)_localctx).label = sassy_string();
+				State = 217;
 				Match(COMMA);
-				State = 189;
-				((Update_config_fullContext)_localctx).config_name = Match(STRING);
-				State = 190;
+				State = 218;
+				((Update_config_fullContext)_localctx).config_name = sassy_string();
+				State = 219;
 				Match(COLON);
-				State = 191;
-				((Update_config_fullContext)_localctx).config_update = expression();
-				State = 192;
+				State = 220;
+				((Update_config_fullContext)_localctx).config_update = expression(0);
+				State = 221;
 				Match(SEMICOLON);
 				}
 				break;
@@ -974,19 +1268,19 @@ public partial class sassy_parser : Parser {
 				_localctx = new Update_config_labelContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 194;
+				State = 223;
 				Match(UPDATE_CONFIG);
-				State = 195;
-				((Update_config_labelContext)_localctx).priority = sub_expression(0);
-				State = 196;
+				State = 224;
+				((Update_config_labelContext)_localctx).priority = expression(0);
+				State = 225;
 				Match(COMMA);
-				State = 197;
-				((Update_config_labelContext)_localctx).label = Match(STRING);
-				State = 198;
+				State = 226;
+				((Update_config_labelContext)_localctx).label = sassy_string();
+				State = 227;
 				Match(COLON);
-				State = 199;
-				((Update_config_labelContext)_localctx).config_update = expression();
-				State = 200;
+				State = 228;
+				((Update_config_labelContext)_localctx).config_update = expression(0);
+				State = 229;
 				Match(SEMICOLON);
 				}
 				break;
@@ -1016,10 +1310,12 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Stage_value_beforeContext : Stage_attributeContext {
-		public IToken stage;
+		public Sassy_stringContext stage;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode BEFORE() { return GetToken(sassy_parser.BEFORE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Stage_value_beforeContext(Stage_attributeContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
@@ -1039,10 +1335,12 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Stage_value_afterContext : Stage_attributeContext {
-		public IToken stage;
+		public Sassy_stringContext stage;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode AFTER() { return GetToken(sassy_parser.AFTER, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Stage_value_afterContext(Stage_attributeContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
@@ -1065,20 +1363,20 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Stage_attributeContext stage_attribute() {
 		Stage_attributeContext _localctx = new Stage_attributeContext(Context, State);
-		EnterRule(_localctx, 18, RULE_stage_attribute);
+		EnterRule(_localctx, 20, RULE_stage_attribute);
 		try {
-			State = 210;
+			State = 241;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case BEFORE:
 				_localctx = new Stage_value_beforeContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 204;
+				State = 233;
 				Match(BEFORE);
-				State = 205;
-				((Stage_value_beforeContext)_localctx).stage = Match(STRING);
-				State = 206;
+				State = 234;
+				((Stage_value_beforeContext)_localctx).stage = sassy_string();
+				State = 235;
 				Match(SEMICOLON);
 				}
 				break;
@@ -1086,11 +1384,11 @@ public partial class sassy_parser : Parser {
 				_localctx = new Stage_value_afterContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 207;
+				State = 237;
 				Match(AFTER);
-				State = 208;
-				((Stage_value_afterContext)_localctx).stage = Match(STRING);
-				State = 209;
+				State = 238;
+				((Stage_value_afterContext)_localctx).stage = sassy_string();
+				State = 239;
 				Match(SEMICOLON);
 				}
 				break;
@@ -1151,25 +1449,25 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Function_defContext function_def() {
 		Function_defContext _localctx = new Function_defContext(Context, State);
-		EnterRule(_localctx, 20, RULE_function_def);
+		EnterRule(_localctx, 22, RULE_function_def);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 212;
+			State = 243;
 			Match(FUNCTION);
-			State = 213;
+			State = 244;
 			_localctx.name = Match(ELEMENT);
-			State = 214;
+			State = 245;
 			Match(LEFT_PAREN);
-			State = 215;
+			State = 246;
 			_localctx.args = arg_decl_list();
-			State = 216;
+			State = 247;
 			Match(RIGHT_PAREN);
-			State = 217;
+			State = 248;
 			Match(LEFT_BRACE);
-			State = 218;
+			State = 249;
 			_localctx.body = function_body();
-			State = 219;
+			State = 250;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -1226,25 +1524,25 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Mixin_defContext mixin_def() {
 		Mixin_defContext _localctx = new Mixin_defContext(Context, State);
-		EnterRule(_localctx, 22, RULE_mixin_def);
+		EnterRule(_localctx, 24, RULE_mixin_def);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 221;
+			State = 252;
 			Match(MIXIN);
-			State = 222;
+			State = 253;
 			_localctx.name = Match(ELEMENT);
-			State = 223;
+			State = 254;
 			Match(LEFT_PAREN);
-			State = 224;
+			State = 255;
 			_localctx.args = arg_decl_list();
-			State = 225;
+			State = 256;
 			Match(RIGHT_PAREN);
-			State = 226;
+			State = 257;
 			Match(LEFT_BRACE);
-			State = 227;
+			State = 258;
 			_localctx.body = selector_body();
-			State = 228;
+			State = 259;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -1260,14 +1558,14 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Top_level_conditionalContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Top_level_statementContext body;
 		public Top_level_elseContext els;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRE_IF() { return GetToken(sassy_parser.PRE_IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Top_level_statementContext[] top_level_statement() {
 			return GetRuleContexts<Top_level_statementContext>();
@@ -1304,39 +1602,39 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Top_level_conditionalContext top_level_conditional() {
 		Top_level_conditionalContext _localctx = new Top_level_conditionalContext(Context, State);
-		EnterRule(_localctx, 24, RULE_top_level_conditional);
+		EnterRule(_localctx, 26, RULE_top_level_conditional);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 230;
+			State = 261;
 			Match(PRE_IF);
-			State = 231;
-			_localctx.cond = sub_expression(0);
-			State = 232;
+			State = 262;
+			_localctx.cond = expression(0);
+			State = 263;
 			Match(LEFT_BRACE);
-			State = 236;
+			State = 267;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -9187340485929467592L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737895809336L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7805L) != 0)) {
 				{
 				{
-				State = 233;
+				State = 264;
 				_localctx.body = top_level_statement();
 				}
 				}
-				State = 238;
+				State = 269;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 239;
+			State = 270;
 			Match(RIGHT_BRACE);
-			State = 241;
+			State = 272;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==PRE_ELSE || _la==PRE_ELSE_IF) {
 				{
-				State = 240;
+				State = 271;
 				_localctx.els = top_level_else();
 				}
 			}
@@ -1387,22 +1685,22 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Top_level_elseContext top_level_else() {
 		Top_level_elseContext _localctx = new Top_level_elseContext(Context, State);
-		EnterRule(_localctx, 26, RULE_top_level_else);
+		EnterRule(_localctx, 28, RULE_top_level_else);
 		try {
-			State = 245;
+			State = 276;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case PRE_ELSE:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 243;
+				State = 274;
 				top_level_else_else();
 				}
 				break;
 			case PRE_ELSE_IF:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 244;
+				State = 275;
 				top_level_else_if();
 				}
 				break;
@@ -1458,30 +1756,30 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Top_level_else_elseContext top_level_else_else() {
 		Top_level_else_elseContext _localctx = new Top_level_else_elseContext(Context, State);
-		EnterRule(_localctx, 28, RULE_top_level_else_else);
+		EnterRule(_localctx, 30, RULE_top_level_else_else);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 247;
+			State = 278;
 			Match(PRE_ELSE);
-			State = 248;
+			State = 279;
 			Match(LEFT_BRACE);
-			State = 252;
+			State = 283;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -9187340485929467592L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737895809336L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7805L) != 0)) {
 				{
 				{
-				State = 249;
+				State = 280;
 				_localctx.body = top_level_statement();
 				}
 				}
-				State = 254;
+				State = 285;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 255;
+			State = 286;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -1497,14 +1795,14 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Top_level_else_ifContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Top_level_statementContext body;
 		public Top_level_elseContext els;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRE_ELSE_IF() { return GetToken(sassy_parser.PRE_ELSE_IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Top_level_statementContext[] top_level_statement() {
 			return GetRuleContexts<Top_level_statementContext>();
@@ -1541,39 +1839,39 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Top_level_else_ifContext top_level_else_if() {
 		Top_level_else_ifContext _localctx = new Top_level_else_ifContext(Context, State);
-		EnterRule(_localctx, 30, RULE_top_level_else_if);
+		EnterRule(_localctx, 32, RULE_top_level_else_if);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 257;
+			State = 288;
 			Match(PRE_ELSE_IF);
-			State = 258;
-			_localctx.cond = sub_expression(0);
-			State = 259;
+			State = 289;
+			_localctx.cond = expression(0);
+			State = 290;
 			Match(LEFT_BRACE);
-			State = 263;
+			State = 294;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -9187340485929467592L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737895809336L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7805L) != 0)) {
 				{
 				{
-				State = 260;
+				State = 291;
 				_localctx.body = top_level_statement();
 				}
 				}
-				State = 265;
+				State = 296;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 266;
+			State = 297;
 			Match(RIGHT_BRACE);
-			State = 268;
+			State = 299;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==PRE_ELSE || _la==PRE_ELSE_IF) {
 				{
-				State = 267;
+				State = 298;
 				_localctx.els = top_level_else();
 				}
 			}
@@ -1626,17 +1924,17 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Selection_blockContext selection_block() {
 		Selection_blockContext _localctx = new Selection_blockContext(Context, State);
-		EnterRule(_localctx, 32, RULE_selection_block);
+		EnterRule(_localctx, 34, RULE_selection_block);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 270;
+			State = 301;
 			attributed_selector();
-			State = 271;
+			State = 302;
 			Match(LEFT_BRACE);
-			State = 272;
+			State = 303;
 			selector_body();
-			State = 273;
+			State = 304;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -1688,26 +1986,26 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Attributed_selectorContext attributed_selector() {
 		Attributed_selectorContext _localctx = new Attributed_selectorContext(Context, State);
-		EnterRule(_localctx, 34, RULE_attributed_selector);
+		EnterRule(_localctx, 36, RULE_attributed_selector);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 278;
+			State = 309;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 17563648L) != 0)) {
 				{
 				{
-				State = 275;
+				State = 306;
 				_localctx.attributes = attribute();
 				}
 				}
-				State = 280;
+				State = 311;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 281;
+			State = 312;
 			selector(0);
 			}
 		}
@@ -1735,9 +2033,11 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Run_at_stageContext : AttributeContext {
-		public IToken stage;
+		public Sassy_stringContext stage;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STAGE() { return GetToken(sassy_parser.STAGE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Run_at_stageContext(AttributeContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
@@ -1807,18 +2107,18 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public AttributeContext attribute() {
 		AttributeContext _localctx = new AttributeContext(Context, State);
-		EnterRule(_localctx, 36, RULE_attribute);
+		EnterRule(_localctx, 38, RULE_attribute);
 		try {
-			State = 289;
+			State = 320;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case REQUIRE:
 				_localctx = new Require_modContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 283;
+				State = 314;
 				Match(REQUIRE);
-				State = 284;
+				State = 315;
 				((Require_modContext)_localctx).expr = require_expression(0);
 				}
 				break;
@@ -1826,19 +2126,19 @@ public partial class sassy_parser : Parser {
 				_localctx = new Run_at_stageContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 285;
+				State = 316;
 				Match(STAGE);
-				State = 286;
-				((Run_at_stageContext)_localctx).stage = Match(STRING);
+				State = 317;
+				((Run_at_stageContext)_localctx).stage = sassy_string();
 				}
 				break;
 			case NEW:
 				_localctx = new New_assetContext(_localctx);
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 287;
+				State = 318;
 				Match(NEW);
-				State = 288;
+				State = 319;
 				constructor_arguments();
 				}
 				break;
@@ -1896,40 +2196,40 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Constructor_argumentsContext constructor_arguments() {
 		Constructor_argumentsContext _localctx = new Constructor_argumentsContext(Context, State);
-		EnterRule(_localctx, 38, RULE_constructor_arguments);
+		EnterRule(_localctx, 40, RULE_constructor_arguments);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 291;
+			State = 322;
 			Match(LEFT_PAREN);
-			State = 300;
+			State = 331;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8574879551585255440L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 19L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8070758418052284432L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 9095L) != 0)) {
 				{
-				State = 292;
-				expression();
-				State = 297;
+				State = 323;
+				expression(0);
+				State = 328;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				while (_la==COMMA) {
 					{
 					{
-					State = 293;
+					State = 324;
 					Match(COMMA);
-					State = 294;
-					expression();
+					State = 325;
+					expression(0);
 					}
 					}
-					State = 299;
+					State = 330;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
 				}
 			}
 
-			State = 302;
+			State = 333;
 			Match(RIGHT_PAREN);
 			}
 		}
@@ -2081,6 +2381,36 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
+	public partial class Sel_string_class_captureContext : SelectorContext {
+		public Function_statementContext body;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_CLASS() { return GetToken(sassy_parser.STRING_CLASS, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACKET() { return GetToken(sassy_parser.LEFT_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACKET() { return GetToken(sassy_parser.RIGHT_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
+			return GetRuleContexts<Function_statementContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext function_statement(int i) {
+			return GetRuleContext<Function_statementContext>(i);
+		}
+		public Sel_string_class_captureContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_string_class_capture(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_string_class_capture(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_string_class_capture(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
 	public partial class Sel_ensureContext : SelectorContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ENSURE() { return GetToken(sassy_parser.ENSURE, 0); }
 		public Sel_ensureContext(SelectorContext context) { CopyFrom(context); }
@@ -2118,6 +2448,68 @@ public partial class sassy_parser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitSel_everything(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sel_without_string_classContext : SelectorContext {
+		public IToken str_field;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_CLASS() { return GetToken(sassy_parser.STRING_CLASS, 0); }
+		public Sel_without_string_classContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_without_string_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_without_string_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_without_string_class(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sel_string_classContext : SelectorContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_CLASS() { return GetToken(sassy_parser.STRING_CLASS, 0); }
+		public Sel_string_classContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_string_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_string_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_string_class(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sel_string_nameContext : SelectorContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_NAME() { return GetToken(sassy_parser.STRING_NAME, 0); }
+		public Sel_string_nameContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_string_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_string_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_string_name(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -2183,6 +2575,70 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
+	public partial class Sel_element_stringContext : SelectorContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		public Sel_element_stringContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_element_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_element_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_element_string(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sel_add_string_elementContext : SelectorContext {
+		public IToken str_element;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ADD() { return GetToken(sassy_parser.ADD, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		public Sel_add_string_elementContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_add_string_element(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_add_string_element(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_add_string_element(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sel_without_string_nameContext : SelectorContext {
+		public IToken str_name;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_NAME() { return GetToken(sassy_parser.STRING_NAME, 0); }
+		public Sel_without_string_nameContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_without_string_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_without_string_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_without_string_name(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
 	public partial class Sel_without_classContext : SelectorContext {
 		public IToken field;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
@@ -2202,6 +2658,26 @@ public partial class sassy_parser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitSel_without_class(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sel_string_ensureContext : SelectorContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_ENSURE() { return GetToken(sassy_parser.STRING_ENSURE, 0); }
+		public Sel_string_ensureContext(SelectorContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSel_string_ensure(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSel_string_ensure(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSel_string_ensure(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -2291,170 +2767,268 @@ public partial class sassy_parser : Parser {
 		int _parentState = State;
 		SelectorContext _localctx = new SelectorContext(Context, _parentState);
 		SelectorContext _prevctx = _localctx;
-		int _startState = 40;
-		EnterRecursionRule(_localctx, 40, RULE_selector, _p);
+		int _startState = 42;
+		EnterRecursionRule(_localctx, 42, RULE_selector, _p);
 		int _la;
 		try {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 331;
+			State = 382;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,18,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,21,Context) ) {
 			case 1:
 				{
 				_localctx = new Sel_elementContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
 
-				State = 305;
+				State = 336;
 				Match(ELEMENT);
 				}
 				break;
 			case 2:
 				{
-				_localctx = new Sel_classContext(_localctx);
+				_localctx = new Sel_element_stringContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 306;
-				Match(CLASS);
+				State = 337;
+				Match(STRING);
 				}
 				break;
 			case 3:
 				{
-				_localctx = new Sel_class_captureContext(_localctx);
+				_localctx = new Sel_classContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 307;
+				State = 338;
 				Match(CLASS);
-				State = 308;
-				Match(COLON);
-				State = 309;
-				Match(LEFT_BRACKET);
-				State = 313;
-				ErrorHandler.Sync(this);
-				_la = TokenStream.LA(1);
-				while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
-					{
-					{
-					State = 310;
-					((Sel_class_captureContext)_localctx).body = function_statement();
-					}
-					}
-					State = 315;
-					ErrorHandler.Sync(this);
-					_la = TokenStream.LA(1);
-				}
-				State = 316;
-				Match(RIGHT_BRACKET);
 				}
 				break;
 			case 4:
 				{
-				_localctx = new Sel_nameContext(_localctx);
+				_localctx = new Sel_string_classContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 317;
-				Match(NAME);
+				State = 339;
+				Match(STRING_CLASS);
 				}
 				break;
 			case 5:
 				{
-				_localctx = new Sel_rulesetContext(_localctx);
+				_localctx = new Sel_class_captureContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 318;
-				Match(RULESET);
+				State = 340;
+				Match(CLASS);
+				State = 341;
+				Match(COLON);
+				State = 342;
+				Match(LEFT_BRACKET);
+				State = 346;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
+					{
+					{
+					State = 343;
+					((Sel_class_captureContext)_localctx).body = function_statement();
+					}
+					}
+					State = 348;
+					ErrorHandler.Sync(this);
+					_la = TokenStream.LA(1);
+				}
+				State = 349;
+				Match(RIGHT_BRACKET);
 				}
 				break;
 			case 6:
 				{
-				_localctx = new Sel_ensureContext(_localctx);
+				_localctx = new Sel_string_class_captureContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 319;
-				Match(ENSURE);
+				State = 350;
+				Match(STRING_CLASS);
+				State = 351;
+				Match(COLON);
+				State = 352;
+				Match(LEFT_BRACKET);
+				State = 356;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
+					{
+					{
+					State = 353;
+					((Sel_string_class_captureContext)_localctx).body = function_statement();
+					}
+					}
+					State = 358;
+					ErrorHandler.Sync(this);
+					_la = TokenStream.LA(1);
+				}
+				State = 359;
+				Match(RIGHT_BRACKET);
 				}
 				break;
 			case 7:
 				{
-				_localctx = new Sel_subContext(_localctx);
+				_localctx = new Sel_nameContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 320;
-				Match(LEFT_PAREN);
-				State = 321;
-				((Sel_subContext)_localctx).internal_selector = selector(0);
-				State = 322;
-				Match(RIGHT_PAREN);
+				State = 360;
+				Match(NAME);
 				}
 				break;
 			case 8:
 				{
-				_localctx = new Sel_add_elementContext(_localctx);
+				_localctx = new Sel_string_nameContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 324;
-				Match(ADD);
-				State = 325;
-				((Sel_add_elementContext)_localctx).element = Match(ELEMENT);
+				State = 361;
+				Match(STRING_NAME);
 				}
 				break;
 			case 9:
 				{
-				_localctx = new Sel_without_classContext(_localctx);
+				_localctx = new Sel_rulesetContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 326;
-				Match(WITHOUT);
-				State = 327;
-				((Sel_without_classContext)_localctx).field = Match(CLASS);
+				State = 362;
+				Match(RULESET);
 				}
 				break;
 			case 10:
 				{
-				_localctx = new Sel_without_nameContext(_localctx);
+				_localctx = new Sel_ensureContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 328;
-				Match(WITHOUT);
-				State = 329;
-				((Sel_without_nameContext)_localctx).name = Match(NAME);
+				State = 363;
+				Match(ENSURE);
 				}
 				break;
 			case 11:
 				{
+				_localctx = new Sel_string_ensureContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 364;
+				Match(STRING_ENSURE);
+				}
+				break;
+			case 12:
+				{
+				_localctx = new Sel_subContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 365;
+				Match(LEFT_PAREN);
+				State = 366;
+				((Sel_subContext)_localctx).internal_selector = selector(0);
+				State = 367;
+				Match(RIGHT_PAREN);
+				}
+				break;
+			case 13:
+				{
+				_localctx = new Sel_add_elementContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 369;
+				Match(ADD);
+				State = 370;
+				((Sel_add_elementContext)_localctx).element = Match(ELEMENT);
+				}
+				break;
+			case 14:
+				{
+				_localctx = new Sel_add_string_elementContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 371;
+				Match(ADD);
+				State = 372;
+				((Sel_add_string_elementContext)_localctx).str_element = Match(STRING);
+				}
+				break;
+			case 15:
+				{
+				_localctx = new Sel_without_classContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 373;
+				Match(WITHOUT);
+				State = 374;
+				((Sel_without_classContext)_localctx).field = Match(CLASS);
+				}
+				break;
+			case 16:
+				{
+				_localctx = new Sel_without_string_classContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 375;
+				Match(WITHOUT);
+				State = 376;
+				((Sel_without_string_classContext)_localctx).str_field = Match(STRING_CLASS);
+				}
+				break;
+			case 17:
+				{
+				_localctx = new Sel_without_nameContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 377;
+				Match(WITHOUT);
+				State = 378;
+				((Sel_without_nameContext)_localctx).name = Match(NAME);
+				}
+				break;
+			case 18:
+				{
+				_localctx = new Sel_without_string_nameContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 379;
+				Match(WITHOUT);
+				State = 380;
+				((Sel_without_string_nameContext)_localctx).str_name = Match(STRING_NAME);
+				}
+				break;
+			case 19:
+				{
 				_localctx = new Sel_everythingContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 330;
+				State = 381;
 				Match(MULTIPLY);
 				}
 				break;
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 343;
+			State = 394;
 			ErrorHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(TokenStream,20,Context);
+			_alt = Interpreter.AdaptivePredict(TokenStream,23,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( ParseListeners!=null )
 						TriggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					State = 341;
+					State = 392;
 					ErrorHandler.Sync(this);
-					switch ( Interpreter.AdaptivePredict(TokenStream,19,Context) ) {
+					switch ( Interpreter.AdaptivePredict(TokenStream,22,Context) ) {
 					case 1:
 						{
 						_localctx = new Sel_combinationContext(new SelectorContext(_parentctx, _parentState));
 						((Sel_combinationContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector);
-						State = 333;
-						if (!(Precpred(Context, 7))) throw new FailedPredicateException(this, "Precpred(Context, 7)");
-						State = 334;
+						State = 384;
+						if (!(Precpred(Context, 10))) throw new FailedPredicateException(this, "Precpred(Context, 10)");
+						State = 385;
 						Match(COMMA);
-						State = 335;
+						State = 386;
 						((Sel_combinationContext)_localctx).rhs = selector_no_children(0);
 						}
 						break;
@@ -2463,11 +3037,11 @@ public partial class sassy_parser : Parser {
 						_localctx = new Sel_childContext(new SelectorContext(_parentctx, _parentState));
 						((Sel_childContext)_localctx).parent = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector);
-						State = 336;
-						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
-						State = 337;
+						State = 387;
+						if (!(Precpred(Context, 9))) throw new FailedPredicateException(this, "Precpred(Context, 9)");
+						State = 388;
 						Match(GREATER_THAN);
-						State = 338;
+						State = 389;
 						((Sel_childContext)_localctx).child = selector_no_children(0);
 						}
 						break;
@@ -2476,18 +3050,18 @@ public partial class sassy_parser : Parser {
 						_localctx = new Sel_intersectionContext(new SelectorContext(_parentctx, _parentState));
 						((Sel_intersectionContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector);
-						State = 339;
-						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
-						State = 340;
+						State = 390;
+						if (!(Precpred(Context, 8))) throw new FailedPredicateException(this, "Precpred(Context, 8)");
+						State = 391;
 						((Sel_intersectionContext)_localctx).rhs = selector_no_children(0);
 						}
 						break;
 					}
 					} 
 				}
-				State = 345;
+				State = 396;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,20,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,23,Context);
 			}
 			}
 		}
@@ -2531,6 +3105,187 @@ public partial class sassy_parser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitRuleset_selector(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class String_class_capture_selectorContext : Selector_no_childrenContext {
+		public Function_statementContext body;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_CLASS() { return GetToken(sassy_parser.STRING_CLASS, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACKET() { return GetToken(sassy_parser.LEFT_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACKET() { return GetToken(sassy_parser.RIGHT_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
+			return GetRuleContexts<Function_statementContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext function_statement(int i) {
+			return GetRuleContext<Function_statementContext>(i);
+		}
+		public String_class_capture_selectorContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterString_class_capture_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitString_class_capture_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitString_class_capture_selector(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Without_string_nameContext : Selector_no_childrenContext {
+		public IToken str_name;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_NAME() { return GetToken(sassy_parser.STRING_NAME, 0); }
+		public Without_string_nameContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterWithout_string_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitWithout_string_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitWithout_string_name(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Sub_selectorContext : Selector_no_childrenContext {
+		public Selector_no_childrenContext internal_selector;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_PAREN() { return GetToken(sassy_parser.RIGHT_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Selector_no_childrenContext selector_no_children() {
+			return GetRuleContext<Selector_no_childrenContext>(0);
+		}
+		public Sub_selectorContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSub_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSub_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSub_selector(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Class_selectorContext : Selector_no_childrenContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLASS() { return GetToken(sassy_parser.CLASS, 0); }
+		public Class_selectorContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterClass_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitClass_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitClass_selector(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Without_classContext : Selector_no_childrenContext {
+		public IToken field;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLASS() { return GetToken(sassy_parser.CLASS, 0); }
+		public Without_classContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterWithout_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitWithout_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitWithout_class(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class String_nameContext : Selector_no_childrenContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_NAME() { return GetToken(sassy_parser.STRING_NAME, 0); }
+		public String_nameContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterString_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitString_name(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitString_name(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class String_class_selectorContext : Selector_no_childrenContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_CLASS() { return GetToken(sassy_parser.STRING_CLASS, 0); }
+		public String_class_selectorContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterString_class_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitString_class_selector(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitString_class_selector(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Add_string_elementContext : Selector_no_childrenContext {
+		public IToken str_element;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ADD() { return GetToken(sassy_parser.ADD, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		public Add_string_elementContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterAdd_string_element(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitAdd_string_element(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAdd_string_element(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -2614,73 +3369,6 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Sub_selectorContext : Selector_no_childrenContext {
-		public Selector_no_childrenContext internal_selector;
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_PAREN() { return GetToken(sassy_parser.RIGHT_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Selector_no_childrenContext selector_no_children() {
-			return GetRuleContext<Selector_no_childrenContext>(0);
-		}
-		public Sub_selectorContext(Selector_no_childrenContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterSub_selector(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitSub_selector(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitSub_selector(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class Class_selectorContext : Selector_no_childrenContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLASS() { return GetToken(sassy_parser.CLASS, 0); }
-		public Class_selectorContext(Selector_no_childrenContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterClass_selector(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitClass_selector(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitClass_selector(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class Without_classContext : Selector_no_childrenContext {
-		public IToken field;
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLASS() { return GetToken(sassy_parser.CLASS, 0); }
-		public Without_classContext(Selector_no_childrenContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterWithout_class(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitWithout_class(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitWithout_class(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
 	public partial class NameContext : Selector_no_childrenContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode NAME() { return GetToken(sassy_parser.NAME, 0); }
 		public NameContext(Selector_no_childrenContext context) { CopyFrom(context); }
@@ -2720,6 +3408,28 @@ public partial class sassy_parser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitAdd_element(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Without_string_classContext : Selector_no_childrenContext {
+		public IToken str_field;
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WITHOUT() { return GetToken(sassy_parser.WITHOUT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_CLASS() { return GetToken(sassy_parser.STRING_CLASS, 0); }
+		public Without_string_classContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterWithout_string_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitWithout_string_class(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitWithout_string_class(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -2770,6 +3480,26 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
+	public partial class String_elementContext : Selector_no_childrenContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		public String_elementContext(Selector_no_childrenContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterString_element(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitString_element(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitString_element(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
 	public partial class ElementContext : Selector_no_childrenContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELEMENT() { return GetToken(sassy_parser.ELEMENT, 0); }
 		public ElementContext(Selector_no_childrenContext context) { CopyFrom(context); }
@@ -2801,162 +3531,251 @@ public partial class sassy_parser : Parser {
 		int _parentState = State;
 		Selector_no_childrenContext _localctx = new Selector_no_childrenContext(Context, _parentState);
 		Selector_no_childrenContext _prevctx = _localctx;
-		int _startState = 42;
-		EnterRecursionRule(_localctx, 42, RULE_selector_no_children, _p);
+		int _startState = 44;
+		EnterRecursionRule(_localctx, 44, RULE_selector_no_children, _p);
 		int _la;
 		try {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 372;
+			State = 442;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,22,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,26,Context) ) {
 			case 1:
 				{
 				_localctx = new ElementContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
 
-				State = 347;
+				State = 398;
 				Match(ELEMENT);
 				}
 				break;
 			case 2:
 				{
-				_localctx = new Class_selectorContext(_localctx);
+				_localctx = new String_elementContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 348;
-				Match(CLASS);
+				State = 399;
+				Match(STRING);
 				}
 				break;
 			case 3:
 				{
-				_localctx = new Class_capture_selectorContext(_localctx);
+				_localctx = new Class_selectorContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 349;
+				State = 400;
 				Match(CLASS);
-				State = 350;
-				Match(COLON);
-				State = 351;
-				Match(LEFT_BRACKET);
-				State = 355;
-				ErrorHandler.Sync(this);
-				_la = TokenStream.LA(1);
-				while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
-					{
-					{
-					State = 352;
-					((Class_capture_selectorContext)_localctx).body = function_statement();
-					}
-					}
-					State = 357;
-					ErrorHandler.Sync(this);
-					_la = TokenStream.LA(1);
-				}
-				State = 358;
-				Match(RIGHT_BRACKET);
 				}
 				break;
 			case 4:
 				{
-				_localctx = new NameContext(_localctx);
+				_localctx = new String_class_selectorContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 359;
-				Match(NAME);
+				State = 401;
+				Match(STRING_CLASS);
 				}
 				break;
 			case 5:
 				{
-				_localctx = new Ruleset_selectorContext(_localctx);
+				_localctx = new Class_capture_selectorContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 360;
-				Match(RULESET);
+				State = 402;
+				Match(CLASS);
+				State = 403;
+				Match(COLON);
+				State = 404;
+				Match(LEFT_BRACKET);
+				State = 408;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
+					{
+					{
+					State = 405;
+					((Class_capture_selectorContext)_localctx).body = function_statement();
+					}
+					}
+					State = 410;
+					ErrorHandler.Sync(this);
+					_la = TokenStream.LA(1);
+				}
+				State = 411;
+				Match(RIGHT_BRACKET);
 				}
 				break;
 			case 6:
 				{
-				_localctx = new Sub_selectorContext(_localctx);
+				_localctx = new String_class_capture_selectorContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 361;
-				Match(LEFT_PAREN);
-				State = 362;
-				((Sub_selectorContext)_localctx).internal_selector = selector_no_children(0);
-				State = 363;
-				Match(RIGHT_PAREN);
+				State = 412;
+				Match(STRING_CLASS);
+				State = 413;
+				Match(COLON);
+				State = 414;
+				Match(LEFT_BRACKET);
+				State = 418;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
+					{
+					{
+					State = 415;
+					((String_class_capture_selectorContext)_localctx).body = function_statement();
+					}
+					}
+					State = 420;
+					ErrorHandler.Sync(this);
+					_la = TokenStream.LA(1);
+				}
+				State = 421;
+				Match(RIGHT_BRACKET);
 				}
 				break;
 			case 7:
 				{
-				_localctx = new Add_elementContext(_localctx);
+				_localctx = new NameContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 365;
-				Match(ADD);
-				State = 366;
-				((Add_elementContext)_localctx).element = Match(ELEMENT);
+				State = 422;
+				Match(NAME);
 				}
 				break;
 			case 8:
 				{
-				_localctx = new Without_classContext(_localctx);
+				_localctx = new String_nameContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 367;
-				Match(WITHOUT);
-				State = 368;
-				((Without_classContext)_localctx).field = Match(CLASS);
+				State = 423;
+				Match(STRING_NAME);
 				}
 				break;
 			case 9:
 				{
-				_localctx = new Without_nameContext(_localctx);
+				_localctx = new Ruleset_selectorContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 369;
-				Match(WITHOUT);
-				State = 370;
-				((Without_nameContext)_localctx).name = Match(NAME);
+				State = 424;
+				Match(RULESET);
 				}
 				break;
 			case 10:
 				{
+				_localctx = new Sub_selectorContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 425;
+				Match(LEFT_PAREN);
+				State = 426;
+				((Sub_selectorContext)_localctx).internal_selector = selector_no_children(0);
+				State = 427;
+				Match(RIGHT_PAREN);
+				}
+				break;
+			case 11:
+				{
+				_localctx = new Add_elementContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 429;
+				Match(ADD);
+				State = 430;
+				((Add_elementContext)_localctx).element = Match(ELEMENT);
+				}
+				break;
+			case 12:
+				{
+				_localctx = new Add_string_elementContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 431;
+				Match(ADD);
+				State = 432;
+				((Add_string_elementContext)_localctx).str_element = Match(STRING);
+				}
+				break;
+			case 13:
+				{
+				_localctx = new Without_classContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 433;
+				Match(WITHOUT);
+				State = 434;
+				((Without_classContext)_localctx).field = Match(CLASS);
+				}
+				break;
+			case 14:
+				{
+				_localctx = new Without_string_classContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 435;
+				Match(WITHOUT);
+				State = 436;
+				((Without_string_classContext)_localctx).str_field = Match(STRING_CLASS);
+				}
+				break;
+			case 15:
+				{
+				_localctx = new Without_nameContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 437;
+				Match(WITHOUT);
+				State = 438;
+				((Without_nameContext)_localctx).name = Match(NAME);
+				}
+				break;
+			case 16:
+				{
+				_localctx = new Without_string_nameContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 439;
+				Match(WITHOUT);
+				State = 440;
+				((Without_string_nameContext)_localctx).str_name = Match(STRING_NAME);
+				}
+				break;
+			case 17:
+				{
 				_localctx = new EverythingContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 371;
+				State = 441;
 				Match(MULTIPLY);
 				}
 				break;
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 381;
+			State = 451;
 			ErrorHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(TokenStream,24,Context);
+			_alt = Interpreter.AdaptivePredict(TokenStream,28,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( ParseListeners!=null )
 						TriggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					State = 379;
+					State = 449;
 					ErrorHandler.Sync(this);
-					switch ( Interpreter.AdaptivePredict(TokenStream,23,Context) ) {
+					switch ( Interpreter.AdaptivePredict(TokenStream,27,Context) ) {
 					case 1:
 						{
 						_localctx = new Combination_selectorContext(new Selector_no_childrenContext(_parentctx, _parentState));
 						((Combination_selectorContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector_no_children);
-						State = 374;
-						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
-						State = 375;
+						State = 444;
+						if (!(Precpred(Context, 9))) throw new FailedPredicateException(this, "Precpred(Context, 9)");
+						State = 445;
 						Match(COMMA);
-						State = 376;
-						((Combination_selectorContext)_localctx).rhs = selector_no_children(7);
+						State = 446;
+						((Combination_selectorContext)_localctx).rhs = selector_no_children(10);
 						}
 						break;
 					case 2:
@@ -2964,18 +3783,18 @@ public partial class sassy_parser : Parser {
 						_localctx = new Intersection_selectorContext(new Selector_no_childrenContext(_parentctx, _parentState));
 						((Intersection_selectorContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_selector_no_children);
-						State = 377;
-						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
-						State = 378;
-						((Intersection_selectorContext)_localctx).rhs = selector_no_children(6);
+						State = 447;
+						if (!(Precpred(Context, 8))) throw new FailedPredicateException(this, "Precpred(Context, 8)");
+						State = 448;
+						((Intersection_selectorContext)_localctx).rhs = selector_no_children(9);
 						}
 						break;
 					}
 					} 
 				}
-				State = 383;
+				State = 453;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,24,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,28,Context);
 			}
 			}
 		}
@@ -3023,22 +3842,22 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Selector_bodyContext selector_body() {
 		Selector_bodyContext _localctx = new Selector_bodyContext(Context, State);
-		EnterRule(_localctx, 44, RULE_selector_body);
+		EnterRule(_localctx, 46, RULE_selector_body);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 387;
+			State = 457;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -2269811459100835808L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737083359264L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7807L) != 0)) {
 				{
 				{
-				State = 384;
+				State = 454;
 				selector_statement();
 				}
 				}
-				State = 389;
+				State = 459;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
@@ -3106,64 +3925,64 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Selector_statementContext selector_statement() {
 		Selector_statementContext _localctx = new Selector_statementContext(Context, State);
-		EnterRule(_localctx, 46, RULE_selector_statement);
+		EnterRule(_localctx, 48, RULE_selector_statement);
 		try {
-			State = 398;
+			State = 468;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,26,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,30,Context) ) {
 			case 1:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 390;
+				State = 460;
 				var_decl();
 				}
 				break;
 			case 2:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 391;
+				State = 461;
 				sel_level_conditional();
 				}
 				break;
 			case 3:
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 392;
+				State = 462;
 				set_value();
 				}
 				break;
 			case 4:
 				EnterOuterAlt(_localctx, 4);
 				{
-				State = 393;
+				State = 463;
 				delete_value();
 				}
 				break;
 			case 5:
 				EnterOuterAlt(_localctx, 5);
 				{
-				State = 394;
+				State = 464;
 				merge_value();
 				}
 				break;
 			case 6:
 				EnterOuterAlt(_localctx, 6);
 				{
-				State = 395;
+				State = 465;
 				field_set();
 				}
 				break;
 			case 7:
 				EnterOuterAlt(_localctx, 7);
 				{
-				State = 396;
+				State = 466;
 				selection_block();
 				}
 				break;
 			case 8:
 				EnterOuterAlt(_localctx, 8);
 				{
-				State = 397;
+				State = 467;
 				mixin_include();
 				}
 				break;
@@ -3181,14 +4000,14 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Sel_level_conditionalContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Selector_statementContext body;
 		public Sel_level_elseContext els;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRE_IF() { return GetToken(sassy_parser.PRE_IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Selector_statementContext[] selector_statement() {
 			return GetRuleContexts<Selector_statementContext>();
@@ -3225,39 +4044,39 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Sel_level_conditionalContext sel_level_conditional() {
 		Sel_level_conditionalContext _localctx = new Sel_level_conditionalContext(Context, State);
-		EnterRule(_localctx, 48, RULE_sel_level_conditional);
+		EnterRule(_localctx, 50, RULE_sel_level_conditional);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 400;
+			State = 470;
 			Match(PRE_IF);
-			State = 401;
-			_localctx.cond = sub_expression(0);
-			State = 402;
+			State = 471;
+			_localctx.cond = expression(0);
+			State = 472;
 			Match(LEFT_BRACE);
-			State = 406;
+			State = 476;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -2269811459100835808L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737083359264L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7807L) != 0)) {
 				{
 				{
-				State = 403;
+				State = 473;
 				_localctx.body = selector_statement();
 				}
 				}
-				State = 408;
+				State = 478;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 409;
+			State = 479;
 			Match(RIGHT_BRACE);
-			State = 411;
+			State = 481;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==PRE_ELSE || _la==PRE_ELSE_IF) {
 				{
-				State = 410;
+				State = 480;
 				_localctx.els = sel_level_else();
 				}
 			}
@@ -3308,22 +4127,22 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Sel_level_elseContext sel_level_else() {
 		Sel_level_elseContext _localctx = new Sel_level_elseContext(Context, State);
-		EnterRule(_localctx, 50, RULE_sel_level_else);
+		EnterRule(_localctx, 52, RULE_sel_level_else);
 		try {
-			State = 415;
+			State = 485;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case PRE_ELSE:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 413;
+				State = 483;
 				sel_level_else_else();
 				}
 				break;
 			case PRE_ELSE_IF:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 414;
+				State = 484;
 				sel_level_else_if();
 				}
 				break;
@@ -3379,30 +4198,30 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Sel_level_else_elseContext sel_level_else_else() {
 		Sel_level_else_elseContext _localctx = new Sel_level_else_elseContext(Context, State);
-		EnterRule(_localctx, 52, RULE_sel_level_else_else);
+		EnterRule(_localctx, 54, RULE_sel_level_else_else);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 417;
+			State = 487;
 			Match(PRE_ELSE);
-			State = 418;
+			State = 488;
 			Match(LEFT_BRACE);
-			State = 422;
+			State = 492;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -2269811459100835808L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737083359264L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7807L) != 0)) {
 				{
 				{
-				State = 419;
+				State = 489;
 				_localctx.body = selector_statement();
 				}
 				}
-				State = 424;
+				State = 494;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 425;
+			State = 495;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -3418,14 +4237,14 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Sel_level_else_ifContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Selector_statementContext body;
 		public Sel_level_elseContext els;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRE_ELSE_IF() { return GetToken(sassy_parser.PRE_ELSE_IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Selector_statementContext[] selector_statement() {
 			return GetRuleContexts<Selector_statementContext>();
@@ -3462,39 +4281,39 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Sel_level_else_ifContext sel_level_else_if() {
 		Sel_level_else_ifContext _localctx = new Sel_level_else_ifContext(Context, State);
-		EnterRule(_localctx, 54, RULE_sel_level_else_if);
+		EnterRule(_localctx, 56, RULE_sel_level_else_if);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 427;
+			State = 497;
 			Match(PRE_ELSE_IF);
-			State = 428;
-			_localctx.cond = sub_expression(0);
-			State = 429;
+			State = 498;
+			_localctx.cond = expression(0);
+			State = 499;
 			Match(LEFT_BRACE);
-			State = 433;
+			State = 503;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -2269811459100835808L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 59L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 576504737083359264L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 7807L) != 0)) {
 				{
 				{
-				State = 430;
+				State = 500;
 				_localctx.body = selector_statement();
 				}
 				}
-				State = 435;
+				State = 505;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 436;
+			State = 506;
 			Match(RIGHT_BRACE);
-			State = 438;
+			State = 508;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==PRE_ELSE || _la==PRE_ELSE_IF) {
 				{
-				State = 437;
+				State = 507;
 				_localctx.els = sel_level_else();
 				}
 			}
@@ -3545,15 +4364,15 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Set_valueContext set_value() {
 		Set_valueContext _localctx = new Set_valueContext(Context, State);
-		EnterRule(_localctx, 56, RULE_set_value);
+		EnterRule(_localctx, 58, RULE_set_value);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 440;
+			State = 510;
 			Match(SET);
-			State = 441;
-			_localctx.expr = expression();
-			State = 442;
+			State = 511;
+			_localctx.expr = expression(0);
+			State = 512;
 			Match(SEMICOLON);
 			}
 		}
@@ -3597,13 +4416,13 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Delete_valueContext delete_value() {
 		Delete_valueContext _localctx = new Delete_valueContext(Context, State);
-		EnterRule(_localctx, 58, RULE_delete_value);
+		EnterRule(_localctx, 60, RULE_delete_value);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 444;
+			State = 514;
 			Match(DELETE);
-			State = 445;
+			State = 515;
 			Match(SEMICOLON);
 			}
 		}
@@ -3619,11 +4438,11 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Merge_valueContext : ParserRuleContext {
-		public Sub_expressionContext expr;
+		public ExpressionContext expr;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MERGE() { return GetToken(sassy_parser.MERGE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public Merge_valueContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -3651,15 +4470,15 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Merge_valueContext merge_value() {
 		Merge_valueContext _localctx = new Merge_valueContext(Context, State);
-		EnterRule(_localctx, 60, RULE_merge_value);
+		EnterRule(_localctx, 62, RULE_merge_value);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 447;
+			State = 517;
 			Match(MERGE);
-			State = 448;
-			_localctx.expr = sub_expression(0);
-			State = 449;
+			State = 518;
+			_localctx.expr = expression(0);
+			State = 519;
 			Match(SEMICOLON);
 			}
 		}
@@ -3686,11 +4505,13 @@ public partial class sassy_parser : Parser {
 			base.CopyFrom(context);
 		}
 	}
-	public partial class String_key_fieldContext : Field_setContext {
+	public partial class Add_field_setContext : Field_setContext {
 		public IndexContext indexor;
 		public ExpressionContext expr;
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PLUS_COLON() { return GetToken(sassy_parser.PLUS_COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
 			return GetRuleContext<ExpressionContext>(0);
@@ -3698,28 +4519,126 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public IndexContext index() {
 			return GetRuleContext<IndexContext>(0);
 		}
-		public String_key_fieldContext(Field_setContext context) { CopyFrom(context); }
+		public Add_field_setContext(Field_setContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterString_key_field(this);
+			if (typedListener != null) typedListener.EnterAdd_field_set(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitString_key_field(this);
+			if (typedListener != null) typedListener.ExitAdd_field_set(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitString_key_field(this);
+			if (typedVisitor != null) return typedVisitor.VisitAdd_field_set(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Element_key_fieldContext : Field_setContext {
+	public partial class Divide_field_setContext : Field_setContext {
 		public IndexContext indexor;
 		public ExpressionContext expr;
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELEMENT() { return GetToken(sassy_parser.ELEMENT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DIVIDE_COLON() { return GetToken(sassy_parser.DIVIDE_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IndexContext index() {
+			return GetRuleContext<IndexContext>(0);
+		}
+		public Divide_field_setContext(Field_setContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterDivide_field_set(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitDivide_field_set(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitDivide_field_set(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Subtract_field_setContext : Field_setContext {
+		public IndexContext indexor;
+		public ExpressionContext expr;
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MINUS_COLON() { return GetToken(sassy_parser.MINUS_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IndexContext index() {
+			return GetRuleContext<IndexContext>(0);
+		}
+		public Subtract_field_setContext(Field_setContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterSubtract_field_set(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitSubtract_field_set(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSubtract_field_set(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Multiply_field_setContext : Field_setContext {
+		public IndexContext indexor;
+		public ExpressionContext expr;
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MULTIPLY_COLON() { return GetToken(sassy_parser.MULTIPLY_COLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IndexContext index() {
+			return GetRuleContext<IndexContext>(0);
+		}
+		public Multiply_field_setContext(Field_setContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterMultiply_field_set(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitMultiply_field_set(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMultiply_field_set(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Normal_field_setContext : Field_setContext {
+		public IndexContext indexor;
+		public ExpressionContext expr;
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
@@ -3728,21 +4647,21 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public IndexContext index() {
 			return GetRuleContext<IndexContext>(0);
 		}
-		public Element_key_fieldContext(Field_setContext context) { CopyFrom(context); }
+		public Normal_field_setContext(Field_setContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterElement_key_field(this);
+			if (typedListener != null) typedListener.EnterNormal_field_set(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitElement_key_field(this);
+			if (typedListener != null) typedListener.ExitNormal_field_set(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitElement_key_field(this);
+			if (typedVisitor != null) return typedVisitor.VisitNormal_field_set(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -3750,62 +4669,132 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public Field_setContext field_set() {
 		Field_setContext _localctx = new Field_setContext(Context, State);
-		EnterRule(_localctx, 62, RULE_field_set);
+		EnterRule(_localctx, 64, RULE_field_set);
 		int _la;
 		try {
-			State = 467;
+			State = 561;
 			ErrorHandler.Sync(this);
-			switch (TokenStream.LA(1)) {
-			case ELEMENT:
-				_localctx = new Element_key_fieldContext(_localctx);
+			switch ( Interpreter.AdaptivePredict(TokenStream,42,Context) ) {
+			case 1:
+				_localctx = new Normal_field_setContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 451;
-				Match(ELEMENT);
-				State = 453;
+				State = 521;
+				sassy_string();
+				State = 523;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==LEFT_BRACKET) {
 					{
-					State = 452;
-					((Element_key_fieldContext)_localctx).indexor = index();
+					State = 522;
+					((Normal_field_setContext)_localctx).indexor = index();
 					}
 				}
 
-				State = 455;
+				State = 525;
 				Match(COLON);
-				State = 456;
-				((Element_key_fieldContext)_localctx).expr = expression();
-				State = 457;
+				State = 526;
+				((Normal_field_setContext)_localctx).expr = expression(0);
+				State = 527;
 				Match(SEMICOLON);
 				}
 				break;
-			case STRING:
-				_localctx = new String_key_fieldContext(_localctx);
+			case 2:
+				_localctx = new Add_field_setContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 459;
-				Match(STRING);
-				State = 461;
+				State = 529;
+				sassy_string();
+				State = 531;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==LEFT_BRACKET) {
 					{
-					State = 460;
-					((String_key_fieldContext)_localctx).indexor = index();
+					State = 530;
+					((Add_field_setContext)_localctx).indexor = index();
 					}
 				}
 
-				State = 463;
-				Match(COLON);
-				State = 464;
-				((String_key_fieldContext)_localctx).expr = expression();
-				State = 465;
+				State = 533;
+				Match(PLUS_COLON);
+				State = 534;
+				((Add_field_setContext)_localctx).expr = expression(0);
+				State = 535;
 				Match(SEMICOLON);
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
+			case 3:
+				_localctx = new Subtract_field_setContext(_localctx);
+				EnterOuterAlt(_localctx, 3);
+				{
+				State = 537;
+				sassy_string();
+				State = 539;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				if (_la==LEFT_BRACKET) {
+					{
+					State = 538;
+					((Subtract_field_setContext)_localctx).indexor = index();
+					}
+				}
+
+				State = 541;
+				Match(MINUS_COLON);
+				State = 542;
+				((Subtract_field_setContext)_localctx).expr = expression(0);
+				State = 543;
+				Match(SEMICOLON);
+				}
+				break;
+			case 4:
+				_localctx = new Multiply_field_setContext(_localctx);
+				EnterOuterAlt(_localctx, 4);
+				{
+				State = 545;
+				sassy_string();
+				State = 547;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				if (_la==LEFT_BRACKET) {
+					{
+					State = 546;
+					((Multiply_field_setContext)_localctx).indexor = index();
+					}
+				}
+
+				State = 549;
+				Match(MULTIPLY_COLON);
+				State = 550;
+				((Multiply_field_setContext)_localctx).expr = expression(0);
+				State = 551;
+				Match(SEMICOLON);
+				}
+				break;
+			case 5:
+				_localctx = new Divide_field_setContext(_localctx);
+				EnterOuterAlt(_localctx, 5);
+				{
+				State = 553;
+				sassy_string();
+				State = 555;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				if (_la==LEFT_BRACKET) {
+					{
+					State = 554;
+					((Divide_field_setContext)_localctx).indexor = index();
+					}
+				}
+
+				State = 557;
+				Match(DIVIDE_COLON);
+				State = 558;
+				((Divide_field_setContext)_localctx).expr = expression(0);
+				State = 559;
+				Match(SEMICOLON);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -3927,20 +4916,20 @@ public partial class sassy_parser : Parser {
 	[RuleVersion(0)]
 	public IndexContext index() {
 		IndexContext _localctx = new IndexContext(Context, State);
-		EnterRule(_localctx, 64, RULE_index);
+		EnterRule(_localctx, 66, RULE_index);
 		try {
-			State = 481;
+			State = 575;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,36,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,43,Context) ) {
 			case 1:
 				_localctx = new Number_indexorContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 469;
+				State = 563;
 				Match(LEFT_BRACKET);
-				State = 470;
+				State = 564;
 				((Number_indexorContext)_localctx).num = Match(NUMBER);
-				State = 471;
+				State = 565;
 				Match(RIGHT_BRACKET);
 				}
 				break;
@@ -3948,11 +4937,11 @@ public partial class sassy_parser : Parser {
 				_localctx = new Element_indexorContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 472;
+				State = 566;
 				Match(LEFT_BRACKET);
-				State = 473;
+				State = 567;
 				((Element_indexorContext)_localctx).elem = Match(ELEMENT);
-				State = 474;
+				State = 568;
 				Match(RIGHT_BRACKET);
 				}
 				break;
@@ -3960,11 +4949,11 @@ public partial class sassy_parser : Parser {
 				_localctx = new Class_indexorContext(_localctx);
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 475;
+				State = 569;
 				Match(LEFT_BRACKET);
-				State = 476;
+				State = 570;
 				((Class_indexorContext)_localctx).clazz = Match(CLASS);
-				State = 477;
+				State = 571;
 				Match(RIGHT_BRACKET);
 				}
 				break;
@@ -3972,11 +4961,11 @@ public partial class sassy_parser : Parser {
 				_localctx = new String_indexorContext(_localctx);
 				EnterOuterAlt(_localctx, 4);
 				{
-				State = 478;
+				State = 572;
 				Match(LEFT_BRACKET);
-				State = 479;
+				State = 573;
 				((String_indexorContext)_localctx).elem = Match(STRING);
-				State = 480;
+				State = 574;
 				Match(RIGHT_BRACKET);
 				}
 				break;
@@ -4005,213 +4994,17 @@ public partial class sassy_parser : Parser {
 			base.CopyFrom(context);
 		}
 	}
-	public partial class Implicit_divideContext : ExpressionContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DIVIDE() { return GetToken(sassy_parser.DIVIDE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
-		}
-		public Implicit_divideContext(ExpressionContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterImplicit_divide(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitImplicit_divide(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitImplicit_divide(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class NormalContext : ExpressionContext {
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
-		}
-		public NormalContext(ExpressionContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterNormal(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitNormal(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitNormal(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class Implicit_multiplyContext : ExpressionContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MULTIPLY() { return GetToken(sassy_parser.MULTIPLY, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
-		}
-		public Implicit_multiplyContext(ExpressionContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterImplicit_multiply(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitImplicit_multiply(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitImplicit_multiply(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class Implicit_addContext : ExpressionContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ADD() { return GetToken(sassy_parser.ADD, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
-		}
-		public Implicit_addContext(ExpressionContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterImplicit_add(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitImplicit_add(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitImplicit_add(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class Implicit_subtractContext : ExpressionContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SUBTRACT() { return GetToken(sassy_parser.SUBTRACT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
-		}
-		public Implicit_subtractContext(ExpressionContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.EnterImplicit_subtract(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			Isassy_parserListener typedListener = listener as Isassy_parserListener;
-			if (typedListener != null) typedListener.ExitImplicit_subtract(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitImplicit_subtract(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public ExpressionContext expression() {
-		ExpressionContext _localctx = new ExpressionContext(Context, State);
-		EnterRule(_localctx, 66, RULE_expression);
-		try {
-			State = 492;
-			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,37,Context) ) {
-			case 1:
-				_localctx = new Implicit_addContext(_localctx);
-				EnterOuterAlt(_localctx, 1);
-				{
-				State = 483;
-				Match(ADD);
-				State = 484;
-				sub_expression(0);
-				}
-				break;
-			case 2:
-				_localctx = new Implicit_subtractContext(_localctx);
-				EnterOuterAlt(_localctx, 2);
-				{
-				State = 485;
-				Match(SUBTRACT);
-				State = 486;
-				sub_expression(0);
-				}
-				break;
-			case 3:
-				_localctx = new Implicit_multiplyContext(_localctx);
-				EnterOuterAlt(_localctx, 3);
-				{
-				State = 487;
-				Match(MULTIPLY);
-				State = 488;
-				sub_expression(0);
-				}
-				break;
-			case 4:
-				_localctx = new Implicit_divideContext(_localctx);
-				EnterOuterAlt(_localctx, 4);
-				{
-				State = 489;
-				Match(DIVIDE);
-				State = 490;
-				sub_expression(0);
-				}
-				break;
-			case 5:
-				_localctx = new NormalContext(_localctx);
-				EnterOuterAlt(_localctx, 5);
-				{
-				State = 491;
-				sub_expression(0);
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
-	public partial class Sub_expressionContext : ParserRuleContext {
-		public Sub_expressionContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_sub_expression; } }
-	 
-		public Sub_expressionContext() { }
-		public virtual void CopyFrom(Sub_expressionContext context) {
-			base.CopyFrom(context);
-		}
-	}
-	public partial class Not_equal_toContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class Not_equal_toContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode NOT_EQUAL_TO() { return GetToken(sassy_parser.NOT_EQUAL_TO, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public Not_equal_toContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Not_equal_toContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4229,9 +5022,9 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Variable_referenceContext : Sub_expressionContext {
+	public partial class Variable_referenceContext : ExpressionContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
-		public Variable_referenceContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Variable_referenceContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4249,17 +5042,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Equal_toContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class Equal_toContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EQUAL_TO() { return GetToken(sassy_parser.EQUAL_TO, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public Equal_toContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Equal_toContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4277,9 +5070,9 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Local_variable_referenceContext : Sub_expressionContext {
+	public partial class Local_variable_referenceContext : ExpressionContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LOCALVARIABLE() { return GetToken(sassy_parser.LOCALVARIABLE, 0); }
-		public Local_variable_referenceContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Local_variable_referenceContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4297,19 +5090,19 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Member_call_rulesetContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
+	public partial class Member_call_rulesetContext : ExpressionContext {
+		public ExpressionContext lhs;
 		public Argument_listContext args;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RULESET() { return GetToken(sassy_parser.RULESET, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_PAREN() { return GetToken(sassy_parser.RIGHT_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Argument_listContext argument_list() {
 			return GetRuleContext<Argument_listContext>(0);
 		}
-		public Member_call_rulesetContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Member_call_rulesetContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4327,11 +5120,11 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Value_referenceContext : Sub_expressionContext {
+	public partial class Value_referenceContext : ExpressionContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value() {
 			return GetRuleContext<ValueContext>(0);
 		}
-		public Value_referenceContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Value_referenceContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4349,17 +5142,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class SubtractionContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class SubtractionContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SUBTRACT() { return GetToken(sassy_parser.SUBTRACT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public SubtractionContext(Sub_expressionContext context) { CopyFrom(context); }
+		public SubtractionContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4377,17 +5170,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class DivisionContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class DivisionContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DIVIDE() { return GetToken(sassy_parser.DIVIDE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public DivisionContext(Sub_expressionContext context) { CopyFrom(context); }
+		public DivisionContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4405,13 +5198,13 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class NegativeContext : Sub_expressionContext {
-		public Sub_expressionContext child;
+	public partial class NegativeContext : ExpressionContext {
+		public ExpressionContext child;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SUBTRACT() { return GetToken(sassy_parser.SUBTRACT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
-		public NegativeContext(Sub_expressionContext context) { CopyFrom(context); }
+		public NegativeContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4429,13 +5222,13 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class NotContext : Sub_expressionContext {
-		public Sub_expressionContext child;
+	public partial class NotContext : ExpressionContext {
+		public ExpressionContext child;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode NOT() { return GetToken(sassy_parser.NOT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
-		public NotContext(Sub_expressionContext context) { CopyFrom(context); }
+		public NotContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4453,17 +5246,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Lesser_thanContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class Lesser_thanContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LESSER_THAN() { return GetToken(sassy_parser.LESSER_THAN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public Lesser_thanContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Lesser_thanContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4481,21 +5274,21 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Member_callContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
+	public partial class Member_callContext : ExpressionContext {
+		public ExpressionContext lhs;
 		public IToken name;
 		public Argument_listContext args;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_PAREN() { return GetToken(sassy_parser.RIGHT_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELEMENT() { return GetToken(sassy_parser.ELEMENT, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public Argument_listContext argument_list() {
 			return GetRuleContext<Argument_listContext>(0);
 		}
-		public Member_callContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Member_callContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4513,17 +5306,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Greater_thanContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class Greater_thanContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode GREATER_THAN() { return GetToken(sassy_parser.GREATER_THAN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public Greater_thanContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Greater_thanContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4541,17 +5334,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class AndContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class AndContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode AND() { return GetToken(sassy_parser.AND, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public AndContext(Sub_expressionContext context) { CopyFrom(context); }
+		public AndContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4569,14 +5362,14 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Sub_sub_expressionContext : Sub_expressionContext {
-		public Sub_expressionContext internal_expr;
+	public partial class Sub_sub_expressionContext : ExpressionContext {
+		public ExpressionContext internal_expr;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_PAREN() { return GetToken(sassy_parser.RIGHT_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
-		public Sub_sub_expressionContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Sub_sub_expressionContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4594,17 +5387,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class MultiplicationContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class MultiplicationContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MULTIPLY() { return GetToken(sassy_parser.MULTIPLY, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public MultiplicationContext(Sub_expressionContext context) { CopyFrom(context); }
+		public MultiplicationContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4622,17 +5415,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Greater_than_equalContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class Greater_than_equalContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode GREATER_THAN_EQUAL() { return GetToken(sassy_parser.GREATER_THAN_EQUAL, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public Greater_than_equalContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Greater_than_equalContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4650,17 +5443,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class AdditionContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class AdditionContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ADD() { return GetToken(sassy_parser.ADD, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public AdditionContext(Sub_expressionContext context) { CopyFrom(context); }
+		public AdditionContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4678,18 +5471,18 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class IndexorContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class IndexorContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACKET() { return GetToken(sassy_parser.LEFT_BRACKET, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACKET() { return GetToken(sassy_parser.RIGHT_BRACKET, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public IndexorContext(Sub_expressionContext context) { CopyFrom(context); }
+		public IndexorContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4707,17 +5500,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class OrContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class OrContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OR() { return GetToken(sassy_parser.OR, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public OrContext(Sub_expressionContext context) { CopyFrom(context); }
+		public OrContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4735,17 +5528,17 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Lesser_than_equalContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class Lesser_than_equalContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LESSER_THAN_EQUAL() { return GetToken(sassy_parser.LESSER_THAN_EQUAL, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public Lesser_than_equalContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Lesser_than_equalContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4763,13 +5556,13 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class PositiveContext : Sub_expressionContext {
-		public Sub_expressionContext child;
+	public partial class PositiveContext : ExpressionContext {
+		public ExpressionContext child;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ADD() { return GetToken(sassy_parser.ADD, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
-		public PositiveContext(Sub_expressionContext context) { CopyFrom(context); }
+		public PositiveContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4787,7 +5580,7 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class Simple_callContext : Sub_expressionContext {
+	public partial class Simple_callContext : ExpressionContext {
 		public IToken lhs;
 		public Argument_listContext args;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_PAREN() { return GetToken(sassy_parser.LEFT_PAREN, 0); }
@@ -4796,7 +5589,7 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public Argument_listContext argument_list() {
 			return GetRuleContext<Argument_listContext>(0);
 		}
-		public Simple_callContext(Sub_expressionContext context) { CopyFrom(context); }
+		public Simple_callContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4814,17 +5607,37 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class RemainderContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext rhs;
+	public partial class String_local_variable_referenceContext : ExpressionContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING_LOCALVARIABLE() { return GetToken(sassy_parser.STRING_LOCALVARIABLE, 0); }
+		public String_local_variable_referenceContext(ExpressionContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterString_local_variable_reference(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitString_local_variable_reference(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitString_local_variable_reference(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class RemainderContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MODULUS() { return GetToken(sassy_parser.MODULUS, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public RemainderContext(Sub_expressionContext context) { CopyFrom(context); }
+		public RemainderContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4842,19 +5655,19 @@ public partial class sassy_parser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class TernaryContext : Sub_expressionContext {
-		public Sub_expressionContext lhs;
-		public Sub_expressionContext cond;
-		public Sub_expressionContext rhs;
+	public partial class TernaryContext : ExpressionContext {
+		public ExpressionContext lhs;
+		public ExpressionContext cond;
+		public ExpressionContext rhs;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IF() { return GetToken(sassy_parser.IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELSE() { return GetToken(sassy_parser.ELSE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
-		public TernaryContext(Sub_expressionContext context) { CopyFrom(context); }
+		public TernaryContext(ExpressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			Isassy_parserListener typedListener = listener as Isassy_parserListener;
@@ -4874,380 +5687,379 @@ public partial class sassy_parser : Parser {
 	}
 
 	[RuleVersion(0)]
-	public Sub_expressionContext sub_expression() {
-		return sub_expression(0);
+	public ExpressionContext expression() {
+		return expression(0);
 	}
 
-	private Sub_expressionContext sub_expression(int _p) {
+	private ExpressionContext expression(int _p) {
 		ParserRuleContext _parentctx = Context;
 		int _parentState = State;
-		Sub_expressionContext _localctx = new Sub_expressionContext(Context, _parentState);
-		Sub_expressionContext _prevctx = _localctx;
+		ExpressionContext _localctx = new ExpressionContext(Context, _parentState);
+		ExpressionContext _prevctx = _localctx;
 		int _startState = 68;
-		EnterRecursionRule(_localctx, 68, RULE_sub_expression, _p);
+		EnterRecursionRule(_localctx, 68, RULE_expression, _p);
 		try {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 513;
+			State = 597;
 			ErrorHandler.Sync(this);
-			switch (TokenStream.LA(1)) {
-			case FUNCTION:
-			case LEFT_BRACE:
-			case LEFT_BRACKET:
-			case NONE:
-			case TRUE:
-			case FALSE:
-			case NUMBER:
-			case STRING:
-			case DELETE:
-				{
-				_localctx = new Value_referenceContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-
-				State = 495;
-				value();
-				}
-				break;
-			case VARIABLE:
-				{
-				_localctx = new Variable_referenceContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-				State = 496;
-				Match(VARIABLE);
-				}
-				break;
-			case LOCALVARIABLE:
-				{
-				_localctx = new Local_variable_referenceContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-				State = 497;
-				Match(LOCALVARIABLE);
-				}
-				break;
-			case LEFT_PAREN:
-				{
-				_localctx = new Sub_sub_expressionContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-				State = 498;
-				Match(LEFT_PAREN);
-				State = 499;
-				((Sub_sub_expressionContext)_localctx).internal_expr = sub_expression(0);
-				State = 500;
-				Match(RIGHT_PAREN);
-				}
-				break;
-			case SUBTRACT:
-				{
-				_localctx = new NegativeContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-				State = 502;
-				Match(SUBTRACT);
-				State = 503;
-				((NegativeContext)_localctx).child = sub_expression(21);
-				}
-				break;
-			case ADD:
-				{
-				_localctx = new PositiveContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-				State = 504;
-				Match(ADD);
-				State = 505;
-				((PositiveContext)_localctx).child = sub_expression(20);
-				}
-				break;
-			case NOT:
-				{
-				_localctx = new NotContext(_localctx);
-				Context = _localctx;
-				_prevctx = _localctx;
-				State = 506;
-				Match(NOT);
-				State = 507;
-				((NotContext)_localctx).child = sub_expression(19);
-				}
-				break;
-			case ELEMENT:
+			switch ( Interpreter.AdaptivePredict(TokenStream,44,Context) ) {
+			case 1:
 				{
 				_localctx = new Simple_callContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 508;
+
+				State = 578;
 				((Simple_callContext)_localctx).lhs = Match(ELEMENT);
-				State = 509;
+				State = 579;
 				Match(LEFT_PAREN);
-				State = 510;
+				State = 580;
 				((Simple_callContext)_localctx).args = argument_list();
-				State = 511;
+				State = 581;
 				Match(RIGHT_PAREN);
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
+			case 2:
+				{
+				_localctx = new Value_referenceContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 583;
+				value();
+				}
+				break;
+			case 3:
+				{
+				_localctx = new Variable_referenceContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 584;
+				Match(VARIABLE);
+				}
+				break;
+			case 4:
+				{
+				_localctx = new Local_variable_referenceContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 585;
+				Match(LOCALVARIABLE);
+				}
+				break;
+			case 5:
+				{
+				_localctx = new String_local_variable_referenceContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 586;
+				Match(STRING_LOCALVARIABLE);
+				}
+				break;
+			case 6:
+				{
+				_localctx = new Sub_sub_expressionContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 587;
+				Match(LEFT_PAREN);
+				State = 588;
+				((Sub_sub_expressionContext)_localctx).internal_expr = expression(0);
+				State = 589;
+				Match(RIGHT_PAREN);
+				}
+				break;
+			case 7:
+				{
+				_localctx = new NegativeContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 591;
+				Match(SUBTRACT);
+				State = 592;
+				((NegativeContext)_localctx).child = expression(20);
+				}
+				break;
+			case 8:
+				{
+				_localctx = new PositiveContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 593;
+				Match(ADD);
+				State = 594;
+				((PositiveContext)_localctx).child = expression(19);
+				}
+				break;
+			case 9:
+				{
+				_localctx = new NotContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 595;
+				Match(NOT);
+				State = 596;
+				((NotContext)_localctx).child = expression(18);
+				}
+				break;
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 580;
+			State = 664;
 			ErrorHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(TokenStream,40,Context);
+			_alt = Interpreter.AdaptivePredict(TokenStream,46,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( ParseListeners!=null )
 						TriggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					State = 578;
+					State = 662;
 					ErrorHandler.Sync(this);
-					switch ( Interpreter.AdaptivePredict(TokenStream,39,Context) ) {
+					switch ( Interpreter.AdaptivePredict(TokenStream,45,Context) ) {
 					case 1:
 						{
-						_localctx = new MultiplicationContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new MultiplicationContext(new ExpressionContext(_parentctx, _parentState));
 						((MultiplicationContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 515;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 599;
 						if (!(Precpred(Context, 14))) throw new FailedPredicateException(this, "Precpred(Context, 14)");
-						State = 516;
+						State = 600;
 						Match(MULTIPLY);
-						State = 517;
-						((MultiplicationContext)_localctx).rhs = sub_expression(15);
+						State = 601;
+						((MultiplicationContext)_localctx).rhs = expression(15);
 						}
 						break;
 					case 2:
 						{
-						_localctx = new DivisionContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new DivisionContext(new ExpressionContext(_parentctx, _parentState));
 						((DivisionContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 518;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 602;
 						if (!(Precpred(Context, 13))) throw new FailedPredicateException(this, "Precpred(Context, 13)");
-						State = 519;
+						State = 603;
 						Match(DIVIDE);
-						State = 520;
-						((DivisionContext)_localctx).rhs = sub_expression(14);
+						State = 604;
+						((DivisionContext)_localctx).rhs = expression(14);
 						}
 						break;
 					case 3:
 						{
-						_localctx = new RemainderContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new RemainderContext(new ExpressionContext(_parentctx, _parentState));
 						((RemainderContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 521;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 605;
 						if (!(Precpred(Context, 12))) throw new FailedPredicateException(this, "Precpred(Context, 12)");
-						State = 522;
+						State = 606;
 						Match(MODULUS);
-						State = 523;
-						((RemainderContext)_localctx).rhs = sub_expression(13);
+						State = 607;
+						((RemainderContext)_localctx).rhs = expression(13);
 						}
 						break;
 					case 4:
 						{
-						_localctx = new AdditionContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new AdditionContext(new ExpressionContext(_parentctx, _parentState));
 						((AdditionContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 524;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 608;
 						if (!(Precpred(Context, 11))) throw new FailedPredicateException(this, "Precpred(Context, 11)");
-						State = 525;
+						State = 609;
 						Match(ADD);
-						State = 526;
-						((AdditionContext)_localctx).rhs = sub_expression(12);
+						State = 610;
+						((AdditionContext)_localctx).rhs = expression(12);
 						}
 						break;
 					case 5:
 						{
-						_localctx = new SubtractionContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new SubtractionContext(new ExpressionContext(_parentctx, _parentState));
 						((SubtractionContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 527;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 611;
 						if (!(Precpred(Context, 10))) throw new FailedPredicateException(this, "Precpred(Context, 10)");
-						State = 528;
+						State = 612;
 						Match(SUBTRACT);
-						State = 529;
-						((SubtractionContext)_localctx).rhs = sub_expression(11);
+						State = 613;
+						((SubtractionContext)_localctx).rhs = expression(11);
 						}
 						break;
 					case 6:
 						{
-						_localctx = new Greater_thanContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Greater_thanContext(new ExpressionContext(_parentctx, _parentState));
 						((Greater_thanContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 530;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 614;
 						if (!(Precpred(Context, 9))) throw new FailedPredicateException(this, "Precpred(Context, 9)");
-						State = 531;
+						State = 615;
 						Match(GREATER_THAN);
-						State = 532;
-						((Greater_thanContext)_localctx).rhs = sub_expression(10);
+						State = 616;
+						((Greater_thanContext)_localctx).rhs = expression(10);
 						}
 						break;
 					case 7:
 						{
-						_localctx = new Lesser_thanContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Lesser_thanContext(new ExpressionContext(_parentctx, _parentState));
 						((Lesser_thanContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 533;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 617;
 						if (!(Precpred(Context, 8))) throw new FailedPredicateException(this, "Precpred(Context, 8)");
-						State = 534;
+						State = 618;
 						Match(LESSER_THAN);
-						State = 535;
-						((Lesser_thanContext)_localctx).rhs = sub_expression(9);
+						State = 619;
+						((Lesser_thanContext)_localctx).rhs = expression(9);
 						}
 						break;
 					case 8:
 						{
-						_localctx = new Greater_than_equalContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Greater_than_equalContext(new ExpressionContext(_parentctx, _parentState));
 						((Greater_than_equalContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 536;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 620;
 						if (!(Precpred(Context, 7))) throw new FailedPredicateException(this, "Precpred(Context, 7)");
-						State = 537;
+						State = 621;
 						Match(GREATER_THAN_EQUAL);
-						State = 538;
-						((Greater_than_equalContext)_localctx).rhs = sub_expression(8);
+						State = 622;
+						((Greater_than_equalContext)_localctx).rhs = expression(8);
 						}
 						break;
 					case 9:
 						{
-						_localctx = new Lesser_than_equalContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Lesser_than_equalContext(new ExpressionContext(_parentctx, _parentState));
 						((Lesser_than_equalContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 539;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 623;
 						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
-						State = 540;
+						State = 624;
 						Match(LESSER_THAN_EQUAL);
-						State = 541;
-						((Lesser_than_equalContext)_localctx).rhs = sub_expression(7);
+						State = 625;
+						((Lesser_than_equalContext)_localctx).rhs = expression(7);
 						}
 						break;
 					case 10:
 						{
-						_localctx = new Equal_toContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Equal_toContext(new ExpressionContext(_parentctx, _parentState));
 						((Equal_toContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 542;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 626;
 						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
-						State = 543;
+						State = 627;
 						Match(EQUAL_TO);
-						State = 544;
-						((Equal_toContext)_localctx).rhs = sub_expression(6);
+						State = 628;
+						((Equal_toContext)_localctx).rhs = expression(6);
 						}
 						break;
 					case 11:
 						{
-						_localctx = new Not_equal_toContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Not_equal_toContext(new ExpressionContext(_parentctx, _parentState));
 						((Not_equal_toContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 545;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 629;
 						if (!(Precpred(Context, 4))) throw new FailedPredicateException(this, "Precpred(Context, 4)");
-						State = 546;
+						State = 630;
 						Match(NOT_EQUAL_TO);
-						State = 547;
-						((Not_equal_toContext)_localctx).rhs = sub_expression(5);
+						State = 631;
+						((Not_equal_toContext)_localctx).rhs = expression(5);
 						}
 						break;
 					case 12:
 						{
-						_localctx = new AndContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new AndContext(new ExpressionContext(_parentctx, _parentState));
 						((AndContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 548;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 632;
 						if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
-						State = 549;
+						State = 633;
 						Match(AND);
-						State = 550;
-						((AndContext)_localctx).rhs = sub_expression(4);
+						State = 634;
+						((AndContext)_localctx).rhs = expression(4);
 						}
 						break;
 					case 13:
 						{
-						_localctx = new OrContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new OrContext(new ExpressionContext(_parentctx, _parentState));
 						((OrContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 551;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 635;
 						if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
-						State = 552;
+						State = 636;
 						Match(OR);
-						State = 553;
-						((OrContext)_localctx).rhs = sub_expression(3);
+						State = 637;
+						((OrContext)_localctx).rhs = expression(3);
 						}
 						break;
 					case 14:
 						{
-						_localctx = new TernaryContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new TernaryContext(new ExpressionContext(_parentctx, _parentState));
 						((TernaryContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 554;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 638;
 						if (!(Precpred(Context, 1))) throw new FailedPredicateException(this, "Precpred(Context, 1)");
-						State = 555;
+						State = 639;
 						Match(IF);
-						State = 556;
-						((TernaryContext)_localctx).cond = sub_expression(0);
-						State = 557;
+						State = 640;
+						((TernaryContext)_localctx).cond = expression(0);
+						State = 641;
 						Match(ELSE);
-						State = 558;
-						((TernaryContext)_localctx).rhs = sub_expression(2);
+						State = 642;
+						((TernaryContext)_localctx).rhs = expression(2);
 						}
 						break;
 					case 15:
 						{
-						_localctx = new Member_callContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Member_callContext(new ExpressionContext(_parentctx, _parentState));
 						((Member_callContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 560;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 644;
 						if (!(Precpred(Context, 17))) throw new FailedPredicateException(this, "Precpred(Context, 17)");
-						State = 561;
+						State = 645;
 						Match(COLON);
-						State = 562;
+						State = 646;
 						((Member_callContext)_localctx).name = Match(ELEMENT);
-						State = 563;
+						State = 647;
 						Match(LEFT_PAREN);
-						State = 564;
+						State = 648;
 						((Member_callContext)_localctx).args = argument_list();
-						State = 565;
+						State = 649;
 						Match(RIGHT_PAREN);
 						}
 						break;
 					case 16:
 						{
-						_localctx = new Member_call_rulesetContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new Member_call_rulesetContext(new ExpressionContext(_parentctx, _parentState));
 						((Member_call_rulesetContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 567;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 651;
 						if (!(Precpred(Context, 16))) throw new FailedPredicateException(this, "Precpred(Context, 16)");
-						State = 568;
+						State = 652;
 						Match(RULESET);
-						State = 569;
+						State = 653;
 						Match(LEFT_PAREN);
-						State = 570;
+						State = 654;
 						((Member_call_rulesetContext)_localctx).args = argument_list();
-						State = 571;
+						State = 655;
 						Match(RIGHT_PAREN);
 						}
 						break;
 					case 17:
 						{
-						_localctx = new IndexorContext(new Sub_expressionContext(_parentctx, _parentState));
+						_localctx = new IndexorContext(new ExpressionContext(_parentctx, _parentState));
 						((IndexorContext)_localctx).lhs = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_sub_expression);
-						State = 573;
+						PushNewRecursionContext(_localctx, _startState, RULE_expression);
+						State = 657;
 						if (!(Precpred(Context, 15))) throw new FailedPredicateException(this, "Precpred(Context, 15)");
-						State = 574;
+						State = 658;
 						Match(LEFT_BRACKET);
-						State = 575;
-						((IndexorContext)_localctx).rhs = sub_expression(0);
-						State = 576;
+						State = 659;
+						((IndexorContext)_localctx).rhs = expression(0);
+						State = 660;
 						Match(RIGHT_BRACKET);
 						}
 						break;
 					}
 					} 
 				}
-				State = 582;
+				State = 666;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,40,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,46,Context);
 			}
 			}
 		}
@@ -5353,6 +6165,26 @@ public partial class sassy_parser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitBoolean_false(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class Element_stringContext : ValueContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELEMENT() { return GetToken(sassy_parser.ELEMENT, 0); }
+		public Element_stringContext(ValueContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.EnterElement_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			Isassy_parserListener typedListener = listener as Isassy_parserListener;
+			if (typedListener != null) typedListener.ExitElement_string(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			Isassy_parserVisitor<TResult> typedVisitor = visitor as Isassy_parserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitElement_string(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -5476,14 +6308,14 @@ public partial class sassy_parser : Parser {
 		ValueContext _localctx = new ValueContext(Context, State);
 		EnterRule(_localctx, 70, RULE_value);
 		try {
-			State = 599;
+			State = 684;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case DELETE:
 				_localctx = new Value_deletionContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 583;
+				State = 667;
 				Match(DELETE);
 				}
 				break;
@@ -5491,7 +6323,7 @@ public partial class sassy_parser : Parser {
 				_localctx = new Boolean_trueContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 584;
+				State = 668;
 				Match(TRUE);
 				}
 				break;
@@ -5499,7 +6331,7 @@ public partial class sassy_parser : Parser {
 				_localctx = new Boolean_falseContext(_localctx);
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 585;
+				State = 669;
 				Match(FALSE);
 				}
 				break;
@@ -5507,7 +6339,7 @@ public partial class sassy_parser : Parser {
 				_localctx = new Number_valueContext(_localctx);
 				EnterOuterAlt(_localctx, 4);
 				{
-				State = 586;
+				State = 670;
 				Match(NUMBER);
 				}
 				break;
@@ -5515,51 +6347,59 @@ public partial class sassy_parser : Parser {
 				_localctx = new String_valueContext(_localctx);
 				EnterOuterAlt(_localctx, 5);
 				{
-				State = 587;
+				State = 671;
 				Match(STRING);
+				}
+				break;
+			case ELEMENT:
+				_localctx = new Element_stringContext(_localctx);
+				EnterOuterAlt(_localctx, 6);
+				{
+				State = 672;
+				Match(ELEMENT);
 				}
 				break;
 			case NONE:
 				_localctx = new NoneContext(_localctx);
-				EnterOuterAlt(_localctx, 6);
+				EnterOuterAlt(_localctx, 7);
 				{
-				State = 588;
+				State = 673;
 				Match(NONE);
 				}
 				break;
 			case FUNCTION:
 				_localctx = new ClosureContext(_localctx);
-				EnterOuterAlt(_localctx, 7);
+				EnterOuterAlt(_localctx, 8);
 				{
-				State = 589;
+				State = 674;
 				Match(FUNCTION);
-				State = 590;
+				State = 675;
 				Match(LEFT_PAREN);
-				State = 591;
+				State = 676;
 				((ClosureContext)_localctx).args = arg_decl_list();
-				State = 592;
+				State = 677;
 				Match(RIGHT_PAREN);
-				State = 593;
+				State = 678;
 				Match(LEFT_BRACE);
-				State = 594;
+				State = 679;
 				((ClosureContext)_localctx).body = function_body();
-				State = 595;
+				State = 680;
 				Match(RIGHT_BRACE);
 				}
 				break;
 			case LEFT_BRACKET:
 				_localctx = new List_valueContext(_localctx);
-				EnterOuterAlt(_localctx, 8);
+				EnterOuterAlt(_localctx, 9);
 				{
-				State = 597;
+				State = 682;
 				list();
 				}
 				break;
 			case LEFT_BRACE:
 				_localctx = new Object_valueContext(_localctx);
-				EnterOuterAlt(_localctx, 9);
+				EnterOuterAlt(_localctx, 10);
 				{
-				State = 598;
+				State = 683;
 				obj();
 				}
 				break;
@@ -5668,8 +6508,10 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Require_guidContext : Require_expressionContext {
-		public IToken modid;
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
+		public Sassy_stringContext modid;
+		[System.Diagnostics.DebuggerNonUserCode] public Sassy_stringContext sassy_string() {
+			return GetRuleContext<Sassy_stringContext>(0);
+		}
 		public Require_guidContext(Require_expressionContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
@@ -5733,7 +6575,7 @@ public partial class sassy_parser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 609;
+			State = 694;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case LEFT_PAREN:
@@ -5742,11 +6584,11 @@ public partial class sassy_parser : Parser {
 				Context = _localctx;
 				_prevctx = _localctx;
 
-				State = 602;
+				State = 687;
 				Match(LEFT_PAREN);
-				State = 603;
+				State = 688;
 				((Require_subContext)_localctx).internal_expr = require_expression(0);
-				State = 604;
+				State = 689;
 				Match(RIGHT_PAREN);
 				}
 				break;
@@ -5755,47 +6597,48 @@ public partial class sassy_parser : Parser {
 				_localctx = new Require_notContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 606;
+				State = 691;
 				Match(NOT);
-				State = 607;
+				State = 692;
 				((Require_notContext)_localctx).internal_expr = require_expression(2);
 				}
 				break;
 			case STRING:
+			case ELEMENT:
 				{
 				_localctx = new Require_guidContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 608;
-				((Require_guidContext)_localctx).modid = Match(STRING);
+				State = 693;
+				((Require_guidContext)_localctx).modid = sassy_string();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 619;
+			State = 704;
 			ErrorHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(TokenStream,44,Context);
+			_alt = Interpreter.AdaptivePredict(TokenStream,50,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( ParseListeners!=null )
 						TriggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					State = 617;
+					State = 702;
 					ErrorHandler.Sync(this);
-					switch ( Interpreter.AdaptivePredict(TokenStream,43,Context) ) {
+					switch ( Interpreter.AdaptivePredict(TokenStream,49,Context) ) {
 					case 1:
 						{
 						_localctx = new Require_andContext(new Require_expressionContext(_parentctx, _parentState));
 						((Require_andContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_require_expression);
-						State = 611;
+						State = 696;
 						if (!(Precpred(Context, 4))) throw new FailedPredicateException(this, "Precpred(Context, 4)");
-						State = 612;
+						State = 697;
 						Match(AND);
-						State = 613;
+						State = 698;
 						((Require_andContext)_localctx).rhs = require_expression(5);
 						}
 						break;
@@ -5804,20 +6647,20 @@ public partial class sassy_parser : Parser {
 						_localctx = new Require_orContext(new Require_expressionContext(_parentctx, _parentState));
 						((Require_orContext)_localctx).lhs = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_require_expression);
-						State = 614;
+						State = 699;
 						if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
-						State = 615;
+						State = 700;
 						Match(OR);
-						State = 616;
+						State = 701;
 						((Require_orContext)_localctx).rhs = require_expression(4);
 						}
 						break;
 					}
 					} 
 				}
-				State = 621;
+				State = 706;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,44,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,50,Context);
 			}
 			}
 		}
@@ -5871,21 +6714,21 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 622;
+			State = 707;
 			Match(LEFT_BRACKET);
-			State = 623;
+			State = 708;
 			_localctx.@values = list_values();
-			State = 625;
+			State = 710;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==COMMA) {
 				{
-				State = 624;
+				State = 709;
 				Match(COMMA);
 				}
 			}
 
-			State = 627;
+			State = 712;
 			Match(RIGHT_BRACKET);
 			}
 		}
@@ -5901,11 +6744,11 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class List_valuesContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(sassy_parser.COMMA); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA(int i) {
@@ -5943,38 +6786,38 @@ public partial class sassy_parser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 639;
+			State = 724;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,48,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,54,Context) ) {
 			case 1:
 				{
-				State = 630;
+				State = 715;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8574872954515488784L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 19L) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8070758418052284432L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 9095L) != 0)) {
 					{
-					State = 629;
-					sub_expression(0);
+					State = 714;
+					expression(0);
 					}
 				}
 
-				State = 636;
+				State = 721;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,47,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,53,Context);
 				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
-						State = 632;
+						State = 717;
 						Match(COMMA);
-						State = 633;
-						sub_expression(0);
+						State = 718;
+						expression(0);
 						}
 						} 
 					}
-					State = 638;
+					State = 723;
 					ErrorHandler.Sync(this);
-					_alt = Interpreter.AdaptivePredict(TokenStream,47,Context);
+					_alt = Interpreter.AdaptivePredict(TokenStream,53,Context);
 				}
 				}
 				break;
@@ -6031,21 +6874,21 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 641;
+			State = 726;
 			Match(LEFT_BRACE);
-			State = 642;
+			State = 727;
 			_localctx.@values = obj_values();
-			State = 644;
+			State = 729;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==COMMA) {
 				{
-				State = 643;
+				State = 728;
 				Match(COMMA);
 				}
 			}
 
-			State = 646;
+			State = 731;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -6103,38 +6946,38 @@ public partial class sassy_parser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 658;
+			State = 743;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,52,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,58,Context) ) {
 			case 1:
 				{
-				State = 649;
+				State = 734;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==STRING || _la==ELEMENT) {
 					{
-					State = 648;
+					State = 733;
 					key_value();
 					}
 				}
 
-				State = 655;
+				State = 740;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,51,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,57,Context);
 				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
-						State = 651;
+						State = 736;
 						Match(COMMA);
-						State = 652;
+						State = 737;
 						key_value();
 						}
 						} 
 					}
-					State = 657;
+					State = 742;
 					ErrorHandler.Sync(this);
-					_alt = Interpreter.AdaptivePredict(TokenStream,51,Context);
+					_alt = Interpreter.AdaptivePredict(TokenStream,57,Context);
 				}
 				}
 				break;
@@ -6166,11 +7009,11 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class String_keyContext : Key_valueContext {
 		public IToken key;
-		public Sub_expressionContext val;
+		public ExpressionContext val;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(sassy_parser.STRING, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public String_keyContext(Key_valueContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -6192,11 +7035,11 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class Literal_keyContext : Key_valueContext {
 		public IToken key;
-		public Sub_expressionContext val;
+		public ExpressionContext val;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ELEMENT() { return GetToken(sassy_parser.ELEMENT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public Literal_keyContext(Key_valueContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -6222,31 +7065,31 @@ public partial class sassy_parser : Parser {
 		Key_valueContext _localctx = new Key_valueContext(Context, State);
 		EnterRule(_localctx, 82, RULE_key_value);
 		try {
-			State = 666;
+			State = 751;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case ELEMENT:
 				_localctx = new Literal_keyContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 660;
+				State = 745;
 				((Literal_keyContext)_localctx).key = Match(ELEMENT);
-				State = 661;
+				State = 746;
 				Match(COLON);
-				State = 662;
-				((Literal_keyContext)_localctx).val = sub_expression(0);
+				State = 747;
+				((Literal_keyContext)_localctx).val = expression(0);
 				}
 				break;
 			case STRING:
 				_localctx = new String_keyContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 663;
+				State = 748;
 				((String_keyContext)_localctx).key = Match(STRING);
-				State = 664;
+				State = 749;
 				Match(COLON);
-				State = 665;
-				((String_keyContext)_localctx).val = sub_expression(0);
+				State = 750;
+				((String_keyContext)_localctx).val = expression(0);
 				}
 				break;
 			default:
@@ -6307,48 +7150,48 @@ public partial class sassy_parser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 678;
+			State = 763;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,56,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,62,Context) ) {
 			case 1:
 				{
-				State = 669;
+				State = 754;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8574872954515488784L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 19L) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8070758418052284432L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 9095L) != 0)) {
 					{
-					State = 668;
+					State = 753;
 					argument();
 					}
 				}
 
-				State = 675;
+				State = 760;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,55,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,61,Context);
 				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
-						State = 671;
+						State = 756;
 						Match(COMMA);
-						State = 672;
+						State = 757;
 						argument();
 						}
 						} 
 					}
-					State = 677;
+					State = 762;
 					ErrorHandler.Sync(this);
-					_alt = Interpreter.AdaptivePredict(TokenStream,55,Context);
+					_alt = Interpreter.AdaptivePredict(TokenStream,61,Context);
 				}
 				}
 				break;
 			}
-			State = 681;
+			State = 766;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==COMMA) {
 				{
-				State = 680;
+				State = 765;
 				Match(COMMA);
 				}
 			}
@@ -6380,11 +7223,11 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class Named_argumentContext : ArgumentContext {
 		public IToken key;
-		public Sub_expressionContext val;
+		public ExpressionContext val;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public Named_argumentContext(ArgumentContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -6405,9 +7248,9 @@ public partial class sassy_parser : Parser {
 		}
 	}
 	public partial class Unnamed_argumentContext : ArgumentContext {
-		public Sub_expressionContext val;
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		public ExpressionContext val;
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public Unnamed_argumentContext(ArgumentContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -6433,27 +7276,27 @@ public partial class sassy_parser : Parser {
 		ArgumentContext _localctx = new ArgumentContext(Context, State);
 		EnterRule(_localctx, 86, RULE_argument);
 		try {
-			State = 687;
+			State = 772;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,58,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,64,Context) ) {
 			case 1:
 				_localctx = new Named_argumentContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 683;
+				State = 768;
 				((Named_argumentContext)_localctx).key = Match(VARIABLE);
-				State = 684;
+				State = 769;
 				Match(COLON);
-				State = 685;
-				((Named_argumentContext)_localctx).val = sub_expression(0);
+				State = 770;
+				((Named_argumentContext)_localctx).val = expression(0);
 				}
 				break;
 			case 2:
 				_localctx = new Unnamed_argumentContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 686;
-				((Unnamed_argumentContext)_localctx).val = sub_expression(0);
+				State = 771;
+				((Unnamed_argumentContext)_localctx).val = expression(0);
 				}
 				break;
 			}
@@ -6512,48 +7355,48 @@ public partial class sassy_parser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 699;
+			State = 784;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,61,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,67,Context) ) {
 			case 1:
 				{
-				State = 690;
+				State = 775;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==VARIABLE) {
 					{
-					State = 689;
+					State = 774;
 					arg_decl();
 					}
 				}
 
-				State = 696;
+				State = 781;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,60,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,66,Context);
 				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
-						State = 692;
+						State = 777;
 						Match(COMMA);
-						State = 693;
+						State = 778;
 						arg_decl();
 						}
 						} 
 					}
-					State = 698;
+					State = 783;
 					ErrorHandler.Sync(this);
-					_alt = Interpreter.AdaptivePredict(TokenStream,60,Context);
+					_alt = Interpreter.AdaptivePredict(TokenStream,66,Context);
 				}
 				}
 				break;
 			}
-			State = 702;
+			State = 787;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==COMMA) {
 				{
-				State = 701;
+				State = 786;
 				Match(COMMA);
 				}
 			}
@@ -6606,11 +7449,11 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class Argument_with_defaultContext : Arg_declContext {
 		public IToken name;
-		public Sub_expressionContext val;
+		public ExpressionContext val;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(sassy_parser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		public Argument_with_defaultContext(Arg_declContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
@@ -6636,14 +7479,14 @@ public partial class sassy_parser : Parser {
 		Arg_declContext _localctx = new Arg_declContext(Context, State);
 		EnterRule(_localctx, 90, RULE_arg_decl);
 		try {
-			State = 708;
+			State = 793;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,63,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,69,Context) ) {
 			case 1:
 				_localctx = new Argument_without_defaultContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 704;
+				State = 789;
 				((Argument_without_defaultContext)_localctx).name = Match(VARIABLE);
 				}
 				break;
@@ -6651,12 +7494,12 @@ public partial class sassy_parser : Parser {
 				_localctx = new Argument_with_defaultContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 705;
+				State = 790;
 				((Argument_with_defaultContext)_localctx).name = Match(VARIABLE);
-				State = 706;
+				State = 791;
 				Match(COLON);
-				State = 707;
-				((Argument_with_defaultContext)_localctx).val = sub_expression(0);
+				State = 792;
+				((Argument_with_defaultContext)_localctx).val = expression(0);
 				}
 				break;
 			}
@@ -6710,17 +7553,17 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 713;
+			State = 798;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 				{
 				{
-				State = 710;
+				State = 795;
 				function_statement();
 				}
 				}
-				State = 715;
+				State = 800;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
@@ -6784,48 +7627,48 @@ public partial class sassy_parser : Parser {
 		Function_statementContext _localctx = new Function_statementContext(Context, State);
 		EnterRule(_localctx, 94, RULE_function_statement);
 		try {
-			State = 722;
+			State = 807;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case VARIABLE:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 716;
+				State = 801;
 				var_decl();
 				}
 				break;
 			case PRE_IF:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 717;
+				State = 802;
 				fn_level_conditional();
 				}
 				break;
 			case RETURN:
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 718;
+				State = 803;
 				fn_return();
 				}
 				break;
 			case FOR:
 				EnterOuterAlt(_localctx, 4);
 				{
-				State = 719;
+				State = 804;
 				for_loop();
 				}
 				break;
 			case EACH:
 				EnterOuterAlt(_localctx, 5);
 				{
-				State = 720;
+				State = 805;
 				each_loop();
 				}
 				break;
 			case WHILE:
 				EnterOuterAlt(_localctx, 6);
 				{
-				State = 721;
+				State = 806;
 				while_loop();
 				}
 				break;
@@ -6845,14 +7688,14 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Fn_level_conditionalContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Function_statementContext body;
 		public Fn_level_elseContext els;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRE_IF() { return GetToken(sassy_parser.PRE_IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
 			return GetRuleContexts<Function_statementContext>();
@@ -6894,34 +7737,34 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 724;
+			State = 809;
 			Match(PRE_IF);
-			State = 725;
-			_localctx.cond = sub_expression(0);
-			State = 726;
+			State = 810;
+			_localctx.cond = expression(0);
+			State = 811;
 			Match(LEFT_BRACE);
-			State = 730;
+			State = 815;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 				{
 				{
-				State = 727;
+				State = 812;
 				_localctx.body = function_statement();
 				}
 				}
-				State = 732;
+				State = 817;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 733;
+			State = 818;
 			Match(RIGHT_BRACE);
-			State = 735;
+			State = 820;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==PRE_ELSE || _la==PRE_ELSE_IF) {
 				{
-				State = 734;
+				State = 819;
 				_localctx.els = fn_level_else();
 				}
 			}
@@ -6974,20 +7817,20 @@ public partial class sassy_parser : Parser {
 		Fn_level_elseContext _localctx = new Fn_level_elseContext(Context, State);
 		EnterRule(_localctx, 98, RULE_fn_level_else);
 		try {
-			State = 739;
+			State = 824;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case PRE_ELSE:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 737;
+				State = 822;
 				fn_level_else_else();
 				}
 				break;
 			case PRE_ELSE_IF:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 738;
+				State = 823;
 				fn_level_else_if();
 				}
 				break;
@@ -7048,25 +7891,25 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 741;
+			State = 826;
 			Match(PRE_ELSE);
-			State = 742;
+			State = 827;
 			Match(LEFT_BRACE);
-			State = 746;
+			State = 831;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 				{
 				{
-				State = 743;
+				State = 828;
 				_localctx.body = function_statement();
 				}
 				}
-				State = 748;
+				State = 833;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 749;
+			State = 834;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -7082,14 +7925,14 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class Fn_level_else_ifContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Function_statementContext body;
 		public Fn_level_elseContext els;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRE_ELSE_IF() { return GetToken(sassy_parser.PRE_ELSE_IF, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
 			return GetRuleContexts<Function_statementContext>();
@@ -7131,34 +7974,34 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 751;
+			State = 836;
 			Match(PRE_ELSE_IF);
-			State = 752;
-			_localctx.cond = sub_expression(0);
-			State = 753;
+			State = 837;
+			_localctx.cond = expression(0);
+			State = 838;
 			Match(LEFT_BRACE);
-			State = 757;
+			State = 842;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 				{
 				{
-				State = 754;
+				State = 839;
 				_localctx.body = function_statement();
 				}
 				}
-				State = 759;
+				State = 844;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 760;
+			State = 845;
 			Match(RIGHT_BRACE);
-			State = 762;
+			State = 847;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==PRE_ELSE || _la==PRE_ELSE_IF) {
 				{
-				State = 761;
+				State = 846;
 				_localctx.els = fn_level_else();
 				}
 			}
@@ -7178,8 +8021,8 @@ public partial class sassy_parser : Parser {
 
 	public partial class Fn_returnContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RETURN() { return GetToken(sassy_parser.RETURN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SEMICOLON() { return GetToken(sassy_parser.SEMICOLON, 0); }
 		public Fn_returnContext(ParserRuleContext parent, int invokingState)
@@ -7212,11 +8055,11 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 764;
+			State = 849;
 			Match(RETURN);
-			State = 765;
-			sub_expression(0);
-			State = 766;
+			State = 850;
+			expression(0);
+			State = 851;
 			Match(SEMICOLON);
 			}
 		}
@@ -7271,15 +8114,15 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 768;
+			State = 853;
 			Match(INCLUDE);
-			State = 769;
+			State = 854;
 			_localctx.mixin = Match(ELEMENT);
-			State = 770;
+			State = 855;
 			Match(LEFT_PAREN);
-			State = 771;
+			State = 856;
 			_localctx.args = argument_list();
-			State = 772;
+			State = 857;
 			Match(RIGHT_PAREN);
 			}
 		}
@@ -7308,8 +8151,8 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class For_to_loopContext : For_loopContext {
 		public IToken idx;
-		public Sub_expressionContext start;
-		public Sub_expressionContext end;
+		public ExpressionContext for_start;
+		public ExpressionContext end;
 		public Function_statementContext body;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FOR() { return GetToken(sassy_parser.FOR, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FROM() { return GetToken(sassy_parser.FROM, 0); }
@@ -7317,11 +8160,11 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
 			return GetRuleContexts<Function_statementContext>();
@@ -7349,8 +8192,8 @@ public partial class sassy_parser : Parser {
 	}
 	public partial class For_through_loopContext : For_loopContext {
 		public IToken idx;
-		public Sub_expressionContext start;
-		public Sub_expressionContext end;
+		public ExpressionContext for_start;
+		public ExpressionContext end;
 		public Function_statementContext body;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FOR() { return GetToken(sassy_parser.FOR, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FROM() { return GetToken(sassy_parser.FROM, 0); }
@@ -7358,11 +8201,11 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE() { return GetToken(sassy_parser.VARIABLE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext[] sub_expression() {
-			return GetRuleContexts<Sub_expressionContext>();
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext[] expression() {
+			return GetRuleContexts<ExpressionContext>();
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression(int i) {
-			return GetRuleContext<Sub_expressionContext>(i);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression(int i) {
+			return GetRuleContext<ExpressionContext>(i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
 			return GetRuleContexts<Function_statementContext>();
@@ -7395,42 +8238,42 @@ public partial class sassy_parser : Parser {
 		EnterRule(_localctx, 108, RULE_for_loop);
 		int _la;
 		try {
-			State = 804;
+			State = 889;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,74,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,80,Context) ) {
 			case 1:
 				_localctx = new For_to_loopContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 774;
+				State = 859;
 				Match(FOR);
-				State = 775;
+				State = 860;
 				((For_to_loopContext)_localctx).idx = Match(VARIABLE);
-				State = 776;
+				State = 861;
 				Match(FROM);
-				State = 777;
-				((For_to_loopContext)_localctx).start = sub_expression(0);
-				State = 778;
+				State = 862;
+				((For_to_loopContext)_localctx).for_start = expression(0);
+				State = 863;
 				Match(TO);
-				State = 779;
-				((For_to_loopContext)_localctx).end = sub_expression(0);
-				State = 780;
+				State = 864;
+				((For_to_loopContext)_localctx).end = expression(0);
+				State = 865;
 				Match(LEFT_BRACE);
-				State = 784;
+				State = 869;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 					{
 					{
-					State = 781;
+					State = 866;
 					((For_to_loopContext)_localctx).body = function_statement();
 					}
 					}
-					State = 786;
+					State = 871;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
-				State = 787;
+				State = 872;
 				Match(RIGHT_BRACE);
 				}
 				break;
@@ -7438,35 +8281,35 @@ public partial class sassy_parser : Parser {
 				_localctx = new For_through_loopContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 789;
+				State = 874;
 				Match(FOR);
-				State = 790;
+				State = 875;
 				((For_through_loopContext)_localctx).idx = Match(VARIABLE);
-				State = 791;
+				State = 876;
 				Match(FROM);
-				State = 792;
-				((For_through_loopContext)_localctx).start = sub_expression(0);
-				State = 793;
+				State = 877;
+				((For_through_loopContext)_localctx).for_start = expression(0);
+				State = 878;
 				Match(THROUGH);
-				State = 794;
-				((For_through_loopContext)_localctx).end = sub_expression(0);
-				State = 795;
+				State = 879;
+				((For_through_loopContext)_localctx).end = expression(0);
+				State = 880;
 				Match(LEFT_BRACE);
-				State = 799;
+				State = 884;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 					{
 					{
-					State = 796;
+					State = 881;
 					((For_through_loopContext)_localctx).body = function_statement();
 					}
 					}
-					State = 801;
+					State = 886;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
-				State = 802;
+				State = 887;
 				Match(RIGHT_BRACE);
 				}
 				break;
@@ -7486,7 +8329,7 @@ public partial class sassy_parser : Parser {
 	public partial class Each_loopContext : ParserRuleContext {
 		public IToken key;
 		public IToken val;
-		public Sub_expressionContext iter;
+		public ExpressionContext iter;
 		public Function_statementContext body;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EACH() { return GetToken(sassy_parser.EACH, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IN() { return GetToken(sassy_parser.IN, 0); }
@@ -7496,8 +8339,8 @@ public partial class sassy_parser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode VARIABLE(int i) {
 			return GetToken(sassy_parser.VARIABLE, i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA() { return GetToken(sassy_parser.COMMA, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
@@ -7537,43 +8380,43 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 806;
+			State = 891;
 			Match(EACH);
-			State = 809;
+			State = 894;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,75,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,81,Context) ) {
 			case 1:
 				{
-				State = 807;
+				State = 892;
 				_localctx.key = Match(VARIABLE);
-				State = 808;
+				State = 893;
 				Match(COMMA);
 				}
 				break;
 			}
-			State = 811;
+			State = 896;
 			_localctx.val = Match(VARIABLE);
-			State = 812;
+			State = 897;
 			Match(IN);
-			State = 813;
-			_localctx.iter = sub_expression(0);
-			State = 814;
+			State = 898;
+			_localctx.iter = expression(0);
+			State = 899;
 			Match(LEFT_BRACE);
-			State = 818;
+			State = 903;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 				{
 				{
-				State = 815;
+				State = 900;
 				_localctx.body = function_statement();
 				}
 				}
-				State = 820;
+				State = 905;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 821;
+			State = 906;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -7589,13 +8432,13 @@ public partial class sassy_parser : Parser {
 	}
 
 	public partial class While_loopContext : ParserRuleContext {
-		public Sub_expressionContext cond;
+		public ExpressionContext cond;
 		public Function_statementContext body;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WHILE() { return GetToken(sassy_parser.WHILE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LEFT_BRACE() { return GetToken(sassy_parser.LEFT_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RIGHT_BRACE() { return GetToken(sassy_parser.RIGHT_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public Sub_expressionContext sub_expression() {
-			return GetRuleContext<Sub_expressionContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
+			return GetRuleContext<ExpressionContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public Function_statementContext[] function_statement() {
 			return GetRuleContexts<Function_statementContext>();
@@ -7634,27 +8477,27 @@ public partial class sassy_parser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 823;
+			State = 908;
 			Match(WHILE);
-			State = 824;
-			_localctx.cond = sub_expression(0);
-			State = 825;
+			State = 909;
+			_localctx.cond = expression(0);
+			State = 910;
 			Match(LEFT_BRACE);
-			State = 829;
+			State = 914;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (((((_la - 5)) & ~0x3f) == 0 && ((1L << (_la - 5)) & 1152921504606978609L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 4212256L) != 0) || _la==VARIABLE) {
 				{
 				{
-				State = 826;
+				State = 911;
 				_localctx.body = function_statement();
 				}
 				}
-				State = 831;
+				State = 916;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 832;
+			State = 917;
 			Match(RIGHT_BRACE);
 			}
 		}
@@ -7671,29 +8514,29 @@ public partial class sassy_parser : Parser {
 
 	public override bool Sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
 		switch (ruleIndex) {
-		case 20: return selector_sempred((SelectorContext)_localctx, predIndex);
-		case 21: return selector_no_children_sempred((Selector_no_childrenContext)_localctx, predIndex);
-		case 34: return sub_expression_sempred((Sub_expressionContext)_localctx, predIndex);
+		case 21: return selector_sempred((SelectorContext)_localctx, predIndex);
+		case 22: return selector_no_children_sempred((Selector_no_childrenContext)_localctx, predIndex);
+		case 34: return expression_sempred((ExpressionContext)_localctx, predIndex);
 		case 36: return require_expression_sempred((Require_expressionContext)_localctx, predIndex);
 		}
 		return true;
 	}
 	private bool selector_sempred(SelectorContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return Precpred(Context, 7);
-		case 1: return Precpred(Context, 6);
-		case 2: return Precpred(Context, 5);
+		case 0: return Precpred(Context, 10);
+		case 1: return Precpred(Context, 9);
+		case 2: return Precpred(Context, 8);
 		}
 		return true;
 	}
 	private bool selector_no_children_sempred(Selector_no_childrenContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 3: return Precpred(Context, 6);
-		case 4: return Precpred(Context, 5);
+		case 3: return Precpred(Context, 9);
+		case 4: return Precpred(Context, 8);
 		}
 		return true;
 	}
-	private bool sub_expression_sempred(Sub_expressionContext _localctx, int predIndex) {
+	private bool expression_sempred(ExpressionContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 5: return Precpred(Context, 14);
 		case 6: return Precpred(Context, 13);
@@ -7724,7 +8567,7 @@ public partial class sassy_parser : Parser {
 	}
 
 	private static int[] _serializedATN = {
-		4,1,69,835,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		4,1,77,920,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
 		7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,
 		2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,
 		2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,7,27,2,28,7,28,
@@ -7734,283 +8577,316 @@ public partial class sassy_parser : Parser {
 		2,50,7,50,2,51,7,51,2,52,7,52,2,53,7,53,2,54,7,54,2,55,7,55,2,56,7,56,
 		1,0,4,0,116,8,0,11,0,12,0,117,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 		1,1,1,1,3,1,132,8,1,1,2,1,2,1,2,1,2,1,3,1,3,1,3,5,3,141,8,3,10,3,12,3,
-		144,9,3,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,1,6,1,
-		6,1,6,1,6,1,6,1,6,1,6,1,6,5,6,168,8,6,10,6,12,6,171,9,6,1,6,1,6,3,6,175,
-		8,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,1,
-		8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,3,8,203,8,8,1,9,1,9,1,9,1,9,1,9,
-		1,9,3,9,211,8,9,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,11,1,11,
-		1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,12,1,12,1,12,1,12,5,12,235,8,12,10,
-		12,12,12,238,9,12,1,12,1,12,3,12,242,8,12,1,13,1,13,3,13,246,8,13,1,14,
-		1,14,1,14,5,14,251,8,14,10,14,12,14,254,9,14,1,14,1,14,1,15,1,15,1,15,
-		1,15,5,15,262,8,15,10,15,12,15,265,9,15,1,15,1,15,3,15,269,8,15,1,16,1,
-		16,1,16,1,16,1,16,1,17,5,17,277,8,17,10,17,12,17,280,9,17,1,17,1,17,1,
-		18,1,18,1,18,1,18,1,18,1,18,3,18,290,8,18,1,19,1,19,1,19,1,19,5,19,296,
-		8,19,10,19,12,19,299,9,19,3,19,301,8,19,1,19,1,19,1,20,1,20,1,20,1,20,
-		1,20,1,20,1,20,5,20,312,8,20,10,20,12,20,315,9,20,1,20,1,20,1,20,1,20,
-		1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,3,20,332,8,20,1,
-		20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,5,20,342,8,20,10,20,12,20,345,9,
-		20,1,21,1,21,1,21,1,21,1,21,1,21,1,21,5,21,354,8,21,10,21,12,21,357,9,
-		21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,
-		21,3,21,373,8,21,1,21,1,21,1,21,1,21,1,21,5,21,380,8,21,10,21,12,21,383,
-		9,21,1,22,5,22,386,8,22,10,22,12,22,389,9,22,1,23,1,23,1,23,1,23,1,23,
-		1,23,1,23,1,23,3,23,399,8,23,1,24,1,24,1,24,1,24,5,24,405,8,24,10,24,12,
-		24,408,9,24,1,24,1,24,3,24,412,8,24,1,25,1,25,3,25,416,8,25,1,26,1,26,
-		1,26,5,26,421,8,26,10,26,12,26,424,9,26,1,26,1,26,1,27,1,27,1,27,1,27,
-		5,27,432,8,27,10,27,12,27,435,9,27,1,27,1,27,3,27,439,8,27,1,28,1,28,1,
-		28,1,28,1,29,1,29,1,29,1,30,1,30,1,30,1,30,1,31,1,31,3,31,454,8,31,1,31,
-		1,31,1,31,1,31,1,31,1,31,3,31,462,8,31,1,31,1,31,1,31,1,31,3,31,468,8,
-		31,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,1,32,3,32,482,
-		8,32,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,3,33,493,8,33,1,34,1,
+		144,9,3,1,4,1,4,3,4,148,8,4,1,5,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,1,6,1,
+		6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,
+		1,6,3,6,179,8,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,
+		7,1,7,5,7,196,8,7,10,7,12,7,199,9,7,1,7,1,7,1,7,3,7,204,8,7,1,8,1,8,1,
+		8,1,8,1,8,1,8,1,8,1,8,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,9,
+		1,9,1,9,1,9,1,9,1,9,1,9,3,9,232,8,9,1,10,1,10,1,10,1,10,1,10,1,10,1,10,
+		1,10,3,10,242,8,10,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,12,1,
+		12,1,12,1,12,1,12,1,12,1,12,1,12,1,12,1,13,1,13,1,13,1,13,5,13,266,8,13,
+		10,13,12,13,269,9,13,1,13,1,13,3,13,273,8,13,1,14,1,14,3,14,277,8,14,1,
+		15,1,15,1,15,5,15,282,8,15,10,15,12,15,285,9,15,1,15,1,15,1,16,1,16,1,
+		16,1,16,5,16,293,8,16,10,16,12,16,296,9,16,1,16,1,16,3,16,300,8,16,1,17,
+		1,17,1,17,1,17,1,17,1,18,5,18,308,8,18,10,18,12,18,311,9,18,1,18,1,18,
+		1,19,1,19,1,19,1,19,1,19,1,19,3,19,321,8,19,1,20,1,20,1,20,1,20,5,20,327,
+		8,20,10,20,12,20,330,9,20,3,20,332,8,20,1,20,1,20,1,21,1,21,1,21,1,21,
+		1,21,1,21,1,21,1,21,1,21,5,21,345,8,21,10,21,12,21,348,9,21,1,21,1,21,
+		1,21,1,21,1,21,5,21,355,8,21,10,21,12,21,358,9,21,1,21,1,21,1,21,1,21,
+		1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,
+		1,21,1,21,1,21,1,21,1,21,3,21,383,8,21,1,21,1,21,1,21,1,21,1,21,1,21,1,
+		21,1,21,5,21,393,8,21,10,21,12,21,396,9,21,1,22,1,22,1,22,1,22,1,22,1,
+		22,1,22,1,22,1,22,5,22,407,8,22,10,22,12,22,410,9,22,1,22,1,22,1,22,1,
+		22,1,22,5,22,417,8,22,10,22,12,22,420,9,22,1,22,1,22,1,22,1,22,1,22,1,
+		22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,
+		22,1,22,3,22,443,8,22,1,22,1,22,1,22,1,22,1,22,5,22,450,8,22,10,22,12,
+		22,453,9,22,1,23,5,23,456,8,23,10,23,12,23,459,9,23,1,24,1,24,1,24,1,24,
+		1,24,1,24,1,24,1,24,3,24,469,8,24,1,25,1,25,1,25,1,25,5,25,475,8,25,10,
+		25,12,25,478,9,25,1,25,1,25,3,25,482,8,25,1,26,1,26,3,26,486,8,26,1,27,
+		1,27,1,27,5,27,491,8,27,10,27,12,27,494,9,27,1,27,1,27,1,28,1,28,1,28,
+		1,28,5,28,502,8,28,10,28,12,28,505,9,28,1,28,1,28,3,28,509,8,28,1,29,1,
+		29,1,29,1,29,1,30,1,30,1,30,1,31,1,31,1,31,1,31,1,32,1,32,3,32,524,8,32,
+		1,32,1,32,1,32,1,32,1,32,1,32,3,32,532,8,32,1,32,1,32,1,32,1,32,1,32,1,
+		32,3,32,540,8,32,1,32,1,32,1,32,1,32,1,32,1,32,3,32,548,8,32,1,32,1,32,
+		1,32,1,32,1,32,1,32,3,32,556,8,32,1,32,1,32,1,32,1,32,3,32,562,8,32,1,
+		33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,1,33,3,33,576,8,33,
+		1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,
+		1,34,1,34,1,34,1,34,1,34,1,34,3,34,598,8,34,1,34,1,34,1,34,1,34,1,34,1,
 		34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,
-		34,1,34,1,34,1,34,3,34,514,8,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,
-		1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,
-		1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,
-		1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,
-		1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,5,34,
-		579,8,34,10,34,12,34,582,9,34,1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,
-		1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,3,35,600,8,35,1,36,1,36,1,36,1,
-		36,1,36,1,36,1,36,1,36,3,36,610,8,36,1,36,1,36,1,36,1,36,1,36,1,36,5,36,
-		618,8,36,10,36,12,36,621,9,36,1,37,1,37,1,37,3,37,626,8,37,1,37,1,37,1,
-		38,3,38,631,8,38,1,38,1,38,5,38,635,8,38,10,38,12,38,638,9,38,3,38,640,
-		8,38,1,39,1,39,1,39,3,39,645,8,39,1,39,1,39,1,40,3,40,650,8,40,1,40,1,
-		40,5,40,654,8,40,10,40,12,40,657,9,40,3,40,659,8,40,1,41,1,41,1,41,1,41,
-		1,41,1,41,3,41,667,8,41,1,42,3,42,670,8,42,1,42,1,42,5,42,674,8,42,10,
-		42,12,42,677,9,42,3,42,679,8,42,1,42,3,42,682,8,42,1,43,1,43,1,43,1,43,
-		3,43,688,8,43,1,44,3,44,691,8,44,1,44,1,44,5,44,695,8,44,10,44,12,44,698,
-		9,44,3,44,700,8,44,1,44,3,44,703,8,44,1,45,1,45,1,45,1,45,3,45,709,8,45,
-		1,46,5,46,712,8,46,10,46,12,46,715,9,46,1,47,1,47,1,47,1,47,1,47,1,47,
-		3,47,723,8,47,1,48,1,48,1,48,1,48,5,48,729,8,48,10,48,12,48,732,9,48,1,
-		48,1,48,3,48,736,8,48,1,49,1,49,3,49,740,8,49,1,50,1,50,1,50,5,50,745,
-		8,50,10,50,12,50,748,9,50,1,50,1,50,1,51,1,51,1,51,1,51,5,51,756,8,51,
-		10,51,12,51,759,9,51,1,51,1,51,3,51,763,8,51,1,52,1,52,1,52,1,52,1,53,
-		1,53,1,53,1,53,1,53,1,53,1,54,1,54,1,54,1,54,1,54,1,54,1,54,1,54,5,54,
-		783,8,54,10,54,12,54,786,9,54,1,54,1,54,1,54,1,54,1,54,1,54,1,54,1,54,
-		1,54,1,54,5,54,798,8,54,10,54,12,54,801,9,54,1,54,1,54,3,54,805,8,54,1,
-		55,1,55,1,55,3,55,810,8,55,1,55,1,55,1,55,1,55,1,55,5,55,817,8,55,10,55,
-		12,55,820,9,55,1,55,1,55,1,56,1,56,1,56,1,56,5,56,828,8,56,10,56,12,56,
-		831,9,56,1,56,1,56,1,56,0,4,40,42,68,72,57,0,2,4,6,8,10,12,14,16,18,20,
-		22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,
-		70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,
-		0,0,927,0,115,1,0,0,0,2,131,1,0,0,0,4,133,1,0,0,0,6,137,1,0,0,0,8,145,
-		1,0,0,0,10,149,1,0,0,0,12,174,1,0,0,0,14,176,1,0,0,0,16,202,1,0,0,0,18,
-		210,1,0,0,0,20,212,1,0,0,0,22,221,1,0,0,0,24,230,1,0,0,0,26,245,1,0,0,
-		0,28,247,1,0,0,0,30,257,1,0,0,0,32,270,1,0,0,0,34,278,1,0,0,0,36,289,1,
-		0,0,0,38,291,1,0,0,0,40,331,1,0,0,0,42,372,1,0,0,0,44,387,1,0,0,0,46,398,
-		1,0,0,0,48,400,1,0,0,0,50,415,1,0,0,0,52,417,1,0,0,0,54,427,1,0,0,0,56,
-		440,1,0,0,0,58,444,1,0,0,0,60,447,1,0,0,0,62,467,1,0,0,0,64,481,1,0,0,
-		0,66,492,1,0,0,0,68,513,1,0,0,0,70,599,1,0,0,0,72,609,1,0,0,0,74,622,1,
-		0,0,0,76,639,1,0,0,0,78,641,1,0,0,0,80,658,1,0,0,0,82,666,1,0,0,0,84,678,
-		1,0,0,0,86,687,1,0,0,0,88,699,1,0,0,0,90,708,1,0,0,0,92,713,1,0,0,0,94,
-		722,1,0,0,0,96,724,1,0,0,0,98,739,1,0,0,0,100,741,1,0,0,0,102,751,1,0,
-		0,0,104,764,1,0,0,0,106,768,1,0,0,0,108,804,1,0,0,0,110,806,1,0,0,0,112,
-		823,1,0,0,0,114,116,3,2,1,0,115,114,1,0,0,0,116,117,1,0,0,0,117,115,1,
-		0,0,0,117,118,1,0,0,0,118,119,1,0,0,0,119,120,5,0,0,1,120,1,1,0,0,0,121,
-		132,3,8,4,0,122,132,3,10,5,0,123,132,3,12,6,0,124,132,3,20,10,0,125,132,
-		3,22,11,0,126,132,3,24,12,0,127,132,3,32,16,0,128,132,3,4,2,0,129,132,
-		3,14,7,0,130,132,3,16,8,0,131,121,1,0,0,0,131,122,1,0,0,0,131,123,1,0,
-		0,0,131,124,1,0,0,0,131,125,1,0,0,0,131,126,1,0,0,0,131,127,1,0,0,0,131,
-		128,1,0,0,0,131,129,1,0,0,0,131,130,1,0,0,0,132,3,1,0,0,0,133,134,5,23,
-		0,0,134,135,3,6,3,0,135,136,5,36,0,0,136,5,1,0,0,0,137,142,5,61,0,0,138,
-		139,5,38,0,0,139,141,5,61,0,0,140,138,1,0,0,0,141,144,1,0,0,0,142,140,
-		1,0,0,0,142,143,1,0,0,0,143,7,1,0,0,0,144,142,1,0,0,0,145,146,5,3,0,0,
-		146,147,5,61,0,0,147,148,5,36,0,0,148,9,1,0,0,0,149,150,5,65,0,0,150,151,
-		5,37,0,0,151,152,3,66,33,0,152,153,5,36,0,0,153,11,1,0,0,0,154,155,5,20,
-		0,0,155,156,5,61,0,0,156,175,5,36,0,0,157,158,5,20,0,0,158,159,5,61,0,
-		0,159,160,5,37,0,0,160,161,5,27,0,0,161,175,5,36,0,0,162,163,5,20,0,0,
-		163,164,5,61,0,0,164,165,5,37,0,0,165,169,5,30,0,0,166,168,3,18,9,0,167,
-		166,1,0,0,0,168,171,1,0,0,0,169,167,1,0,0,0,169,170,1,0,0,0,170,172,1,
-		0,0,0,171,169,1,0,0,0,172,173,5,31,0,0,173,175,5,36,0,0,174,154,1,0,0,
-		0,174,157,1,0,0,0,174,162,1,0,0,0,175,13,1,0,0,0,176,177,5,28,0,0,177,
-		178,5,61,0,0,178,179,5,38,0,0,179,180,5,61,0,0,180,181,5,37,0,0,181,182,
-		3,68,34,0,182,183,5,36,0,0,183,15,1,0,0,0,184,185,5,29,0,0,185,186,3,68,
-		34,0,186,187,5,38,0,0,187,188,5,61,0,0,188,189,5,38,0,0,189,190,5,61,0,
-		0,190,191,5,37,0,0,191,192,3,66,33,0,192,193,5,36,0,0,193,203,1,0,0,0,
-		194,195,5,29,0,0,195,196,3,68,34,0,196,197,5,38,0,0,197,198,5,61,0,0,198,
-		199,5,37,0,0,199,200,3,66,33,0,200,201,5,36,0,0,201,203,1,0,0,0,202,184,
-		1,0,0,0,202,194,1,0,0,0,203,17,1,0,0,0,204,205,5,25,0,0,205,206,5,61,0,
-		0,206,211,5,36,0,0,207,208,5,26,0,0,208,209,5,61,0,0,209,211,5,36,0,0,
-		210,204,1,0,0,0,210,207,1,0,0,0,211,19,1,0,0,0,212,213,5,4,0,0,213,214,
-		5,69,0,0,214,215,5,32,0,0,215,216,3,88,44,0,216,217,5,33,0,0,217,218,5,
-		30,0,0,218,219,3,92,46,0,219,220,5,31,0,0,220,21,1,0,0,0,221,222,5,8,0,
-		0,222,223,5,69,0,0,223,224,5,32,0,0,224,225,3,88,44,0,225,226,5,33,0,0,
-		226,227,5,30,0,0,227,228,3,44,22,0,228,229,5,31,0,0,229,23,1,0,0,0,230,
-		231,5,5,0,0,231,232,3,68,34,0,232,236,5,30,0,0,233,235,3,2,1,0,234,233,
-		1,0,0,0,235,238,1,0,0,0,236,234,1,0,0,0,236,237,1,0,0,0,237,239,1,0,0,
-		0,238,236,1,0,0,0,239,241,5,31,0,0,240,242,3,26,13,0,241,240,1,0,0,0,241,
-		242,1,0,0,0,242,25,1,0,0,0,243,246,3,28,14,0,244,246,3,30,15,0,245,243,
-		1,0,0,0,245,244,1,0,0,0,246,27,1,0,0,0,247,248,5,6,0,0,248,252,5,30,0,
-		0,249,251,3,2,1,0,250,249,1,0,0,0,251,254,1,0,0,0,252,250,1,0,0,0,252,
-		253,1,0,0,0,253,255,1,0,0,0,254,252,1,0,0,0,255,256,5,31,0,0,256,29,1,
-		0,0,0,257,258,5,7,0,0,258,259,3,68,34,0,259,263,5,30,0,0,260,262,3,2,1,
-		0,261,260,1,0,0,0,262,265,1,0,0,0,263,261,1,0,0,0,263,264,1,0,0,0,264,
-		266,1,0,0,0,265,263,1,0,0,0,266,268,5,31,0,0,267,269,3,26,13,0,268,267,
-		1,0,0,0,268,269,1,0,0,0,269,31,1,0,0,0,270,271,3,34,17,0,271,272,5,30,
-		0,0,272,273,3,44,22,0,273,274,5,31,0,0,274,33,1,0,0,0,275,277,3,36,18,
-		0,276,275,1,0,0,0,277,280,1,0,0,0,278,276,1,0,0,0,278,279,1,0,0,0,279,
-		281,1,0,0,0,280,278,1,0,0,0,281,282,3,40,20,0,282,35,1,0,0,0,283,284,5,
-		18,0,0,284,290,3,72,36,0,285,286,5,19,0,0,286,290,5,61,0,0,287,288,5,24,
-		0,0,288,290,3,38,19,0,289,283,1,0,0,0,289,285,1,0,0,0,289,287,1,0,0,0,
-		290,37,1,0,0,0,291,300,5,32,0,0,292,297,3,66,33,0,293,294,5,38,0,0,294,
-		296,3,66,33,0,295,293,1,0,0,0,296,299,1,0,0,0,297,295,1,0,0,0,297,298,
-		1,0,0,0,298,301,1,0,0,0,299,297,1,0,0,0,300,292,1,0,0,0,300,301,1,0,0,
-		0,301,302,1,0,0,0,302,303,5,33,0,0,303,39,1,0,0,0,304,305,6,20,-1,0,305,
-		332,5,69,0,0,306,332,5,64,0,0,307,308,5,64,0,0,308,309,5,37,0,0,309,313,
-		5,34,0,0,310,312,3,94,47,0,311,310,1,0,0,0,312,315,1,0,0,0,313,311,1,0,
-		0,0,313,314,1,0,0,0,314,316,1,0,0,0,315,313,1,0,0,0,316,332,5,35,0,0,317,
-		332,5,63,0,0,318,332,5,67,0,0,319,332,5,68,0,0,320,321,5,32,0,0,321,322,
-		3,40,20,0,322,323,5,33,0,0,323,332,1,0,0,0,324,325,5,39,0,0,325,332,5,
-		69,0,0,326,327,5,55,0,0,327,332,5,64,0,0,328,329,5,55,0,0,329,332,5,63,
-		0,0,330,332,5,41,0,0,331,304,1,0,0,0,331,306,1,0,0,0,331,307,1,0,0,0,331,
-		317,1,0,0,0,331,318,1,0,0,0,331,319,1,0,0,0,331,320,1,0,0,0,331,324,1,
-		0,0,0,331,326,1,0,0,0,331,328,1,0,0,0,331,330,1,0,0,0,332,343,1,0,0,0,
-		333,334,10,7,0,0,334,335,5,38,0,0,335,342,3,42,21,0,336,337,10,6,0,0,337,
-		338,5,45,0,0,338,342,3,42,21,0,339,340,10,5,0,0,340,342,3,42,21,0,341,
-		333,1,0,0,0,341,336,1,0,0,0,341,339,1,0,0,0,342,345,1,0,0,0,343,341,1,
-		0,0,0,343,344,1,0,0,0,344,41,1,0,0,0,345,343,1,0,0,0,346,347,6,21,-1,0,
-		347,373,5,69,0,0,348,373,5,64,0,0,349,350,5,64,0,0,350,351,5,37,0,0,351,
-		355,5,34,0,0,352,354,3,94,47,0,353,352,1,0,0,0,354,357,1,0,0,0,355,353,
-		1,0,0,0,355,356,1,0,0,0,356,358,1,0,0,0,357,355,1,0,0,0,358,373,5,35,0,
-		0,359,373,5,63,0,0,360,373,5,67,0,0,361,362,5,32,0,0,362,363,3,42,21,0,
-		363,364,5,33,0,0,364,373,1,0,0,0,365,366,5,39,0,0,366,373,5,69,0,0,367,
-		368,5,55,0,0,368,373,5,64,0,0,369,370,5,55,0,0,370,373,5,63,0,0,371,373,
-		5,41,0,0,372,346,1,0,0,0,372,348,1,0,0,0,372,349,1,0,0,0,372,359,1,0,0,
-		0,372,360,1,0,0,0,372,361,1,0,0,0,372,365,1,0,0,0,372,367,1,0,0,0,372,
-		369,1,0,0,0,372,371,1,0,0,0,373,381,1,0,0,0,374,375,10,6,0,0,375,376,5,
-		38,0,0,376,380,3,42,21,7,377,378,10,5,0,0,378,380,3,42,21,6,379,374,1,
-		0,0,0,379,377,1,0,0,0,380,383,1,0,0,0,381,379,1,0,0,0,381,382,1,0,0,0,
-		382,43,1,0,0,0,383,381,1,0,0,0,384,386,3,46,23,0,385,384,1,0,0,0,386,389,
-		1,0,0,0,387,385,1,0,0,0,387,388,1,0,0,0,388,45,1,0,0,0,389,387,1,0,0,0,
-		390,399,3,10,5,0,391,399,3,48,24,0,392,399,3,56,28,0,393,399,3,58,29,0,
-		394,399,3,60,30,0,395,399,3,62,31,0,396,399,3,32,16,0,397,399,3,106,53,
-		0,398,390,1,0,0,0,398,391,1,0,0,0,398,392,1,0,0,0,398,393,1,0,0,0,398,
-		394,1,0,0,0,398,395,1,0,0,0,398,396,1,0,0,0,398,397,1,0,0,0,399,47,1,0,
-		0,0,400,401,5,5,0,0,401,402,3,68,34,0,402,406,5,30,0,0,403,405,3,46,23,
-		0,404,403,1,0,0,0,405,408,1,0,0,0,406,404,1,0,0,0,406,407,1,0,0,0,407,
-		409,1,0,0,0,408,406,1,0,0,0,409,411,5,31,0,0,410,412,3,50,25,0,411,410,
-		1,0,0,0,411,412,1,0,0,0,412,49,1,0,0,0,413,416,3,52,26,0,414,416,3,54,
-		27,0,415,413,1,0,0,0,415,414,1,0,0,0,416,51,1,0,0,0,417,418,5,6,0,0,418,
-		422,5,30,0,0,419,421,3,46,23,0,420,419,1,0,0,0,421,424,1,0,0,0,422,420,
-		1,0,0,0,422,423,1,0,0,0,423,425,1,0,0,0,424,422,1,0,0,0,425,426,5,31,0,
-		0,426,53,1,0,0,0,427,428,5,7,0,0,428,429,3,68,34,0,429,433,5,30,0,0,430,
-		432,3,46,23,0,431,430,1,0,0,0,432,435,1,0,0,0,433,431,1,0,0,0,433,434,
-		1,0,0,0,434,436,1,0,0,0,435,433,1,0,0,0,436,438,5,31,0,0,437,439,3,50,
-		25,0,438,437,1,0,0,0,438,439,1,0,0,0,439,55,1,0,0,0,440,441,5,16,0,0,441,
-		442,3,66,33,0,442,443,5,36,0,0,443,57,1,0,0,0,444,445,5,62,0,0,445,446,
-		5,36,0,0,446,59,1,0,0,0,447,448,5,17,0,0,448,449,3,68,34,0,449,450,5,36,
-		0,0,450,61,1,0,0,0,451,453,5,69,0,0,452,454,3,64,32,0,453,452,1,0,0,0,
-		453,454,1,0,0,0,454,455,1,0,0,0,455,456,5,37,0,0,456,457,3,66,33,0,457,
-		458,5,36,0,0,458,468,1,0,0,0,459,461,5,61,0,0,460,462,3,64,32,0,461,460,
-		1,0,0,0,461,462,1,0,0,0,462,463,1,0,0,0,463,464,5,37,0,0,464,465,3,66,
-		33,0,465,466,5,36,0,0,466,468,1,0,0,0,467,451,1,0,0,0,467,459,1,0,0,0,
-		468,63,1,0,0,0,469,470,5,34,0,0,470,471,5,60,0,0,471,482,5,35,0,0,472,
-		473,5,34,0,0,473,474,5,69,0,0,474,482,5,35,0,0,475,476,5,34,0,0,476,477,
-		5,64,0,0,477,482,5,35,0,0,478,479,5,34,0,0,479,480,5,61,0,0,480,482,5,
-		35,0,0,481,469,1,0,0,0,481,472,1,0,0,0,481,475,1,0,0,0,481,478,1,0,0,0,
-		482,65,1,0,0,0,483,484,5,39,0,0,484,493,3,68,34,0,485,486,5,40,0,0,486,
-		493,3,68,34,0,487,488,5,41,0,0,488,493,3,68,34,0,489,490,5,42,0,0,490,
-		493,3,68,34,0,491,493,3,68,34,0,492,483,1,0,0,0,492,485,1,0,0,0,492,487,
-		1,0,0,0,492,489,1,0,0,0,492,491,1,0,0,0,493,67,1,0,0,0,494,495,6,34,-1,
-		0,495,514,3,70,35,0,496,514,5,65,0,0,497,514,5,66,0,0,498,499,5,32,0,0,
-		499,500,3,68,34,0,500,501,5,33,0,0,501,514,1,0,0,0,502,503,5,40,0,0,503,
-		514,3,68,34,21,504,505,5,39,0,0,505,514,3,68,34,20,506,507,5,44,0,0,507,
-		514,3,68,34,19,508,509,5,69,0,0,509,510,5,32,0,0,510,511,3,84,42,0,511,
-		512,5,33,0,0,512,514,1,0,0,0,513,494,1,0,0,0,513,496,1,0,0,0,513,497,1,
-		0,0,0,513,498,1,0,0,0,513,502,1,0,0,0,513,504,1,0,0,0,513,506,1,0,0,0,
-		513,508,1,0,0,0,514,580,1,0,0,0,515,516,10,14,0,0,516,517,5,41,0,0,517,
-		579,3,68,34,15,518,519,10,13,0,0,519,520,5,42,0,0,520,579,3,68,34,14,521,
-		522,10,12,0,0,522,523,5,43,0,0,523,579,3,68,34,13,524,525,10,11,0,0,525,
-		526,5,39,0,0,526,579,3,68,34,12,527,528,10,10,0,0,528,529,5,40,0,0,529,
-		579,3,68,34,11,530,531,10,9,0,0,531,532,5,45,0,0,532,579,3,68,34,10,533,
-		534,10,8,0,0,534,535,5,47,0,0,535,579,3,68,34,9,536,537,10,7,0,0,537,538,
-		5,46,0,0,538,579,3,68,34,8,539,540,10,6,0,0,540,541,5,48,0,0,541,579,3,
-		68,34,7,542,543,10,5,0,0,543,544,5,49,0,0,544,579,3,68,34,6,545,546,10,
-		4,0,0,546,547,5,50,0,0,547,579,3,68,34,5,548,549,10,3,0,0,549,550,5,51,
-		0,0,550,579,3,68,34,4,551,552,10,2,0,0,552,553,5,52,0,0,553,579,3,68,34,
-		3,554,555,10,1,0,0,555,556,5,53,0,0,556,557,3,68,34,0,557,558,5,54,0,0,
-		558,559,3,68,34,2,559,579,1,0,0,0,560,561,10,17,0,0,561,562,5,37,0,0,562,
-		563,5,69,0,0,563,564,5,32,0,0,564,565,3,84,42,0,565,566,5,33,0,0,566,579,
-		1,0,0,0,567,568,10,16,0,0,568,569,5,67,0,0,569,570,5,32,0,0,570,571,3,
-		84,42,0,571,572,5,33,0,0,572,579,1,0,0,0,573,574,10,15,0,0,574,575,5,34,
-		0,0,575,576,3,68,34,0,576,577,5,35,0,0,577,579,1,0,0,0,578,515,1,0,0,0,
-		578,518,1,0,0,0,578,521,1,0,0,0,578,524,1,0,0,0,578,527,1,0,0,0,578,530,
-		1,0,0,0,578,533,1,0,0,0,578,536,1,0,0,0,578,539,1,0,0,0,578,542,1,0,0,
-		0,578,545,1,0,0,0,578,548,1,0,0,0,578,551,1,0,0,0,578,554,1,0,0,0,578,
-		560,1,0,0,0,578,567,1,0,0,0,578,573,1,0,0,0,579,582,1,0,0,0,580,578,1,
-		0,0,0,580,581,1,0,0,0,581,69,1,0,0,0,582,580,1,0,0,0,583,600,5,62,0,0,
-		584,600,5,57,0,0,585,600,5,58,0,0,586,600,5,60,0,0,587,600,5,61,0,0,588,
-		600,5,56,0,0,589,590,5,4,0,0,590,591,5,32,0,0,591,592,3,88,44,0,592,593,
-		5,33,0,0,593,594,5,30,0,0,594,595,3,92,46,0,595,596,5,31,0,0,596,600,1,
-		0,0,0,597,600,3,74,37,0,598,600,3,78,39,0,599,583,1,0,0,0,599,584,1,0,
-		0,0,599,585,1,0,0,0,599,586,1,0,0,0,599,587,1,0,0,0,599,588,1,0,0,0,599,
-		589,1,0,0,0,599,597,1,0,0,0,599,598,1,0,0,0,600,71,1,0,0,0,601,602,6,36,
-		-1,0,602,603,5,32,0,0,603,604,3,72,36,0,604,605,5,33,0,0,605,610,1,0,0,
-		0,606,607,5,44,0,0,607,610,3,72,36,2,608,610,5,61,0,0,609,601,1,0,0,0,
-		609,606,1,0,0,0,609,608,1,0,0,0,610,619,1,0,0,0,611,612,10,4,0,0,612,613,
-		5,51,0,0,613,618,3,72,36,5,614,615,10,3,0,0,615,616,5,52,0,0,616,618,3,
-		72,36,4,617,611,1,0,0,0,617,614,1,0,0,0,618,621,1,0,0,0,619,617,1,0,0,
-		0,619,620,1,0,0,0,620,73,1,0,0,0,621,619,1,0,0,0,622,623,5,34,0,0,623,
-		625,3,76,38,0,624,626,5,38,0,0,625,624,1,0,0,0,625,626,1,0,0,0,626,627,
-		1,0,0,0,627,628,5,35,0,0,628,75,1,0,0,0,629,631,3,68,34,0,630,629,1,0,
-		0,0,630,631,1,0,0,0,631,636,1,0,0,0,632,633,5,38,0,0,633,635,3,68,34,0,
-		634,632,1,0,0,0,635,638,1,0,0,0,636,634,1,0,0,0,636,637,1,0,0,0,637,640,
-		1,0,0,0,638,636,1,0,0,0,639,630,1,0,0,0,639,640,1,0,0,0,640,77,1,0,0,0,
-		641,642,5,30,0,0,642,644,3,80,40,0,643,645,5,38,0,0,644,643,1,0,0,0,644,
-		645,1,0,0,0,645,646,1,0,0,0,646,647,5,31,0,0,647,79,1,0,0,0,648,650,3,
-		82,41,0,649,648,1,0,0,0,649,650,1,0,0,0,650,655,1,0,0,0,651,652,5,38,0,
-		0,652,654,3,82,41,0,653,651,1,0,0,0,654,657,1,0,0,0,655,653,1,0,0,0,655,
-		656,1,0,0,0,656,659,1,0,0,0,657,655,1,0,0,0,658,649,1,0,0,0,658,659,1,
-		0,0,0,659,81,1,0,0,0,660,661,5,69,0,0,661,662,5,37,0,0,662,667,3,68,34,
-		0,663,664,5,61,0,0,664,665,5,37,0,0,665,667,3,68,34,0,666,660,1,0,0,0,
-		666,663,1,0,0,0,667,83,1,0,0,0,668,670,3,86,43,0,669,668,1,0,0,0,669,670,
-		1,0,0,0,670,675,1,0,0,0,671,672,5,38,0,0,672,674,3,86,43,0,673,671,1,0,
-		0,0,674,677,1,0,0,0,675,673,1,0,0,0,675,676,1,0,0,0,676,679,1,0,0,0,677,
-		675,1,0,0,0,678,669,1,0,0,0,678,679,1,0,0,0,679,681,1,0,0,0,680,682,5,
-		38,0,0,681,680,1,0,0,0,681,682,1,0,0,0,682,85,1,0,0,0,683,684,5,65,0,0,
-		684,685,5,37,0,0,685,688,3,68,34,0,686,688,3,68,34,0,687,683,1,0,0,0,687,
-		686,1,0,0,0,688,87,1,0,0,0,689,691,3,90,45,0,690,689,1,0,0,0,690,691,1,
-		0,0,0,691,696,1,0,0,0,692,693,5,38,0,0,693,695,3,90,45,0,694,692,1,0,0,
-		0,695,698,1,0,0,0,696,694,1,0,0,0,696,697,1,0,0,0,697,700,1,0,0,0,698,
-		696,1,0,0,0,699,690,1,0,0,0,699,700,1,0,0,0,700,702,1,0,0,0,701,703,5,
-		38,0,0,702,701,1,0,0,0,702,703,1,0,0,0,703,89,1,0,0,0,704,709,5,65,0,0,
-		705,706,5,65,0,0,706,707,5,37,0,0,707,709,3,68,34,0,708,704,1,0,0,0,708,
-		705,1,0,0,0,709,91,1,0,0,0,710,712,3,94,47,0,711,710,1,0,0,0,712,715,1,
-		0,0,0,713,711,1,0,0,0,713,714,1,0,0,0,714,93,1,0,0,0,715,713,1,0,0,0,716,
-		723,3,10,5,0,717,723,3,96,48,0,718,723,3,104,52,0,719,723,3,108,54,0,720,
-		723,3,110,55,0,721,723,3,112,56,0,722,716,1,0,0,0,722,717,1,0,0,0,722,
-		718,1,0,0,0,722,719,1,0,0,0,722,720,1,0,0,0,722,721,1,0,0,0,723,95,1,0,
-		0,0,724,725,5,5,0,0,725,726,3,68,34,0,726,730,5,30,0,0,727,729,3,94,47,
-		0,728,727,1,0,0,0,729,732,1,0,0,0,730,728,1,0,0,0,730,731,1,0,0,0,731,
-		733,1,0,0,0,732,730,1,0,0,0,733,735,5,31,0,0,734,736,3,98,49,0,735,734,
-		1,0,0,0,735,736,1,0,0,0,736,97,1,0,0,0,737,740,3,100,50,0,738,740,3,102,
-		51,0,739,737,1,0,0,0,739,738,1,0,0,0,740,99,1,0,0,0,741,742,5,6,0,0,742,
-		746,5,30,0,0,743,745,3,94,47,0,744,743,1,0,0,0,745,748,1,0,0,0,746,744,
-		1,0,0,0,746,747,1,0,0,0,747,749,1,0,0,0,748,746,1,0,0,0,749,750,5,31,0,
-		0,750,101,1,0,0,0,751,752,5,7,0,0,752,753,3,68,34,0,753,757,5,30,0,0,754,
-		756,3,94,47,0,755,754,1,0,0,0,756,759,1,0,0,0,757,755,1,0,0,0,757,758,
-		1,0,0,0,758,760,1,0,0,0,759,757,1,0,0,0,760,762,5,31,0,0,761,763,3,98,
-		49,0,762,761,1,0,0,0,762,763,1,0,0,0,763,103,1,0,0,0,764,765,5,22,0,0,
-		765,766,3,68,34,0,766,767,5,36,0,0,767,105,1,0,0,0,768,769,5,21,0,0,769,
-		770,5,69,0,0,770,771,5,32,0,0,771,772,3,84,42,0,772,773,5,33,0,0,773,107,
-		1,0,0,0,774,775,5,10,0,0,775,776,5,65,0,0,776,777,5,11,0,0,777,778,3,68,
-		34,0,778,779,5,13,0,0,779,780,3,68,34,0,780,784,5,30,0,0,781,783,3,94,
-		47,0,782,781,1,0,0,0,783,786,1,0,0,0,784,782,1,0,0,0,784,785,1,0,0,0,785,
-		787,1,0,0,0,786,784,1,0,0,0,787,788,5,31,0,0,788,805,1,0,0,0,789,790,5,
-		10,0,0,790,791,5,65,0,0,791,792,5,11,0,0,792,793,3,68,34,0,793,794,5,12,
-		0,0,794,795,3,68,34,0,795,799,5,30,0,0,796,798,3,94,47,0,797,796,1,0,0,
-		0,798,801,1,0,0,0,799,797,1,0,0,0,799,800,1,0,0,0,800,802,1,0,0,0,801,
-		799,1,0,0,0,802,803,5,31,0,0,803,805,1,0,0,0,804,774,1,0,0,0,804,789,1,
-		0,0,0,805,109,1,0,0,0,806,809,5,14,0,0,807,808,5,65,0,0,808,810,5,38,0,
-		0,809,807,1,0,0,0,809,810,1,0,0,0,810,811,1,0,0,0,811,812,5,65,0,0,812,
-		813,5,15,0,0,813,814,3,68,34,0,814,818,5,30,0,0,815,817,3,94,47,0,816,
-		815,1,0,0,0,817,820,1,0,0,0,818,816,1,0,0,0,818,819,1,0,0,0,819,821,1,
-		0,0,0,820,818,1,0,0,0,821,822,5,31,0,0,822,111,1,0,0,0,823,824,5,9,0,0,
-		824,825,3,68,34,0,825,829,5,30,0,0,826,828,3,94,47,0,827,826,1,0,0,0,828,
-		831,1,0,0,0,829,827,1,0,0,0,829,830,1,0,0,0,830,832,1,0,0,0,831,829,1,
-		0,0,0,832,833,5,31,0,0,833,113,1,0,0,0,78,117,131,142,169,174,202,210,
-		236,241,245,252,263,268,278,289,297,300,313,331,341,343,355,372,379,381,
-		387,398,406,411,415,422,433,438,453,461,467,481,492,513,578,580,599,609,
-		617,619,625,630,636,639,644,649,655,658,666,669,675,678,681,687,690,696,
-		699,702,708,713,722,730,735,739,746,757,762,784,799,804,809,818,829
+		34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,
+		34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,
+		34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,
+		34,1,34,5,34,663,8,34,10,34,12,34,666,9,34,1,35,1,35,1,35,1,35,1,35,1,
+		35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,1,35,3,35,685,8,35,
+		1,36,1,36,1,36,1,36,1,36,1,36,1,36,1,36,3,36,695,8,36,1,36,1,36,1,36,1,
+		36,1,36,1,36,5,36,703,8,36,10,36,12,36,706,9,36,1,37,1,37,1,37,3,37,711,
+		8,37,1,37,1,37,1,38,3,38,716,8,38,1,38,1,38,5,38,720,8,38,10,38,12,38,
+		723,9,38,3,38,725,8,38,1,39,1,39,1,39,3,39,730,8,39,1,39,1,39,1,40,3,40,
+		735,8,40,1,40,1,40,5,40,739,8,40,10,40,12,40,742,9,40,3,40,744,8,40,1,
+		41,1,41,1,41,1,41,1,41,1,41,3,41,752,8,41,1,42,3,42,755,8,42,1,42,1,42,
+		5,42,759,8,42,10,42,12,42,762,9,42,3,42,764,8,42,1,42,3,42,767,8,42,1,
+		43,1,43,1,43,1,43,3,43,773,8,43,1,44,3,44,776,8,44,1,44,1,44,5,44,780,
+		8,44,10,44,12,44,783,9,44,3,44,785,8,44,1,44,3,44,788,8,44,1,45,1,45,1,
+		45,1,45,3,45,794,8,45,1,46,5,46,797,8,46,10,46,12,46,800,9,46,1,47,1,47,
+		1,47,1,47,1,47,1,47,3,47,808,8,47,1,48,1,48,1,48,1,48,5,48,814,8,48,10,
+		48,12,48,817,9,48,1,48,1,48,3,48,821,8,48,1,49,1,49,3,49,825,8,49,1,50,
+		1,50,1,50,5,50,830,8,50,10,50,12,50,833,9,50,1,50,1,50,1,51,1,51,1,51,
+		1,51,5,51,841,8,51,10,51,12,51,844,9,51,1,51,1,51,3,51,848,8,51,1,52,1,
+		52,1,52,1,52,1,53,1,53,1,53,1,53,1,53,1,53,1,54,1,54,1,54,1,54,1,54,1,
+		54,1,54,1,54,5,54,868,8,54,10,54,12,54,871,9,54,1,54,1,54,1,54,1,54,1,
+		54,1,54,1,54,1,54,1,54,1,54,5,54,883,8,54,10,54,12,54,886,9,54,1,54,1,
+		54,3,54,890,8,54,1,55,1,55,1,55,3,55,895,8,55,1,55,1,55,1,55,1,55,1,55,
+		5,55,902,8,55,10,55,12,55,905,9,55,1,55,1,55,1,56,1,56,1,56,1,56,5,56,
+		913,8,56,10,56,12,56,916,9,56,1,56,1,56,1,56,0,4,42,44,68,72,57,0,2,4,
+		6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,
+		54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,
+		102,104,106,108,110,112,0,0,1038,0,115,1,0,0,0,2,131,1,0,0,0,4,133,1,0,
+		0,0,6,137,1,0,0,0,8,147,1,0,0,0,10,149,1,0,0,0,12,178,1,0,0,0,14,203,1,
+		0,0,0,16,205,1,0,0,0,18,231,1,0,0,0,20,241,1,0,0,0,22,243,1,0,0,0,24,252,
+		1,0,0,0,26,261,1,0,0,0,28,276,1,0,0,0,30,278,1,0,0,0,32,288,1,0,0,0,34,
+		301,1,0,0,0,36,309,1,0,0,0,38,320,1,0,0,0,40,322,1,0,0,0,42,382,1,0,0,
+		0,44,442,1,0,0,0,46,457,1,0,0,0,48,468,1,0,0,0,50,470,1,0,0,0,52,485,1,
+		0,0,0,54,487,1,0,0,0,56,497,1,0,0,0,58,510,1,0,0,0,60,514,1,0,0,0,62,517,
+		1,0,0,0,64,561,1,0,0,0,66,575,1,0,0,0,68,597,1,0,0,0,70,684,1,0,0,0,72,
+		694,1,0,0,0,74,707,1,0,0,0,76,724,1,0,0,0,78,726,1,0,0,0,80,743,1,0,0,
+		0,82,751,1,0,0,0,84,763,1,0,0,0,86,772,1,0,0,0,88,784,1,0,0,0,90,793,1,
+		0,0,0,92,798,1,0,0,0,94,807,1,0,0,0,96,809,1,0,0,0,98,824,1,0,0,0,100,
+		826,1,0,0,0,102,836,1,0,0,0,104,849,1,0,0,0,106,853,1,0,0,0,108,889,1,
+		0,0,0,110,891,1,0,0,0,112,908,1,0,0,0,114,116,3,2,1,0,115,114,1,0,0,0,
+		116,117,1,0,0,0,117,115,1,0,0,0,117,118,1,0,0,0,118,119,1,0,0,0,119,120,
+		5,0,0,1,120,1,1,0,0,0,121,132,3,10,5,0,122,132,3,12,6,0,123,132,3,14,7,
+		0,124,132,3,22,11,0,125,132,3,24,12,0,126,132,3,26,13,0,127,132,3,34,17,
+		0,128,132,3,4,2,0,129,132,3,16,8,0,130,132,3,18,9,0,131,121,1,0,0,0,131,
+		122,1,0,0,0,131,123,1,0,0,0,131,124,1,0,0,0,131,125,1,0,0,0,131,126,1,
+		0,0,0,131,127,1,0,0,0,131,128,1,0,0,0,131,129,1,0,0,0,131,130,1,0,0,0,
+		132,3,1,0,0,0,133,134,5,23,0,0,134,135,3,6,3,0,135,136,5,36,0,0,136,5,
+		1,0,0,0,137,142,3,8,4,0,138,139,5,42,0,0,139,141,3,8,4,0,140,138,1,0,0,
+		0,141,144,1,0,0,0,142,140,1,0,0,0,142,143,1,0,0,0,143,7,1,0,0,0,144,142,
+		1,0,0,0,145,148,5,65,0,0,146,148,5,77,0,0,147,145,1,0,0,0,147,146,1,0,
+		0,0,148,9,1,0,0,0,149,150,5,3,0,0,150,151,3,8,4,0,151,152,5,36,0,0,152,
+		11,1,0,0,0,153,154,5,71,0,0,154,155,5,37,0,0,155,156,3,68,34,0,156,157,
+		5,36,0,0,157,179,1,0,0,0,158,159,5,71,0,0,159,160,5,38,0,0,160,161,3,68,
+		34,0,161,162,5,36,0,0,162,179,1,0,0,0,163,164,5,71,0,0,164,165,5,39,0,
+		0,165,166,3,68,34,0,166,167,5,36,0,0,167,179,1,0,0,0,168,169,5,71,0,0,
+		169,170,5,40,0,0,170,171,3,68,34,0,171,172,5,36,0,0,172,179,1,0,0,0,173,
+		174,5,71,0,0,174,175,5,41,0,0,175,176,3,68,34,0,176,177,5,36,0,0,177,179,
+		1,0,0,0,178,153,1,0,0,0,178,158,1,0,0,0,178,163,1,0,0,0,178,168,1,0,0,
+		0,178,173,1,0,0,0,179,13,1,0,0,0,180,181,5,20,0,0,181,182,3,8,4,0,182,
+		183,5,36,0,0,183,204,1,0,0,0,184,185,5,20,0,0,185,186,3,8,4,0,186,187,
+		5,37,0,0,187,188,5,27,0,0,188,189,5,36,0,0,189,204,1,0,0,0,190,191,5,20,
+		0,0,191,192,3,8,4,0,192,193,5,37,0,0,193,197,5,30,0,0,194,196,3,20,10,
+		0,195,194,1,0,0,0,196,199,1,0,0,0,197,195,1,0,0,0,197,198,1,0,0,0,198,
+		200,1,0,0,0,199,197,1,0,0,0,200,201,5,31,0,0,201,202,5,36,0,0,202,204,
+		1,0,0,0,203,180,1,0,0,0,203,184,1,0,0,0,203,190,1,0,0,0,204,15,1,0,0,0,
+		205,206,5,28,0,0,206,207,3,8,4,0,207,208,5,42,0,0,208,209,3,8,4,0,209,
+		210,5,37,0,0,210,211,3,68,34,0,211,212,5,36,0,0,212,17,1,0,0,0,213,214,
+		5,29,0,0,214,215,3,68,34,0,215,216,5,42,0,0,216,217,3,8,4,0,217,218,5,
+		42,0,0,218,219,3,8,4,0,219,220,5,37,0,0,220,221,3,68,34,0,221,222,5,36,
+		0,0,222,232,1,0,0,0,223,224,5,29,0,0,224,225,3,68,34,0,225,226,5,42,0,
+		0,226,227,3,8,4,0,227,228,5,37,0,0,228,229,3,68,34,0,229,230,5,36,0,0,
+		230,232,1,0,0,0,231,213,1,0,0,0,231,223,1,0,0,0,232,19,1,0,0,0,233,234,
+		5,25,0,0,234,235,3,8,4,0,235,236,5,36,0,0,236,242,1,0,0,0,237,238,5,26,
+		0,0,238,239,3,8,4,0,239,240,5,36,0,0,240,242,1,0,0,0,241,233,1,0,0,0,241,
+		237,1,0,0,0,242,21,1,0,0,0,243,244,5,4,0,0,244,245,5,77,0,0,245,246,5,
+		32,0,0,246,247,3,88,44,0,247,248,5,33,0,0,248,249,5,30,0,0,249,250,3,92,
+		46,0,250,251,5,31,0,0,251,23,1,0,0,0,252,253,5,8,0,0,253,254,5,77,0,0,
+		254,255,5,32,0,0,255,256,3,88,44,0,256,257,5,33,0,0,257,258,5,30,0,0,258,
+		259,3,46,23,0,259,260,5,31,0,0,260,25,1,0,0,0,261,262,5,5,0,0,262,263,
+		3,68,34,0,263,267,5,30,0,0,264,266,3,2,1,0,265,264,1,0,0,0,266,269,1,0,
+		0,0,267,265,1,0,0,0,267,268,1,0,0,0,268,270,1,0,0,0,269,267,1,0,0,0,270,
+		272,5,31,0,0,271,273,3,28,14,0,272,271,1,0,0,0,272,273,1,0,0,0,273,27,
+		1,0,0,0,274,277,3,30,15,0,275,277,3,32,16,0,276,274,1,0,0,0,276,275,1,
+		0,0,0,277,29,1,0,0,0,278,279,5,6,0,0,279,283,5,30,0,0,280,282,3,2,1,0,
+		281,280,1,0,0,0,282,285,1,0,0,0,283,281,1,0,0,0,283,284,1,0,0,0,284,286,
+		1,0,0,0,285,283,1,0,0,0,286,287,5,31,0,0,287,31,1,0,0,0,288,289,5,7,0,
+		0,289,290,3,68,34,0,290,294,5,30,0,0,291,293,3,2,1,0,292,291,1,0,0,0,293,
+		296,1,0,0,0,294,292,1,0,0,0,294,295,1,0,0,0,295,297,1,0,0,0,296,294,1,
+		0,0,0,297,299,5,31,0,0,298,300,3,28,14,0,299,298,1,0,0,0,299,300,1,0,0,
+		0,300,33,1,0,0,0,301,302,3,36,18,0,302,303,5,30,0,0,303,304,3,46,23,0,
+		304,305,5,31,0,0,305,35,1,0,0,0,306,308,3,38,19,0,307,306,1,0,0,0,308,
+		311,1,0,0,0,309,307,1,0,0,0,309,310,1,0,0,0,310,312,1,0,0,0,311,309,1,
+		0,0,0,312,313,3,42,21,0,313,37,1,0,0,0,314,315,5,18,0,0,315,321,3,72,36,
+		0,316,317,5,19,0,0,317,321,3,8,4,0,318,319,5,24,0,0,319,321,3,40,20,0,
+		320,314,1,0,0,0,320,316,1,0,0,0,320,318,1,0,0,0,321,39,1,0,0,0,322,331,
+		5,32,0,0,323,328,3,68,34,0,324,325,5,42,0,0,325,327,3,68,34,0,326,324,
+		1,0,0,0,327,330,1,0,0,0,328,326,1,0,0,0,328,329,1,0,0,0,329,332,1,0,0,
+		0,330,328,1,0,0,0,331,323,1,0,0,0,331,332,1,0,0,0,332,333,1,0,0,0,333,
+		334,5,33,0,0,334,41,1,0,0,0,335,336,6,21,-1,0,336,383,5,77,0,0,337,383,
+		5,65,0,0,338,383,5,69,0,0,339,383,5,70,0,0,340,341,5,69,0,0,341,342,5,
+		37,0,0,342,346,5,34,0,0,343,345,3,94,47,0,344,343,1,0,0,0,345,348,1,0,
+		0,0,346,344,1,0,0,0,346,347,1,0,0,0,347,349,1,0,0,0,348,346,1,0,0,0,349,
+		383,5,35,0,0,350,351,5,70,0,0,351,352,5,37,0,0,352,356,5,34,0,0,353,355,
+		3,94,47,0,354,353,1,0,0,0,355,358,1,0,0,0,356,354,1,0,0,0,356,357,1,0,
+		0,0,357,359,1,0,0,0,358,356,1,0,0,0,359,383,5,35,0,0,360,383,5,67,0,0,
+		361,383,5,68,0,0,362,383,5,74,0,0,363,383,5,75,0,0,364,383,5,76,0,0,365,
+		366,5,32,0,0,366,367,3,42,21,0,367,368,5,33,0,0,368,383,1,0,0,0,369,370,
+		5,43,0,0,370,383,5,77,0,0,371,372,5,43,0,0,372,383,5,65,0,0,373,374,5,
+		59,0,0,374,383,5,69,0,0,375,376,5,59,0,0,376,383,5,70,0,0,377,378,5,59,
+		0,0,378,383,5,67,0,0,379,380,5,59,0,0,380,383,5,68,0,0,381,383,5,45,0,
+		0,382,335,1,0,0,0,382,337,1,0,0,0,382,338,1,0,0,0,382,339,1,0,0,0,382,
+		340,1,0,0,0,382,350,1,0,0,0,382,360,1,0,0,0,382,361,1,0,0,0,382,362,1,
+		0,0,0,382,363,1,0,0,0,382,364,1,0,0,0,382,365,1,0,0,0,382,369,1,0,0,0,
+		382,371,1,0,0,0,382,373,1,0,0,0,382,375,1,0,0,0,382,377,1,0,0,0,382,379,
+		1,0,0,0,382,381,1,0,0,0,383,394,1,0,0,0,384,385,10,10,0,0,385,386,5,42,
+		0,0,386,393,3,44,22,0,387,388,10,9,0,0,388,389,5,49,0,0,389,393,3,44,22,
+		0,390,391,10,8,0,0,391,393,3,44,22,0,392,384,1,0,0,0,392,387,1,0,0,0,392,
+		390,1,0,0,0,393,396,1,0,0,0,394,392,1,0,0,0,394,395,1,0,0,0,395,43,1,0,
+		0,0,396,394,1,0,0,0,397,398,6,22,-1,0,398,443,5,77,0,0,399,443,5,65,0,
+		0,400,443,5,69,0,0,401,443,5,70,0,0,402,403,5,69,0,0,403,404,5,37,0,0,
+		404,408,5,34,0,0,405,407,3,94,47,0,406,405,1,0,0,0,407,410,1,0,0,0,408,
+		406,1,0,0,0,408,409,1,0,0,0,409,411,1,0,0,0,410,408,1,0,0,0,411,443,5,
+		35,0,0,412,413,5,70,0,0,413,414,5,37,0,0,414,418,5,34,0,0,415,417,3,94,
+		47,0,416,415,1,0,0,0,417,420,1,0,0,0,418,416,1,0,0,0,418,419,1,0,0,0,419,
+		421,1,0,0,0,420,418,1,0,0,0,421,443,5,35,0,0,422,443,5,67,0,0,423,443,
+		5,68,0,0,424,443,5,74,0,0,425,426,5,32,0,0,426,427,3,44,22,0,427,428,5,
+		33,0,0,428,443,1,0,0,0,429,430,5,43,0,0,430,443,5,77,0,0,431,432,5,43,
+		0,0,432,443,5,65,0,0,433,434,5,59,0,0,434,443,5,69,0,0,435,436,5,59,0,
+		0,436,443,5,70,0,0,437,438,5,59,0,0,438,443,5,67,0,0,439,440,5,59,0,0,
+		440,443,5,68,0,0,441,443,5,45,0,0,442,397,1,0,0,0,442,399,1,0,0,0,442,
+		400,1,0,0,0,442,401,1,0,0,0,442,402,1,0,0,0,442,412,1,0,0,0,442,422,1,
+		0,0,0,442,423,1,0,0,0,442,424,1,0,0,0,442,425,1,0,0,0,442,429,1,0,0,0,
+		442,431,1,0,0,0,442,433,1,0,0,0,442,435,1,0,0,0,442,437,1,0,0,0,442,439,
+		1,0,0,0,442,441,1,0,0,0,443,451,1,0,0,0,444,445,10,9,0,0,445,446,5,42,
+		0,0,446,450,3,44,22,10,447,448,10,8,0,0,448,450,3,44,22,9,449,444,1,0,
+		0,0,449,447,1,0,0,0,450,453,1,0,0,0,451,449,1,0,0,0,451,452,1,0,0,0,452,
+		45,1,0,0,0,453,451,1,0,0,0,454,456,3,48,24,0,455,454,1,0,0,0,456,459,1,
+		0,0,0,457,455,1,0,0,0,457,458,1,0,0,0,458,47,1,0,0,0,459,457,1,0,0,0,460,
+		469,3,12,6,0,461,469,3,50,25,0,462,469,3,58,29,0,463,469,3,60,30,0,464,
+		469,3,62,31,0,465,469,3,64,32,0,466,469,3,34,17,0,467,469,3,106,53,0,468,
+		460,1,0,0,0,468,461,1,0,0,0,468,462,1,0,0,0,468,463,1,0,0,0,468,464,1,
+		0,0,0,468,465,1,0,0,0,468,466,1,0,0,0,468,467,1,0,0,0,469,49,1,0,0,0,470,
+		471,5,5,0,0,471,472,3,68,34,0,472,476,5,30,0,0,473,475,3,48,24,0,474,473,
+		1,0,0,0,475,478,1,0,0,0,476,474,1,0,0,0,476,477,1,0,0,0,477,479,1,0,0,
+		0,478,476,1,0,0,0,479,481,5,31,0,0,480,482,3,52,26,0,481,480,1,0,0,0,481,
+		482,1,0,0,0,482,51,1,0,0,0,483,486,3,54,27,0,484,486,3,56,28,0,485,483,
+		1,0,0,0,485,484,1,0,0,0,486,53,1,0,0,0,487,488,5,6,0,0,488,492,5,30,0,
+		0,489,491,3,48,24,0,490,489,1,0,0,0,491,494,1,0,0,0,492,490,1,0,0,0,492,
+		493,1,0,0,0,493,495,1,0,0,0,494,492,1,0,0,0,495,496,5,31,0,0,496,55,1,
+		0,0,0,497,498,5,7,0,0,498,499,3,68,34,0,499,503,5,30,0,0,500,502,3,48,
+		24,0,501,500,1,0,0,0,502,505,1,0,0,0,503,501,1,0,0,0,503,504,1,0,0,0,504,
+		506,1,0,0,0,505,503,1,0,0,0,506,508,5,31,0,0,507,509,3,52,26,0,508,507,
+		1,0,0,0,508,509,1,0,0,0,509,57,1,0,0,0,510,511,5,16,0,0,511,512,3,68,34,
+		0,512,513,5,36,0,0,513,59,1,0,0,0,514,515,5,66,0,0,515,516,5,36,0,0,516,
+		61,1,0,0,0,517,518,5,17,0,0,518,519,3,68,34,0,519,520,5,36,0,0,520,63,
+		1,0,0,0,521,523,3,8,4,0,522,524,3,66,33,0,523,522,1,0,0,0,523,524,1,0,
+		0,0,524,525,1,0,0,0,525,526,5,37,0,0,526,527,3,68,34,0,527,528,5,36,0,
+		0,528,562,1,0,0,0,529,531,3,8,4,0,530,532,3,66,33,0,531,530,1,0,0,0,531,
+		532,1,0,0,0,532,533,1,0,0,0,533,534,5,38,0,0,534,535,3,68,34,0,535,536,
+		5,36,0,0,536,562,1,0,0,0,537,539,3,8,4,0,538,540,3,66,33,0,539,538,1,0,
+		0,0,539,540,1,0,0,0,540,541,1,0,0,0,541,542,5,39,0,0,542,543,3,68,34,0,
+		543,544,5,36,0,0,544,562,1,0,0,0,545,547,3,8,4,0,546,548,3,66,33,0,547,
+		546,1,0,0,0,547,548,1,0,0,0,548,549,1,0,0,0,549,550,5,41,0,0,550,551,3,
+		68,34,0,551,552,5,36,0,0,552,562,1,0,0,0,553,555,3,8,4,0,554,556,3,66,
+		33,0,555,554,1,0,0,0,555,556,1,0,0,0,556,557,1,0,0,0,557,558,5,40,0,0,
+		558,559,3,68,34,0,559,560,5,36,0,0,560,562,1,0,0,0,561,521,1,0,0,0,561,
+		529,1,0,0,0,561,537,1,0,0,0,561,545,1,0,0,0,561,553,1,0,0,0,562,65,1,0,
+		0,0,563,564,5,34,0,0,564,565,5,64,0,0,565,576,5,35,0,0,566,567,5,34,0,
+		0,567,568,5,77,0,0,568,576,5,35,0,0,569,570,5,34,0,0,570,571,5,69,0,0,
+		571,576,5,35,0,0,572,573,5,34,0,0,573,574,5,65,0,0,574,576,5,35,0,0,575,
+		563,1,0,0,0,575,566,1,0,0,0,575,569,1,0,0,0,575,572,1,0,0,0,576,67,1,0,
+		0,0,577,578,6,34,-1,0,578,579,5,77,0,0,579,580,5,32,0,0,580,581,3,84,42,
+		0,581,582,5,33,0,0,582,598,1,0,0,0,583,598,3,70,35,0,584,598,5,71,0,0,
+		585,598,5,72,0,0,586,598,5,73,0,0,587,588,5,32,0,0,588,589,3,68,34,0,589,
+		590,5,33,0,0,590,598,1,0,0,0,591,592,5,44,0,0,592,598,3,68,34,20,593,594,
+		5,43,0,0,594,598,3,68,34,19,595,596,5,48,0,0,596,598,3,68,34,18,597,577,
+		1,0,0,0,597,583,1,0,0,0,597,584,1,0,0,0,597,585,1,0,0,0,597,586,1,0,0,
+		0,597,587,1,0,0,0,597,591,1,0,0,0,597,593,1,0,0,0,597,595,1,0,0,0,598,
+		664,1,0,0,0,599,600,10,14,0,0,600,601,5,45,0,0,601,663,3,68,34,15,602,
+		603,10,13,0,0,603,604,5,46,0,0,604,663,3,68,34,14,605,606,10,12,0,0,606,
+		607,5,47,0,0,607,663,3,68,34,13,608,609,10,11,0,0,609,610,5,43,0,0,610,
+		663,3,68,34,12,611,612,10,10,0,0,612,613,5,44,0,0,613,663,3,68,34,11,614,
+		615,10,9,0,0,615,616,5,49,0,0,616,663,3,68,34,10,617,618,10,8,0,0,618,
+		619,5,51,0,0,619,663,3,68,34,9,620,621,10,7,0,0,621,622,5,50,0,0,622,663,
+		3,68,34,8,623,624,10,6,0,0,624,625,5,52,0,0,625,663,3,68,34,7,626,627,
+		10,5,0,0,627,628,5,53,0,0,628,663,3,68,34,6,629,630,10,4,0,0,630,631,5,
+		54,0,0,631,663,3,68,34,5,632,633,10,3,0,0,633,634,5,55,0,0,634,663,3,68,
+		34,4,635,636,10,2,0,0,636,637,5,56,0,0,637,663,3,68,34,3,638,639,10,1,
+		0,0,639,640,5,57,0,0,640,641,3,68,34,0,641,642,5,58,0,0,642,643,3,68,34,
+		2,643,663,1,0,0,0,644,645,10,17,0,0,645,646,5,37,0,0,646,647,5,77,0,0,
+		647,648,5,32,0,0,648,649,3,84,42,0,649,650,5,33,0,0,650,663,1,0,0,0,651,
+		652,10,16,0,0,652,653,5,74,0,0,653,654,5,32,0,0,654,655,3,84,42,0,655,
+		656,5,33,0,0,656,663,1,0,0,0,657,658,10,15,0,0,658,659,5,34,0,0,659,660,
+		3,68,34,0,660,661,5,35,0,0,661,663,1,0,0,0,662,599,1,0,0,0,662,602,1,0,
+		0,0,662,605,1,0,0,0,662,608,1,0,0,0,662,611,1,0,0,0,662,614,1,0,0,0,662,
+		617,1,0,0,0,662,620,1,0,0,0,662,623,1,0,0,0,662,626,1,0,0,0,662,629,1,
+		0,0,0,662,632,1,0,0,0,662,635,1,0,0,0,662,638,1,0,0,0,662,644,1,0,0,0,
+		662,651,1,0,0,0,662,657,1,0,0,0,663,666,1,0,0,0,664,662,1,0,0,0,664,665,
+		1,0,0,0,665,69,1,0,0,0,666,664,1,0,0,0,667,685,5,66,0,0,668,685,5,61,0,
+		0,669,685,5,62,0,0,670,685,5,64,0,0,671,685,5,65,0,0,672,685,5,77,0,0,
+		673,685,5,60,0,0,674,675,5,4,0,0,675,676,5,32,0,0,676,677,3,88,44,0,677,
+		678,5,33,0,0,678,679,5,30,0,0,679,680,3,92,46,0,680,681,5,31,0,0,681,685,
+		1,0,0,0,682,685,3,74,37,0,683,685,3,78,39,0,684,667,1,0,0,0,684,668,1,
+		0,0,0,684,669,1,0,0,0,684,670,1,0,0,0,684,671,1,0,0,0,684,672,1,0,0,0,
+		684,673,1,0,0,0,684,674,1,0,0,0,684,682,1,0,0,0,684,683,1,0,0,0,685,71,
+		1,0,0,0,686,687,6,36,-1,0,687,688,5,32,0,0,688,689,3,72,36,0,689,690,5,
+		33,0,0,690,695,1,0,0,0,691,692,5,48,0,0,692,695,3,72,36,2,693,695,3,8,
+		4,0,694,686,1,0,0,0,694,691,1,0,0,0,694,693,1,0,0,0,695,704,1,0,0,0,696,
+		697,10,4,0,0,697,698,5,55,0,0,698,703,3,72,36,5,699,700,10,3,0,0,700,701,
+		5,56,0,0,701,703,3,72,36,4,702,696,1,0,0,0,702,699,1,0,0,0,703,706,1,0,
+		0,0,704,702,1,0,0,0,704,705,1,0,0,0,705,73,1,0,0,0,706,704,1,0,0,0,707,
+		708,5,34,0,0,708,710,3,76,38,0,709,711,5,42,0,0,710,709,1,0,0,0,710,711,
+		1,0,0,0,711,712,1,0,0,0,712,713,5,35,0,0,713,75,1,0,0,0,714,716,3,68,34,
+		0,715,714,1,0,0,0,715,716,1,0,0,0,716,721,1,0,0,0,717,718,5,42,0,0,718,
+		720,3,68,34,0,719,717,1,0,0,0,720,723,1,0,0,0,721,719,1,0,0,0,721,722,
+		1,0,0,0,722,725,1,0,0,0,723,721,1,0,0,0,724,715,1,0,0,0,724,725,1,0,0,
+		0,725,77,1,0,0,0,726,727,5,30,0,0,727,729,3,80,40,0,728,730,5,42,0,0,729,
+		728,1,0,0,0,729,730,1,0,0,0,730,731,1,0,0,0,731,732,5,31,0,0,732,79,1,
+		0,0,0,733,735,3,82,41,0,734,733,1,0,0,0,734,735,1,0,0,0,735,740,1,0,0,
+		0,736,737,5,42,0,0,737,739,3,82,41,0,738,736,1,0,0,0,739,742,1,0,0,0,740,
+		738,1,0,0,0,740,741,1,0,0,0,741,744,1,0,0,0,742,740,1,0,0,0,743,734,1,
+		0,0,0,743,744,1,0,0,0,744,81,1,0,0,0,745,746,5,77,0,0,746,747,5,37,0,0,
+		747,752,3,68,34,0,748,749,5,65,0,0,749,750,5,37,0,0,750,752,3,68,34,0,
+		751,745,1,0,0,0,751,748,1,0,0,0,752,83,1,0,0,0,753,755,3,86,43,0,754,753,
+		1,0,0,0,754,755,1,0,0,0,755,760,1,0,0,0,756,757,5,42,0,0,757,759,3,86,
+		43,0,758,756,1,0,0,0,759,762,1,0,0,0,760,758,1,0,0,0,760,761,1,0,0,0,761,
+		764,1,0,0,0,762,760,1,0,0,0,763,754,1,0,0,0,763,764,1,0,0,0,764,766,1,
+		0,0,0,765,767,5,42,0,0,766,765,1,0,0,0,766,767,1,0,0,0,767,85,1,0,0,0,
+		768,769,5,71,0,0,769,770,5,37,0,0,770,773,3,68,34,0,771,773,3,68,34,0,
+		772,768,1,0,0,0,772,771,1,0,0,0,773,87,1,0,0,0,774,776,3,90,45,0,775,774,
+		1,0,0,0,775,776,1,0,0,0,776,781,1,0,0,0,777,778,5,42,0,0,778,780,3,90,
+		45,0,779,777,1,0,0,0,780,783,1,0,0,0,781,779,1,0,0,0,781,782,1,0,0,0,782,
+		785,1,0,0,0,783,781,1,0,0,0,784,775,1,0,0,0,784,785,1,0,0,0,785,787,1,
+		0,0,0,786,788,5,42,0,0,787,786,1,0,0,0,787,788,1,0,0,0,788,89,1,0,0,0,
+		789,794,5,71,0,0,790,791,5,71,0,0,791,792,5,37,0,0,792,794,3,68,34,0,793,
+		789,1,0,0,0,793,790,1,0,0,0,794,91,1,0,0,0,795,797,3,94,47,0,796,795,1,
+		0,0,0,797,800,1,0,0,0,798,796,1,0,0,0,798,799,1,0,0,0,799,93,1,0,0,0,800,
+		798,1,0,0,0,801,808,3,12,6,0,802,808,3,96,48,0,803,808,3,104,52,0,804,
+		808,3,108,54,0,805,808,3,110,55,0,806,808,3,112,56,0,807,801,1,0,0,0,807,
+		802,1,0,0,0,807,803,1,0,0,0,807,804,1,0,0,0,807,805,1,0,0,0,807,806,1,
+		0,0,0,808,95,1,0,0,0,809,810,5,5,0,0,810,811,3,68,34,0,811,815,5,30,0,
+		0,812,814,3,94,47,0,813,812,1,0,0,0,814,817,1,0,0,0,815,813,1,0,0,0,815,
+		816,1,0,0,0,816,818,1,0,0,0,817,815,1,0,0,0,818,820,5,31,0,0,819,821,3,
+		98,49,0,820,819,1,0,0,0,820,821,1,0,0,0,821,97,1,0,0,0,822,825,3,100,50,
+		0,823,825,3,102,51,0,824,822,1,0,0,0,824,823,1,0,0,0,825,99,1,0,0,0,826,
+		827,5,6,0,0,827,831,5,30,0,0,828,830,3,94,47,0,829,828,1,0,0,0,830,833,
+		1,0,0,0,831,829,1,0,0,0,831,832,1,0,0,0,832,834,1,0,0,0,833,831,1,0,0,
+		0,834,835,5,31,0,0,835,101,1,0,0,0,836,837,5,7,0,0,837,838,3,68,34,0,838,
+		842,5,30,0,0,839,841,3,94,47,0,840,839,1,0,0,0,841,844,1,0,0,0,842,840,
+		1,0,0,0,842,843,1,0,0,0,843,845,1,0,0,0,844,842,1,0,0,0,845,847,5,31,0,
+		0,846,848,3,98,49,0,847,846,1,0,0,0,847,848,1,0,0,0,848,103,1,0,0,0,849,
+		850,5,22,0,0,850,851,3,68,34,0,851,852,5,36,0,0,852,105,1,0,0,0,853,854,
+		5,21,0,0,854,855,5,77,0,0,855,856,5,32,0,0,856,857,3,84,42,0,857,858,5,
+		33,0,0,858,107,1,0,0,0,859,860,5,10,0,0,860,861,5,71,0,0,861,862,5,11,
+		0,0,862,863,3,68,34,0,863,864,5,13,0,0,864,865,3,68,34,0,865,869,5,30,
+		0,0,866,868,3,94,47,0,867,866,1,0,0,0,868,871,1,0,0,0,869,867,1,0,0,0,
+		869,870,1,0,0,0,870,872,1,0,0,0,871,869,1,0,0,0,872,873,5,31,0,0,873,890,
+		1,0,0,0,874,875,5,10,0,0,875,876,5,71,0,0,876,877,5,11,0,0,877,878,3,68,
+		34,0,878,879,5,12,0,0,879,880,3,68,34,0,880,884,5,30,0,0,881,883,3,94,
+		47,0,882,881,1,0,0,0,883,886,1,0,0,0,884,882,1,0,0,0,884,885,1,0,0,0,885,
+		887,1,0,0,0,886,884,1,0,0,0,887,888,5,31,0,0,888,890,1,0,0,0,889,859,1,
+		0,0,0,889,874,1,0,0,0,890,109,1,0,0,0,891,894,5,14,0,0,892,893,5,71,0,
+		0,893,895,5,42,0,0,894,892,1,0,0,0,894,895,1,0,0,0,895,896,1,0,0,0,896,
+		897,5,71,0,0,897,898,5,15,0,0,898,899,3,68,34,0,899,903,5,30,0,0,900,902,
+		3,94,47,0,901,900,1,0,0,0,902,905,1,0,0,0,903,901,1,0,0,0,903,904,1,0,
+		0,0,904,906,1,0,0,0,905,903,1,0,0,0,906,907,5,31,0,0,907,111,1,0,0,0,908,
+		909,5,9,0,0,909,910,3,68,34,0,910,914,5,30,0,0,911,913,3,94,47,0,912,911,
+		1,0,0,0,913,916,1,0,0,0,914,912,1,0,0,0,914,915,1,0,0,0,915,917,1,0,0,
+		0,916,914,1,0,0,0,917,918,5,31,0,0,918,113,1,0,0,0,84,117,131,142,147,
+		178,197,203,231,241,267,272,276,283,294,299,309,320,328,331,346,356,382,
+		392,394,408,418,442,449,451,457,468,476,481,485,492,503,508,523,531,539,
+		547,555,561,575,597,662,664,684,694,702,704,710,715,721,724,729,734,740,
+		743,751,754,760,763,766,772,775,781,784,787,793,798,807,815,820,824,831,
+		842,847,869,884,889,894,903,914
 	};
 
 	public static readonly ATN _ATN =

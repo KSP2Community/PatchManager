@@ -72,6 +72,30 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitPatch_list([NotNull] sassy_parser.Patch_listContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>quoted_string</c>
+	/// labeled alternative in <see cref="sassy_parser.sassy_string"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterQuoted_string([NotNull] sassy_parser.Quoted_stringContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>quoted_string</c>
+	/// labeled alternative in <see cref="sassy_parser.sassy_string"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitQuoted_string([NotNull] sassy_parser.Quoted_stringContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>unquoted_string</c>
+	/// labeled alternative in <see cref="sassy_parser.sassy_string"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterUnquoted_string([NotNull] sassy_parser.Unquoted_stringContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>unquoted_string</c>
+	/// labeled alternative in <see cref="sassy_parser.sassy_string"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitUnquoted_string([NotNull] sassy_parser.Unquoted_stringContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.import_declaration"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -82,15 +106,65 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitImport_declaration([NotNull] sassy_parser.Import_declarationContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="sassy_parser.var_decl"/>.
+	/// Enter a parse tree produced by the <c>normal_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterVar_decl([NotNull] sassy_parser.Var_declContext context);
+	void EnterNormal_var_decl([NotNull] sassy_parser.Normal_var_declContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="sassy_parser.var_decl"/>.
+	/// Exit a parse tree produced by the <c>normal_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitVar_decl([NotNull] sassy_parser.Var_declContext context);
+	void ExitNormal_var_decl([NotNull] sassy_parser.Normal_var_declContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>add_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterAdd_var_decl([NotNull] sassy_parser.Add_var_declContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>add_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitAdd_var_decl([NotNull] sassy_parser.Add_var_declContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>subtract_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSubtract_var_decl([NotNull] sassy_parser.Subtract_var_declContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>subtract_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSubtract_var_decl([NotNull] sassy_parser.Subtract_var_declContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>divide_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterDivide_var_decl([NotNull] sassy_parser.Divide_var_declContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>divide_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitDivide_var_decl([NotNull] sassy_parser.Divide_var_declContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>multiply_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMultiply_var_decl([NotNull] sassy_parser.Multiply_var_declContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>multiply_var_decl</c>
+	/// labeled alternative in <see cref="sassy_parser.var_decl"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMultiply_var_decl([NotNull] sassy_parser.Multiply_var_declContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>implicit_stage_def</c>
 	/// labeled alternative in <see cref="sassy_parser.stage_def"/>.
@@ -372,6 +446,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_intersection([NotNull] sassy_parser.Sel_intersectionContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_string_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_string_class_capture([NotNull] sassy_parser.Sel_string_class_captureContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_string_class_capture</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_string_class_capture([NotNull] sassy_parser.Sel_string_class_captureContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_ensure</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
@@ -395,6 +481,42 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_everything([NotNull] sassy_parser.Sel_everythingContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_without_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_without_string_class([NotNull] sassy_parser.Sel_without_string_classContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_without_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_without_string_class([NotNull] sassy_parser.Sel_without_string_classContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_string_class([NotNull] sassy_parser.Sel_string_classContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_string_class([NotNull] sassy_parser.Sel_string_classContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_string_name([NotNull] sassy_parser.Sel_string_nameContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_string_name([NotNull] sassy_parser.Sel_string_nameContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
@@ -432,6 +554,42 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_add_element([NotNull] sassy_parser.Sel_add_elementContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_element_string</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_element_string([NotNull] sassy_parser.Sel_element_stringContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_element_string</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_element_string([NotNull] sassy_parser.Sel_element_stringContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_add_string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_add_string_element([NotNull] sassy_parser.Sel_add_string_elementContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_add_string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_add_string_element([NotNull] sassy_parser.Sel_add_string_elementContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_without_string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_without_string_name([NotNull] sassy_parser.Sel_without_string_nameContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_without_string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_without_string_name([NotNull] sassy_parser.Sel_without_string_nameContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_without_class</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
 	/// </summary>
@@ -443,6 +601,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSel_without_class([NotNull] sassy_parser.Sel_without_classContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_string_ensure</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_string_ensure([NotNull] sassy_parser.Sel_string_ensureContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_string_ensure</c>
+	/// labeled alternative in <see cref="sassy_parser.selector"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_string_ensure([NotNull] sassy_parser.Sel_string_ensureContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>sel_without_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector"/>.
@@ -492,41 +662,29 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitRuleset_selector([NotNull] sassy_parser.Ruleset_selectorContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>combination_selector</c>
+	/// Enter a parse tree produced by the <c>string_class_capture_selector</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterCombination_selector([NotNull] sassy_parser.Combination_selectorContext context);
+	void EnterString_class_capture_selector([NotNull] sassy_parser.String_class_capture_selectorContext context);
 	/// <summary>
-	/// Exit a parse tree produced by the <c>combination_selector</c>
+	/// Exit a parse tree produced by the <c>string_class_capture_selector</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context);
+	void ExitString_class_capture_selector([NotNull] sassy_parser.String_class_capture_selectorContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>class_capture_selector</c>
+	/// Enter a parse tree produced by the <c>without_string_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
+	void EnterWithout_string_name([NotNull] sassy_parser.Without_string_nameContext context);
 	/// <summary>
-	/// Exit a parse tree produced by the <c>class_capture_selector</c>
+	/// Exit a parse tree produced by the <c>without_string_name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>without_name</c>
-	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterWithout_name([NotNull] sassy_parser.Without_nameContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>without_name</c>
-	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitWithout_name([NotNull] sassy_parser.Without_nameContext context);
+	void ExitWithout_string_name([NotNull] sassy_parser.Without_string_nameContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>sub_selector</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
@@ -564,6 +722,78 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitWithout_class([NotNull] sassy_parser.Without_classContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterString_name([NotNull] sassy_parser.String_nameContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>string_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitString_name([NotNull] sassy_parser.String_nameContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>string_class_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterString_class_selector([NotNull] sassy_parser.String_class_selectorContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>string_class_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitString_class_selector([NotNull] sassy_parser.String_class_selectorContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>add_string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterAdd_string_element([NotNull] sassy_parser.Add_string_elementContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>add_string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitAdd_string_element([NotNull] sassy_parser.Add_string_elementContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>combination_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterCombination_selector([NotNull] sassy_parser.Combination_selectorContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>combination_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitCombination_selector([NotNull] sassy_parser.Combination_selectorContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>class_capture_selector</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitClass_capture_selector([NotNull] sassy_parser.Class_capture_selectorContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>without_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterWithout_name([NotNull] sassy_parser.Without_nameContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>without_name</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitWithout_name([NotNull] sassy_parser.Without_nameContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>name</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// </summary>
@@ -588,6 +818,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitAdd_element([NotNull] sassy_parser.Add_elementContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>without_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterWithout_string_class([NotNull] sassy_parser.Without_string_classContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>without_string_class</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitWithout_string_class([NotNull] sassy_parser.Without_string_classContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>everything</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
 	/// </summary>
@@ -611,6 +853,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitIntersection_selector([NotNull] sassy_parser.Intersection_selectorContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterString_element([NotNull] sassy_parser.String_elementContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>string_element</c>
+	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitString_element([NotNull] sassy_parser.String_elementContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>element</c>
 	/// labeled alternative in <see cref="sassy_parser.selector_no_children"/>.
@@ -714,29 +968,65 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitMerge_value([NotNull] sassy_parser.Merge_valueContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>element_key_field</c>
+	/// Enter a parse tree produced by the <c>normal_field_set</c>
 	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterElement_key_field([NotNull] sassy_parser.Element_key_fieldContext context);
+	void EnterNormal_field_set([NotNull] sassy_parser.Normal_field_setContext context);
 	/// <summary>
-	/// Exit a parse tree produced by the <c>element_key_field</c>
+	/// Exit a parse tree produced by the <c>normal_field_set</c>
 	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitElement_key_field([NotNull] sassy_parser.Element_key_fieldContext context);
+	void ExitNormal_field_set([NotNull] sassy_parser.Normal_field_setContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>string_key_field</c>
+	/// Enter a parse tree produced by the <c>add_field_set</c>
 	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterString_key_field([NotNull] sassy_parser.String_key_fieldContext context);
+	void EnterAdd_field_set([NotNull] sassy_parser.Add_field_setContext context);
 	/// <summary>
-	/// Exit a parse tree produced by the <c>string_key_field</c>
+	/// Exit a parse tree produced by the <c>add_field_set</c>
 	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitString_key_field([NotNull] sassy_parser.String_key_fieldContext context);
+	void ExitAdd_field_set([NotNull] sassy_parser.Add_field_setContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>subtract_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSubtract_field_set([NotNull] sassy_parser.Subtract_field_setContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>subtract_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSubtract_field_set([NotNull] sassy_parser.Subtract_field_setContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>multiply_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMultiply_field_set([NotNull] sassy_parser.Multiply_field_setContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>multiply_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMultiply_field_set([NotNull] sassy_parser.Multiply_field_setContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>divide_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterDivide_field_set([NotNull] sassy_parser.Divide_field_setContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>divide_field_set</c>
+	/// labeled alternative in <see cref="sassy_parser.field_set"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitDivide_field_set([NotNull] sassy_parser.Divide_field_setContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>number_indexor</c>
 	/// labeled alternative in <see cref="sassy_parser.index"/>.
@@ -786,362 +1076,314 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitString_indexor([NotNull] sassy_parser.String_indexorContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>implicit_add</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterImplicit_add([NotNull] sassy_parser.Implicit_addContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>implicit_add</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitImplicit_add([NotNull] sassy_parser.Implicit_addContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>implicit_subtract</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterImplicit_subtract([NotNull] sassy_parser.Implicit_subtractContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>implicit_subtract</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitImplicit_subtract([NotNull] sassy_parser.Implicit_subtractContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>implicit_multiply</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterImplicit_multiply([NotNull] sassy_parser.Implicit_multiplyContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>implicit_multiply</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitImplicit_multiply([NotNull] sassy_parser.Implicit_multiplyContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>implicit_divide</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterImplicit_divide([NotNull] sassy_parser.Implicit_divideContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>implicit_divide</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitImplicit_divide([NotNull] sassy_parser.Implicit_divideContext context);
-	/// <summary>
-	/// Enter a parse tree produced by the <c>normal</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterNormal([NotNull] sassy_parser.NormalContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>normal</c>
-	/// labeled alternative in <see cref="sassy_parser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitNormal([NotNull] sassy_parser.NormalContext context);
-	/// <summary>
 	/// Enter a parse tree produced by the <c>not_equal_to</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterNot_equal_to([NotNull] sassy_parser.Not_equal_toContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>not_equal_to</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitNot_equal_to([NotNull] sassy_parser.Not_equal_toContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>variable_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterVariable_reference([NotNull] sassy_parser.Variable_referenceContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>variable_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitVariable_reference([NotNull] sassy_parser.Variable_referenceContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>equal_to</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterEqual_to([NotNull] sassy_parser.Equal_toContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>equal_to</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitEqual_to([NotNull] sassy_parser.Equal_toContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>local_variable_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterLocal_variable_reference([NotNull] sassy_parser.Local_variable_referenceContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>local_variable_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitLocal_variable_reference([NotNull] sassy_parser.Local_variable_referenceContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>member_call_ruleset</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>member_call_ruleset</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitMember_call_ruleset([NotNull] sassy_parser.Member_call_rulesetContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>value_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterValue_reference([NotNull] sassy_parser.Value_referenceContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>value_reference</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitValue_reference([NotNull] sassy_parser.Value_referenceContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>subtraction</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterSubtraction([NotNull] sassy_parser.SubtractionContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>subtraction</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSubtraction([NotNull] sassy_parser.SubtractionContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>division</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterDivision([NotNull] sassy_parser.DivisionContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>division</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitDivision([NotNull] sassy_parser.DivisionContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>negative</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterNegative([NotNull] sassy_parser.NegativeContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>negative</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitNegative([NotNull] sassy_parser.NegativeContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>not</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterNot([NotNull] sassy_parser.NotContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>not</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitNot([NotNull] sassy_parser.NotContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>lesser_than</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterLesser_than([NotNull] sassy_parser.Lesser_thanContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>lesser_than</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitLesser_than([NotNull] sassy_parser.Lesser_thanContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>member_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterMember_call([NotNull] sassy_parser.Member_callContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>member_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitMember_call([NotNull] sassy_parser.Member_callContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>greater_than</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterGreater_than([NotNull] sassy_parser.Greater_thanContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>greater_than</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitGreater_than([NotNull] sassy_parser.Greater_thanContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>and</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterAnd([NotNull] sassy_parser.AndContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>and</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitAnd([NotNull] sassy_parser.AndContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>sub_sub_expression</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterSub_sub_expression([NotNull] sassy_parser.Sub_sub_expressionContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>sub_sub_expression</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSub_sub_expression([NotNull] sassy_parser.Sub_sub_expressionContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>multiplication</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterMultiplication([NotNull] sassy_parser.MultiplicationContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>multiplication</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitMultiplication([NotNull] sassy_parser.MultiplicationContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>greater_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterGreater_than_equal([NotNull] sassy_parser.Greater_than_equalContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>greater_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitGreater_than_equal([NotNull] sassy_parser.Greater_than_equalContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>addition</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterAddition([NotNull] sassy_parser.AdditionContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>addition</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitAddition([NotNull] sassy_parser.AdditionContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>indexor</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterIndexor([NotNull] sassy_parser.IndexorContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>indexor</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitIndexor([NotNull] sassy_parser.IndexorContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>or</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterOr([NotNull] sassy_parser.OrContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>or</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitOr([NotNull] sassy_parser.OrContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>lesser_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterLesser_than_equal([NotNull] sassy_parser.Lesser_than_equalContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>lesser_than_equal</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitLesser_than_equal([NotNull] sassy_parser.Lesser_than_equalContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>positive</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterPositive([NotNull] sassy_parser.PositiveContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>positive</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitPositive([NotNull] sassy_parser.PositiveContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>simple_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterSimple_call([NotNull] sassy_parser.Simple_callContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>simple_call</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitSimple_call([NotNull] sassy_parser.Simple_callContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>string_local_variable_reference</c>
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterString_local_variable_reference([NotNull] sassy_parser.String_local_variable_referenceContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>string_local_variable_reference</c>
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitString_local_variable_reference([NotNull] sassy_parser.String_local_variable_referenceContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>remainder</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterRemainder([NotNull] sassy_parser.RemainderContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>remainder</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitRemainder([NotNull] sassy_parser.RemainderContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>ternary</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void EnterTernary([NotNull] sassy_parser.TernaryContext context);
 	/// <summary>
 	/// Exit a parse tree produced by the <c>ternary</c>
-	/// labeled alternative in <see cref="sassy_parser.sub_expression"/>.
+	/// labeled alternative in <see cref="sassy_parser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitTernary([NotNull] sassy_parser.TernaryContext context);
@@ -1205,6 +1447,18 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitString_value([NotNull] sassy_parser.String_valueContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>element_string</c>
+	/// labeled alternative in <see cref="sassy_parser.value"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterElement_string([NotNull] sassy_parser.Element_stringContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>element_string</c>
+	/// labeled alternative in <see cref="sassy_parser.value"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitElement_string([NotNull] sassy_parser.Element_stringContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>none</c>
 	/// labeled alternative in <see cref="sassy_parser.value"/>.

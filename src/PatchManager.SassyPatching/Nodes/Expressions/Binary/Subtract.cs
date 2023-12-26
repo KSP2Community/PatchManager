@@ -32,6 +32,11 @@ public class Subtract : Binary
             return leftHandSide.Integer - rightHandSide.Real;
         }
 
+        if (leftHandSide.IsList && rightHandSide.IsList)
+        {
+            return leftHandSide.List.Where(x => rightHandSide.List.All(y => x != y)).ToList();
+        }
+
         throw new BinaryExpressionTypeException(Coordinate,"subtract", leftHandSide.Type.ToString(),
             rightHandSide.Type.ToString());
     }
