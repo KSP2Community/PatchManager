@@ -74,7 +74,7 @@
         <Delete Condition="$(ConfigurationName) == Release"
                 Files="$(SolutionDir)/dist/$(SolutionName)-$(Version).zip"/>
         <Exec Condition="$(ConfigurationName) == Release"
-              Command="$(PowerShellExecutable) Compress-Archive -Path '$(SolutionDir)/dist/$(ConfigurationName)/BepInEx' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-$(Version).zip'"/>
+              Command="$(PowerShellExecutable) -Command &quot;&amp; {Push-Location '$(SolutionDir)/dist/$(ConfigurationName)'; Compress-Archive -Path './*' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-$(Version).zip'; Pop-Location}&quot;"/>
 
         <!-- Copy plugin DLLs and XMLs into a temporary folder for NuGet packing -->
         <Message Text="Copying plugin DLLs and XMLs to temporary folder for NuGet packing" Condition="$(ConfigurationName) == Release"/>
@@ -93,7 +93,7 @@
         <!-- Packing NuGet package -->
         <Message Text="Packing NuGet package" Condition="$(ConfigurationName) == Release"/>
         <Exec Condition="$(ConfigurationName) == Release"
-              Command="$(NuGetExecutable) pack &quot;$(SolutionDir)/PatchManager.nuspec&quot; -OutputDirectory &quot;$(SolutionDir)/nuget&quot; -Properties NoWarn=NU5125;id=&quot;$(ProjectName)&quot;;version=&quot;$(Version)&quot;;authors=&quot;$(Authors)&quot;;description=&quot;$(Description)&quot;;repositoryType=&quot;$(RepositoryType)&quot;;repositoryUrl=&quot;$(RepositoryUrl)&quot;" />
+              Command="$(NuGetExecutable) pack &quot;$(SolutionDir)/Package.nuspec&quot; -OutputDirectory &quot;$(SolutionDir)/nuget&quot; -Properties &quot;NoWarn=NU5125;id=$(ProjectName);version=$(Version);authors=$(Authors);description=$(Description);repositoryType=$(RepositoryType);repositoryUrl=$(RepositoryUrl)&quot;" />
 
         <!-- Remove temporary folder -->
         <Message Text="Removing temporary folder" Condition="$(ConfigurationName) == Release"/>
