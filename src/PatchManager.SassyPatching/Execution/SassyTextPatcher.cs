@@ -1,5 +1,4 @@
-﻿using PatchManager.SassyPatching.Exceptions;
-using PatchManager.SassyPatching.Nodes.Attributes;
+﻿using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Statements;
 using PatchManager.Shared.Interfaces;
 
@@ -10,7 +9,7 @@ namespace PatchManager.SassyPatching.Execution;
 /// </summary>
 public class SassyTextPatcher : ITextPatcher
 {
-    
+
     // This is a snapshot of the environment before the patch was registered, note it will still reference the same global environment as its file, as that is only mutated by function declarations
     // Same w/ universe environment, as that should only contain stage definitions and such
     private Environment _environmentSnapshot;
@@ -41,14 +40,12 @@ public class SassyTextPatcher : ITextPatcher
         //     // If this errors then we don't register the patch, but we should give a more friendly thing to this at some point
         //     Priority = global.Universe.AllStages[stageName];
         // }
-        var global = environmentSnapshot.GlobalEnvironment;
         OriginalGuid = environmentSnapshot.GlobalEnvironment.ModGuid;
-        var universe = global.Universe;
         PriorityString =
             rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault() is { } runAtStageAttribute
                 ? runAtStageAttribute.Stage
                 : environmentSnapshot.GlobalEnvironment.ModGuid;
-        
+
     }
 
     public string OriginalGuid { get; }

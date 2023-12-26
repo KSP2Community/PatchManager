@@ -1,8 +1,5 @@
 ﻿using System.Collections;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using HarmonyLib;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
@@ -52,7 +49,7 @@ public class DataValue
         /// The type of a value that when assigned to a variable/field deletes that variable/field
         /// </summary>
         Deletion,
-        
+
         /// <summary>
         /// The type of a closure, a function in a value
         /// </summary>
@@ -132,7 +129,7 @@ public class DataValue
     /// Is the type of this variable <see cref="DataType.Integer"/>?
     /// </summary>
     public bool IsInteger => Type == DataType.Integer;
-    
+
     /// <summary>
     /// Asserts this value is of type <see cref="DataType.Integer"/>,
     /// then returns the <see cref="long"/> contained within
@@ -146,7 +143,7 @@ public class DataValue
             return (long)_object;
         }
     }
-    
+
 
     /// <summary>
     /// Is the type of this variable <see cref="DataType.String"/>?
@@ -190,7 +187,7 @@ public class DataValue
     /// Is the type of this variable <see cref="DataType.Dictionary"/>?
     /// </summary>
     public bool IsDictionary => Type == DataType.Dictionary;
-    
+
     /// <summary>
     /// Asserts this value is of type <see cref="DataType.Dictionary"/>,
     /// then returns the <see cref="Dictionary{K,V}"/> contained within of which the key type is <see cref="string"/> and the value type is <see cref="DataValue"/>
@@ -209,7 +206,7 @@ public class DataValue
     /// Is the type of this variable <see cref="DataType.Deletion"/>?
     /// </summary>
     public bool IsDeletion => Type == DataType.Deletion;
-    
+
     /// <summary>
     /// Is the type of this variable <see cref="DataType.Closure"/>?
     /// </summary>
@@ -228,8 +225,8 @@ public class DataValue
             return (PatchFunction)_object;
         }
     }
-    
-    
+
+
     /// <summary>
     /// Does this value get interpreted as true in places where a <see cref="DataType.Boolean"/> is expected?
     /// That is, is the value a <see cref="DataType.Boolean"/> and the value stored within true, or is the value anything but <see cref="DataType.None"/> and <see cref="DataType.Deletion"/>?
@@ -260,8 +257,8 @@ public class DataValue
     public static implicit operator DataValue(double d)
     {
         return new DataValue(DataType.Real, d);
-    } 
-    
+    }
+
     /// <summary>
     /// Creates a <see cref="DataValue"/> from a <see cref="long"/>
     /// </summary>
@@ -271,7 +268,7 @@ public class DataValue
     {
         return new DataValue(DataType.Integer, l);
     }
-    
+
 
     /// <summary>
     /// Creates a <see cref="DataValue"/> from a <see cref="string"/>
@@ -302,7 +299,7 @@ public class DataValue
     {
         return new DataValue(DataType.Dictionary, d);
     }
-    
+
     /// <summary>
     /// Creates a <see cref="DataValue"/> from a <see cref="PatchFunction"/>
     /// </summary>
@@ -371,7 +368,7 @@ public class DataValue
         {
             return this;
         }
-        
+
         if (t == typeof(string))
         {
             return String;
@@ -424,6 +421,7 @@ public class DataValue
 
         if (t == typeof(long))
         {
+            // ReSharper disable once RedundantCast
             return (long)Integer;
         }
 
@@ -452,7 +450,7 @@ public class DataValue
             return Closure;
         }
 
-        if (Type == DataValue.DataType.None)
+        if (Type == DataType.None)
         {
             return null;
         }
@@ -462,9 +460,9 @@ public class DataValue
         if (ConvertValueToMultiRankArray(t, out var multiRankArray)) return multiRankArray;
 
         if (ConvertValueToList(t, out var list)) return list;
-        
+
         if (ConvertValueToDictionary(t, out var convertParameterValue)) return convertParameterValue;
-        
+
         var obj = Activator.CreateInstance(t);
         var dictionary = Dictionary;
         foreach (var field in t.GetFields())
@@ -544,7 +542,7 @@ public class DataValue
 
             var arr = Array.CreateInstance(type.GetElementType()!, dimensions);
 
-            void BuildArray(Array array, List<DataValue> data, params int[] idx)
+            void BuildArray(Array array, params int[] idx)
             {
                 var idxCopy = new int[idx.Length + 1];
                 idx.CopyTo(idxCopy, 0);
@@ -561,12 +559,12 @@ public class DataValue
                     for (var i = 0; i < array.GetLength(idx.Length); i++)
                     {
                         idxCopy[idx.Length] = i;
-                        BuildArray(array, data[i].List, idxCopy);
+                        BuildArray(array, idxCopy);
                     }
                 }
             }
 
-            BuildArray(arr, tab);
+            BuildArray(arr);
             {
                 multiRankArray = arr;
                 return true;
@@ -662,7 +660,7 @@ public class DataValue
         {
             return new JValue(Integer);
         }
-        
+
         if (IsString)
         {
             return new JValue(String);
@@ -687,7 +685,7 @@ public class DataValue
             }
             return obj;
         }
-        
+
         return null;
     }
     private static bool ConvertGenericListOrDictionaryToValue(object value, Type type, out DataValue listOrDictionaryDataValue)
@@ -731,7 +729,6 @@ public class DataValue
         if (t.IsArray)
         {
             var a = (Array)value;
-            var rank = a.Rank;
             var outermostDimension = new List<DataValue>();
 
             void TraverseRank(List<DataValue> containingDimension, Array arr, int r, params int[] idx)
@@ -797,7 +794,7 @@ public class DataValue
         switch (value)
         {
             case null:
-                return new DataValue(DataValue.DataType.None);
+                return new DataValue(DataType.None);
             case DataValue v:
                 return v;
             case bool b:
@@ -837,7 +834,7 @@ public class DataValue
         }
 
         var t = value.GetType();
-        
+
         if (ConvertSingleRankArrayToValue(value, t, out var singleRankArray)) return singleRankArray;
         if (ConvertMultiRankArrayToValue(value, t, out var multiRankArrayValue)) return multiRankArrayValue;
         if (ConvertGenericListOrDictionaryToValue(value, t, out var listOrDictionaryValue)) return listOrDictionaryValue;

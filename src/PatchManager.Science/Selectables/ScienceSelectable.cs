@@ -6,12 +6,15 @@ using PatchManager.Science.Modifiables;
 
 namespace PatchManager.Science.Selectables;
 
+/// <summary>
+/// A selectable that represents a science experiment
+/// </summary>
 public sealed class ScienceSelectable : BaseSelectable
 {
-   
-    private bool _modified = false;
-    private bool _deleted = false;
-
+#pragma warning disable CS0414 // Field is assigned but its value is never used
+    private bool _modified;
+#pragma warning restore CS0414 // Field is assigned but its value is never used
+    private bool _deleted;
 
     /// <summary>
     /// Marks this part selectable as having been modified any level down
@@ -30,30 +33,38 @@ public sealed class ScienceSelectable : BaseSelectable
         _deleted = true;
     }
 
+    /// <summary>
+    /// The science object that this selectable represents
+    /// </summary>
     public JObject ScienceObject;
-    
+
+    /// <summary>
+    /// Creates a new science selectable
+    /// </summary>
+    /// <param name="scienceData">The science data that this selectable represents</param>
     public ScienceSelectable(JObject scienceData)
     {
         ElementType = "techNodeData";
         ScienceObject = scienceData;
-        Classes = new();
-        Children = new();
+        Classes = new List<string>();
+        Children = new List<ISelectable>();
         foreach (var subToken in ScienceObject)
         {
             Classes.Add(subToken.Key);
-            Children.Add(new JTokenSelectable(SetModified,subToken.Value,subToken.Key));
+            Children.Add(new JTokenSelectable(SetModified, subToken.Value, subToken.Key));
         }
     }
-    /// <inheritdoc />
-    public sealed override List<ISelectable> Children { get; }
 
+    /// <inheritdoc />
+    public override List<ISelectable> Children { get; }
 
     /// <inheritdoc />
     public override string Name => ScienceObject["ID"]!.Value<string>()!;
 
     /// <inheritdoc />
-    public sealed override List<string> Classes { get; }
+    public override List<string> Classes { get; }
 
+    /// <inheritdoc />
     public override bool MatchesClass(string @class, out DataValue classValue)
     {
         classValue = null;
@@ -64,7 +75,6 @@ public sealed class ScienceSelectable : BaseSelectable
 
         classValue = DataValue.FromJToken(ScienceObject[@class]);
         return true;
-
     }
 
     /// <inheritdoc />

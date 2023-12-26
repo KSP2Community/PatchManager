@@ -1,5 +1,4 @@
-﻿using BepInEx.Logging;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using KSP.Modules;
 using Newtonsoft.Json.Linq;
 using PatchManager.Parts.Attributes;
@@ -7,7 +6,6 @@ using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Modifiables;
 using PatchManager.SassyPatching.Selectables;
-using UnityEngine;
 
 namespace PatchManager.Parts.Selectables;
 

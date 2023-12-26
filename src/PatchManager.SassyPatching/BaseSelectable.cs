@@ -9,9 +9,6 @@ namespace PatchManager.SassyPatching;
 [PublicAPI]
 public abstract class BaseSelectable : ISelectable
 {
-
-    
-    
     /// <summary>
     /// The children of this selectable
     /// </summary>

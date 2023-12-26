@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using PatchManager.SassyPatching.Execution;
+﻿using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 

@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <!-- References -->
-    <ItemGroup Label="Project references">
-      <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
-      <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
+    <ItemGroup Label="NuGet package references">
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" />
+        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" Publicize="true" />
+        <PackageReference Include="SpaceWarp" Version="1.6.0" PrivateAssets="all" />
     </ItemGroup>
-    <ItemGroup>
-      <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" Publicize="true" />
-      <PackageReference Include="SpaceWarp" Version="1.5.2" />
+    <ItemGroup Label="Project references">
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
 </Project>

@@ -17,8 +17,8 @@ public class ConfigCreation : Node
     public override void ExecuteIn(Environment environment)
     {
         var universe = environment.GlobalEnvironment.Universe;
-        if (!universe.Configs.TryGetValue(ConfigLabel, out var Label))
-            Label = universe.Configs[ConfigLabel] = new Dictionary<string, DataValue>();
-        Label[ConfigName] = ConfigValue.Compute(environment);
+        if (!universe.Configs.TryGetValue(ConfigLabel, out var label))
+            label = universe.Configs[ConfigLabel] = new Dictionary<string, DataValue>();
+        label[ConfigName] = ConfigValue.Compute(environment);
     }
 }

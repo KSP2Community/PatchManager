@@ -29,7 +29,7 @@ public abstract class CustomJTokenModifiable : IModifiable
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="fieldName"></param>
     /// <param name="field"></param>
@@ -51,10 +51,10 @@ public abstract class CustomJTokenModifiable : IModifiable
     /// This is a dictionary from fieldName -> function where that function returns a custom value that is that element or null
     /// </summary>
     protected abstract Dictionary<string, Func<JToken, string, JToken>> CustomElementAdaptors { get; }
-    
+
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="jToken"></param>
     /// <param name="setDirty"></param>
@@ -266,7 +266,7 @@ public abstract class CustomJTokenModifiable : IModifiable
         }
         else
         {
-            
+
             if (dataValue.IsDeletion)
             {
                 JToken[fieldName].Remove();
@@ -297,6 +297,5 @@ public abstract class CustomJTokenModifiable : IModifiable
     /// <inheritdoc />
     public virtual void Complete()
     {
-        return;
     }
 }

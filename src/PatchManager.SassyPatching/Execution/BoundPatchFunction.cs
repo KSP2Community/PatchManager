@@ -1,6 +1,4 @@
-﻿using PatchManager.SassyPatching.Nodes;
-
-namespace PatchManager.SassyPatching.Execution;
+﻿namespace PatchManager.SassyPatching.Execution;
 
 /// <summary>
 /// A patch function that already has an argument bound to it

@@ -25,7 +25,7 @@ public class CoreModule : BaseModule
 {
     private ConfigValue<bool> _shouldAlwaysInvalidate;
 
-    private bool _wasCacheInvalidated = false;
+    private bool _wasCacheInvalidated;
 
     private static bool ShouldLoad(string[] disabled, string modInfoLocation)
     {

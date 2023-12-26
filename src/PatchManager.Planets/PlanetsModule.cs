@@ -1,7 +1,4 @@
 ﻿using JetBrains.Annotations;
-using KSP.Game;
-using KSP.Map;
-using KSP.Messages;
 using PatchManager.Shared.Modules;
 
 namespace PatchManager.Planets;

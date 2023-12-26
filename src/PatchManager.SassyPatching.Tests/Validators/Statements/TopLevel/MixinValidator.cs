@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace PatchManager.SassyPatching.Tests.Validators.Statements.TopLevel;
+﻿namespace PatchManager.SassyPatching.Tests.Validators.Statements.TopLevel;
 /// <summary>
 /// Describes a validator for matching nodes of type <see cref="Mixin"/>
 /// </summary>

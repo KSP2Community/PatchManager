@@ -29,7 +29,7 @@ public class ChildSelector : Selector
 
     private List<SelectableWithEnvironment> SelectChildren(List<SelectableWithEnvironment> selectedParents)
     {
-        
+
         List<SelectableWithEnvironment> result = new();
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var selectable in selectedParents)
@@ -38,13 +38,13 @@ public class ChildSelector : Selector
             var allChildren = Child.SelectAll(selectable.Selectable.SelectEverything().Select(x => new SelectableWithEnvironment
             {
                 Selectable = x,
-                Environment = new Execution.Environment(selectable.Environment.GlobalEnvironment, selectable.Environment)
+                Environment = new Environment(selectable.Environment.GlobalEnvironment, selectable.Environment)
             }).ToList());
             result = SelectionUtilities.CombineSelections(result, allChildren);
         }
         return result;
     }
-    
+
     /// <inheritdoc />
     public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject) =>
         SelectChildren(Parent.SelectAllTopLevel(type, name, data, baseEnvironment, out rulesetMatchingObject));

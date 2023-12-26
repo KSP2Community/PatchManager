@@ -1,8 +1,4 @@
 ﻿using System.Collections;
-using System.Globalization;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using BepInEx.Logging;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Cache;
@@ -12,9 +8,7 @@ using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Interfaces;
-using SpaceWarp;
 using SpaceWarp.API.Mods;
-using SpaceWarp.API.Versions;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -33,7 +27,6 @@ internal static class PatchingManager
     private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
 
     internal static int TotalPatchCount;
-    private static readonly Regex VersionPreprocessRegex = new Regex(@"[^0-9.]");
     public static void GenerateUniverse(HashSet<string> singleFileModIds)
     {
         var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
@@ -58,6 +51,7 @@ internal static class PatchingManager
 
         Patchers.Add(patcher);
     }
+
     private static void RegisterGenerator(ITextAssetGenerator generator)
     {
         for (var index = 0; index < Generators.Count; index++)
@@ -133,7 +127,8 @@ internal static class PatchingManager
         }
     }
 
-    public static void ImportSinglePatch(FileInfo fileInfo) => Universe.LoadSinglePatchFile(fileInfo,new DirectoryInfo(BepInEx.Paths.GameRootPath));
+    public static void ImportSinglePatch(FileInfo fileInfo) 
+        => Universe.LoadSinglePatchFile(fileInfo,new DirectoryInfo(BepInEx.Paths.GameRootPath));
 
     public static void RegisterPatches()
     {
@@ -198,6 +193,7 @@ internal static class PatchingManager
                     Assets = new List<string> { name }
                 });
             }
+
             createdAsset.Clear();
             _createdAssets.Remove(label);
         }
@@ -217,6 +213,7 @@ internal static class PatchingManager
                 {
                     return;
                 }
+
                 archiveFiles[asset.name] = patchedText;
                 labelCacheEntry.Assets.Add(asset.name);
                 assetsCacheEntries.Add(asset.name, new CacheEntry
@@ -250,6 +247,7 @@ internal static class PatchingManager
 
             Console.WriteLine($"Cache for label '{label}' rebuilt.");
         }
+
         if (handle.Status == AsyncOperationStatus.Failed && !unchanged)
         {
             SaveArchive();
@@ -267,21 +265,6 @@ internal static class PatchingManager
         };
 
         return handle;
-    }
-
-    private static bool IsUsefulKey(string key)
-    {
-        key = key.Replace(".bundle", "").Replace(".json", "");
-        if (int.TryParse(key, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
-        {
-            return false;
-        }
-        if (key.Length == 32)
-        {
-            return !key.All(x => "0123456789abcdef".Contains(x));
-        }
-
-        return !key.EndsWith(".prefab") && !key.EndsWith(".png");
     }
 
     public static void CreateNewAssets(Action resolve, Action<string> reject)
@@ -308,34 +291,40 @@ internal static class PatchingManager
 
     public static void RebuildAllCache(Action resolve, Action<string> reject)
     {
-
-
         var distinctKeys = Universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
         LoadingBarPatch.InjectPatchManagerTips = true;
+
         GenericFlowAction CreateIndexedFlowAction(int idx)
         {
             return new GenericFlowAction(
                 $"Patch Manager: {distinctKeys[idx]}",
-                (resolve2, reject2) =>
+                (resolve2, _) =>
                 {
                     var handle = RebuildCache(distinctKeys[idx]);
                     var killTips = false;
                     if (idx + 1 < distinctKeys.Count)
-                        GameManager.Instance.LoadingFlow._flowActions.Insert(GameManager.Instance.LoadingFlow._flowIndex + 1,
-                            CreateIndexedFlowAction(idx+1));
+                    {
+                        GameManager.Instance.LoadingFlow._flowActions.Insert(
+                            GameManager.Instance.LoadingFlow._flowIndex + 1,
+                            CreateIndexedFlowAction(idx + 1)
+                        );
+                    }
                     else
                     {
                         killTips = true;
                     }
-                    CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2,killTips));
+
+                    CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2, killTips));
                 });
         }
 
         if (distinctKeys.Count > 0)
         {
-            GameManager.Instance.LoadingFlow._flowActions.Insert(GameManager.Instance.LoadingFlow._flowIndex + 1,
-                CreateIndexedFlowAction(0));
+            GameManager.Instance.LoadingFlow._flowActions.Insert(
+                GameManager.Instance.LoadingFlow._flowIndex + 1,
+                CreateIndexedFlowAction(0)
+            );
         }
 
         resolve();

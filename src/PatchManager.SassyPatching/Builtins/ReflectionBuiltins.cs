@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using PatchManager.SassyPatching.Attributes;
-using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Builtins;
 
