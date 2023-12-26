@@ -4,7 +4,7 @@
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" Publicize="true" />
-        <PackageReference Include="SpaceWarp" Version="1.6.0" PrivateAssets="all" />
+        <PackageReference Include="SpaceWarp" Version="1.7.0" PrivateAssets="all" />
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />

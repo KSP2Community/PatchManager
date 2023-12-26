@@ -5,7 +5,7 @@
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" PrivateAssets="all" />
-        <PackageReference Include="SpaceWarp" Version="1.6.0" PrivateAssets="all" />
+        <PackageReference Include="SpaceWarp" Version="1.7.0" PrivateAssets="all" />
         <PackageReference Include="SpaceWarp.PluginInfoProps" Version="1.*" />
     </ItemGroup>
     <ItemGroup Label="Project references">
