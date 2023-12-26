@@ -87,30 +87,62 @@ public class CoreModule : BaseModule
     /// <inheritdoc />
     public override void PreLoad()
     {
+        var gameDataModsExists = Directory.Exists(Path.Combine(Paths.GameRootPath, "GameData/Mods"));
+
         // Go here instead so that the static constructor recognizes everything
         var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
             .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
         var modFolders = Directory.GetDirectories(Paths.PluginPath, "*", SearchOption.AllDirectories)
-            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x =>
-                (Folder: x,
-                    Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))))
+            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
+            .Select(x => (
+                Folder: x,
+                Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))
+            ))
             .ToList();
-        modFolders.AddRange(Directory
-            .GetDirectories(Path.Combine(Paths.GameRootPath, "GameData/Mods"), "*", SearchOption.AllDirectories)
-            .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json"))).Select(x =>
-                (Folder: x,
-                    Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json"))))));
+
+        if (gameDataModsExists)
+        {
+            modFolders.AddRange(
+                Directory
+                    .GetDirectories(Path.Combine(Paths.GameRootPath, "GameData/Mods"), "*", SearchOption.AllDirectories)
+                    .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
+                    .Select(x => (
+                        Folder: x,
+                        Info: JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(Path.Combine(x, "swinfo.json")))
+                    )));
+        }
+
         var gameRoot = new DirectoryInfo(Paths.GameRootPath);
 
-        var standalonePatches = Directory.EnumerateFiles(Path.Combine(Paths.GameRootPath, "GameData/Mods"), "*.patch",
-                SearchOption.AllDirectories)
-            .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot)).Select(x => new FileInfo(x)).ToList();
-        standalonePatches.AddRange(Directory.EnumerateFiles(Paths.PluginPath, "*.patch", SearchOption.AllDirectories)
-            .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot)).Select(x => new FileInfo(x)));
+        var standalonePatches = Directory.EnumerateFiles(
+                Paths.PluginPath,
+                "*.patch",
+                SearchOption.AllDirectories
+            )
+            .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot))
+            .Select(x => new FileInfo(x))
+            .ToList();
 
-        PatchingManager.GenerateUniverse(standalonePatches
-            .Select(x => x.Directory!.FullName.MakeRelativePathTo(gameRoot.FullName).Replace("\\","-")).ToHashSet());
+        if (gameDataModsExists)
+        {
+            standalonePatches.AddRange(
+                Directory.EnumerateFiles(
+                        Path.Combine(Paths.GameRootPath, "GameData/Mods"),
+                        "*.patch",
+                        SearchOption.AllDirectories
+                    )
+                    .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot))
+                    .Select(x => new FileInfo(x))
+            );
+        }
+
+        PatchingManager.GenerateUniverse(standalonePatches.Select(x =>
+            x.Directory!.FullName
+                .MakeRelativePathTo(gameRoot.FullName)
+                .Replace("\\", "-")
+        ).ToHashSet());
+
         foreach (var modFolder in modFolders)
         {
             Logging.LogInfo($"Loading patchers from {modFolder.Folder}");
