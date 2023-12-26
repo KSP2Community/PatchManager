@@ -1,5 +1,4 @@
-﻿using PatchManager.SassyPatching.Nodes.Statements;
-using Environment = PatchManager.SassyPatching.Execution.Environment;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes;
 

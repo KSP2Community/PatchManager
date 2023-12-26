@@ -10,6 +10,8 @@ public interface IPatcherRuleSet
     /// <summary>
     /// What type of patch type will this ruleset match
     /// </summary>
+    /// <param name="label">The label to match</param>
+    /// <returns>True if the label matches the ruleset</returns>
     public bool Matches(string label);
 
     /// <summary>
@@ -22,5 +24,10 @@ public interface IPatcherRuleSet
     public ISelectable ConvertToSelectable(string type, string name, string jsonData);
 
 
+    /// <summary>
+    /// Creates a new asset for the patcher
+    /// </summary>
+    /// <param name="dataValues">The data values to create the asset from</param>
+    /// <returns>The new asset</returns>
     public INewAsset CreateNew(List<DataValue> dataValues);
 }

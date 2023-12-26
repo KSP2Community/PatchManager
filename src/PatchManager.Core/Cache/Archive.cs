@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using UnityEngine;
 
 namespace PatchManager.Core.Cache;
 

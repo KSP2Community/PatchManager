@@ -61,8 +61,8 @@ public class For : Node
 
     private void SetupRealIteration(Environment environment, DataValue end, DataValue start)
     {
-        Func<double, bool> endCheck = null;
-        bool inverted = false;
+        Func<double, bool> endCheck;
+        bool inverted;
         if (end.IsReal)
         {
             inverted = SetupRealRealIteration(end, start, out endCheck);
@@ -141,8 +141,8 @@ public class For : Node
 
     private void SetupIntegerIteration(Environment environment, DataValue end, DataValue start)
     {
-        Func<long, bool> endCheck = null;
-        bool inverted = false;
+        Func<long, bool> endCheck;
+        bool inverted;
         if (end.IsReal)
         {
             inverted = SetupIntegerRealIteration(end, start, out endCheck);
@@ -239,8 +239,8 @@ public class For : Node
             start += inverted ? -1 : 1;
         }
     }
-    
-    
+
+
     private void ExecuteChildren(Environment environment)
     {
         foreach (var child in Children)

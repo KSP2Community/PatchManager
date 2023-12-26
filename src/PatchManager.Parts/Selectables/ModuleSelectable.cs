@@ -1,5 +1,4 @@
 ﻿using KSP.IO;
-using KSP.Networking.MP.Utils;
 using KSP.Sim.Definitions;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;

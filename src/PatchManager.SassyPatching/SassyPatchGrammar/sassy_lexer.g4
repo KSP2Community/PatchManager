@@ -50,6 +50,10 @@ LEFT_BRACKET        : '[';
 RIGHT_BRACKET       : ']';
 SEMICOLON           : ';';
 COLON               : ':';
+PLUS_COLON          : '+:';
+MINUS_COLON         : '-:';
+DIVIDE_COLON        : '/:';
+MULTIPLY_COLON      : '*:';
 COMMA               : ',';
 
 // Operators
@@ -120,9 +124,13 @@ fragment IDENTIFIER : [a-zA-Z_*?0-9]([a-zA-Z_.*?0-9\-])*;
 fragment WILDCARDLESS_IDENTIFIER : [a-zA-Z_]([a-zA-Z_.0-9]|[\-][a-zA-Z])*;
 
 NAME                : '#' IDENTIFIER;
+STRING_NAME         : '#' STRING;
 CLASS               : '.' WILDCARDLESS_IDENTIFIER;
+STRING_CLASS        : '.' STRING;
 VARIABLE            : '$' WILDCARDLESS_IDENTIFIER;
 LOCALVARIABLE       : '$$' WILDCARDLESS_IDENTIFIER;
+STRING_LOCALVARIABLE: '$$' STRING;
 RULESET             : ':' WILDCARDLESS_IDENTIFIER;
 ENSURE              : '%' WILDCARDLESS_IDENTIFIER;
+STRING_ENSURE       : '%' STRING;
 ELEMENT             : WILDCARDLESS_IDENTIFIER;

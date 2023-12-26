@@ -4,7 +4,7 @@ using KSP.OAB;
 namespace PatchManager.Parts.Patchers;
 
 [HarmonyPatch]
-internal class OABUtilsPatcher
+internal class OabUtilsPatcher
 {
     /// <summary>
     /// This is a map of part names to icon names. It is populated by the PartDataDeserializePatcher.
@@ -19,6 +19,7 @@ internal class OABUtilsPatcher
     /// <returns>True if the original method should be called, false otherwise.</returns>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Utils), nameof(Utils.GetPartIconNameFromPartName))]
+    // ReSharper disable once InconsistentNaming
     internal static bool Utils_GetPartIconNameFromPartName(string partName, ref string __result)
     {
         if (PartIconMap.TryGetValue(partName, out var iconName))

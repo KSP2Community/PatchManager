@@ -9,76 +9,8 @@ public class EqualTo : Binary
     {
     }
 
-    private bool ListCompare(List<DataValue> leftHandSide, List<DataValue> rightHandSide)
-    {
-        if (leftHandSide.Count != rightHandSide.Count)
-        {
-            return false;
-        }
-        return !leftHandSide.Where((t, index) => !GetResult(t, rightHandSide[index]).Boolean).Any();
-    }
-
-    private bool DictionaryCompare(Dictionary<string, DataValue> leftHandSide, Dictionary<string, DataValue> rightHandSide)
-    {
-        if (leftHandSide.Count != rightHandSide.Count)
-        {
-            return false;
-        }
-
-        foreach (var kv in leftHandSide)
-        {
-            if (rightHandSide.TryGetValue(kv.Key, out var rvalue))
-            {
-                if (!GetResult(kv.Value, rvalue).Boolean)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
-    {
-        if (leftHandSide.Type != rightHandSide.Type) return false;
-        
-        if (leftHandSide.IsBoolean)
-        {
-            return leftHandSide.Boolean == rightHandSide.Boolean;
-        }
-
-        if (leftHandSide.IsReal)
-        {
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            return leftHandSide.Real == rightHandSide.Real;
-        }
-
-        if (leftHandSide.IsInteger)
-        {
-            return leftHandSide.Integer == rightHandSide.Integer;
-        }
-
-        if (leftHandSide.IsString)
-        {
-            return leftHandSide.String == rightHandSide.String;
-        }
-
-        if (leftHandSide.IsList)
-        {
-            return ListCompare(leftHandSide.List,rightHandSide.List);
-        }
-
-        if (leftHandSide.IsDictionary)
-        {
-            return DictionaryCompare(leftHandSide.Dictionary, rightHandSide.Dictionary);
-        }
-        
-        return true;
-    }
+    internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide) =>
+        leftHandSide == rightHandSide;
 
     internal override bool ShortCircuitOn(DataValue dataValue) => false;
 

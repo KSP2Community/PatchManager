@@ -1,16 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" />
+    <!-- References -->
+    <ItemGroup Label="NuGet package references">
+        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" />
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" />
+    <ItemGroup Label="Project references">
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
-
 </Project>

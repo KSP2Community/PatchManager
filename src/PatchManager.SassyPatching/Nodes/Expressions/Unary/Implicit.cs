@@ -1,5 +1,4 @@
-﻿using PatchManager.SassyPatching.Exceptions;
-using Environment = PatchManager.SassyPatching.Execution.Environment;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions.Unary;
 

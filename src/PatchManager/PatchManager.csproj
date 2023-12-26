@@ -4,16 +4,18 @@
     <ItemGroup Label="NuGet package references">
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
-        <PackageReference Include="SpaceWarp.PluginInfoProps" Version="1.*" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" PrivateAssets="all" />
-        <PackageReference Include="SpaceWarp" Version="1.5.2" PrivateAssets="all" />
+        <PackageReference Include="SpaceWarp" Version="1.7.0" PrivateAssets="all" />
+        <PackageReference Include="SpaceWarp.PluginInfoProps" Version="1.*" />
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Core/PatchManager.Core.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Generic/PatchManager.Generic.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Missions/PatchManager.Missions.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Parts/PatchManager.Parts.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Resources/PatchManager.Resources.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
+        <ProjectReference Include="$(SolutionDir)/src/PatchManager.Science/PatchManager.Science.csproj" Private="false" />
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
     </ItemGroup>
 </Project>
