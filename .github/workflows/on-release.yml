@@ -10,7 +10,7 @@ jobs:
     permissions: write-all
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install jq
         uses: dcarbone/install-jq-action@v2.1.0
@@ -54,7 +54,7 @@ jobs:
           dotnet nuget push "$nupkg_path" -s https://nuget.spacewarp.org/v3/index.json -k ${{ secrets.NUGET_SERVER_KEY }}
 
       - name: Upload Zip
-        uses: actions/upload-release-asset@v1.0.1
+        uses: shogo82148/actions-upload-release-asset@v1.7.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
