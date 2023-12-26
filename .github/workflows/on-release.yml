@@ -26,7 +26,7 @@ jobs:
       - name: Extract current version
         id: get-version
         run: |
-          version=$(jq -r '.version' plugin_template/BepInEx/plugins/PatchManager/swinfo.json)
+          version=$(jq -r '.version' plugin_template/swinfo.json)
           echo "Version is $version"
           echo "version=$version" >> $GITHUB_ENV
           echo "artifact_name=PatchManager-$version.zip" >> $GITHUB_ENV
