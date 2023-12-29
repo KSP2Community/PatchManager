@@ -17,8 +17,14 @@ public class GalaxyRuleset
     public bool Matches(string label) => true;
 
     /// <inheritdoc />
-    public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
-        new GalaxySelectable(JObject.Parse(jsonData), type);
+    public ISelectable ConvertToSelectable(string type, string name, string jsonData)
+    {
+        var obj = JObject.Parse(jsonData);
+        if (!obj.ContainsKey("Name") || !obj.ContainsKey("Version") || !obj.ContainsKey("CelestialBodies"))
+            return null;
+        return new GalaxySelectable(JObject.Parse(jsonData), type);
+        
+    }
     /// <inheritdoc />
     public INewAsset CreateNew(List<DataValue> dataValues)
     {
