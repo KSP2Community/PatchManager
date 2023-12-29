@@ -6,14 +6,14 @@ using PatchManager.Planets.Selectables;
 
 
 /// <summary>
-/// Modifiable for <see cref="ScienceSelectable"/>. This is used to modify the science object.
+/// Modifiable for <see cref="GalaxySelectable"/>. This is used to modify the science object.
 /// </summary>
 public class GalaxyModifiable : JTokenModifiable
 {
     private GalaxySelectable _galaxySelectable;
 
     /// <summary>
-    /// Creates a new <see cref="ScienceModifiable"/> for the given <see cref="ScienceSelectable"/>.
+    /// Creates a new <see cref="GalaxyModifiable"/> for the given <see cref="GalaxyModifiable"/>.
     /// </summary>
     /// <param name="selectable">The selectable to modify.</param>
     public GalaxyModifiable(GalaxySelectable selectable) : base(selectable.GalaxyObject, selectable.SetModified) => _galaxySelectable = selectable;
