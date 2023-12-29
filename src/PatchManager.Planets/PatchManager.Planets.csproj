@@ -8,5 +8,6 @@
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.Shared/PatchManager.Shared.csproj" Private="false" />
+        <ProjectReference Include="..\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj" />
     </ItemGroup>
 </Project>
