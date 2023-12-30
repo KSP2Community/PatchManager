@@ -217,5 +217,5 @@ public class CoreModule : BaseModule
     /// This is the current universe that patch manager is using (used for interop reasons)
     /// </summary>
     [PublicAPI]
-    public Universe CurrentUniverse => PatchingManager.Universe;
+    public static Universe CurrentUniverse => PatchingManager.Universe;
 }
