@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Execution;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
@@ -23,7 +24,17 @@ public class ElementSelector : Selector
     {
         return selectableWithEnvironments.Where(selectable =>
         {
-            var result = selectable.Selectable.MatchesElement(ElementName);
+            var interpolated = "";
+            try
+            {
+                interpolated = ElementName.Interpolate(selectable.Environment);
+            }
+            catch (Exception e)
+            {
+                throw new InterpolationException(Coordinate, e.Message);
+            }
+
+            var result = selectable.Selectable.MatchesElement(interpolated);
             return result;
         }).ToList();
     }

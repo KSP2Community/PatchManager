@@ -1,7 +1,7 @@
 ﻿using PatchManager.SassyPatching.Nodes.Expressions;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
-namespace PatchManager.SassyPatching.Nodes.Statements.FunctionLevel;
+namespace PatchManager.SassyPatching.Nodes.Statements;
 
 /// <summary>
 /// Represents a loop that iterates while a condition remains true

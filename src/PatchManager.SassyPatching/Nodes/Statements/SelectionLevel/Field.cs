@@ -43,11 +43,24 @@ public class Field : Node, ISelectionAction
         {
             throw new InterpreterException(Coordinate, "Attempting to modify an unmodifiable selection");
         }
+
+        var interpolated = "";
+        if (Indexer is StringIndexer si)
+        {
+            try
+            {
+                interpolated = si.Index.Interpolate(environment);
+            }
+            catch (Exception e)
+            {
+                throw new InterpolationException(Coordinate, e.Message);
+            }
+        }
         
         var value = Indexer switch
         {
             ElementIndexer elementIndexer => modifiable.GetFieldByElement(FieldName, elementIndexer.ElementName),
-            StringIndexer stringIndexer => modifiable.GetFieldByElement(FieldName, stringIndexer.Index),
+            StringIndexer stringIndexer => modifiable.GetFieldByElement(FieldName, interpolated),
             NumberIndexer numberIndexer => modifiable.GetFieldByNumber(FieldName, numberIndexer.Index),
             ClassIndexer classIndexer => modifiable.GetFieldByClass(FieldName, classIndexer.ClassName),
             _ => modifiable.GetFieldValue(FieldName)
@@ -66,7 +79,7 @@ public class Field : Node, ISelectionAction
                     modifiable.SetFieldByElement(FieldName, setElementIndexer.ElementName, result);
                     return;
                 case StringIndexer setStringIndexer:
-                    modifiable.SetFieldByElement(FieldName, setStringIndexer.Index, result);
+                    modifiable.SetFieldByElement(FieldName, interpolated, result);
                     return;
                 case NumberIndexer setNumberIndexer:
                     modifiable.SetFieldByNumber(FieldName, setNumberIndexer.Index, result);

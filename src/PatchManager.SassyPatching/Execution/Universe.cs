@@ -150,7 +150,7 @@ public class Universe
         }
     }
 
-    private class ParserListener : IAntlrErrorListener<IToken>
+    internal class ParserListener : IAntlrErrorListener<IToken>
     {
         internal bool Errored;
         internal Action<string> ErrorLogger;
@@ -170,7 +170,7 @@ public class Universe
         }
     }
 
-    private class LexerListener : IAntlrErrorListener<int>
+    internal class LexerListener : IAntlrErrorListener<int>
     {
         internal bool Errored;
         internal Action<string> ErrorLogger;
@@ -317,18 +317,20 @@ public class Universe
         // Now lets update configs
         foreach (var (_,label,name,updateExpression,environment) in ConfigUpdates)
         {
-            if (!Configs.TryGetValue(label, out var labelDict))
-                labelDict = Configs[label] = new Dictionary<string, DataValue>();
+            var interpLabel = label.Interpolate(environment);
+            if (!Configs.TryGetValue(interpLabel, out var labelDict))
+                labelDict = Configs[interpLabel] = new Dictionary<string, DataValue>();
             var subEnv = new Environment(environment.GlobalEnvironment,environment);
             if (name != null)
             {
-                if (labelDict.TryGetValue(name, out var toAddValue))
+                var interpName = name.Interpolate(environment);
+                if (labelDict.TryGetValue(interpName, out var toAddValue))
                 {
                     subEnv["value"] = toAddValue;
                 }
                 else
                 {
-                    subEnv["value"] = labelDict[name] = new DataValue(DataValue.DataType.None);
+                    subEnv["value"] = labelDict[interpName] = new DataValue(DataValue.DataType.None);
                 }
 
                 var result = updateExpression.Compute(subEnv);
@@ -338,7 +340,7 @@ public class Universe
                 }
                 else
                 {
-                    labelDict[name] = result;
+                    labelDict[interpName] = result;
                 }
             }
             else

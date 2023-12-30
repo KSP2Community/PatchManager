@@ -34,11 +34,15 @@ public class Import : Node
     {
         try
         {
-            environment.GlobalEnvironment.Import(environment, Library);
+            environment.GlobalEnvironment.Import(environment, Library.Interpolate(environment));
         }
         catch (ImportException)
         {
-            throw new InterpreterException(Coordinate, $"Cannot import library {Library} as it does not exist");
+            throw new InterpreterException(Coordinate, $"Cannot import library {Library.Interpolate(environment)} as it does not exist");
+        }
+        catch (Exception e)
+        {
+            throw new InterpolationException(Coordinate, e.Message);
         }
     }
 }

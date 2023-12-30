@@ -1073,16 +1073,68 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFor_through_loop([NotNull] sassy_parser.For_through_loopContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>top_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTop_level_for_to_loop([NotNull] sassy_parser.Top_level_for_to_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>top_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTop_level_for_through_loop([NotNull] sassy_parser.Top_level_for_through_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_level_for_to_loop([NotNull] sassy_parser.Sel_level_for_to_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>sel_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_level_for_through_loop([NotNull] sassy_parser.Sel_level_for_through_loopContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.each_loop"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitEach_loop([NotNull] sassy_parser.Each_loopContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.top_level_each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTop_level_each_loop([NotNull] sassy_parser.Top_level_each_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.sel_level_each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_level_each_loop([NotNull] sassy_parser.Sel_level_each_loopContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="sassy_parser.while_loop"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitWhile_loop([NotNull] sassy_parser.While_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.top_level_while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTop_level_while_loop([NotNull] sassy_parser.Top_level_while_loopContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.sel_level_while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSel_level_while_loop([NotNull] sassy_parser.Sel_level_while_loopContext context);
 }
 } // namespace SassyPatchGrammar

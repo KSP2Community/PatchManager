@@ -21,7 +21,7 @@ public class ClassSelector : Selector
     /// <inheritdoc />
     public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
-        return selectableWithEnvironments.Where(selectable => selectable.Selectable.MatchesClass(ClassName)).ToList();
+        return selectableWithEnvironments.Where(selectable => selectable.Selectable.MatchesClass(ClassName.Interpolate(selectable.Environment))).ToList();
     }
 
     /// <inheritdoc />

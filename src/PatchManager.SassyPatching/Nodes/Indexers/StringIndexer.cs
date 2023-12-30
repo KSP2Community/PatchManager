@@ -9,8 +9,5 @@ public class StringIndexer : Indexer
     /// The element type to index by
     /// </summary>
     public readonly string Index;
-    internal StringIndexer(Coordinate c, string index) : base(c)
-    {
-        Index = index;
-    }
+    internal StringIndexer(Coordinate c, string index) : base(c) => Index = index;
 }

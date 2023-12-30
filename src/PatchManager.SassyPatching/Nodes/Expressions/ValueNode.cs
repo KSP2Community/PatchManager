@@ -1,4 +1,5 @@
-﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+﻿using PatchManager.SassyPatching.Exceptions;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Expressions;
 
@@ -17,5 +18,20 @@ public class ValueNode : Expression
     }
 
     /// <inheritdoc />
-    public override DataValue Compute(Environment environment) => StoredDataValue;
+    public override DataValue Compute(Environment environment)
+    {
+        if (!StoredDataValue.IsString)
+        {
+            return StoredDataValue;
+        }
+
+        try
+        {
+            return StoredDataValue.String.Interpolate(environment);
+        }
+        catch (Exception e)
+        {
+            throw new InterpolationException(Coordinate, e.Message);
+        }
+    }
 }

@@ -27,7 +27,16 @@ public class ElementAdditionSelector : Selector
             List<SelectableWithEnvironment> result = new();
             foreach (var selectable in selectableWithEnvironments)
             {
-                var addedElement = selectable.Selectable.AddElement(ElementName);
+                var interpolated = "";
+                try
+                {
+                    interpolated = ElementName.Interpolate(selectable.Environment);
+                }
+                catch (Exception e)
+                {
+                    throw new InterpolationException(Coordinate, e.Message);
+                }
+                var addedElement = selectable.Selectable.AddElement(interpolated);
                 result.Add(new SelectableWithEnvironment
                 {
                     Selectable = addedElement,
