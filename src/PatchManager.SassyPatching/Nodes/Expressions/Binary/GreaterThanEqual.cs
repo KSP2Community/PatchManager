@@ -12,33 +12,15 @@ public class GreaterThanEqual : Binary
 
     internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     { 
-        if (leftHandSide.IsReal && rightHandSide.IsReal)
+        try
         {
-            return leftHandSide.Real >= rightHandSide.Real;
+            return leftHandSide >= rightHandSide;
         }
-
-        if (leftHandSide.IsReal && rightHandSide.IsInteger)
+        catch (DataValueOperationException)
         {
-            return leftHandSide.Real >= rightHandSide.Integer;
+            throw new BinaryExpressionTypeException(Coordinate,"perform a relational comparison (>=)", leftHandSide.Type.ToString(),
+                rightHandSide.Type.ToString());
         }
-
-        if (leftHandSide.IsInteger && rightHandSide.IsInteger)
-        {
-            return leftHandSide.Integer >= rightHandSide.Integer;
-        }
-
-        if (leftHandSide.IsInteger && rightHandSide.IsReal)
-        {
-            return leftHandSide.Integer >= rightHandSide.Real;
-        }
-
-        if (leftHandSide.IsString && rightHandSide.IsString)
-        {
-            return string.Compare(leftHandSide.String, rightHandSide.String, StringComparison.Ordinal) >= 0;
-        }
-
-        throw new BinaryExpressionTypeException(Coordinate,"perform a relational comparison (>=)", leftHandSide.Type.ToString(),
-            rightHandSide.Type.ToString());
     }
 
     internal override bool ShortCircuitOn(DataValue dataValue) => false;
