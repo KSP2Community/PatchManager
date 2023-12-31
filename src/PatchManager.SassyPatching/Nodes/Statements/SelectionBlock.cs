@@ -144,7 +144,6 @@ public class SelectionBlock : Node, ISelectionAction
         
         var patcher = new SassyTextPatcher(snapshot, this);
         environment.GlobalEnvironment.Universe.RegisterPatcherToUniverse(patcher);
-        
     }
 
     /// <inheritdoc />
