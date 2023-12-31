@@ -15,7 +15,7 @@ public class ImplicitSubtract : Implicit
     {
         try
         {
-            return leftHandSide - rightHandSide;
+            return leftHandSide.Real - rightHandSide.Integer;
         }
         catch (DataValueOperationException)
         {
