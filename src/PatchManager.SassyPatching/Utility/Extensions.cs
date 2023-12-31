@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Nodes.Expressions;
 using SassyPatchGrammar;
+using UnityEngine;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Utility;
@@ -61,8 +62,8 @@ internal static class Extensions
     
     public static string Interpolate(this string toBeInterpolated, Environment environment)
     {
-        List<object> arguments = [];
-        var index = 0;
+        if (toBeInterpolated.IndexOf("#", StringComparison.Ordinal) == -1)
+            return toBeInterpolated;
         StringBuilder format = new();
         var inFormat = false;
         var currentString = "";
@@ -86,34 +87,34 @@ internal static class Extensions
             {
                 if (lookForStart)
                 {
-                    if (character == '{')
+                    switch (character)
                     {
-                        currentString = "";
-                        inFormat = true;
-                    }
-                    else if (character == '#')
-                    {
-                        format.Append('#');
-                    }
-                    else
-                    {
-                        format.Append('#');
-                        format.Append(character);
+                        case '{':
+                            currentString = "";
+                            inFormat = true;
+                            break;
+                        case '#':
+                            format.Append('#');
+                            break;
+                        default:
+                            format.Append('#');
+                            format.Append(character);
+                            break;
                     }
 
                     lookForStart = false;
                 }
-                if (character == '#')
+                else if (character == '#')
                 {
                     lookForStart = true;
                 }
                 else
                 {
-                    format.Append(currentString);
+                    format.Append(character);
                 }
             }
         }
-
+    
         if (lookForStart)
         {
             format.Append('#');
@@ -123,7 +124,6 @@ internal static class Extensions
         {
             throw new Exception("Unterminated interpolated string");
         }
-
         return format.ToString();
     }
 }

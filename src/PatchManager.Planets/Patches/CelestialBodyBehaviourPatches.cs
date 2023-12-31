@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using KSP;
 using KSP.Game;
+using KSP.Rendering;
 using KSP.Sim.impl;
 using PatchManager.Shared;
 using UnityEngine;
@@ -13,7 +14,7 @@ internal static class CelestialBodyBehaviourPatches
 {
     [HarmonyPatch(nameof(CelestialBodyBehavior.OnScaledSpaceViewInstantiated))]
     [HarmonyPrefix]
-    internal static void MergeData(GameObject instance)
+    internal static void MergeData(CelestialBodyBehavior __instance, GameObject instance)
     {
         var data = instance.GetComponent<CoreCelestialBodyData>();
         var name = data.Data.bodyName;
@@ -22,6 +23,14 @@ internal static class CelestialBodyBehaviourPatches
         // var name = __instance.CelestialBodyData.Data.bodyName;
         // var newData = GameManager.Instance.Game.CelestialBodies.Get(name);
         // __instance._coreCelestialBodyData.core = newData;
+        
+        Logging.LogInfo(
+            $"Following info is from the scaled space load of {data.Data.bodyName}");
+        Logging.LogInfo("The scaled space object has the following components:\n");
+        foreach (var component in instance.GetComponents(typeof(Object)))
+        {
+            Logging.LogInfo($"- {component.GetType()}");
+        }
     }
     
     [HarmonyPatch(nameof(CelestialBodyBehavior.OnLocalSpaceViewInstantiated))]
@@ -31,12 +40,12 @@ internal static class CelestialBodyBehaviourPatches
         Logging.LogInfo(
             $"Following info is from the local space load of {__instance.CelestialBodyData.Data.bodyName}");
         Logging.LogInfo($"The celestial body has a radius of {__instance.CelestialBodyData.Data.radius}");
-        Logging.LogInfo($"The local space object has the following components:\n");
+        Logging.LogInfo("The local space object has the following components:\n");
         foreach (var component in obj.GetComponents(typeof(Object)))
         {
             Logging.LogInfo($"- {component.GetType()}");
         }
-
+        
         Logging.LogInfo($"The local space has the following prefabs\n");
         if (obj.TryGetComponent(out NestedPrefabSpawner nestedPrefabSpawner))
         {
