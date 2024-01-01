@@ -1,5 +1,8 @@
 name: Publish NuGet and upload release
-
+env:
+  MOD_ID: 3482
+  LATEST_GAME_VERSION: 0.2.0
+  
 on:
   release:
     types: [ "published" ]
@@ -32,6 +35,7 @@ jobs:
           echo "artifact_name=PatchManager-$version.zip" >> $GITHUB_ENV
           echo "zip=$(ls -1 dist/PatchManager-*.zip | head -n 1)" >> $GITHUB_ENV
           echo "upload_url=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].upload_url' | tr -d \")" >> $GITHUB_ENV
+          echo "changelog=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].upload_url' | tr -d \")" >> $GITHUB_ENV
 
       - name: Check if version exists
         id: check-version
@@ -62,4 +66,19 @@ jobs:
           asset_path: ${{ env.zip }}
           asset_name: ${{ env.artifact_name }}
           asset_content_type: application/zip
+
+      - name: Log in to spacedock
+        run: |
+          login_response=$(curl -F username=${{ secrets.SPACEDOCK_USER}} -F password=${{ secrets.SPACEDOCK_PASSWORD }} -c ./cookies "https://spacedock.info/api/login")
+          login_errored=$(echo $login_response | jq .error)
+          if [ "$login_errored" = "true" ]; then
+            echo "Login to space dock errored: $(echo $login_response | jq .reason)"
+            exit 1
+          else
+            echo "Login to space dock successful"
+          fi
+
+      - name: Update mod on spacedock
+        run: |
+          curl -b ./cookies -F "version=${{ env.version }}" -F "changelog=${{ env.changelog }}" -F "game-version=${{ env.LATEST_GAME_VERSION}}" -F "notify-followers=yes" -F "zipball=@${{ env.zip }}" "https://spacedock.info/api/mod/${{ env.MOD_ID }}/update"
 
