@@ -35,7 +35,7 @@ jobs:
           echo "artifact_name=PatchManager-$version.zip" >> $GITHUB_ENV
           echo "zip=$(ls -1 dist/PatchManager-*.zip | head -n 1)" >> $GITHUB_ENV
           echo "upload_url=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].upload_url' | tr -d \")" >> $GITHUB_ENV
-          echo "changelog=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].upload_url' | tr -d \")" >> $GITHUB_ENV
+          echo "changelog=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].body' | tr -d \")" >> $GITHUB_ENV
 
       - name: Check if version exists
         id: check-version
