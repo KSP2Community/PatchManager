@@ -69,7 +69,7 @@ jobs:
 
       - name: Log in to spacedock
         run: |
-          login_response=$(curl -F username=${{ secrets.SPACEDOCK_USER}} -F password=${{ secrets.SPACEDOCK_PASSWORD }} -c ./cookies "https://spacedock.info/api/login")
+          login_response=$(curl -F username=${{ secrets.SPACEDOCK_USER }} -F password=${{ secrets.SPACEDOCK_PASSWORD }} -c ./cookies "https://spacedock.info/api/login")
           login_errored=$(echo $login_response | jq .error)
           if [ "$login_errored" = "true" ]; then
             echo "Login to space dock errored: $(echo $login_response | jq .reason)"
