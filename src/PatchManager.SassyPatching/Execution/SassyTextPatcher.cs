@@ -43,7 +43,7 @@ public class SassyTextPatcher : ITextPatcher
         OriginalGuid = environmentSnapshot.GlobalEnvironment.ModGuid;
         PriorityString =
             rootSelectionBlock.Attributes.OfType<RunAtStageAttribute>().FirstOrDefault() is { } runAtStageAttribute
-                ? runAtStageAttribute.Stage
+                ? runAtStageAttribute.Stage.Interpolate(environmentSnapshot)
                 : environmentSnapshot.GlobalEnvironment.ModGuid;
 
     }

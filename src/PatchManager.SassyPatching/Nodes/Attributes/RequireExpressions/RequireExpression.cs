@@ -12,5 +12,5 @@ public abstract class RequireExpression : Node
     /// <inheritdoc />
     public override void ExecuteIn(Environment environment) { }
 
-    public abstract bool Execute(IReadOnlyCollection<string> loadedMods);
+    public abstract bool Execute(IReadOnlyCollection<string> loadedMods, Environment e);
 }

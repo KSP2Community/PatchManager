@@ -121,7 +121,14 @@ public class JTokenModifiable : IModifiable
         _setDirty();
         if (dataValue.IsDeletion)
         {
-            _jToken[fieldName].Remove();
+            if (_jToken[fieldName].Parent is JProperty jProperty)
+            {
+                jProperty.Remove();
+            }
+            else
+            {
+                _jToken[fieldName].Remove();
+            }
         }
         else
         {

@@ -115,7 +115,7 @@ public class SelectionBlock : Node, ISelectionAction
             switch (attribute)
             {
                 case RequireModAttribute requireModAttribute when
-                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods):
+                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods,environment):
                     return;
             }
         }
@@ -133,7 +133,7 @@ public class SelectionBlock : Node, ISelectionAction
             switch (attribute)
             {
                 case RequireModAttribute requireModAttribute when
-                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods):
+                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods,environment):
                     return;
                 case NewAttribute na:
                     CreateGenerator(environment, na.Arguments);
@@ -144,7 +144,6 @@ public class SelectionBlock : Node, ISelectionAction
         
         var patcher = new SassyTextPatcher(snapshot, this);
         environment.GlobalEnvironment.Universe.RegisterPatcherToUniverse(patcher);
-        
     }
 
     /// <inheritdoc />
@@ -155,7 +154,7 @@ public class SelectionBlock : Node, ISelectionAction
             switch (attribute)
             {
                 case RequireModAttribute requireModAttribute when
-                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods):
+                    !requireModAttribute.Expression.Execute(environment.GlobalEnvironment.Universe.AllMods,environment):
                     return;
             }
         }

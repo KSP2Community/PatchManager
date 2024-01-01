@@ -2117,6 +2117,62 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitFor_through_loop([NotNull] sassy_parser.For_through_loopContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by the <c>top_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTop_level_for_to_loop([NotNull] sassy_parser.Top_level_for_to_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>top_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTop_level_for_to_loop([NotNull] sassy_parser.Top_level_for_to_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>top_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTop_level_for_through_loop([NotNull] sassy_parser.Top_level_for_through_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>top_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTop_level_for_through_loop([NotNull] sassy_parser.Top_level_for_through_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterSel_level_for_to_loop([NotNull] sassy_parser.Sel_level_for_to_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitSel_level_for_to_loop([NotNull] sassy_parser.Sel_level_for_to_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterSel_level_for_through_loop([NotNull] sassy_parser.Sel_level_for_through_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitSel_level_for_through_loop([NotNull] sassy_parser.Sel_level_for_through_loopContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.each_loop"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -2129,6 +2185,30 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitEach_loop([NotNull] sassy_parser.Each_loopContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.top_level_each_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTop_level_each_loop([NotNull] sassy_parser.Top_level_each_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.top_level_each_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTop_level_each_loop([NotNull] sassy_parser.Top_level_each_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.sel_level_each_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterSel_level_each_loop([NotNull] sassy_parser.Sel_level_each_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.sel_level_each_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitSel_level_each_loop([NotNull] sassy_parser.Sel_level_each_loopContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.while_loop"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -2140,6 +2220,30 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitWhile_loop([NotNull] sassy_parser.While_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.top_level_while_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTop_level_while_loop([NotNull] sassy_parser.Top_level_while_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.top_level_while_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTop_level_while_loop([NotNull] sassy_parser.Top_level_while_loopContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.sel_level_while_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterSel_level_while_loop([NotNull] sassy_parser.Sel_level_while_loopContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.sel_level_while_loop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitSel_level_while_loop([NotNull] sassy_parser.Sel_level_while_loopContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

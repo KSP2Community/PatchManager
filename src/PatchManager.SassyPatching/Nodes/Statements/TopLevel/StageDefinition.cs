@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Execution;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Execution;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
@@ -49,7 +50,16 @@ public class StageDefinition : Node
     {
         var universe = environment.GlobalEnvironment.Universe;
         var id = environment.GlobalEnvironment.ModGuid;
-        var name = $"{id}:{Name}";
+        var interpName = "";
+        try
+        {
+            interpName = Name.Interpolate(environment);
+        }
+        catch (Exception e)
+        {
+            throw new InterpolationException(Coordinate, e.Message);
+        }
+        var name = $"{id}:{interpName}";
         var stage = new Stage();
         if (Global) // @global
         {
@@ -65,8 +75,32 @@ public class StageDefinition : Node
         }
         else // defined relations
         {
-            stage.RunsAfter.AddRange(After.Select(x => (x.Contains(":") || universe.AllMods.Contains(x)) ? x : $"{id}:x"));
-            stage.RunsBefore.AddRange(Before.Select(x => (x.Contains(":") || universe.AllMods.Contains(x)) ? x : $"{id}:x"));
+            stage.RunsAfter.AddRange(After.Select(x =>
+            {
+                var interp = "";
+                try
+                {
+                    interp = x.Interpolate(environment);
+                }
+                catch (Exception e)
+                {
+                    throw new InterpolationException(Coordinate, e.Message);
+                }
+                return (interp.Contains(":") || universe.AllMods.Contains(interp)) ? interp : $"{id}:{interp}";
+            }));
+            stage.RunsBefore.AddRange(Before.Select(x =>
+            {
+                var interp = "";
+                try
+                {
+                    interp = x.Interpolate(environment);
+                }
+                catch (Exception e)
+                {
+                    throw new InterpolationException(Coordinate, e.Message);
+                }
+                return (interp.Contains(":") || universe.AllMods.Contains(interp)) ? interp : $"{id}:{interp}";
+            }));
         }
         universe.UnsortedStages[name] = stage;
     }

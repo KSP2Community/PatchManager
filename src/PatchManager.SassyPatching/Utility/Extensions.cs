@@ -1,7 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using Antlr4.Runtime;
 using Newtonsoft.Json;
+using PatchManager.SassyPatching.Execution;
+using PatchManager.SassyPatching.Nodes.Expressions;
 using SassyPatchGrammar;
+using UnityEngine;
+using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Utility;
 
@@ -28,5 +33,97 @@ internal static class Extensions
 
         var unquotedStringContext = ctx as sassy_parser.Unquoted_stringContext;
         return unquotedStringContext!.ELEMENT().GetText();
+    }
+
+    private static object GetResult(this string variable, Environment environment)
+    {
+        var lexer = new sassy_lexer(CharStreams.fromString(variable));
+        var lexerErrorGenerator = new Universe.LexerListener("Interpolated string",
+            environment.GlobalEnvironment.Universe.MessageLogger);
+        lexer.AddErrorListener(lexerErrorGenerator);
+        if (lexerErrorGenerator.Errored)
+        {
+            throw new Exception("Lexer errors detected");
+        }
+        
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new sassy_parser(tokenStream);
+        var parserErrorGenerator = new Universe.ParserListener("Interpolated string",
+            environment.GlobalEnvironment.Universe.MessageLogger);
+        parser.AddErrorListener(parserErrorGenerator);
+        var expressionContext = parser.expression();
+        if (parserErrorGenerator.Errored)
+            throw new Exception("parser errors detected");
+        var tokenTransformer = new Transformer(msg => throw new Exception(msg));
+        var ctx = tokenTransformer.Visit(expressionContext) as Expression;
+        var result = ctx!.Compute(environment);
+        return result.IsString ? result.String : result.ToString();
+    }
+    
+    public static string Interpolate(this string toBeInterpolated, Environment environment)
+    {
+        if (toBeInterpolated.IndexOf("#", StringComparison.Ordinal) == -1)
+            return toBeInterpolated;
+        StringBuilder format = new();
+        var inFormat = false;
+        var currentString = "";
+        var lookForStart = false;
+        
+        foreach (var character in toBeInterpolated)
+        {
+            if (inFormat)
+            {
+                if (character is '}')
+                {
+                    format.Append(currentString.GetResult(environment));
+                    inFormat = false;
+                }
+                else
+                {
+                    currentString += character;
+                }
+            }
+            else
+            {
+                if (lookForStart)
+                {
+                    switch (character)
+                    {
+                        case '{':
+                            currentString = "";
+                            inFormat = true;
+                            break;
+                        case '#':
+                            format.Append('#');
+                            break;
+                        default:
+                            format.Append('#');
+                            format.Append(character);
+                            break;
+                    }
+
+                    lookForStart = false;
+                }
+                else if (character == '#')
+                {
+                    lookForStart = true;
+                }
+                else
+                {
+                    format.Append(character);
+                }
+            }
+        }
+    
+        if (lookForStart)
+        {
+            format.Append('#');
+        }
+
+        if (inFormat)
+        {
+            throw new Exception("Unterminated interpolated string");
+        }
+        return format.ToString();
     }
 }

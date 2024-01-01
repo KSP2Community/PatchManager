@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Attributes.RequireExpressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Attributes.RequireExpressions;
 
 public class RequireOr : RequireExpression
 {
@@ -11,6 +13,6 @@ public class RequireOr : RequireExpression
         RightHandSide = rhs;
     }
 
-    public override bool Execute(IReadOnlyCollection<string> loadedMods) =>
-        LeftHandSide.Execute(loadedMods) || RightHandSide.Execute(loadedMods);
+    public override bool Execute(IReadOnlyCollection<string> loadedMods, Environment e) =>
+        LeftHandSide.Execute(loadedMods, e) || RightHandSide.Execute(loadedMods, e);
 }

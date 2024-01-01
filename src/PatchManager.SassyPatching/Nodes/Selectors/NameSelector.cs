@@ -21,7 +21,7 @@ public class NameSelector : Selector
     /// <inheritdoc />
     public override List<SelectableWithEnvironment> SelectAll(List<SelectableWithEnvironment> selectableWithEnvironments)
     {
-        return selectableWithEnvironments.Where(selectable => selectable.Selectable.MatchesName(NamePattern)).ToList();
+        return selectableWithEnvironments.Where(selectable => selectable.Selectable.MatchesName(NamePattern.Interpolate(selectable.Environment))).ToList();
     }
 
     /// <inheritdoc />

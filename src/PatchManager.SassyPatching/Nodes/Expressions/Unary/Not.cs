@@ -10,5 +10,5 @@ public class Not : Unary
     {
     }
 
-    internal override DataValue GetResult(DataValue child) => !child.Truthy;
+    internal override DataValue GetResult(DataValue child) => !child;
 }

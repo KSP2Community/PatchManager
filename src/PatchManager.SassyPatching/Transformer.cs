@@ -13,6 +13,7 @@ using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 using PatchManager.SassyPatching.Nodes.Statements.TopLevel;
 using SassyPatchGrammar;
 using UnityEngine;
+
 namespace PatchManager.SassyPatching;
 
 /// <summary>
@@ -64,33 +65,35 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     /// <inheritdoc />
     public override Node VisitNormal_var_decl(sassy_parser.Normal_var_declContext context)
         => new VariableDeclaration(context.GetCoordinate(),
-        context.variable.Text.TrimFirst(),
-        Visit(context.val) as Expression);
+            context.variable.Text.TrimFirst(),
+            Visit(context.val) as Expression);
 
     /// <inheritdoc />
     public override Node VisitAdd_var_decl(sassy_parser.Add_var_declContext context) => new VariableDeclaration(
         context.GetCoordinate(),
         context.variable.Text.TrimFirst(),
-        new ImplicitAdd(context.GetCoordinate(),Visit(context.val) as Expression));
+        new ImplicitAdd(context.GetCoordinate(), Visit(context.val) as Expression));
 
     /// <inheritdoc />
-    public override Node VisitSubtract_var_decl(sassy_parser.Subtract_var_declContext context) => new VariableDeclaration(
-        context.GetCoordinate(),
-        context.variable.Text.TrimFirst(),
-        new ImplicitSubtract(context.GetCoordinate(),Visit(context.val) as Expression));
-    
+    public override Node VisitSubtract_var_decl(sassy_parser.Subtract_var_declContext context) =>
+        new VariableDeclaration(
+            context.GetCoordinate(),
+            context.variable.Text.TrimFirst(),
+            new ImplicitSubtract(context.GetCoordinate(), Visit(context.val) as Expression));
+
     /// <inheritdoc />
-    public override Node VisitMultiply_var_decl(sassy_parser.Multiply_var_declContext context) => new VariableDeclaration(
-        context.GetCoordinate(),
-        context.variable.Text.TrimFirst(),
-        new ImplicitMultiply(context.GetCoordinate(),Visit(context.val) as Expression));
-    
+    public override Node VisitMultiply_var_decl(sassy_parser.Multiply_var_declContext context) =>
+        new VariableDeclaration(
+            context.GetCoordinate(),
+            context.variable.Text.TrimFirst(),
+            new ImplicitMultiply(context.GetCoordinate(), Visit(context.val) as Expression));
+
     /// <inheritdoc />
     public override Node VisitDivide_var_decl(sassy_parser.Divide_var_declContext context) => new VariableDeclaration(
         context.GetCoordinate(),
         context.variable.Text.TrimFirst(),
-        new ImplicitDivide(context.GetCoordinate(),Visit(context.val) as Expression));
-    
+        new ImplicitDivide(context.GetCoordinate(), Visit(context.val) as Expression));
+
     /// <inheritdoc />
     public override Node VisitFunction_def(sassy_parser.Function_defContext context) =>
         new Function(context.GetCoordinate(),
@@ -438,7 +441,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             context.indexor != null
                 ? Visit(context.indexor) as Indexer
                 : null,
-            new ImplicitAdd(context.GetCoordinate(),Visit(context.expr) as Expression));
+            new ImplicitAdd(context.GetCoordinate(), Visit(context.expr) as Expression));
 
     /// <inheritdoc />
     public override Node VisitSubtract_field_set(sassy_parser.Subtract_field_setContext context) =>
@@ -447,7 +450,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             context.indexor != null
                 ? Visit(context.indexor) as Indexer
                 : null,
-            new ImplicitSubtract(context.GetCoordinate(),Visit(context.expr) as Expression));
+            new ImplicitSubtract(context.GetCoordinate(), Visit(context.expr) as Expression));
 
     /// <inheritdoc />
     public override Node VisitMultiply_field_set(sassy_parser.Multiply_field_setContext context) =>
@@ -457,8 +460,8 @@ public class Transformer : sassy_parserBaseVisitor<Node>
                 ? Visit(context.indexor) as Indexer
                 : null,
             new ImplicitMultiply(context.GetCoordinate(), Visit(context.expr) as Expression));
-    
-    
+
+
     /// <inheritdoc />
     public override Node VisitDivide_field_set(sassy_parser.Divide_field_setContext context) =>
         new Field(context.GetCoordinate(),
@@ -466,8 +469,8 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             context.indexor != null
                 ? Visit(context.indexor) as Indexer
                 : null,
-            new ImplicitDivide(context.GetCoordinate(),Visit(context.expr) as Expression));
-    
+            new ImplicitDivide(context.GetCoordinate(), Visit(context.expr) as Expression));
+
 
     /// <inheritdoc />
     public override Node VisitNumber_indexor(sassy_parser.Number_indexorContext context)
@@ -735,9 +738,30 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             Visit(context.end) as Expression, context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
+    public override Node VisitTop_level_for_to_loop(sassy_parser.Top_level_for_to_loopContext context) => new For(
+        context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, false,
+        Visit(context.end) as Expression, context.top_level_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitSel_level_for_to_loop(sassy_parser.Sel_level_for_to_loopContext context) => new For(
+        context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, false,
+        Visit(context.end) as Expression, context.selector_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
     public override Node VisitFor_through_loop(sassy_parser.For_through_loopContext context)
         => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, true,
             Visit(context.end) as Expression, context.function_statement().Select(Visit).ToList());
+
+
+    /// <inheritdoc />
+    public override Node VisitTop_level_for_through_loop(sassy_parser.Top_level_for_through_loopContext context)
+        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, true,
+            Visit(context.end) as Expression, context.top_level_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitSel_level_for_through_loop(sassy_parser.Sel_level_for_through_loopContext context)
+        => new For(context.GetCoordinate(), context.idx.Text.TrimFirst(), Visit(context.for_start) as Expression, true,
+            Visit(context.end) as Expression, context.selector_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
     public override Node VisitEach_loop(sassy_parser.Each_loopContext context)
@@ -745,9 +769,29 @@ public class Transformer : sassy_parserBaseVisitor<Node>
             Visit(context.iter) as Expression, context.function_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
+    public override Node VisitTop_level_each_loop(sassy_parser.Top_level_each_loopContext context)
+        => new Each(context.GetCoordinate(), context.key?.Text.TrimFirst(), context.val.Text.TrimFirst(),
+            Visit(context.iter) as Expression, context.top_level_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitSel_level_each_loop(sassy_parser.Sel_level_each_loopContext context)
+        => new Each(context.GetCoordinate(), context.key?.Text.TrimFirst(), context.val.Text.TrimFirst(),
+            Visit(context.iter) as Expression, context.selector_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
     public override Node VisitWhile_loop(sassy_parser.While_loopContext context)
         => new While(context.GetCoordinate(), Visit(context.cond) as Expression,
             context.function_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitTop_level_while_loop(sassy_parser.Top_level_while_loopContext context)
+        => new While(context.GetCoordinate(), Visit(context.cond) as Expression,
+            context.top_level_statement().Select(Visit).ToList());
+
+    /// <inheritdoc />
+    public override Node VisitSel_level_while_loop(sassy_parser.Sel_level_while_loopContext context)
+        => new While(context.GetCoordinate(), Visit(context.cond) as Expression,
+            context.selector_statement().Select(Visit).ToList());
 
     /// <inheritdoc />
     public override Node VisitGlobal_stage_def(sassy_parser.Global_stage_defContext context) =>

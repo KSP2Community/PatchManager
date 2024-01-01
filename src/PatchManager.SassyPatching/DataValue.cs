@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
+using System.Text;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
@@ -978,5 +979,330 @@ public class DataValue
         }
 
         return -1;
+    }
+
+    public static DataValue operator +(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.Type)
+        {
+            case DataType.Real when rightHandSide.IsReal:
+                return leftHandSide.Real + rightHandSide.Real;
+            case DataType.Real when rightHandSide.IsInteger:
+                return leftHandSide.Real + rightHandSide.Integer;
+            case DataType.Integer when rightHandSide.IsInteger:
+                return leftHandSide.Integer + rightHandSide.Integer;
+            case DataType.Integer when rightHandSide.IsReal:
+                return leftHandSide.Integer + rightHandSide.Real;
+            case DataType.String when rightHandSide.IsString:
+                return leftHandSide.String + rightHandSide.String;
+            case DataType.List when rightHandSide.IsList:
+            {
+                // If every value is immutable a shallow copy should be fine
+                var newList = new List<DataValue>(leftHandSide.List);
+                newList.AddRange(rightHandSide.List);
+                return newList;
+            }
+            case DataType.None:
+            case DataType.Boolean:
+            case DataType.Dictionary:
+            case DataType.Deletion:
+            case DataType.Closure:
+            default:
+                throw new DataValueOperationException($"Cannot add a {leftHandSide.Type} and a {rightHandSide.Type}");
+        }
+    }
+
+    public static DataValue operator -(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.IsReal)
+        {
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Real - rightHandSide.Real;
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Real - rightHandSide.Integer;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer - rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer - rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsList && rightHandSide.IsList)
+        {
+            return leftHandSide.List.Where(x => rightHandSide.List.All(y => x != y)).ToList();
+        }
+
+        throw new DataValueOperationException($"Cannot subtract a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+    
+    private static DataValue StringRepeat(DataValue str, DataValue amount)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (var i = 0; i < amount.Integer; i++)
+        {
+            sb.Append(str.String);
+        }
+
+        return sb.ToString();
+    }
+
+    private static DataValue ListRepeat(DataValue list, DataValue amount)
+    {
+        List<DataValue> newList = [];
+        for (var i = 0; i < amount.Integer; i++)
+        {
+            newList.AddRange(list.List);
+        }
+        return newList;
+    }
+
+    
+    public static DataValue operator *(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.IsReal)
+        {
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Real * rightHandSide.Real;
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Real * rightHandSide.Integer;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer * rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer * rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsString && rightHandSide.IsInteger)
+        {
+            return StringRepeat(leftHandSide, rightHandSide);
+        }
+
+        if (leftHandSide.IsInteger && rightHandSide.IsString)
+        {
+            return StringRepeat(rightHandSide, leftHandSide);
+        }
+        
+        if (leftHandSide.IsList && rightHandSide.IsInteger)
+        {
+            return ListRepeat(leftHandSide, rightHandSide);
+        }
+
+        if (leftHandSide.IsInteger && rightHandSide.IsList)
+        {
+            return ListRepeat(rightHandSide, leftHandSide);
+        }
+
+        throw new DataValueOperationException($"Cannot multiply a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+
+    public static DataValue operator /(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        if (leftHandSide.IsReal && rightHandSide.IsReal)
+        {
+            return leftHandSide.Real / rightHandSide.Real;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer / rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer / rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsReal && rightHandSide.IsInteger)
+        {
+            return leftHandSide.Real / rightHandSide.Integer;
+        }
+        
+        throw new DataValueOperationException($"Cannot divide a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+
+    public static bool operator >(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.IsReal)
+        {
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Real > rightHandSide.Real;
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Real > rightHandSide.Integer;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer > rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer > rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsString && rightHandSide.IsString)
+        {
+            return string.Compare(leftHandSide.String, rightHandSide.String, StringComparison.Ordinal) > 0;
+        }
+
+        throw new DataValueOperationException($"Cannot relationally compare a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+
+    public static bool operator <(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.IsReal)
+        {
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Real < rightHandSide.Real;
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Real < rightHandSide.Integer;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer < rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer < rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsString && rightHandSide.IsString)
+        {
+            return string.Compare(leftHandSide.String, rightHandSide.String, StringComparison.Ordinal) < 0;
+        }
+        
+        throw new DataValueOperationException($"Cannot relationally compare a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+
+    public static bool operator >=(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.IsReal)
+        {
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Real >= rightHandSide.Real;
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Real >= rightHandSide.Integer;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer >= rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer >= rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsString && rightHandSide.IsString)
+        {
+            return string.Compare(leftHandSide.String, rightHandSide.String, StringComparison.Ordinal) >= 0;
+        }
+
+        throw new DataValueOperationException($"Cannot relationally compare a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+
+    public static bool operator <=(DataValue leftHandSide, DataValue rightHandSide)
+    {
+        switch (leftHandSide.IsReal)
+        {
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Real <= rightHandSide.Real;
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Real <= rightHandSide.Integer;
+        }
+
+        switch (leftHandSide.IsInteger)
+        {
+            case true when rightHandSide.IsInteger:
+                return leftHandSide.Integer <= rightHandSide.Integer;
+            case true when rightHandSide.IsReal:
+                return leftHandSide.Integer <= rightHandSide.Real;
+        }
+
+        if (leftHandSide.IsString && rightHandSide.IsString)
+        {
+            return string.Compare(leftHandSide.String, rightHandSide.String, StringComparison.Ordinal) <= 0;
+        }
+
+        throw new DataValueOperationException($"Cannot relationally compare a {leftHandSide.Type} and a {rightHandSide.Type}");
+    }
+
+    public static DataValue operator %(DataValue leftHandSide, DataValue rightHandSide) =>
+        leftHandSide.IsReal switch
+        {
+            true when rightHandSide.IsReal => leftHandSide.Real % rightHandSide.Real,
+            true when rightHandSide.IsInteger => leftHandSide.Real % rightHandSide.Integer,
+            _ => leftHandSide.IsInteger switch
+            {
+                true when rightHandSide.IsInteger => leftHandSide.Integer % rightHandSide.Integer,
+                true when rightHandSide.IsReal => leftHandSide.Integer % rightHandSide.Real,
+                _ => throw new DataValueOperationException(
+                    $"Cannot take the remainder of a {leftHandSide.Type} and a {rightHandSide.Type}")
+            }
+        };
+
+    public static DataValue operator -(DataValue child)
+    {
+        if (child.IsInteger)
+        {
+            return -child.Integer;
+        }
+
+        if (child.IsReal)
+        {
+            return -child.Real;
+        }
+
+        throw new DataValueOperationException($"Cannot negate a {child.Type}");
+    }
+
+    public static bool operator !(DataValue child) => !child.Truthy;
+
+    public static DataValue operator +(DataValue child) => child;
+
+    public DataValue this[DataValue rightHandSide]
+    {
+        get
+        {
+            if (IsList && rightHandSide.IsInteger)
+            {
+                try
+                {
+                    return List[(int)rightHandSide.Integer];
+                }
+                catch
+                {
+                    throw new IndexOutOfRangeException(((int)rightHandSide.Real) + " is out of range of the string being indexed");
+                }
+            }
+
+            if (IsString && rightHandSide.IsInteger)
+            {
+                try
+                {
+                    return (int)String[(int)rightHandSide.Integer];
+                }
+                catch
+                {
+                    throw new IndexOutOfRangeException(rightHandSide.Integer + " is out of range of the string being indexed");
+                }
+            }
+
+            if (IsDictionary && rightHandSide.IsString)
+            {
+                try
+                {
+                    return Dictionary[rightHandSide.String];
+                }
+                catch
+                {
+                    throw new KeyNotFoundException(rightHandSide.String + " is not a key found in the dictionary being indexed");
+                }
+            }
+
+            throw new DataValueOperationException(
+                $"Cannot subscript of a {Type} and a {rightHandSide.Type}");
+        }
     }
 }

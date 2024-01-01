@@ -17,6 +17,6 @@ public class PatchDeclaration : Node
     /// <inheritdoc />
     public override void ExecuteIn(Environment environment)
     {
-        environment.GlobalEnvironment.Universe.PatchLabels(Labels.ToArray());
+        environment.GlobalEnvironment.Universe.PatchLabels(Labels.Select(label => label.Interpolate(environment)).ToArray());
     }
 }

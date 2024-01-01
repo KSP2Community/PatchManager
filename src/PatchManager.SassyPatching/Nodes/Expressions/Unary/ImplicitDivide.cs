@@ -13,26 +13,14 @@ public class ImplicitDivide : Implicit
 
     internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
-        if (leftHandSide.IsReal && rightHandSide.IsReal)
+        try
         {
-            return leftHandSide.Real / rightHandSide.Real;
+            return leftHandSide / rightHandSide;
         }
-
-        if (leftHandSide.IsInteger && rightHandSide.IsInteger)
+        catch (DataValueOperationException)
         {
-            return leftHandSide.Integer / rightHandSide.Integer;
+            throw new BinaryExpressionTypeException(Coordinate, "divide", leftHandSide.Type.ToString(),
+                rightHandSide.Type.ToString());
         }
-
-        if (leftHandSide.IsInteger && rightHandSide.IsReal)
-        {
-            return leftHandSide.Integer / rightHandSide.Real;
-        }
-
-        if (leftHandSide.IsReal && rightHandSide.IsInteger)
-        {
-            return leftHandSide.Real / rightHandSide.Integer;
-        }
-
-        throw new BinaryExpressionTypeException(Coordinate,"divide", leftHandSide.Type.ToString(), rightHandSide.Type.ToString());
     }
 }

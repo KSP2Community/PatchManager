@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Execution;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
@@ -20,7 +21,17 @@ public class ClassCaptureSelector : Selector
         List<SelectableWithEnvironment> newList = new();
         foreach (var selectableWithEnvironment in selectableWithEnvironments)
         {
-            if (selectableWithEnvironment.Selectable.MatchesClass(ClassName,out var value))
+            var interpolated = "";
+            try
+            {
+                interpolated = ClassName.Interpolate(selectableWithEnvironment.Environment);
+            }
+            catch (Exception e)
+            {
+                throw new InterpolationException(Coordinate, e.Message);
+            }
+
+            if (selectableWithEnvironment.Selectable.MatchesClass(interpolated,out var value))
             {
                 selectableWithEnvironment.Environment["current"] = value;
                 foreach (var node in Captures)

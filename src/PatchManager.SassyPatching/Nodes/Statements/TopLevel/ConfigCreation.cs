@@ -1,4 +1,5 @@
-﻿using PatchManager.SassyPatching.Nodes.Expressions;
+﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Nodes.Expressions;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.TopLevel;
@@ -16,9 +17,21 @@ public class ConfigCreation : Node
     }
     public override void ExecuteIn(Environment environment)
     {
+        var configLabel = "";
+        var configName = "";
+        try
+        {
+            configLabel = ConfigLabel.Interpolate(environment);
+            configName = ConfigName.Interpolate(environment);
+        }
+        catch (Exception e)
+        {
+            throw new InterpolationException(Coordinate, e.Message);
+        }
+        
         var universe = environment.GlobalEnvironment.Universe;
-        if (!universe.Configs.TryGetValue(ConfigLabel, out var label))
-            label = universe.Configs[ConfigLabel] = new Dictionary<string, DataValue>();
-        label[ConfigName] = ConfigValue.Compute(environment);
+        if (!universe.Configs.TryGetValue(configLabel, out var label))
+            label = universe.Configs[configLabel] = new Dictionary<string, DataValue>();
+        label[configName] = ConfigValue.Compute(environment);
     }
 }

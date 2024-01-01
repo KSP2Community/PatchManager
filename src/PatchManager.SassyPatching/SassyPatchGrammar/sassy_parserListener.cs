@@ -1804,6 +1804,54 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitFor_through_loop([NotNull] sassy_parser.For_through_loopContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>top_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTop_level_for_to_loop([NotNull] sassy_parser.Top_level_for_to_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>top_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTop_level_for_to_loop([NotNull] sassy_parser.Top_level_for_to_loopContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>top_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTop_level_for_through_loop([NotNull] sassy_parser.Top_level_for_through_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>top_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.top_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTop_level_for_through_loop([NotNull] sassy_parser.Top_level_for_through_loopContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_level_for_to_loop([NotNull] sassy_parser.Sel_level_for_to_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_level_for_to_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_level_for_to_loop([NotNull] sassy_parser.Sel_level_for_to_loopContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>sel_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_level_for_through_loop([NotNull] sassy_parser.Sel_level_for_through_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>sel_level_for_through_loop</c>
+	/// labeled alternative in <see cref="sassy_parser.sel_level_for_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_level_for_through_loop([NotNull] sassy_parser.Sel_level_for_through_loopContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.each_loop"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -1814,6 +1862,26 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitEach_loop([NotNull] sassy_parser.Each_loopContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.top_level_each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTop_level_each_loop([NotNull] sassy_parser.Top_level_each_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.top_level_each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTop_level_each_loop([NotNull] sassy_parser.Top_level_each_loopContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.sel_level_each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_level_each_loop([NotNull] sassy_parser.Sel_level_each_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.sel_level_each_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_level_each_loop([NotNull] sassy_parser.Sel_level_each_loopContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="sassy_parser.while_loop"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -1823,5 +1891,25 @@ public interface Isassy_parserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitWhile_loop([NotNull] sassy_parser.While_loopContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.top_level_while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTop_level_while_loop([NotNull] sassy_parser.Top_level_while_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.top_level_while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTop_level_while_loop([NotNull] sassy_parser.Top_level_while_loopContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.sel_level_while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSel_level_while_loop([NotNull] sassy_parser.Sel_level_while_loopContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.sel_level_while_loop"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSel_level_while_loop([NotNull] sassy_parser.Sel_level_while_loopContext context);
 }
 } // namespace SassyPatchGrammar

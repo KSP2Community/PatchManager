@@ -1,13 +1,15 @@
 ﻿using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes.Expressions;
+using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
-namespace PatchManager.SassyPatching.Nodes.Statements.FunctionLevel;
+namespace PatchManager.SassyPatching.Nodes.Statements;
 
 /// <summary>
 /// Represents a loop that iterates over a range of numbers
 /// </summary>
-public class For : Node
+public class For : Node, ISelectionAction
 {
     /// <summary>
     /// The variable that is set to the current iteration value
@@ -246,6 +248,99 @@ public class For : Node
         foreach (var child in Children)
         {
             child.ExecuteIn(environment);
+        }
+    }
+
+    public void ExecuteOn(Environment environment, ISelectable selectable, IModifiable modifiable)
+    {
+        var start = InitialValue.Compute(environment);
+        var end = EndingValue.Compute(environment);
+        if (start.IsInteger)
+        {
+            SetupIntegerIteration(environment, selectable, modifiable, end, start);
+            return;
+        }
+
+        if (start.IsReal)
+        {
+            SetupRealIteration(environment, selectable, modifiable, end, start);
+            return;
+        }
+
+        throw new InterpreterException(Coordinate, $"cannot do a for loop w/ a value that is of type {start.Type.ToString().ToLowerInvariant()}");
+    }
+    private void SetupRealIteration(Environment environment, ISelectable selectable, IModifiable modifiable, DataValue end, DataValue start)
+    {
+        Func<double, bool> endCheck;
+        bool inverted;
+        if (end.IsReal)
+        {
+            inverted = SetupRealRealIteration(end, start, out endCheck);
+        }
+        else if (end.IsInteger)
+        {
+            inverted = SetupRealIntegerIteration(end, start, out endCheck);
+        }
+        else
+        {
+            throw new InterpreterException(Coordinate, $"cannot do a for loop through/to a value of type {end.Type.ToString().ToLowerInvariant()}");
+        }
+
+        IterateReal(environment, selectable, modifiable, start.Real, inverted, endCheck);
+    }
+
+    private void SetupIntegerIteration(Environment environment, ISelectable selectable, IModifiable modifiable, DataValue end, DataValue start)
+    {
+        Func<long, bool> endCheck;
+        bool inverted;
+        if (end.IsReal)
+        {
+            inverted = SetupIntegerRealIteration(end, start, out endCheck);
+        }
+        else if (end.IsInteger)
+        {
+            inverted = SetupIntegerIntegerIteration(end, start, out endCheck);
+        }
+        else
+        {
+            throw new InterpreterException(Coordinate, $"cannot do a for loop through/to a value of type {end.Type.ToString().ToLowerInvariant()}");
+        }
+
+        IterateInteger(environment, selectable, modifiable, start.Integer, inverted, endCheck);
+    }
+
+
+    private void IterateInteger(Environment environment, ISelectable selectable, IModifiable modifiable, long start, bool inverted, Func<long, bool> end)
+    {
+        while (!end(start))
+        {
+            environment[VariableName] = start;
+            ExecuteChildren(environment, selectable, modifiable);
+            start += inverted ? -1 : 1;
+        }
+    }
+
+    private void IterateReal(Environment environment, ISelectable selectable, IModifiable modifiable, double start, bool inverted, Func<double, bool> end)
+    {
+        while (!end(start))
+        {
+            environment[VariableName] = start;
+            ExecuteChildren(environment, selectable, modifiable);
+            start += inverted ? -1 : 1;
+        }
+    }
+    private void ExecuteChildren(Environment environment, ISelectable selectable, IModifiable modifiable)
+    {
+        foreach (var child in Children)
+        {
+            if (child is ISelectionAction selectionAction)
+            {
+                selectionAction.ExecuteOn(environment,selectable,modifiable);
+            }
+            else
+            {
+                child.ExecuteIn(environment);
+            }
         }
     }
 }

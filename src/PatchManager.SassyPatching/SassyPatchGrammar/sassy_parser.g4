@@ -14,6 +14,9 @@ top_level_statement     : import_declaration
                         | patch_declaration
                         | config_creation
                         | config_mutation
+                        | top_level_for_loop
+                        | top_level_each_loop
+                        | top_level_while_loop
                         ;
 
 
@@ -123,6 +126,9 @@ selector_body           : selector_statement*;
 
 selector_statement      : var_decl
                         | sel_level_conditional
+                        | sel_level_each_loop
+                        | sel_level_while_loop
+                        | sel_level_for_loop
                         | set_value
                         | delete_value
                         | merge_value
@@ -253,6 +259,22 @@ for_loop                : FOR idx=VARIABLE FROM for_start=expression TO end=expr
                         | FOR idx=VARIABLE FROM for_start=expression THROUGH end=expression LEFT_BRACE body=function_statement* RIGHT_BRACE #for_through_loop
                         ;
                         
+top_level_for_loop      : FOR idx=VARIABLE FROM for_start=expression TO end=expression LEFT_BRACE body=top_level_statement* RIGHT_BRACE #top_level_for_to_loop
+                        | FOR idx=VARIABLE FROM for_start=expression THROUGH end=expression LEFT_BRACE body=top_level_statement* RIGHT_BRACE #top_level_for_through_loop
+                        ;
+
+sel_level_for_loop      : FOR idx=VARIABLE FROM for_start=expression TO end=expression LEFT_BRACE body=selector_statement* RIGHT_BRACE #sel_level_for_to_loop
+                        | FOR idx=VARIABLE FROM for_start=expression THROUGH end=expression LEFT_BRACE body=selector_statement* RIGHT_BRACE #sel_level_for_through_loop
+                        ;
+                        
 each_loop               : EACH (key=VARIABLE COMMA)? val=VARIABLE IN iter=expression LEFT_BRACE body=function_statement* RIGHT_BRACE;
+
+top_level_each_loop     : EACH (key=VARIABLE COMMA)? val=VARIABLE IN iter=expression LEFT_BRACE body=top_level_statement* RIGHT_BRACE;
+
+sel_level_each_loop     : EACH (key=VARIABLE COMMA)? val=VARIABLE IN iter=expression LEFT_BRACE body=selector_statement* RIGHT_BRACE;
                         
 while_loop              : WHILE cond=expression LEFT_BRACE body=function_statement* RIGHT_BRACE;
+
+top_level_while_loop    : WHILE cond=expression LEFT_BRACE body=top_level_statement* RIGHT_BRACE;
+
+sel_level_while_loop    : WHILE cond=expression LEFT_BRACE body=selector_statement* RIGHT_BRACE;

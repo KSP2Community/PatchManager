@@ -1,4 +1,6 @@
-﻿namespace PatchManager.SassyPatching.Nodes.Attributes.RequireExpressions;
+﻿using Environment = PatchManager.SassyPatching.Execution.Environment;
+
+namespace PatchManager.SassyPatching.Nodes.Attributes.RequireExpressions;
 
 public class RequireGuid : RequireExpression
 {
@@ -6,5 +8,5 @@ public class RequireGuid : RequireExpression
 
     public RequireGuid(Coordinate c, string guid) : base(c) => Guid = guid;
 
-    public override bool Execute(IReadOnlyCollection<string> loadedMods) => loadedMods.Contains(Guid);
+    public override bool Execute(IReadOnlyCollection<string> loadedMods, Environment e) => loadedMods.Contains(Guid.Interpolate(e));
 }

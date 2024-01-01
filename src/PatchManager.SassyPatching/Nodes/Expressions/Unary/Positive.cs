@@ -9,8 +9,5 @@ public class Positive : Unary
     {
     }
 
-    internal override DataValue GetResult(DataValue child)
-    {
-        return child;
-    }
+    internal override DataValue GetResult(DataValue child) => +child;
 }

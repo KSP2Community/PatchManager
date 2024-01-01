@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using KSP.Game;
 using KSP.Game.Flow;
+using MonoMod.Utils;
 using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Patches.Runtime;
@@ -127,8 +128,11 @@ internal static class PatchingManager
         }
     }
 
-    public static void ImportSinglePatch(FileInfo fileInfo) 
-        => Universe.LoadSinglePatchFile(fileInfo,new DirectoryInfo(BepInEx.Paths.GameRootPath));
+    public static void ImportSinglePatch(FileInfo fileInfo)
+    {
+        Universe.LoadSinglePatchFile(fileInfo, new DirectoryInfo(BepInEx.Paths.GameRootPath));
+        CurrentPatchHashes.Patches.Add(fileInfo.FullName, Hash.FromFile(fileInfo.FullName));
+    }
 
     public static void RegisterPatches()
     {

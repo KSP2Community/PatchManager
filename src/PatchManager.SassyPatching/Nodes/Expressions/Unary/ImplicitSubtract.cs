@@ -13,34 +13,14 @@ public class ImplicitSubtract : Implicit
 
     internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
-        if (leftHandSide.IsReal && rightHandSide.IsReal)
-        {
-            return leftHandSide.Real - rightHandSide.Real;
-        }
-
-        if (leftHandSide.IsReal && rightHandSide.IsInteger)
+        try
         {
             return leftHandSide.Real - rightHandSide.Integer;
         }
-
-        if (leftHandSide.IsInteger && rightHandSide.IsInteger)
+        catch (DataValueOperationException)
         {
-            return leftHandSide.Integer - rightHandSide.Integer;
+            throw new BinaryExpressionTypeException(Coordinate, "subtract", leftHandSide.Type.ToString(),
+                rightHandSide.Type.ToString());
         }
-
-        if (leftHandSide.IsInteger && rightHandSide.IsReal)
-        {
-            return leftHandSide.Integer - rightHandSide.Real;
-        }
-
-        
-        if (leftHandSide.IsList && rightHandSide.IsList)
-        {
-            return leftHandSide.List.Where(x => rightHandSide.List.All(y => x != y)).ToList();
-        }
-
-        
-        throw new BinaryExpressionTypeException(Coordinate,"subtract", leftHandSide.Type.ToString(),
-            rightHandSide.Type.ToString());
     }
 }

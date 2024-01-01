@@ -14,47 +14,23 @@ public class Subscript : Binary
     // ReSharper disable once CognitiveComplexity
     internal override DataValue GetResult(DataValue leftHandSide, DataValue rightHandSide)
     {
-        if (leftHandSide.IsList && rightHandSide.IsInteger)
+        try
         {
-            try
-            {
-                return leftHandSide.List[(int)rightHandSide.Integer];
-            }
-            catch
-            {
-                throw new ListIndexOutOfRangeException(Coordinate,
-                    ((int)rightHandSide.Real) + " is out of range of the list being indexed");
-            }
+            return leftHandSide[rightHandSide];
         }
-
-        if (leftHandSide.IsString && rightHandSide.IsInteger)
+        catch (IndexOutOfRangeException indexOutOfRangeException)
         {
-            try
-            {
-                return (double)leftHandSide.String[(int)rightHandSide.Integer];
-            }
-            catch
-            {
-                throw new ListIndexOutOfRangeException(Coordinate,
-                    ((int)rightHandSide.Real) + " is out of range of the string being indexed");
-            }
+            throw new ListIndexOutOfRangeException(Coordinate, indexOutOfRangeException.Message);
         }
-
-        if (leftHandSide.IsDictionary && rightHandSide.IsString)
+        catch (KeyNotFoundException keyNotFoundException)
         {
-            try
-            {
-                return leftHandSide.Dictionary[rightHandSide.String];
-            }
-            catch
-            {
-                throw new DictionaryKeyNotFoundException(Coordinate,
-                    rightHandSide.String + " is not a key found in the dictionary being indexed");
-            }
+            throw new DictionaryKeyNotFoundException(Coordinate, keyNotFoundException.Message);
         }
-
-        throw new BinaryExpressionTypeException(Coordinate, "subscript", leftHandSide.Type.ToString(),
-            rightHandSide.Type.ToString());
+        catch (DataValueOperationException)
+        {
+            throw new BinaryExpressionTypeException(Coordinate, "subscript", leftHandSide.Type.ToString(),
+                rightHandSide.Type.ToString());
+        }
     }
 
     internal override bool ShortCircuitOn(DataValue dataValue) => false;

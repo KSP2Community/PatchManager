@@ -28,44 +28,48 @@ public class RulesetSelector : Selector
     /// <inheritdoc />
     public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
     {
-        if (Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
-        {
-            if (ruleSet.Matches(type))
-            {
-                rulesetMatchingObject = ruleSet.ConvertToSelectable(type, name,data);
-                return new List<SelectableWithEnvironment>
-                {
-                    new()
-                    {
-                        Selectable = rulesetMatchingObject,
-                        Environment = new Environment(baseEnvironment.GlobalEnvironment,baseEnvironment)
-                    }
-                };
-            }
-            rulesetMatchingObject = null;
-            return new();
-        }
-        else
+        if (!Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
         {
             throw new InterpreterException(Coordinate, $"Ruleset: {RulesetName} does not exist!");
         }
+
+        if (ruleSet.Matches(type))
+        {
+            rulesetMatchingObject = ruleSet.ConvertToSelectable(type, name,data);
+            if (rulesetMatchingObject != null)
+            {
+                return
+                [
+                    new SelectableWithEnvironment
+                    {
+                        Selectable = rulesetMatchingObject,
+                        Environment = new Environment(baseEnvironment.GlobalEnvironment, baseEnvironment)
+                    }
+                ];
+            }
+        }
+        rulesetMatchingObject = null;
+        return [];
+
     }
 
     public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
     {
-        if (Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
-        {
-            var newObject = ruleSet.CreateNew(rulesetArguments);
-            newAsset = newObject;
-            return new List<SelectableWithEnvironment> { new()
-            {
-                Selectable = newAsset.Selectable,
-                Environment = new Environment(baseEnvironment.GlobalEnvironment,baseEnvironment)
-            } };
-        }
-        else
+        if (!Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
         {
             throw new InterpreterException(Coordinate, $"Ruleset: {RulesetName} does not exist!");
         }
+
+        var newObject = ruleSet.CreateNew(rulesetArguments);
+        newAsset = newObject;
+        return
+        [
+            new SelectableWithEnvironment
+            {
+                Selectable = newAsset.Selectable,
+                Environment = new Environment(baseEnvironment.GlobalEnvironment, baseEnvironment)
+            }
+        ];
+
     }
 }

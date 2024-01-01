@@ -22,7 +22,6 @@ public class JsonRuleset : IPatcherRuleSet
     /// <inheritdoc />
     public ISelectable ConvertToSelectable(string type, string name, string jsonData)
     {
-        Console.WriteLine($"Converting to JTokenSelectable {type}:{name}");
         return new JTokenSelectable(() => { }, JToken.Parse(jsonData), name, type);
     }
 

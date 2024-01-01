@@ -26,7 +26,16 @@ public class EnsureSelector : Selector
         {
             var baseList = selectableWithEnvironments.Where(selectable =>
             {
-                var result = selectable.Selectable.MatchesElement(ElementName);
+                var interpolated = "";
+                try
+                {
+                    interpolated = ElementName.Interpolate(selectable.Environment);
+                }
+                catch (Exception e)
+                {
+                    throw new InterpolationException(Coordinate, e.Message);
+                }
+                var result = selectable.Selectable.MatchesElement(interpolated);
                 return result;
             }).ToList();
             // return baseList.Count == 0 ? selectables.Select(selectable => selectable.AddElement(ElementName)).ToList() : baseList;
@@ -34,7 +43,16 @@ public class EnsureSelector : Selector
             {
                 foreach (var selectable in selectableWithEnvironments)
                 {
-                    var addedElement = selectable.Selectable.AddElement(ElementName);
+                    var interpolated = "";
+                    try
+                    {
+                        interpolated = ElementName.Interpolate(selectable.Environment);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InterpolationException(Coordinate, e.Message);
+                    }
+                    var addedElement = selectable.Selectable.AddElement(interpolated);
                     baseList.Add(new SelectableWithEnvironment
                     {
                         Selectable = addedElement,
