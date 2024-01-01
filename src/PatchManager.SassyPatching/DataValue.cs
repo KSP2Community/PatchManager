@@ -1281,11 +1281,11 @@ public class DataValue
             {
                 try
                 {
-                    return (double)String[(int)rightHandSide.Integer];
+                    return (int)String[(int)rightHandSide.Integer];
                 }
                 catch
                 {
-                    throw new IndexOutOfRangeException(((int)rightHandSide.Real) + " is out of range of the string being indexed");
+                    throw new IndexOutOfRangeException(rightHandSide.Integer + " is out of range of the string being indexed");
                 }
             }
 
