@@ -10,7 +10,7 @@ namespace PatchManager.Science.Selectables;
 /// <summary>
 /// This is the selectable for science regions
 /// </summary>
-public class RegionsSelectable : BaseSelectable
+public sealed class RegionsSelectable : BaseSelectable
 {
     #pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _modified;
