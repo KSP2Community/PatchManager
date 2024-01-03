@@ -52,8 +52,8 @@ public class ExperimentSelectable : BaseSelectable
         ElementType = "scienceExperiment";
         ScienceObject = scienceData;
         DataObject = (JObject)scienceData["data"]!;
-        Classes = new List<string>();
-        Children = new List<ISelectable>();
+        Classes = [];
+        Children = [];
         foreach (var subToken in DataObject)
         {
             Classes.Add(subToken.Key);
@@ -81,7 +81,6 @@ public class ExperimentSelectable : BaseSelectable
 
         classValue = DataValue.FromJToken(DataObject[@class]);
         return true;
-
     }
 
     /// <inheritdoc />
