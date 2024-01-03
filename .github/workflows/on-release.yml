@@ -1,7 +1,7 @@
 name: Publish NuGet and upload release
 env:
   MOD_ID: 3482
-  LATEST_GAME_VERSION: 0.2.0.0
+  KSP2_ID: 22407
   
 on:
   release:
@@ -35,7 +35,7 @@ jobs:
           echo "artifact_name=PatchManager-$version.zip" >> $GITHUB_ENV
           echo "zip=$(ls -1 dist/PatchManager-*.zip | head -n 1)" >> $GITHUB_ENV
           echo "upload_url=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].upload_url' | tr -d \")" >> $GITHUB_ENV
-          echo "changelog=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].body' | tr -d \" | sed 's/@/%40/g')" >> $GITHUB_ENV
+          echo "changelog=$(wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq '.[0].body' | tr -d \" | jq -Rr @uri)" >> $GITHUB_ENV
 
       - name: Check if version exists
         id: check-version
@@ -79,10 +79,14 @@ jobs:
           else
             echo "Login to space dock successful"
           fi
-
+          
+      - name: Query latest game version
+        run: |
+          echo "LATEST_GAME_VERSION=$(curl 'https://spacedock.info/api/${{ env.KSP2_ID }}/versions' | jq '.[0].friendly_version' | tr -d \")" >> $GITHUB_ENV
+          
       - name: Update mod on spacedock
         run: |
-          result=$(curl -b ./cookies -F "version=${{ env.version }}" -F "changelog=${{ env.changelog }}" -F "game-version=${{ env.LATEST_GAME_VERSION}}" -F "notify-followers=yes" -F "zipball=@${{ env.zip }}" "https://spacedock.info/api/mod/${{ env.MOD_ID }}/update")
+          result=$(curl -b ./cookies -F "version=${{ env.version }}" -F "changelog=${{ env.changelog }}" -F "game-version=${{ env.LATEST_GAME_VERSION }}" -F "notify-followers=yes" -F "zipball=@${{ env.zip }}" "https://spacedock.info/api/mod/${{ env.MOD_ID }}/update")
           errored=$(echo $result | jq .error)
           if [ "$errored" == "true" ]; then
             echo "Upload to space dock errored: $(echo $result | jq .reason)"
