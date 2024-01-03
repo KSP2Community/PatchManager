@@ -42,9 +42,9 @@ public sealed class RegionsSelectable : BaseSelectable
     private JArray _regionsArray;
     
     /// <summary>
-    /// Create a new discoverables selectable from a JObject
+    /// Create a new regions selectable from a JObject
     /// </summary>
-    /// <param name="discoverablesObject">Discoverable </param>
+    /// <param name="regionsObject">Region</param>
     public RegionsSelectable(JObject regionsObject)
     {
         RegionsObject = regionsObject;
