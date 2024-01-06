@@ -20,14 +20,11 @@ public class ResourceRuleset : IPatcherRuleSet
     public ISelectable ConvertToSelectable(string type, string name, string jsonData)
     {
         var obj = JObject.Parse(jsonData);
-        if (obj.ContainsKey("isRecipe") && obj["isRecipe"].Value<bool>())
+        if (obj.ContainsKey("isRecipe") && obj["isRecipe"]!.Value<bool>())
         {
             return new RecipeSelectable(jsonData);
         }
-        else
-        {
-            return new ResourceSelectable(jsonData);
-        }
+        return new ResourceSelectable(jsonData);
     }
 
     /// <inheritdoc />

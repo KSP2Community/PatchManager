@@ -92,7 +92,7 @@ public sealed class RecipeSelectable : BaseSelectable
     public override bool IsSameAs(ISelectable other) => other is RecipeSelectable rs && rs.Name == Name;
 
     /// <inheritdoc />
-    public override IModifiable OpenModification() => new JTokenModifiable(JObject["data"], SetModified);
+    public override IModifiable OpenModification() => new JTokenModifiable(JObject["recipeData"], SetModified);
 
     /// <inheritdoc />
     public override ISelectable AddElement(string elementType)
