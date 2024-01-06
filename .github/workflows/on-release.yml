@@ -74,4 +74,5 @@ jobs:
           game_id: 22407
           mod_id: 3482
           version: ${{ env.version }}
+          zipball: ${{ env.zip }}
           changelog: ./changelog.md
