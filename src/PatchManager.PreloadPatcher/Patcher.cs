@@ -1,23 +1,23 @@
 ﻿using BepInEx;
-using BepInEx.Logging;
 using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using SpaceWarp.Preload.API;
 
 namespace PatchManager.PreloadPatcher;
 
 /// <summary>
 /// Preload patcher for the game's AssetProvider.
 /// </summary>
-public static class Patcher
+[UsedImplicitly]
+internal class Patcher : BasePatcher
 {
-    [UsedImplicitly]
-    public static IEnumerable<string> TargetDLLs { get; } = new[]
+    public override IEnumerable<string> DLLsToPatch { get; } = new[]
     {
         "Assembly-CSharp.dll"
     };
 
-    private static MethodReference MakeGeneric(this MethodReference method, params GenericParameter[] args)
+    private static MethodReference MakeGeneric(MethodReference method, params GenericParameter[] args)
     {
         if (args.Length == 0)
         {
@@ -43,8 +43,7 @@ public static class Patcher
     /// </summary>
     /// <param name="assemblyDefinition">Game assembly containing the AssetProvider class.</param>
     /// <exception cref="Exception">Thrown if the assembly with the replacement method cannot be found.</exception>
-    [UsedImplicitly]
-    public static void Patch(ref AssemblyDefinition assemblyDefinition)
+    public override void ApplyPatch(ref AssemblyDefinition assemblyDefinition)
     {
         // Now we need to get the assembly with the replacement method
         AssemblyDefinition coreAssembly = null;
@@ -67,7 +66,7 @@ public static class Patcher
         // Remove every single instruction from the body of the methods
         // Emit call to our extracted method
         var methodInModule = targetMethod.Module.ImportReference(extractedMethod);
-        var generic = methodInModule.MakeGeneric(targetMethod.GenericParameters.ToArray());
+        var generic = MakeGeneric(methodInModule, targetMethod.GenericParameters.ToArray());
         targetMethod.Body.Instructions.Clear();
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
@@ -75,6 +74,6 @@ public static class Patcher
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Call, generic));
         targetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
-        Logger.CreateLogSource("Patch Manager Preload").LogInfo("Pre-patching complete!");
+        Logger.LogInfo("Pre-patching complete!");
     }
 }
