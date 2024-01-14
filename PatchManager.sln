@@ -4,8 +4,6 @@ Project("{5F1D0BAA-A518-423E-B128-A97490E64B50}") = "PatchManager", "src\PatchMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.Core", "src\PatchManager.Core\PatchManager.Core.csproj", "{F14D175D-865C-47E8-BCE8-AA14A39FB084}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.PreloadPatcher", "src\PatchManager.PreloadPatcher\PatchManager.PreloadPatcher.csproj", "{8BD0F66F-7C47-477D-B519-0118A9F55428}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.SassyPatching", "src\PatchManager.SassyPatching\PatchManager.SassyPatching.csproj", "{38D713EA-A57C-4C0E-9B72-09346D3034EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchManager.SassyPatching.Tests", "src\PatchManager.SassyPatching.Tests\PatchManager.SassyPatching.Tests.csproj", "{95F3322B-A566-4BAB-8370-20C92EACDBC1}"
@@ -48,14 +46,6 @@ Global
 		{F14D175D-865C-47E8-BCE8-AA14A39FB084}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
 		{F14D175D-865C-47E8-BCE8-AA14A39FB084}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
 		{F14D175D-865C-47E8-BCE8-AA14A39FB084}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Deploy|Any CPU.ActiveCfg = Deploy|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
-		{8BD0F66F-7C47-477D-B519-0118A9F55428}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
 		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38D713EA-A57C-4C0E-9B72-09346D3034EE}.Release|Any CPU.ActiveCfg = Release|Any CPU

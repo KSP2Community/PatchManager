@@ -2,6 +2,7 @@
 using KSP.Assets;
 using KSP.Game;
 using PatchManager.Core.Assets;
+using Premonition.Core.Attributes;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -9,8 +10,12 @@ using UnityObject = UnityEngine.Object;
 
 namespace PatchManager.Core.Patches.Preload;
 
+[PremonitionAssembly("Assembly-CSharp")]
+[PremonitionType("KSP.Assets.AssetProvider")]
 internal static class AssetProviderPatch
 {
+    [PremonitionMethod("LoadByLabel")]
+    [PremonitionTrampoline]
     [UsedImplicitly]
     public static void LoadByLabel<T>(
         string label,
