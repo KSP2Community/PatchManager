@@ -20,7 +20,7 @@
       }
     },
     {
-      "id": "Premonition",
+      "id": "premonition",
       "version": {
         "min": "0.2.0",
         "max": "*"
