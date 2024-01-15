@@ -5,7 +5,7 @@
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.2.0" PrivateAssets="all" Publicize="true" />
         <PackageReference Include="Premonition.Core" Version="0.1.0" />
-        <PackageReference Include="SpaceWarp" Version="1.7.0" PrivateAssets="all" Publicize="true" />
+        <PackageReference Include="SpaceWarp" Version="1.8.1" PrivateAssets="all" Publicize="true" />
     </ItemGroup>
     <ItemGroup Label="Project references">
         <ProjectReference Include="$(SolutionDir)/src/PatchManager.SassyPatching/PatchManager.SassyPatching.csproj" Private="false" />
