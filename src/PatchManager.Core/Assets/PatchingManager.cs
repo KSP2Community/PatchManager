@@ -188,7 +188,7 @@ internal static class PatchingManager
             {
                 var patchedText = PatchJson(label, name, text);
                 if (patchedText == "") continue;
-                archiveFiles[name] = text;
+                archiveFiles[name] = patchedText;
                 labelCacheEntry.Assets.Add(name);
                 assetsCacheEntries.Add(name, new CacheEntry
                 {
