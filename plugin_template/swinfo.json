@@ -15,7 +15,14 @@
     {
       "id": "com.github.x606.spacewarp",
       "version": {
-        "min": "1.7.0",
+        "min": "1.8.0",
+        "max": "*"
+      }
+    },
+    {
+      "id": "Premonition",
+      "version": {
+        "min": "0.2.0",
         "max": "*"
       }
     }
