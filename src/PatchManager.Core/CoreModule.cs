@@ -27,14 +27,14 @@ public class CoreModule : BaseModule
 
     private bool _wasCacheInvalidated;
 
-    private static bool ShouldLoad(string[] disabled, string modInfoLocation)
+    private static bool ShouldLoad(IEnumerable<string> disabled, string modInfoLocation)
     {
         if (!File.Exists(modInfoLocation))
             return false;
         try
         {
             var metadata = JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(modInfoLocation));
-            return metadata.ModID == null || !disabled.Contains(metadata.ModID);
+            return metadata.ModID == null || disabled.All(x => x != metadata.ModID);
         }
         catch
         {
@@ -90,8 +90,8 @@ public class CoreModule : BaseModule
         var gameDataModsExists = Directory.Exists(Path.Combine(Paths.GameRootPath, "GameData/Mods"));
 
         // Go here instead so that the static constructor recognizes everything
-        var disabledPlugins = File.ReadAllText(Path.Combine(Paths.BepInExRootPath, "disabled_plugins.cfg"))
-            .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        var disabledPlugins = File.ReadAllText(SpaceWarp.Preload.API.CommonPaths.DisabledPluginsFilepath)
+            .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
 
         var modFolders = Directory.GetDirectories(Paths.PluginPath, "*", SearchOption.AllDirectories)
             .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
