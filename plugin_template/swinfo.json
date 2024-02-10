@@ -5,7 +5,7 @@
   "name": "Patch Manager",
   "description": "A mod for generic patching needs similar to KSP 1's Module Manager.",
   "source": "https://github.com/KSP2Community/PatchManager",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "version_check": "https://raw.githubusercontent.com/KSP2Community/PatchManager/main/plugin_template/swinfo.json",
   "ksp2_version": {
     "min": "0.2.0",
@@ -15,7 +15,14 @@
     {
       "id": "com.github.x606.spacewarp",
       "version": {
-        "min": "1.7.0",
+        "min": "1.8.0",
+        "max": "*"
+      }
+    },
+    {
+      "id": "premonition",
+      "version": {
+        "min": "0.2.0",
         "max": "*"
       }
     }
