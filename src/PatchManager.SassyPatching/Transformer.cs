@@ -806,6 +806,12 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         context.GetCoordinate(), context.stage.GetStringValue(),
         context.stage_attribute().Select(Visit).Cast<StageDefinitionAttribute>().ToList());
 
+    public override Node VisitStage_value_before(sassy_parser.Stage_value_beforeContext context) =>
+        new StageDefinitionAttribute(context.GetCoordinate(), context.stage.GetStringValue(), false);
+
+    public override Node VisitStage_value_after(sassy_parser.Stage_value_afterContext context) => 
+        new StageDefinitionAttribute(context.GetCoordinate(), context.stage.GetStringValue(), true);
+
     /// <inheritdoc />
     public override Node VisitConfig_creation(sassy_parser.Config_creationContext context) => new ConfigCreation(
         context.GetCoordinate(), context.label.GetStringValue(), context.config_name.GetStringValue(),
