@@ -258,7 +258,7 @@ public class Universe
         }
         catch (Exception e)
         {
-            _errorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e.Message}");
+            _errorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e}");
         }
     }
 
