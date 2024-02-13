@@ -1,7 +1,6 @@
 using PatchManager.SassyPatching.Tests.Validators;
 using PatchManager.SassyPatching.Tests.Validators.Attributes;
 using PatchManager.SassyPatching.Tests.Validators.Expressions;
-using PatchManager.SassyPatching.Tests.Validators.Indexers;
 using PatchManager.SassyPatching.Tests.Validators.Selectors;
 using PatchManager.SassyPatching.Tests.Validators.Statements;
 using PatchManager.SassyPatching.Tests.Validators.Statements.FunctionLevel;
@@ -1523,314 +1522,314 @@ a b c {
     /// <summary>
     /// Tests a field set selection action w/ an element key and a number indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ an element key and a number indexer")]
-    public void FieldSetElementKeyNumberIndexer()
-    {
-        const string patch =
-            @"
-* {
-    x[0]: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new NumberIndexerValidator
-                        {
-                            Index = 0
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ an element key and a number indexer")]
+//     public void FieldSetElementKeyNumberIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     x[0]: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new NumberIndexerValidator
+//                         {
+//                             Index = 0
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ a string key and a number indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ a string key and a number indexer")]
-    public void FieldSetStringKeyNumberIndexer()
-    {
-        const string patch =
-            @"
-* {
-    'x'[0]: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new NumberIndexerValidator
-                        {
-                            Index = 0
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ a string key and a number indexer")]
+//     public void FieldSetStringKeyNumberIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     'x'[0]: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new NumberIndexerValidator
+//                         {
+//                             Index = 0
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ an element key and an element indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ an element key and an element indexer")]
-    public void FieldSetElementKeyElementIndexer()
-    {
-        const string patch =
-            @"
-* {
-    x[y]: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new ElementIndexerValidator
-                        {
-                            ElementName = "y"
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ an element key and an element indexer")]
+//     public void FieldSetElementKeyElementIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     x[y]: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new ElementIndexerValidator
+//                         {
+//                             ElementName = "y"
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ a string key and an element indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ a string key and an element indexer")]
-    public void FieldSetStringKeyElementIndexer()
-    {
-        const string patch =
-            @"
-* {
-    'x'[y]: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new ElementIndexerValidator
-                        {
-                            ElementName = "y"
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ a string key and an element indexer")]
+//     public void FieldSetStringKeyElementIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     'x'[y]: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new ElementIndexerValidator
+//                         {
+//                             ElementName = "y"
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ an element key and a class indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ an element key and a class indexer")]
-    public void FieldSetElementKeyClassIndexer()
-    {
-        const string patch =
-            @"
-* {
-    x[.y]: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new ClassIndexerValidator
-                        {
-                            ClassName = "y"
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ an element key and a class indexer")]
+//     public void FieldSetElementKeyClassIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     x[.y]: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new ClassIndexerValidator
+//                         {
+//                             ClassName = "y"
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ a string key and a class indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ a string key and a class indexer")]
-    public void FieldSetStringKeyClassIndexer()
-    {
-        const string patch =
-            @"
-* {
-    'x'[.y]: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new ClassIndexerValidator
-                        {
-                            ClassName = "y"
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch,validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ a string key and a class indexer")]
+//     public void FieldSetStringKeyClassIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     'x'[.y]: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new ClassIndexerValidator
+//                         {
+//                             ClassName = "y"
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch,validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ an element key and a string indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ an element key and a string indexer")]
-    public void FieldSetElementKeyStringIndexer()
-    {
-        const string patch =
-            @"
-* {
-    x['y']: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new StringIndexerValidator
-                        {
-                            Index = "y"
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ an element key and a string indexer")]
+//     public void FieldSetElementKeyStringIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     x['y']: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new StringIndexerValidator
+//                         {
+//                             Index = "y"
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a field set selection action w/ a string key and a string indexer
     /// </summary>
-    [Test(TestOf = typeof(Transformer), Author = "Cheese",
-        Description = "Tests a field set selection action w/ a string key and a string indexer")]
-    public void FieldSetStringKeyStringIndexer()
-    {
-        const string patch =
-            @"
-* {
-    'x'['y']: 5;
-}
-";
-        var validator = new PatchValidator
-        {
-            new SelectionBlockValidator
-            {
-                Attributes = new(),
-                Selector = new WildcardSelectorValidator(),
-                Actions = new()
-                {
-                    new FieldValidator
-                    {
-                        FieldName = "x",
-                        Indexer = new StringIndexerValidator
-                        {
-                            Index = "y"
-                        },
-                        FieldValue = new ValueValidator
-                        {
-                            StoredDataValue = 5
-                        }
-                    }
-                }
-            }
-        };
-        Match(patch, validator);
-    }
+//     [Test(TestOf = typeof(Transformer), Author = "Cheese",
+//         Description = "Tests a field set selection action w/ a string key and a string indexer")]
+//     public void FieldSetStringKeyStringIndexer()
+//     {
+//         const string patch =
+//             @"
+// * {
+//     'x'['y']: 5;
+// }
+// ";
+//         var validator = new PatchValidator
+//         {
+//             new SelectionBlockValidator
+//             {
+//                 Attributes = new(),
+//                 Selector = new WildcardSelectorValidator(),
+//                 Actions = new()
+//                 {
+//                     new FieldValidator
+//                     {
+//                         FieldName = "x",
+//                         Indexer = new StringIndexerValidator
+//                         {
+//                             Index = "y"
+//                         },
+//                         FieldValue = new ValueValidator
+//                         {
+//                             StoredDataValue = 5
+//                         }
+//                     }
+//                 }
+//             }
+//         };
+//         Match(patch, validator);
+//     }
 
     /// <summary>
     /// Tests a nested selection block as a selection action

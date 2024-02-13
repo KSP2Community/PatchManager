@@ -76,3 +76,35 @@ jobs:
           version: ${{ env.version }}
           zipball: ${{ env.zip }}
           changelog: ./changelog.md
+          
+      - name: Update mod topic 
+        uses: Kerbalight/ksp2-forum-post-action@latest
+        with:
+          username: ${{ secrets.FORUM_USER }}
+          password: ${{ secrets.FORUM_PASSWORD }}
+          forum_topic_url: https://forum.kerbalspaceprogram.com/topic/221179-093-patch-manager/
+          forum_topic_title: '[{version}] Patch Manager'
+          spacedock_url: https://spacedock.info/mod/3482/Patch%20Manager
+          version: ${{ env.version }}
+          swinfo_path: 'plugin_template/swinfo.json'
+          changelog: ./changelog.md
+          
+      - name: Prepare content for discord
+        shell: bash
+        run: |
+          echo -e "## Release v${version}\n" > ./content.md
+          cat ./changelog.md >> ./content.md
+          {
+            echo 'discord_message<<EOF'
+            cat ./content.md
+            echo EOF
+          } >> "$GITHUB_ENV"
+
+      - name: Publish update to Discord
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          content: ${{ env.discord_message }}
+          thread-id: '1171826066692776028'
+          username: "Patch Manager"
+          avatar-url: "https://spacedock.info/content/cheese3660_103715/Patch_Manager/thumb_Patch_Manager-1703507804.jpg"

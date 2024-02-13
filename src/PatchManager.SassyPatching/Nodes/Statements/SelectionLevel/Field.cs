@@ -19,15 +19,15 @@ public class Field : Node, ISelectionAction
     /// <summary>
     /// The index into the field, if there is one
     /// </summary>
-    [CanBeNull] public readonly Indexer Indexer;
+    public readonly List<Indexer> Indexers;
     /// <summary>
     /// The value to set the field to
     /// </summary>
     public readonly Expression FieldValue;
-    internal Field(Coordinate c, string fieldName, [CanBeNull] Indexer indexer, Expression fieldValue) : base(c)
+    internal Field(Coordinate c, string fieldName, List<Indexer> indexers, Expression fieldValue) : base(c)
     {
         FieldName = fieldName;
-        Indexer = indexer;
+        Indexers = indexers;
         FieldValue = fieldValue;
     }
 
@@ -44,57 +44,117 @@ public class Field : Node, ISelectionAction
             throw new InterpreterException(Coordinate, "Attempting to modify an unmodifiable selection");
         }
 
-        var interpolated = "";
-        if (Indexer is StringIndexer si)
+        var current = modifiable.GetFieldValue(FieldName);
+        var subEnv = new Environment(environment.GlobalEnvironment, environment);
+        modifiable.SetFieldValue(FieldName, ComputeValues(subEnv, current));
+    }
+    private DataValue ComputeValues(Environment subEnv, DataValue current, int layer = 0)
+    {
+        if (Indexers.Count == layer)
         {
-            try
-            {
-                interpolated = si.Index.Interpolate(environment);
-            }
-            catch (Exception e)
-            {
-                throw new InterpolationException(Coordinate, e.Message);
-            }
+            subEnv["value"] = current;
+            return FieldValue.Compute(subEnv);
         }
-        
-        var value = Indexer switch
+
+        var indexer = Indexers[layer];
+        switch (indexer)
         {
-            ElementIndexer elementIndexer => modifiable.GetFieldByElement(FieldName, elementIndexer.ElementName),
-            StringIndexer stringIndexer => modifiable.GetFieldByElement(FieldName, interpolated),
-            NumberIndexer numberIndexer => modifiable.GetFieldByNumber(FieldName, numberIndexer.Index),
-            ClassIndexer classIndexer => modifiable.GetFieldByClass(FieldName, classIndexer.ClassName),
-            _ => modifiable.GetFieldValue(FieldName)
-        };
-        // Console.WriteLine($"Field value: {value}");
-        var subEnvironment = new Environment(environment.GlobalEnvironment, environment)
-        {
-            ["value"] = value
-        };
-        var result = FieldValue.Compute(subEnvironment);
-        try
-        {
-            switch (Indexer)
+            case SingleIndexer singleIndexer:
             {
-                case ElementIndexer setElementIndexer:
-                    modifiable.SetFieldByElement(FieldName, setElementIndexer.ElementName, result);
-                    return;
-                case StringIndexer setStringIndexer:
-                    modifiable.SetFieldByElement(FieldName, interpolated, result);
-                    return;
-                case NumberIndexer setNumberIndexer:
-                    modifiable.SetFieldByNumber(FieldName, setNumberIndexer.Index, result);
-                    return;
-                case ClassIndexer setClassIndexer:
-                    modifiable.SetFieldByClass(FieldName, setClassIndexer.ClassName, result);
-                    return;
-                default:
-                    modifiable.SetFieldValue(FieldName, result);
-                    return;
+                var index = singleIndexer.Index.Compute(subEnv);
+                if (index.IsInteger)
+                {
+                    return ComputeIntegerIndex(subEnv, current, layer, index, indexer);
+                }
+
+                if (index.IsString)
+                {
+                    return ComputeStringIndex(subEnv, current, layer, index, indexer);
+                }
+
+                throw new InterpreterException(indexer.Coordinate,
+                    $"Invalid index type {index.Type}, expected Integer or String");
             }
+            case EverythingIndexer everythingIndexer:
+                return current.Type switch
+                {
+                    DataValue.DataType.List => current.List.Select(value => ComputeValues(subEnv, value, layer + 1))
+                        .ToList(),
+                    DataValue.DataType.Dictionary => current.Dictionary
+                        .Select(kv => (kv.Key, ComputeValues(subEnv, kv.Value, layer + 1)))
+                        .ToDictionary(kv => kv.Key, kv => kv.Item2),
+                    DataValue.DataType.None => DataValue.Null,
+                    _ => throw new InterpreterException(everythingIndexer.Coordinate,
+                        $"Attempting to use a `*` indexer on a value of type {current.Type}")
+                };
+            default:
+                throw new InterpreterException(indexer.Coordinate, $"Unknown indexer type: {indexer.GetType()}");
         }
-        catch (NullReferenceException e)
+    }
+
+    private DataValue ComputeStringIndex(
+        Environment subEnv,
+        DataValue current,
+        int layer,
+        DataValue index,
+        Node indexer
+    )
+    {
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        return current.Type switch
         {
-            Console.WriteLine("Field does not exist :3");
+            DataValue.DataType.None => new Dictionary<string, DataValue>
+            {
+                [index.String] = ComputeValues(subEnv, DataValue.Null, layer + 1)
+            },
+            DataValue.DataType.Dictionary => new Dictionary<string, DataValue>(current.Dictionary)
+            {
+                [index.String] = ComputeValues(subEnv,
+                    current.Dictionary.TryGetValue(index.String, out var currentValue)
+                        ? currentValue
+                        : DataValue.Null, layer + 1),
+            },
+            _ => throw new InterpreterException(indexer.Coordinate,
+                $"Attempting to index into a value of type {current.Type} with an indexer that is a String")
+        };
+    }
+
+    private DataValue ComputeIntegerIndex(
+        Environment subEnv,
+        DataValue current,
+        int layer,
+        DataValue index,
+        Node indexer
+    )
+    {
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        switch (current.Type)
+        {
+            case DataValue.DataType.None:
+            {
+                var list = new List<DataValue>();
+                for (var i = 0; i < index.Integer; i++)
+                {
+                    list.Add(DataValue.Null);
+                }
+
+                list.Add(ComputeValues(subEnv, DataValue.Null, layer + 1));
+                return list;
+            }
+            case DataValue.DataType.List:
+            {
+                var list = new List<DataValue>(current.List);
+                while (list.Count <= (int)index.Integer)
+                {
+                    list.Add(DataValue.Null);
+                }
+
+                list[(int)index.Integer] = ComputeValues(subEnv, list[(int)index.Integer], layer + 1);
+                return list;
+            }
+            default:
+                throw new InterpreterException(indexer.Coordinate,
+                    $"Attempting to index into a value of type {current.Type} with an indexer that is an Integer");
         }
     }
 }

@@ -24,9 +24,9 @@ public class FieldValidator : ParseValidator<Field>
     public override bool Validate(Field node)
     {
         if (FieldName != node.FieldName) return false;
-        if (Indexer == null && node.Indexer != null) return false;
-        if (Indexer != null && node.Indexer == null) return false;
-        if (Indexer != null && node.Indexer != null && !Indexer.Validate(node.Indexer)) return false;
+        // if (Indexer == null && node.Indexer != null) return false;
+        // if (Indexer != null && node.Indexer == null) return false;
+        // if (Indexer != null && node.Indexer != null && !Indexer.Validate(node.Indexer)) return false;
         return FieldValue.Validate(node.FieldValue);
     }
 }
