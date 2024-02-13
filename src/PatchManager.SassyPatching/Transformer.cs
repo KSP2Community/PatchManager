@@ -66,12 +66,14 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitNormal_var_decl(sassy_parser.Normal_var_declContext context)
         => new VariableDeclaration(context.GetCoordinate(),
             context.variable.Text.TrimFirst(),
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             Visit(context.val) as Expression);
 
     /// <inheritdoc />
     public override Node VisitAdd_var_decl(sassy_parser.Add_var_declContext context) => new VariableDeclaration(
         context.GetCoordinate(),
         context.variable.Text.TrimFirst(),
+        context.index().Select(Visit).Cast<Indexer>().ToList(),
         new ImplicitAdd(context.GetCoordinate(), Visit(context.val) as Expression));
 
     /// <inheritdoc />
@@ -79,6 +81,7 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         new VariableDeclaration(
             context.GetCoordinate(),
             context.variable.Text.TrimFirst(),
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             new ImplicitSubtract(context.GetCoordinate(), Visit(context.val) as Expression));
 
     /// <inheritdoc />
@@ -86,12 +89,14 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         new VariableDeclaration(
             context.GetCoordinate(),
             context.variable.Text.TrimFirst(),
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             new ImplicitMultiply(context.GetCoordinate(), Visit(context.val) as Expression));
 
     /// <inheritdoc />
     public override Node VisitDivide_var_decl(sassy_parser.Divide_var_declContext context) => new VariableDeclaration(
         context.GetCoordinate(),
         context.variable.Text.TrimFirst(),
+        context.index().Select(Visit).Cast<Indexer>().ToList(),
         new ImplicitDivide(context.GetCoordinate(), Visit(context.val) as Expression));
 
     /// <inheritdoc />
@@ -429,36 +434,28 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitNormal_field_set(sassy_parser.Normal_field_setContext context) =>
         new Field(context.GetCoordinate(),
             context.sassy_string().GetStringValue(),
-            context.indexor != null
-                ? Visit(context.indexor) as Indexer
-                : null,
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             Visit(context.expr) as Expression);
 
     /// <inheritdoc />
     public override Node VisitAdd_field_set(sassy_parser.Add_field_setContext context) =>
         new Field(context.GetCoordinate(),
             context.sassy_string().GetStringValue(),
-            context.indexor != null
-                ? Visit(context.indexor) as Indexer
-                : null,
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             new ImplicitAdd(context.GetCoordinate(), Visit(context.expr) as Expression));
 
     /// <inheritdoc />
     public override Node VisitSubtract_field_set(sassy_parser.Subtract_field_setContext context) =>
         new Field(context.GetCoordinate(),
             context.sassy_string().GetStringValue(),
-            context.indexor != null
-                ? Visit(context.indexor) as Indexer
-                : null,
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             new ImplicitSubtract(context.GetCoordinate(), Visit(context.expr) as Expression));
 
     /// <inheritdoc />
     public override Node VisitMultiply_field_set(sassy_parser.Multiply_field_setContext context) =>
         new Field(context.GetCoordinate(),
             context.sassy_string().GetStringValue(),
-            context.indexor != null
-                ? Visit(context.indexor) as Indexer
-                : null,
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             new ImplicitMultiply(context.GetCoordinate(), Visit(context.expr) as Expression));
 
 
@@ -466,35 +463,14 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitDivide_field_set(sassy_parser.Divide_field_setContext context) =>
         new Field(context.GetCoordinate(),
             context.sassy_string().GetStringValue(),
-            context.indexor != null
-                ? Visit(context.indexor) as Indexer
-                : null,
+            context.index().Select(Visit).Cast<Indexer>().ToList(),
             new ImplicitDivide(context.GetCoordinate(), Visit(context.expr) as Expression));
 
 
-    /// <inheritdoc />
-    public override Node VisitNumber_indexor(sassy_parser.Number_indexorContext context)
-    {
-        var location = context.GetCoordinate();
-        return ulong.TryParse(context.num.Text, NumberStyles.Number, CultureInfo.InvariantCulture,
-            out var index)
-            ? new NumberIndexer(location,
-                index)
-            : Error(location,
-                "Index must be a positive integer");
-    }
+    public override Node VisitExpression_indexer(sassy_parser.Expression_indexerContext context) => new SingleIndexer(context.GetCoordinate(),Visit(context.expression()) as Expression);
 
-    /// <inheritdoc />
-    public override Node VisitElement_indexor(sassy_parser.Element_indexorContext context) =>
-        new ElementIndexer(context.GetCoordinate(), context.elem.Text);
+    public override Node VisitMap_indexer(sassy_parser.Map_indexerContext context) => new EverythingIndexer(context.GetCoordinate());
 
-    /// <inheritdoc />
-    public override Node VisitClass_indexor(sassy_parser.Class_indexorContext context) =>
-        new ClassIndexer(context.GetCoordinate(), context.clazz.Text.TrimFirst());
-
-    /// <inheritdoc />
-    public override Node VisitString_indexor(sassy_parser.String_indexorContext context) =>
-        new StringIndexer(context.GetCoordinate(), context.elem.Text.Unescape());
 
     /// <inheritdoc />
     public override Node VisitNot_equal_to(sassy_parser.Not_equal_toContext context) =>

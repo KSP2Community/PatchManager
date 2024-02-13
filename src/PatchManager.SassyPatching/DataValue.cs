@@ -851,7 +851,8 @@ public class DataValue
         return objectData;
     }
 
-    public static DataValue Null => new(DataType.None);
+
+    public static readonly DataValue Null = new(DataType.None);
     
     public static bool operator ==(DataValue leftHandSide, DataValue rightHandSide)
     {

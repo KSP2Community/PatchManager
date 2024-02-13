@@ -30,11 +30,11 @@ sassy_string            : STRING #quoted_string
 
 import_declaration      : USE imp=sassy_string SEMICOLON;
 
-var_decl                : variable=VARIABLE COLON val=expression SEMICOLON          #normal_var_decl
-                        | variable=VARIABLE PLUS_COLON val=expression SEMICOLON     #add_var_decl
-                        | variable=VARIABLE MINUS_COLON val=expression SEMICOLON    #subtract_var_decl
-                        | variable=VARIABLE DIVIDE_COLON val=expression SEMICOLON   #divide_var_decl
-                        | variable=VARIABLE MULTIPLY_COLON val=expression SEMICOLON #multiply_var_decl
+var_decl                : variable=VARIABLE indexor=index* COLON val=expression SEMICOLON          #normal_var_decl
+                        | variable=VARIABLE indexor=index* PLUS_COLON val=expression SEMICOLON     #add_var_decl
+                        | variable=VARIABLE indexor=index* MINUS_COLON val=expression SEMICOLON    #subtract_var_decl
+                        | variable=VARIABLE indexor=index* DIVIDE_COLON val=expression SEMICOLON   #divide_var_decl
+                        | variable=VARIABLE indexor=index* MULTIPLY_COLON val=expression SEMICOLON #multiply_var_decl
                         ;
                         
 
@@ -151,17 +151,15 @@ delete_value            : DELETE SEMICOLON;
 
 merge_value             : MERGE expr=expression SEMICOLON;
 
-field_set               : sassy_string indexor=index? COLON expr=expression SEMICOLON #normal_field_set
-                        | sassy_string indexor=index? PLUS_COLON expr=expression SEMICOLON #add_field_set
-                        | sassy_string indexor=index? MINUS_COLON expr=expression SEMICOLON #subtract_field_set
-                        | sassy_string indexor=index? MULTIPLY_COLON expr=expression SEMICOLON #multiply_field_set
-                        | sassy_string indexor=index? DIVIDE_COLON expr=expression SEMICOLON #divide_field_set
+field_set               : sassy_string indexor=index* COLON expr=expression SEMICOLON #normal_field_set
+                        | sassy_string indexor=index* PLUS_COLON expr=expression SEMICOLON #add_field_set
+                        | sassy_string indexor=index* MINUS_COLON expr=expression SEMICOLON #subtract_field_set
+                        | sassy_string indexor=index* MULTIPLY_COLON expr=expression SEMICOLON #multiply_field_set
+                        | sassy_string indexor=index* DIVIDE_COLON expr=expression SEMICOLON #divide_field_set
                         ;
                         
-index                   : LEFT_BRACKET num=NUMBER RIGHT_BRACKET     #number_indexor
-                        | LEFT_BRACKET elem=ELEMENT RIGHT_BRACKET   #element_indexor
-                        | LEFT_BRACKET clazz=CLASS  RIGHT_BRACKET   #class_indexor
-                        | LEFT_BRACKET elem=STRING  RIGHT_BRACKET   #string_indexor
+index                   : LEFT_BRACKET elem=expression RIGHT_BRACKET           #expression_indexer
+                        | LEFT_BRACKET elem=MULTIPLY RIGHT_BRACKET             #map_indexer
                         ;
 
 expression              : lhs=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN                         #simple_call
