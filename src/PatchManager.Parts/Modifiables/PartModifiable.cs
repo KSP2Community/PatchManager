@@ -23,14 +23,18 @@ public sealed class PartModifiable : CustomJTokenModifiable
         var repl = fieldName.Replace("PartComponent", "");
         if (JToken is not JObject jObject)
             return DataValue.Null;
-        if(!jObject.ContainsKey("serializedPartModules"))
+        if (!jObject.ContainsKey("serializedPartModules"))
             return DataValue.Null;
         foreach (var module in jObject["serializedPartModules"])
         {
-            if (module is not JObject moduleObject)continue;
+            if (module is not JObject moduleObject) continue;
             if (moduleObject.ContainsKey("Name") && ((string)moduleObject["Name"])!.Replace("PartComponent", "") == repl)
                 return DataValue.FromJToken(module);
         }
+
+        if (jObject.TryGetValue(fieldName, out var value))
+            return DataValue.FromJToken(value);
+
         return DataValue.Null;
     }
 
