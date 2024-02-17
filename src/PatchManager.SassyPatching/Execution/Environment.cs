@@ -1,4 +1,6 @@
 ﻿using JetBrains.Annotations;
+using PatchManager.SassyPatching.Nodes;
+using PatchManager.SassyPatching.Nodes.Statements.SelectionLevel;
 
 namespace PatchManager.SassyPatching.Execution;
 
@@ -20,6 +22,16 @@ public class Environment
     /// </summary>
     public Dictionary<string, DataValue> ScopedValues;
 
+
+    [CanBeNull] private List<Node> _slotActions;
+
+    [CanBeNull]
+    public List<Node> SlotActions
+    {
+        get => _slotActions ?? Parent?.SlotActions;
+        set => _slotActions = value;
+    }
+    
     /// <summary>
     /// Creates a new environment
     /// </summary>
@@ -76,7 +88,8 @@ public class Environment
         var parent = Parent?.Snapshot();
         return new Environment(GlobalEnvironment, parent)
         {
-            ScopedValues = scopedValues
+            ScopedValues = scopedValues,
+            _slotActions = _slotActions
         };
     }
 }
