@@ -16,7 +16,6 @@ PRE_IF              : '@if';
 PRE_ELSE            : '@else';
 PRE_ELSE_IF         : '@else-if';
 MIXIN               : '@mixin';
-MIXIN_BLOCK         : '@mixin-block';
 MIXIN_SLOT          : '@mixin-slot';
 WHILE               : '@while';
 FOR                 : '@for';
