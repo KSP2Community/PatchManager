@@ -17,6 +17,8 @@ internal static class LoadingBarPatch
         if (!InjectPatchManagerTips)
             return true;
         __instance.tipsText.text = $"Patch Manager: {PatchingManager.TotalPatchCount} patches";
+        if (PatchingManager.TotalErrorCount > 0)
+            __instance.tipsText.text += $", {PatchingManager.TotalErrorCount} errors";
 
         return false;
     }
