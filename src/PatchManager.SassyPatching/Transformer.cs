@@ -688,6 +688,16 @@ public class Transformer : sassy_parserBaseVisitor<Node>
         new MixinInclude(context.GetCoordinate(), context.mixin.Text,
             context.args.argument().Select(Visit).Cast<CallArgument>().ToList());
 
+
+    /// <inheritdoc />
+    public override Node VisitMixin_block_include(sassy_parser.Mixin_block_includeContext context) =>
+        new MixinBlockInclude(context.GetCoordinate(), context.mixin.Text,
+            context.args.argument().Select(Visit).Cast<CallArgument>().ToList(),
+            context.selector_statement().Select(Visit).ToList());
+
+    public override Node VisitMixin_slot(sassy_parser.Mixin_slotContext context) =>
+        new MixinSlot(context.GetCoordinate());
+
     /// <inheritdoc />
     public override Node VisitArgument_without_default(sassy_parser.Argument_without_defaultContext context)
         => new Argument(context.GetCoordinate(), context.name.Text.TrimFirst());
@@ -806,4 +816,5 @@ public class Transformer : sassy_parserBaseVisitor<Node>
     public override Node VisitUpdate_config_label(sassy_parser.Update_config_labelContext context) => new ConfigUpdate(
         context.GetCoordinate(), Visit(context.priority) as Expression, context.label.GetStringValue(), null,
         Visit(context.config_update) as Expression);
+
 }

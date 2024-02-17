@@ -1045,6 +1045,18 @@ public interface Isassy_parserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitMixin_include([NotNull] sassy_parser.Mixin_includeContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.mixin_block_include"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMixin_block_include([NotNull] sassy_parser.Mixin_block_includeContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="sassy_parser.mixin_slot"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMixin_slot([NotNull] sassy_parser.Mixin_slotContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>for_to_loop</c>
 	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
 	/// </summary>

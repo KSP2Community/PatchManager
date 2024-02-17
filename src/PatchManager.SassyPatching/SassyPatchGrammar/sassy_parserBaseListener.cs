@@ -2061,6 +2061,30 @@ public partial class sassy_parserBaseListener : Isassy_parserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitMixin_include([NotNull] sassy_parser.Mixin_includeContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.mixin_block_include"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMixin_block_include([NotNull] sassy_parser.Mixin_block_includeContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.mixin_block_include"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMixin_block_include([NotNull] sassy_parser.Mixin_block_includeContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="sassy_parser.mixin_slot"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMixin_slot([NotNull] sassy_parser.Mixin_slotContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="sassy_parser.mixin_slot"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMixin_slot([NotNull] sassy_parser.Mixin_slotContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by the <c>for_to_loop</c>
 	/// labeled alternative in <see cref="sassy_parser.for_loop"/>.
 	/// <para>The default implementation does nothing.</para>

@@ -28,6 +28,8 @@ internal static class PatchingManager
     private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
 
     internal static int TotalPatchCount;
+    internal static int TotalErrorCount;
+    
     public static void GenerateUniverse(HashSet<string> singleFileModIds)
     {
         var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
@@ -87,6 +89,7 @@ internal static class PatchingManager
             }
             catch (Exception e)
             {
+                TotalErrorCount += 1;
                 Console.WriteLine($"Patch of {label}:{assetName} errored due to: {e}");
                 text = backup;
             }

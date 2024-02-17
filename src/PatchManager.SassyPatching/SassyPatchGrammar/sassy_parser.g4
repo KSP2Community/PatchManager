@@ -135,6 +135,8 @@ selector_statement      : var_decl
                         | field_set
                         | selection_block
                         | mixin_include
+                        | mixin_block_include
+                        | mixin_slot
                         ;
                         
 sel_level_conditional   : PRE_IF cond=expression LEFT_BRACE body=selector_statement* RIGHT_BRACE els=sel_level_else?;
@@ -227,7 +229,7 @@ argument                : key=VARIABLE COLON val=expression #named_argument
 
 arg_decl_list           : (arg_decl? (COMMA arg_decl)*)? COMMA?;
 
-arg_decl                : name=VARIABLE                           #argument_without_default
+arg_decl                : name=VARIABLE                       #argument_without_default
                         | name=VARIABLE COLON val=expression  #argument_with_default
                         ;
 
@@ -252,6 +254,10 @@ fn_level_else_if        : PRE_ELSE_IF cond=expression LEFT_BRACE body=function_s
 fn_return               : RETURN expression SEMICOLON;
 
 mixin_include           : INCLUDE mixin=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN;
+
+mixin_block_include     : INCLUDE mixin=ELEMENT LEFT_PAREN args=argument_list RIGHT_PAREN LEFT_BRACE body=selector_statement* RIGHT_BRACE;
+
+mixin_slot              : MIXIN_SLOT;
 
 for_loop                : FOR idx=VARIABLE FROM for_start=expression TO end=expression LEFT_BRACE body=function_statement* RIGHT_BRACE #for_to_loop
                         | FOR idx=VARIABLE FROM for_start=expression THROUGH end=expression LEFT_BRACE body=function_statement* RIGHT_BRACE #for_through_loop
