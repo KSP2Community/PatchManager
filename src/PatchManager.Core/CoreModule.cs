@@ -192,6 +192,7 @@ public class CoreModule : BaseModule
         {
             text.text += "Total amount of patches: Unknown (loaded from cache)\n";
         }
+        text.text += $"Total amount of errors: {PatchingManager.TotalErrorCount}\n";
 
         text.text += "Patched labels:";
         foreach (var label in PatchingManager.Universe.LoadedLabels)
