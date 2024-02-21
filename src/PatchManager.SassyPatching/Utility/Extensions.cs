@@ -20,7 +20,7 @@ internal static class Extensions
         new(@this.Start.TokenSource.SourceName, @this.Start.Line, @this.Start.Column);
 
     public static bool MatchesPattern(this string @this, string pattern) =>
-        Regex.IsMatch(@this, pattern.Replace("*", ".*").Replace("?", ".?"));
+        Regex.IsMatch(@this, $"^{pattern.Replace("*", ".*").Replace("?", ".?")}$");
 
     public static string Escape(this string @this) => JsonConvert.ToString(@this);
 
