@@ -1,1 +1,0 @@
-﻿global using static PatchManager.SassyPatching.Utility.Extensions;
