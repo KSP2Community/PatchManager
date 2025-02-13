@@ -17,9 +17,9 @@ using ILogger = ReduxLib.Logging.ILogger;
 
 namespace PatchManager
 {
-    public class PatchManager : GeneralMod
+    public class PatchManager : KerbalMod
     {
-        public PatchManager(ILogger logger, IConfigFile configFile)
+        public void Awake()
         {
             // Let's register all our modules!
             ModuleManager.Register(typeof(CoreModule));
@@ -28,11 +28,11 @@ namespace PatchManager
             ModuleManager.Register(typeof(PartsModule));
             ModuleManager.Register(typeof(ResourcesModule));
             ModuleManager.Register(typeof(ScienceModule));
-            Logging.Initialize(logger);
+            Logging.Initialize(SWLogger);
             foreach (var module in ModuleManager.Modules)
             {
                 // We are going to use reduxes core configuration
-                module.BindConfiguration(configFile);
+                module.BindConfiguration(SWConfiguration);
             }
             ModuleManager.InitAll();
         }
