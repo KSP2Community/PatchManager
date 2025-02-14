@@ -14,14 +14,10 @@ namespace PatchManager.Core.Cache
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
             "cache"
         );
-        */
-#if UNITY_EDITOR
-        private const string CacheDirectory = "Assets/PatchManagerCache";
-#else
-    private const string CacheDirectory = "./pm_cache";
-#endif
+        */ 
+        private const string CACHE_DIRECTORY = "./pm_cache";
 
-        private static readonly string InventoryPath = Path.Combine(CacheDirectory, "inventory.json");
+        private static readonly string InventoryPath = Path.Combine(CACHE_DIRECTORY, "inventory.json");
 
         private static readonly Dictionary<string, Archive> OpenArchives = new();
         public static readonly List<string> CacheValidLabels = new();
@@ -31,18 +27,18 @@ namespace PatchManager.Core.Cache
 
         public static void CreateCacheFolderIfNotExists()
         {
-            if (Directory.Exists(CacheDirectory))
+            if (Directory.Exists(CACHE_DIRECTORY))
             {
                 return;
             }
 
             Logging.LogDebug("Cache directory does not exist, creating a new one.");
-            Directory.CreateDirectory(CacheDirectory);
+            Directory.CreateDirectory(CACHE_DIRECTORY);
         }
 
         public static Archive CreateArchive(string archiveFilename)
         {
-            var archivePath = Path.Combine(CacheDirectory, archiveFilename);
+            var archivePath = Path.Combine(CACHE_DIRECTORY, archiveFilename);
             if (File.Exists(archivePath))
             {
                 throw new ArgumentException($"Archive '{archivePath}' already exists!");
@@ -55,7 +51,7 @@ namespace PatchManager.Core.Cache
 
         public static Archive GetArchive(string archiveFilename)
         {
-            var archivePath = Path.Combine(CacheDirectory, archiveFilename);
+            var archivePath = Path.Combine(CACHE_DIRECTORY, archiveFilename);
             if (!File.Exists(archivePath))
             {
                 throw new FileNotFoundException($"Archive '{archivePath}' does not exist!");
@@ -82,7 +78,7 @@ namespace PatchManager.Core.Cache
 
             OpenArchives.Clear();
 
-            Directory.Delete(CacheDirectory, true);
+            Directory.Delete(CACHE_DIRECTORY, true);
             CreateCacheFolderIfNotExists();
         }
 
