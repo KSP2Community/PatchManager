@@ -90,10 +90,10 @@ namespace PatchManager.Core
         {
             
             // Go here instead so that the static constructor recognizes everything
-            var disabledPlugins = File.ReadAllText(SpaceWarp.API.CommonPaths.DISABLED_PLUGINS)
+            var disabledPlugins = File.ReadAllText(SpaceWarp.API.CommonPaths.DisabledPlugins)
                 .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
             
-            var modFolders = Directory.GetDirectories(SpaceWarp.API.CommonPaths.MODS_FOLDER, "*", SearchOption.AllDirectories)
+            var modFolders = Directory.GetDirectories(SpaceWarp.API.CommonPaths.ModsFolder, "*", SearchOption.AllDirectories)
                 .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
                 .Select(x => (
                     Folder: x,
@@ -104,7 +104,7 @@ namespace PatchManager.Core
             var gameRoot = new DirectoryInfo(".");
 
             var standalonePatches = Directory.EnumerateFiles(
-                    SpaceWarp.API.CommonPaths.MODS_FOLDER,
+                    SpaceWarp.API.CommonPaths.ModsFolder,
                     "*.patch",
                     SearchOption.AllDirectories
                 )
