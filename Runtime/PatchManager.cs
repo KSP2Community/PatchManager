@@ -19,9 +19,11 @@ namespace PatchManager
 {
     public class PatchManager : KerbalMod
     {
+        internal static PatchManager Instance;
         public void Awake()
         {
             // Let's register all our modules!
+            Instance = this;
             ModuleManager.Register(typeof(CoreModule));
             ModuleManager.Register(typeof(GenericModule));
             ModuleManager.Register(typeof(MissionsModule));
