@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using KSP.Game;
 using Newtonsoft.Json.Linq;
@@ -24,14 +25,21 @@ namespace PatchManager.Resources
 
         public override void Load()
         {
-            GameManager.Instance.Assets.LoadByLabel("resource_units", RegisterUnits,
-                delegate(IList<TextAsset> assetLocations)
-                {
-                    if (assetLocations != null)
+            if (GameManager.Instance.Assets.RegisteredResourceLocators.Any(x => x.Keys.Contains("resource_units")))
+            {
+                GameManager.Instance.Assets.LoadByLabel("resource_units", RegisterUnits,
+                    delegate(IList<TextAsset> assetLocations)
                     {
-                        Addressables.Release(assetLocations);
-                    }
-                });
+                        if (assetLocations != null)
+                        {
+                            Addressables.Release(assetLocations);
+                        }
+                    });
+            }
+            else
+            {
+                Logging.LogInfo("No custom resource units were defined");
+            }
             
             PatchManager.Instance.AddComponent<NonStageableResourcesUIController>();
         }
