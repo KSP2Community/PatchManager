@@ -32,6 +32,12 @@ namespace PatchManager.SassyPatching.Execution
         /// </summary>
         public static readonly Dictionary<string, PatchLibrary> AllManagedLibraries;
 
+
+        /// <summary>
+        /// This contains all the constant text based libraries that have been registered 
+        /// </summary>
+        public static readonly Dictionary<string, string> AllRawLibraries = new();
+        
         private static List<string> _preloadedLabels;
 
         static Universe()
@@ -141,6 +147,7 @@ namespace PatchManager.SassyPatching.Execution
             AllMods = allMods;
             MessageLogger("Setup universe!");
             SetupBasePriorities(allMods);
+            LoadAllRawPatches();
         }
 
         // TODO: Fix this so that other mods stages get their guids working
@@ -195,6 +202,40 @@ namespace PatchManager.SassyPatching.Execution
                 ErrorLogger.Invoke($"error lexing {File} - {line}:{charPositionInLine}: {msg}");
             }
         }
+
+        private void LoadAllRawPatches()
+        {
+            var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
+            foreach (var (id, raw) in AllRawLibraries)
+            {
+                try
+                {
+                    MessageLogger.Invoke($"Loading library {id}");
+                    var charStream = CharStreams.fromString(raw);
+                    var lexerErrorGenerator = new LexerListener(id, ErrorLogger);
+                    var lexer = new sassy_lexer(charStream);
+                    lexer.AddErrorListener(lexerErrorGenerator);
+                    if (lexerErrorGenerator.Errored)
+                        throw new LoadException("lexer errors detected");
+                    var tokenStream = new CommonTokenStream(lexer);
+                    var parser = new sassy_parser(tokenStream);
+                    var parserErrorGenerator = new ParserListener(id, ErrorLogger);
+                    parser.AddErrorListener(parserErrorGenerator);
+                    if (parserErrorGenerator.Errored)
+                        throw new LoadException("parser errors detected");
+                    var patchContext = parser.patch();
+                    tokenTransformer.Errored = false;
+                    var patch = tokenTransformer.Visit(patchContext) as SassyPatch;
+                    var lib = new SassyPatchLibrary(patch);
+                    AllLibraries[id] = lib;
+                }
+                catch (Exception e)
+                {
+                    ErrorLogger($"Could not load library: {id} due to: {e.Message}");
+                }
+            }
+        }
+        
         /// <summary>
         /// Loads all patches from a directory
         /// </summary>
@@ -471,9 +512,9 @@ namespace PatchManager.SassyPatching.Execution
             MessageLogger($"Last implicit global: {lastPost}");
         }
 
-        public static void RegisterAddressablesLibrary(string modId, string name, string key)
+        public static void RegisterRawLibrary(string modId, string name, string raw)
         {
-            AllManagedLibraries.Add($"{modId}:{name}", new AddressablesPatchLibrary(key));
+            AllRawLibraries.Add($"{modId}:{name}", raw);
         }
     }
 }
