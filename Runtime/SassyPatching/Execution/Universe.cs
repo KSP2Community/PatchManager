@@ -13,6 +13,7 @@ using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Utility;
 using PatchManager.Shared;
 using UniLinq;
+using Unity.VisualScripting;
 
 namespace PatchManager.SassyPatching.Execution
 {
@@ -109,7 +110,7 @@ namespace PatchManager.SassyPatching.Execution
         /// <summary>
         /// This logs errors in this universe
         /// </summary>
-        private readonly Action<string> _errorLogger;
+        public readonly Action<string> ErrorLogger;
 
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace PatchManager.SassyPatching.Execution
         public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger, Action<ITextAssetGenerator> registerGenerator, List<string> allMods)
         {
             RegisterPatcher = registerPatcher;
-            _errorLogger = errorLogger;
+            ErrorLogger = errorLogger;
             MessageLogger = messageLogger;
             RegisterGenerator = registerGenerator;
             LoadedLabels = new List<string>(_preloadedLabels);
@@ -243,13 +244,13 @@ namespace PatchManager.SassyPatching.Execution
                 MessageLogger.Invoke($"Loading patch {modId}:{patch.Name}");
                 var charStream = CharStreams.fromPath(patch.FullName);
                 var lexer = new sassy_lexer(charStream);
-                var lexerErrorGenerator = new LexerListener($"{modId}:{patch.Name}", _errorLogger);
+                var lexerErrorGenerator = new LexerListener($"{modId}:{patch.Name}", ErrorLogger);
                 lexer.AddErrorListener(lexerErrorGenerator);
                 if (lexerErrorGenerator.Errored)
                     throw new LoadException("lexer errors detected");
                 var tokenStream = new CommonTokenStream(lexer);
                 var parser = new sassy_parser(tokenStream);
-                var parserErrorGenerator = new ParserListener($"{modId}:{patch.Name}", _errorLogger);
+                var parserErrorGenerator = new ParserListener($"{modId}:{patch.Name}", ErrorLogger);
                 parser.AddErrorListener(parserErrorGenerator);
                 var patchContext = parser.patch();
                 if (parserErrorGenerator.Errored)
@@ -263,7 +264,7 @@ namespace PatchManager.SassyPatching.Execution
             }
             catch (Exception e)
             {
-                _errorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e}");
+                ErrorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e}");
             }
         }
 
@@ -274,14 +275,14 @@ namespace PatchManager.SassyPatching.Execution
             {
                 MessageLogger.Invoke($"Loading library {name}");
                 var charStream = CharStreams.fromPath(library.FullName);
-                var lexerErrorGenerator = new LexerListener(name, _errorLogger);
+                var lexerErrorGenerator = new LexerListener(name, ErrorLogger);
                 var lexer = new sassy_lexer(charStream);
                 lexer.AddErrorListener(lexerErrorGenerator);
                 if (lexerErrorGenerator.Errored)
                     throw new LoadException("lexer errors detected");
                 var tokenStream = new CommonTokenStream(lexer);
                 var parser = new sassy_parser(tokenStream);
-                var parserErrorGenerator = new ParserListener(name, _errorLogger);
+                var parserErrorGenerator = new ParserListener(name, ErrorLogger);
                 parser.AddErrorListener(parserErrorGenerator);
                 if (parserErrorGenerator.Errored)
                     throw new LoadException("parser errors detected");
@@ -293,7 +294,7 @@ namespace PatchManager.SassyPatching.Execution
             }
             catch (Exception e)
             {
-                _errorLogger($"Could not load library: {name} due to: {e.Message}");
+                ErrorLogger($"Could not load library: {name} due to: {e.Message}");
             }
         }
 
@@ -468,6 +469,11 @@ namespace PatchManager.SassyPatching.Execution
             }
             LastImplicitGlobal = lastPost;
             MessageLogger($"Last implicit global: {lastPost}");
+        }
+
+        public static void RegisterAddressablesLibrary(string modId, string name, string key)
+        {
+            AllManagedLibraries.Add($"{modId}:{name}", new AddressablesPatchLibrary(key));
         }
     }
 }
