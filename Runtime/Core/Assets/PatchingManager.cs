@@ -31,7 +31,7 @@ namespace PatchManager.Core.Assets
 
         internal static int TotalPatchCount;
         internal static int TotalErrorCount;
-    
+
         public static void GenerateUniverse(HashSet<string> singleFileModIds)
         {
             var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
@@ -137,6 +137,12 @@ namespace PatchManager.Core.Assets
         {
             Universe.LoadSinglePatchFile(fileInfo, new DirectoryInfo("."));
             CurrentPatchHashes.Patches.Add(fileInfo.FullName, Hash.FromFile(fileInfo.FullName));
+        }
+
+        public static void ImportAssetPatch(TextAsset asset, string modId)
+        {
+            Universe.LoadPatchAsset(asset, modId);
+            CurrentPatchHashes.Patches.Add(asset.name, Hash.FromString(asset.text));
         }
 
         public static void RegisterPatches()
@@ -299,7 +305,7 @@ namespace PatchManager.Core.Assets
         }
 
         internal static bool InjectPatchManagerTips = false;
-        
+
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
             var distinctKeys = Universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();

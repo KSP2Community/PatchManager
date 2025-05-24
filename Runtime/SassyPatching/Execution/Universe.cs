@@ -14,6 +14,7 @@ using PatchManager.SassyPatching.Utility;
 using PatchManager.Shared;
 using UniLinq;
 using Unity.VisualScripting;
+using UnityEngine;
 
 namespace PatchManager.SassyPatching.Execution
 {
@@ -34,10 +35,10 @@ namespace PatchManager.SassyPatching.Execution
 
 
         /// <summary>
-        /// This contains all the constant text based libraries that have been registered 
+        /// This contains all the constant text based libraries that have been registered
         /// </summary>
         public static readonly Dictionary<string, string> AllRawLibraries = new();
-        
+
         private static List<string> _preloadedLabels;
 
         static Universe()
@@ -235,7 +236,7 @@ namespace PatchManager.SassyPatching.Execution
                 }
             }
         }
-        
+
         /// <summary>
         /// Loads all patches from a directory
         /// </summary>
@@ -247,12 +248,12 @@ namespace PatchManager.SassyPatching.Execution
             var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
             foreach (var library in directory.EnumerateFiles("_*.patch", SearchOption.AllDirectories))
             {
-                LoadSingleLibrary(modId, library, tokenTransformer);
+                LoadSingleLibrary(modId, library.Name, CharStreams.fromPath(library.FullName), tokenTransformer);
             }
 
             foreach (var patch in directory.EnumerateFiles("*.patch", SearchOption.AllDirectories))
             {
-                LoadSinglePatch(modId, patch, tokenTransformer);
+                LoadSinglePatch(modId, patch.Name, CharStreams.fromPath(patch.FullName), tokenTransformer);
             }
         }
 
@@ -262,40 +263,66 @@ namespace PatchManager.SassyPatching.Execution
         /// <param name="patch">The file info of the patch file</param>
         /// <param name="cwd">The working directory to generate the patch mod id against</param>
         public void LoadSinglePatchFile(FileInfo patch, DirectoryInfo cwd)
-        {   
+        {
             var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
             var name = Path.GetFileNameWithoutExtension(patch.FullName);
             var id = patch.Directory!.FullName.MakeRelativePathTo(cwd.FullName).Replace("\\", "-");
             if (name.StartsWith("_"))
             {
-                LoadSingleLibrary(id, patch, tokenTransformer);
+                LoadSingleLibrary(id, name, CharStreams.fromPath(patch.FullName), tokenTransformer);
             }
             else
             {
-                LoadSinglePatch(id, patch, tokenTransformer);
+                LoadSinglePatch(id, name, CharStreams.fromPath(patch.FullName), tokenTransformer);
             }
         }
 
-        private void LoadSinglePatch(string modId, FileInfo patch, Transformer tokenTransformer)
+        /// <summary>
+        /// Loads a single patch
+        /// </summary>
+        /// <param name="asset">The text asset to load</param>
+        /// <param name="modId">Mod ID</param>
+        public void LoadPatchAsset(TextAsset asset, string modId)
         {
-            if (patch.Name.StartsWith("_"))
+            var tokenTransformer = new Transformer(msg => throw new LoadException(msg));
+            if (asset.name.StartsWith("_"))
+            {
+                LoadSingleLibrary(modId, asset.name, CharStreams.fromString(asset.text), tokenTransformer);
+            }
+            else
+            {
+                LoadSinglePatch(modId, asset.name, CharStreams.fromString(asset.text), tokenTransformer);
+            }
+        }
+
+        private void LoadSinglePatch(string modId, string name, ICharStream charStream, Transformer tokenTransformer)
+        {
+            if (name.StartsWith("_"))
+            {
                 return;
+            }
+
             try
             {
-                MessageLogger.Invoke($"Loading patch {modId}:{patch.Name}");
-                var charStream = CharStreams.fromPath(patch.FullName);
+                MessageLogger.Invoke($"Loading patch {modId}:{name}");
                 var lexer = new sassy_lexer(charStream);
-                var lexerErrorGenerator = new LexerListener($"{modId}:{patch.Name}", ErrorLogger);
+                var lexerErrorGenerator = new LexerListener($"{modId}:{name}", ErrorLogger);
                 lexer.AddErrorListener(lexerErrorGenerator);
                 if (lexerErrorGenerator.Errored)
+                {
                     throw new LoadException("lexer errors detected");
+                }
+
                 var tokenStream = new CommonTokenStream(lexer);
                 var parser = new sassy_parser(tokenStream);
-                var parserErrorGenerator = new ParserListener($"{modId}:{patch.Name}", ErrorLogger);
+                var parserErrorGenerator = new ParserListener($"{modId}:{name}", ErrorLogger);
                 parser.AddErrorListener(parserErrorGenerator);
                 var patchContext = parser.patch();
                 if (parserErrorGenerator.Errored)
+                {
                     throw new LoadException("parser errors detected");
+                }
+
                 tokenTransformer.Errored = false;
                 // var gEnv = new GlobalEnvironment(this, modId);
                 // var env = new Environment(gEnv);
@@ -305,37 +332,42 @@ namespace PatchManager.SassyPatching.Execution
             }
             catch (Exception e)
             {
-                ErrorLogger($"Could not run patch: {modId}:{patch.Name} due to: {e}");
+                ErrorLogger($"Could not run patch: {modId}:{name} due to: {e}");
             }
         }
 
-        private void LoadSingleLibrary(string modId, FileInfo library, Transformer tokenTransformer)
+        private void LoadSingleLibrary(string modId, string name, ICharStream charStream, Transformer tokenTransformer)
         {
-            string name = modId + ":" + library.Name.Replace(".patch", "").TrimFirst();
+            string libName = modId + ":" + name.Replace(".patch", "").TrimFirst();
             try
             {
-                MessageLogger.Invoke($"Loading library {name}");
-                var charStream = CharStreams.fromPath(library.FullName);
-                var lexerErrorGenerator = new LexerListener(name, ErrorLogger);
+                MessageLogger.Invoke($"Loading library {libName}");
+                var lexerErrorGenerator = new LexerListener(libName, ErrorLogger);
                 var lexer = new sassy_lexer(charStream);
                 lexer.AddErrorListener(lexerErrorGenerator);
                 if (lexerErrorGenerator.Errored)
+                {
                     throw new LoadException("lexer errors detected");
+                }
+
                 var tokenStream = new CommonTokenStream(lexer);
                 var parser = new sassy_parser(tokenStream);
-                var parserErrorGenerator = new ParserListener(name, ErrorLogger);
+                var parserErrorGenerator = new ParserListener(libName, ErrorLogger);
                 parser.AddErrorListener(parserErrorGenerator);
                 if (parserErrorGenerator.Errored)
+                {
                     throw new LoadException("parser errors detected");
+                }
+
                 var patchContext = parser.patch();
                 tokenTransformer.Errored = false;
                 var patch = tokenTransformer.Visit(patchContext) as SassyPatch;
                 var lib = new SassyPatchLibrary(patch);
-                AllLibraries[name] = lib;
+                AllLibraries[libName] = lib;
             }
             catch (Exception e)
             {
-                ErrorLogger($"Could not load library: {name} due to: {e.Message}");
+                ErrorLogger($"Could not load library: {libName} due to: {e.Message}");
             }
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using JetBrains.Annotations;
+using KSP.Game;
 using Newtonsoft.Json;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
@@ -12,6 +13,7 @@ using ReduxLib.Configuration;
 using SpaceWarp.API.Mods.JSON;
 using UniLinq;
 using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
 using FlowAction = PatchManager.Core.Flow.FlowAction;
@@ -24,6 +26,9 @@ namespace PatchManager.Core
     [UsedImplicitly]
     public class CoreModule : BaseModule
     {
+        private const string PATCH_LABEL = "redux_patches";
+        private const string REDUX_MOD_ID = "Redux";
+
         private ConfigValue<bool> _shouldAlwaysInvalidate;
 
         private bool _wasCacheInvalidated;
@@ -88,11 +93,10 @@ namespace PatchManager.Core
         /// <inheritdoc />
         public override void PreLoad()
         {
-            
             // Go here instead so that the static constructor recognizes everything
             var disabledPlugins = File.ReadAllText(SpaceWarp.API.CommonPaths.DisabledPlugins)
                 .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
-            
+
             var modFolders = Directory.GetDirectories(SpaceWarp.API.CommonPaths.ModsFolder, "*", SearchOption.AllDirectories)
                 .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
                 .Select(x => (
@@ -112,12 +116,22 @@ namespace PatchManager.Core
                 .Select(x => new FileInfo(x))
                 .ToList();
 
-            
+
             PatchingManager.GenerateUniverse(standalonePatches.Select(x =>
                 x.Directory!.FullName
                     .MakeRelativePathTo(gameRoot.FullName)
                     .Replace("\\", "-")
             ).ToHashSet());
+
+            var handle = GameManager.Instance.Assets.LoadAssetsAsync<TextAsset>(PATCH_LABEL, asset =>
+            {
+                PatchingManager.ImportAssetPatch(asset, REDUX_MOD_ID);
+            });
+            handle.Completed += _ =>
+            {
+                Addressables.Release(handle);
+            };
+            handle.WaitForCompletion();
 
             foreach (var modFolder in modFolders)
             {
