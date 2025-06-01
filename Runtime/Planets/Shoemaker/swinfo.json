@@ -1,0 +1,30 @@
+{
+  "spec": "2.0",
+  "mod_id": "Shoemaker",
+  "author": "KSP2 Community",
+  "name": "Shoemaker",
+  "description": "A tool to enable planet modding for KSP2 via Patch Manager",
+  "source": "https://github.com/KSP2Community/Shoemaker",
+  "version": "0.1.0",
+  "version_check": "https://raw.githubusercontent.com/KSP2Community/Shoemaker/main/plugin_template/swinfo.json",
+  "ksp2_version": {
+    "min": "0.2.0",
+    "max": "*"
+  },
+  "dependencies": [
+    {
+      "id": "com.github.x606.spacewarp",
+      "version": {
+        "min": "1.8.0",
+        "max": "*"
+      }
+    },
+    {
+      "id": "PatchManager",
+      "version": {
+        "min": "0.11.0",
+        "max": "*"
+      }
+    }
+  ]
+}
