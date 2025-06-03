@@ -3,7 +3,7 @@ using KSP.Game;
 using KSP.Rendering;
 using UnityEngine;
 
-namespace Shoemaker.Overrides
+namespace PatchManager.Planets.Overrides
 {
     [PublicAPI]
     [UsedImplicitly]

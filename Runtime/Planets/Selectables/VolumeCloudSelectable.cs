@@ -3,10 +3,10 @@ using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Selectables;
-using Shoemaker.Modifiables;
-using Shoemaker.Overrides;
+using PatchManager.Planets.Modifiables;
+using PatchManager.Planets.Overrides;
 
-namespace Shoemaker.Selectables
+namespace PatchManager.Planets.Selectables
 {
     public sealed class VolumeCloudSelectable : BaseSelectable
     {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Interfaces;
-using Shoemaker.Modifiables;
+using PatchManager.Planets.Modifiables;
 
-namespace Shoemaker.Selectables
+namespace PatchManager.Planets.Selectables
 {
     public sealed class AtmosphereOverrideSelectable : BaseSelectable
     {

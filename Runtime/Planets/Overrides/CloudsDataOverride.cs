@@ -4,9 +4,9 @@
 using JetBrains.Annotations;
 using KSP.VolumeCloud;
 using UnityEngine;
-using static Shoemaker.Utility.Extensions;
+using static PatchManager.Planets.Utility.Extensions;
 
-namespace Shoemaker.Overrides
+namespace PatchManager.Planets.Overrides
 {
     [PublicAPI]
     public class CloudsDataOverride : IOverride<VolumeCloudConfiguration.CloudsData>

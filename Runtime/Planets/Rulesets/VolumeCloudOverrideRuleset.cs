@@ -4,10 +4,10 @@ using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.NewAssets;
-using Shoemaker.Overrides;
-using Shoemaker.Selectables;
+using PatchManager.Planets.Overrides;
+using PatchManager.Planets.Selectables;
 
-namespace Shoemaker.Rulesets
+namespace PatchManager.Planets.Rulesets
 {
     [PatcherRuleset("volume-cloud-override","volume_cloud_overrides")]
     public class VolumeCloudOverrideRuleset : IPatcherRuleSet

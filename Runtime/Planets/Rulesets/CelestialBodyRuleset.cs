@@ -5,9 +5,9 @@ using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.NewAssets;
-using Shoemaker.Selectables;
+using PatchManager.Planets.Selectables;
 
-namespace Shoemaker.Rulesets
+namespace PatchManager.Planets.Rulesets
 {
     [PatcherRuleset("body","celestial_bodies")]
     public class CelestialBodyRuleset : IPatcherRuleSet

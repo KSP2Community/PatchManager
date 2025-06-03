@@ -1,8 +1,8 @@
 using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Modifiables;
-using Shoemaker.Selectables;
+using PatchManager.Planets.Selectables;
 
-namespace Shoemaker.Modifiables
+namespace PatchManager.Planets.Modifiables
 {
     public class CelestialBodyModifiable : JTokenModifiable
     {

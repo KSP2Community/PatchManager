@@ -4,11 +4,11 @@ using KSP.Game;
 using KSP.IO;
 using Newtonsoft.Json;
 using PatchManager.Shared.Modules;
-using Shoemaker.Overrides;
+using PatchManager.Planets.Overrides;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-namespace Shoemaker
+namespace PatchManager.Planets
 {
     public class PlanetsModule : BaseModule
     {

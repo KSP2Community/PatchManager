@@ -3,12 +3,12 @@ using System.Linq;
 using JetBrains.Annotations;
 using KSP.VolumeCloud;
 using UnityEngine;
-using static Shoemaker.Utility.Extensions;
+using static PatchManager.Planets.Utility.Extensions;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
-namespace Shoemaker.Overrides
+namespace PatchManager.Planets.Overrides
 { 
     [PublicAPI]
     public class VolumeCloudConfigurationOverride : IOverride<VolumeCloudConfiguration>

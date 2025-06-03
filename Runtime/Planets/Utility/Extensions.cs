@@ -1,4 +1,4 @@
-namespace Shoemaker.Utility
+namespace PatchManager.Planets.Utility
 {
     public static class Extensions
     {

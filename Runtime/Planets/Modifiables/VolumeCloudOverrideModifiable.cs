@@ -1,25 +1,25 @@
-﻿using PatchManager.SassyPatching;
+using PatchManager.SassyPatching;
 using PatchManager.SassyPatching.Modifiables;
-using Shoemaker.Selectables;
+using PatchManager.Planets.Selectables;
 
-namespace Shoemaker.Modifiables
+namespace PatchManager.Planets.Modifiables
 {
-    public class GalaxyModifiable : JTokenModifiable
+    public class VolumeCloudOverrideModifiable : JTokenModifiable
     {
-        private GalaxySelectable _galaxySelectable;
+        private readonly VolumeCloudSelectable _volumeCloudSelectable;
 
         /// <summary>
         /// Creates a new <see cref="GalaxyModifiable"/> for the given <see cref="GalaxyModifiable"/>.
         /// </summary>
         /// <param name="selectable">The selectable to modify.</param>
-        public GalaxyModifiable(GalaxySelectable selectable) : base(selectable.GalaxyObject, selectable.SetModified) => _galaxySelectable = selectable;
+        public VolumeCloudOverrideModifiable(VolumeCloudSelectable selectable) : base(selectable.VolumeCloudOverrideObject, selectable.SetModified) => _volumeCloudSelectable = selectable;
 
         /// <inheritdoc/>
         public override void Set(DataValue dataValue)
         {
             if (dataValue.IsDeletion)
             {
-                _galaxySelectable.SetDeleted();
+                _volumeCloudSelectable.SetDeleted();
                 return;
             }
             base.Set(dataValue);
