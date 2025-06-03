@@ -30,6 +30,7 @@ namespace PatchManager
             ModuleManager.Register(typeof(PartsModule));
             ModuleManager.Register(typeof(ResourcesModule));
             ModuleManager.Register(typeof(ScienceModule));
+            ModuleManager.Register(typeof(PlanetsModule));
             Logging.Initialize(SWLogger);
             foreach (var module in ModuleManager.Modules)
             {
