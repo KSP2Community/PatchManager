@@ -3,17 +3,13 @@ using PatchManager.Core;
 using PatchManager.Generic;
 using PatchManager.Missions;
 using PatchManager.Parts;
-using PatchManager.Parts.Selectables;
+using PatchManager.Planets;
 using PatchManager.Resources;
 using PatchManager.Science;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using Redux.ExtraModTypes;
-using ReduxLib.Configuration;
-using SpaceWarp.API.Mods;
-using UnityEngine;
 using UnityEngine.UIElements;
-using ILogger = ReduxLib.Logging.ILogger;
 
 namespace PatchManager
 {
