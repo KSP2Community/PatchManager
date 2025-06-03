@@ -4,6 +4,7 @@
 using JetBrains.Annotations;
 using KSP.VolumeCloud;
 using UnityEngine;
+using static Shoemaker.Utility.Extensions;
 
 namespace Shoemaker.Overrides
 {
@@ -25,23 +26,54 @@ namespace Shoemaker.Overrides
         public float? evolveSpeed;
         public float? topOffset;
         public bool? isFold;
-    
+        public float? baseTexureTile;
+        public float? coverageScale;
+        public float? evanish;
+        public float? detailAmount;
+        public float? cloudsMaskBias;
+        public float? upperFalloff;
+        public float? lowerFalloff;
+        public float? detailAltitudeShift;
+        public bool? enableDetailTexture;
+        public float? detailTextureTile;
+        public float? detailStrength;
+        public float? cloudsDensity;
+        public float? normalScale;
+        public Color? scaleCloudColor = Color.white;
+        
         public void ApplyTo(VolumeCloudConfiguration.CloudsData obj)
         {
-            isEnable.Apply(value => obj.isEnable = value ?? false);
-            castShadow.Apply(value => obj.castShadow = value ?? false);
-            bakeCloudMipmap.Apply(value => obj.bakeCloudMipmap = value ?? 0);
-            currentBakedCloudMipMap.Apply(value => obj.currentBakedCloudMipmap = value ?? 0);
-            cloudsType.Apply(value => obj.cloudsType = value ?? VolumeCloudConfiguration.CloudsLayerType.Cumulus);
-            cloudHeightRange.Apply(value => obj.cloudHeightRange  = value ?? Vector2.zero);
-            bakedCloudHeight.Apply(value => obj.bakedCloudHeight = value ?? 0);
-            cloudsLayerRotate.Apply(value => obj.cloudsLayerRotate  = value ?? Vector3.zero);
-            enableWind.Apply(value => obj.enableWind = value ?? false);
-            windDirection.Apply(value => obj.windDirection = value ?? Vector2.zero);
-            movementSpeed.Apply(value => obj.movementSpeed  = value ?? 0f);
-            evolveSpeed.Apply(value => obj.evolveSpeed  = value ?? 0f);
-            topOffset.Apply(value => obj.topOffset = value ?? 0f);
-            isFold.Apply(value => obj.isFold = value ?? false);
+            isEnable.Apply(ref obj.isEnable);
+            castShadow.Apply(ref obj.castShadow);
+            bakeCloudMipmap.Apply(ref obj.bakeCloudMipmap);
+            currentBakedCloudMipMap.Apply(ref obj.currentBakedCloudMipmap);
+            cloudsType.Apply(ref obj.cloudsType);
+            cloudHeightRange.Apply(ref obj.cloudHeightRange);
+            bakedCloudHeight.Apply(ref obj.bakedCloudHeight);
+            cloudsLayerRotate.Apply(ref obj.cloudsLayerRotate);
+            enableWind.Apply(ref obj.enableWind);
+            windDirection.Apply(ref obj.windDirection);
+            movementSpeed.Apply(ref obj.movementSpeed);
+            evolveSpeed.Apply(ref obj.evolveSpeed);
+            topOffset.Apply(ref obj.topOffset);
+            isFold.Apply(ref obj.isFold);
+            if (obj is VolumeCloudConfiguration.CumulusData cumulus)
+            {
+                baseTexureTile.Apply(ref cumulus.baseTexureTile);
+                coverageScale.Apply(ref cumulus.coverageScale);
+                evanish.Apply(ref cumulus.evanish);
+                detailAmount.Apply(ref cumulus.detailAmount);
+                cloudsMaskBias.Apply(ref cumulus.cloudsMaskBias);
+                upperFalloff.Apply(ref cumulus.upperFalloff);
+                lowerFalloff.Apply(ref cumulus.lowerFalloff);
+                detailAltitudeShift.Apply(ref cumulus.detailAltitudeShift);
+                enableDetailTexture.Apply(ref cumulus.enableDetailTexture);
+                detailTextureTile.Apply(ref cumulus.detailTextureTile);
+                detailStrength.Apply(ref cumulus.detailStrength);
+                cloudsDensity.Apply(ref cumulus.cloudsDensity);
+                normalScale.Apply(ref cumulus.normalScale);
+                scaleCloudColor.Apply(ref cumulus.scaleCloudColor);
+            }
         }
     }
 }

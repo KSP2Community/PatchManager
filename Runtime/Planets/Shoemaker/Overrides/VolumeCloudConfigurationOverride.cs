@@ -26,7 +26,6 @@ namespace Shoemaker.Overrides
         public Vector2? vortexCloudHeightRange;
         // todo: lenticular list
         public List<CloudsDataOverride> cumulusList = new List<CloudsDataOverride>();
-        // todo: cumulus list
         // todo: cumulus index
         public float? cloudCoverageModifier;
         public float? detailVariationRange;
