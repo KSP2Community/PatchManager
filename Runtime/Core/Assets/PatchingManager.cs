@@ -142,7 +142,8 @@ namespace PatchManager.Core.Assets
         public static void ImportAssetPatch(TextAsset asset, string modId)
         {
             Universe.LoadPatchAsset(asset, modId);
-            CurrentPatchHashes.Patches.Add(asset.name, Hash.FromString(asset.text));
+            // TODO: Actually fix the double-loading of addressables rather than just changing Add to TryAdd
+            CurrentPatchHashes.Patches.TryAdd($"{modId}/{asset.name}", Hash.FromString(asset.text));
         }
 
         public static void RegisterPatches()
@@ -292,8 +293,15 @@ namespace PatchManager.Core.Assets
                     Logging.LogDebug($"Generated an asset with the label {label}, and name {name}:\n{text}");
 
                     if (!_createdAssets.ContainsKey(label))
+                    {
                         _createdAssets[label] = new List<(string name, string text)>();
-                    _createdAssets[label].Add((name, text));
+                    }
+
+                    if (!_createdAssets[label].Any(x => x.name == name))
+                    {
+                        _createdAssets[label].Add((name, text));
+                    }
+
                 }
                 catch (Exception e)
                 {

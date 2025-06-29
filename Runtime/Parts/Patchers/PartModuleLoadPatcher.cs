@@ -40,7 +40,8 @@ namespace PatchManager.Parts.Patchers
 
                 // Debug.Log($"ApplyOnGameObject - {partData.partName} adding {behaviourType.FullName}");
                 var instance = obj.AddComponent(behaviourType);
-                Logging.LogInfo($"Attempting to setup serialized fields on {partData.partName} of type {behaviourType}");
+                Logging.LogInfo(
+                    $"Attempting to setup serialized fields on {partData.partName} of type {behaviourType}");
                 foreach (var field in behaviourType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
                              .Concat(behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance)))
                 {
@@ -70,7 +71,14 @@ namespace PatchManager.Parts.Patchers
                 if (partData.serializedPartModules.All(x => x.BehaviourType != t))
                 {
                     // Debug.Log($"ApplyOnGameObject - {partData.partName} removing {component.GetType().FullName}");
-                    Object.Destroy(component);
+                    if (Application.isEditor)
+                    {
+                        Object.DestroyImmediate(component);
+                    }
+                    else
+                    {
+                        Object.Destroy(component);
+                    }
                 }
             }
 
