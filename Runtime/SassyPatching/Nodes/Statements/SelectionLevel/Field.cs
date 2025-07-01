@@ -5,6 +5,7 @@ using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Nodes.Indexers;
 using UniLinq;
+using UnityEngine;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
 
 namespace PatchManager.SassyPatching.Nodes.Statements.SelectionLevel
@@ -48,7 +49,8 @@ namespace PatchManager.SassyPatching.Nodes.Statements.SelectionLevel
 
             var current = modifiable.GetFieldValue(FieldName);
             var subEnv = new Environment(environment.GlobalEnvironment, environment);
-            modifiable.SetFieldValue(FieldName, ComputeValues(subEnv, current));
+            var computed = ComputeValues(subEnv, current);
+            modifiable.SetFieldValue(FieldName, computed);
         }
         private DataValue ComputeValues(Environment subEnv, DataValue current, int layer = 0)
         {
