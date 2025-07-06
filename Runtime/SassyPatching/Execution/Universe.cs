@@ -645,7 +645,7 @@ namespace PatchManager.SassyPatching.Execution
                 catch (Exception e)
                 {
                     errorCount += 1;
-                    ErrorLogger($"Patching {label}:{name} failed due to {e}");
+                    ErrorLogger($"Patching {label}:{name} failed due to {e.Message}");
                 }
             }
 
@@ -670,7 +670,7 @@ namespace PatchManager.SassyPatching.Execution
                 catch (Exception e)
                 {
                     errorCount += 1;
-                    ErrorLogger($"Patching {label}:{name} failed due to {e}");
+                    ErrorLogger($"Patching {label}:{name} failed due to {e.Message}");
                 }
             }
             return selectable.Serialize();

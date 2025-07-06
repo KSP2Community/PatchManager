@@ -232,7 +232,7 @@ namespace PatchManager.Core.Assets
                 }
                 catch (Exception e)
                 {
-                    Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
+                    Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}, {e.StackTrace}");
                 }
             });
 
@@ -318,29 +318,19 @@ namespace PatchManager.Core.Assets
                     (resolve2, _) =>
                     {
                         var handle = RebuildCache(distinctKeys[idx]);
-                        var killTips = false;
-                        if (idx + 1 < distinctKeys.Count)
-                        {
-                            GameManager.Instance.LoadingFlow.FlowActions.Insert(
-                                GameManager.Instance.LoadingFlow.flowIndex + 1,
-                                CreateIndexedFlowAction(idx + 1)
-                            );
-                        }
-                        else
-                        {
-                            killTips = true;
-                        }
-
-                        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2, killTips));
+                        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2, idx + 1 == distinctKeys.Count));
                     });
             }
 
             if (distinctKeys.Count > 0)
             {
-                GameManager.Instance.LoadingFlow.FlowActions.Insert(
-                    GameManager.Instance.LoadingFlow.flowIndex + 1,
-                    CreateIndexedFlowAction(0)
-                );
+                for (var i = distinctKeys.Count - 1; i >= 0; i--)
+                {
+                    GameManager.Instance.LoadingFlow.FlowActions.Insert(
+                        GameManager.Instance.LoadingFlow.flowIndex + 1,
+                        CreateIndexedFlowAction(i)
+                    );
+                }
             }
 
             resolve();
