@@ -79,7 +79,7 @@ namespace PatchManager.Core
                 _wasCacheInvalidated = true;
                 SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: loading Patches from Addressables",
                     LoadPatchesFromAddressables));
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
+                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1, () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2,
                     () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
                 SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(3,
