@@ -8,8 +8,8 @@ using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
+using PatchManager.SassyPatching.Interfaces;
 using PatchManager.Shared;
-using PatchManager.Shared.Interfaces;
 using SpaceWarp.API.Mods;
 using UniLinq;
 using UnityEngine;
@@ -20,14 +20,12 @@ namespace PatchManager.Core.Assets
 {
     internal static class PatchingManager
     {
-        internal static readonly List<ITextPatcher> Patchers = new();
-        internal static readonly List<ITextAssetGenerator> Generators = new();
         internal static Universe Universe;
 
         private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
         private static int _initialLibraryCount;
-        private static Dictionary<string, List<(string name, string text)>> _createdAssets = new();
+        private static Dictionary<string, List<(string name, ISelectable data)>> _createdAssets = new();
 
         internal static int TotalPatchCount;
         internal static int TotalErrorCount;
@@ -36,80 +34,73 @@ namespace PatchManager.Core.Assets
         {
             var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
             loadedPlugins.AddRange(singleFileModIds);
-            Universe = new(RegisterPatcher, Logging.LogError, Logging.LogMessage, RegisterGenerator,
+            Universe = new(Logging.LogError, Logging.LogMessage,
                 loadedPlugins);
             _initialLibraryCount = Universe.AllLibraries.Count;
         }
 
-        private static void RegisterPatcher(ITextPatcher patcher)
-        {
-            for (var index = 0; index < Patchers.Count; index++)
-            {
-                if (Patchers[index].Priority <= patcher.Priority)
-                {
-                    continue;
-                }
-
-                Patchers.Insert(index, patcher);
-                return;
-            }
-
-            Patchers.Add(patcher);
-        }
-
-        private static void RegisterGenerator(ITextAssetGenerator generator)
-        {
-            for (var index = 0; index < Generators.Count; index++)
-            {
-                if (Generators[index].Priority <= generator.Priority)
-                {
-                    continue;
-                }
-
-                Generators.Insert(index, generator);
-                return;
-            }
-
-            Generators.Add(generator);
-        }
+        // private static void RegisterPatcher(ITextPatcher patcher)
+        // {
+        //     for (var index = 0; index < Patchers.Count; index++)
+        //     {
+        //         if (Patchers[index].Priority <= patcher.Priority)
+        //         {
+        //             continue;
+        //         }
+        //
+        //         Patchers.Insert(index, patcher);
+        //         return;
+        //     }
+        //
+        //     Patchers.Add(patcher);
+        // }
+        //
+        // private static void RegisterGenerator(ITextAssetGenerator generator)
+        // {
+        //     for (var index = 0; index < Generators.Count; index++)
+        //     {
+        //         if (Generators[index].Priority <= generator.Priority)
+        //         {
+        //             continue;
+        //         }
+        //
+        //         Generators.Insert(index, generator);
+        //         return;
+        //     }
+        //
+        //     Generators.Add(generator);
+        // }
 
         private static string PatchJson(string label, string assetName, string text)
         {
-            Console.WriteLine($"Patching {label}:{assetName}");
-            var patchCount = 0;
+            Logging.LogInfo($"Patching {label}:{assetName}");
 
-            foreach (var patcher in Patchers)
-            {
-                var backup = text;
-                try
-                {
-                    var wasPatched = patcher.TryPatch(label, assetName, ref text);
-                    if (wasPatched)
-                    {
-                        patchCount++;
-                    }
-                }
-                catch (Exception e)
-                {
-                    TotalErrorCount += 1;
-                    Console.WriteLine($"Patch of {label}:{assetName} errored due to: {e}");
-                    text = backup;
-                }
-
-                if (text == "")
-                {
-                    break;
-                }
-            }
-
+            text = Universe.RunAllPatchesFor(label, assetName, text, out var patchCount, out var errorCount);
+            TotalErrorCount += errorCount;
             TotalPatchCount += patchCount;
             if (patchCount > 0)
             {
-                Console.WriteLine($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+                Logging.LogInfo($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
             }
 
             return text;
         }
+        
+        private static string PatchJson(string label, string assetName, ISelectable data)
+        {
+            Logging.LogInfo($"Patching {label}:{assetName}");
+
+            var text = Universe.RunAllPatchesFor(label, assetName, data, out var patchCount, out var errorCount);
+            TotalErrorCount += errorCount;
+            TotalPatchCount += patchCount;
+            if (patchCount > 0)
+            {
+                Logging.LogInfo($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+            }
+
+            return text;
+        }
+
 
         private static int _previousLibraryCount = -1;
 
@@ -150,8 +141,8 @@ namespace PatchManager.Core.Assets
         {
             Logging.LogInfo($"Registering all patches!");
             Universe.RegisterAllPatches();
-            Logging.LogInfo($"{Patchers.Count} patchers registered!");
-            Logging.LogInfo($"{Generators.Count} generators registered!");
+            Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
+            Logging.LogInfo($"{Universe.Generators.Count} generators registered!");
         }
 
         /// <summary>
@@ -241,7 +232,7 @@ namespace PatchManager.Core.Assets
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Unable to patch {asset.name} due to: {e.Message}");
+                    Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}");
                 }
             });
 
@@ -261,7 +252,7 @@ namespace PatchManager.Core.Assets
                 CacheManager.Inventory.CacheEntries.AddRangeUnique(assetsCacheEntries);
                 CacheManager.SaveInventory();
 
-                Console.WriteLine($"Cache for label '{label}' rebuilt.");
+                Logging.LogInfo($"Cache for label '{label}' rebuilt.");
             }
 
             if (handle.Status == AsyncOperationStatus.Failed && !unchanged)
@@ -285,21 +276,21 @@ namespace PatchManager.Core.Assets
 
         public static void CreateNewAssets(Action resolve, Action<string> reject)
         {
-            foreach (var generator in Generators)
+            foreach (var generator in Universe.Generators)
             {
                 try
                 {
-                    var text = generator.Create(out var label, out var name);
-                    Logging.LogDebug($"Generated an asset with the label {label}, and name {name}:\n{text}");
+                    var data = generator.Create(out var label, out var name);
+                    Logging.LogDebug($"Generated an asset with the label {label}, and name {name}:\n{data}");
 
                     if (!_createdAssets.ContainsKey(label))
                     {
-                        _createdAssets[label] = new List<(string name, string text)>();
+                        _createdAssets[label] = new List<(string name, ISelectable data)>();
                     }
 
                     if (!_createdAssets[label].Any(x => x.name == name))
                     {
-                        _createdAssets[label].Add((name, text));
+                        _createdAssets[label].Add((name, data));
                     }
 
                 }

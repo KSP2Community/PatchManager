@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using KSP.Sim;
 using Newtonsoft.Json.Linq;
 using PatchManager.SassyPatching;
@@ -13,8 +14,8 @@ namespace PatchManager.Planets.Rulesets
     [PatcherRuleset("galaxy", "GalaxyDefinition_Default")]
     public class GalaxyRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => true;
+
+        public string[] Labels => null;
 
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData)
@@ -25,6 +26,16 @@ namespace PatchManager.Planets.Rulesets
             return new GalaxySelectable(obj, type);
         
         }
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is GalaxySelectable
+        {
+            Deleted: false
+        };
+        
+        public bool CanGetAssetNameFromSelectableName => false;
+
+        public string SelectableNameToAssetName(string selectableName) => $"GalaxyDefinition_{selectableName}";
+
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)
         {
@@ -36,7 +47,7 @@ namespace PatchManager.Planets.Rulesets
                 Version = version,
                 CelestialBodies = new List<SerializedCelestialBody>()
             };
-            return new NewGenericAsset(name, name, new GalaxySelectable(JObject.FromObject(def), name));
+            return new NewGenericAsset($"GalaxyDefinition_{name}", $"GalaxyDefinition_{name}", new GalaxySelectable(JObject.FromObject(def), name));
         }
     }
 }

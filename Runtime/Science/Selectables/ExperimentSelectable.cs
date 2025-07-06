@@ -12,10 +12,8 @@ namespace PatchManager.Science.Selectables
     /// </summary>
     public class ExperimentSelectable : BaseSelectable
     {
-#pragma warning disable CS0414 // Field is assigned but its value is never used
         private bool _modified;
-#pragma warning restore CS0414 // Field is assigned but its value is never used
-        private bool _deleted;
+        public bool Deleted;
 
         /// <summary>
         /// Marks this part selectable as having been modified any level down
@@ -31,7 +29,7 @@ namespace PatchManager.Science.Selectables
         public void SetDeleted()
         {
             SetModified();
-            _deleted = true;
+            Deleted = true;
         }
 
         /// <summary>
@@ -105,9 +103,15 @@ namespace PatchManager.Science.Selectables
         }
 
         /// <inheritdoc />
-        public override string Serialize() => _deleted ? "" : ScienceObject.ToString();
+        public override string Serialize() => Deleted ? "" : ScienceObject.ToString();
 
         /// <inheritdoc />
         public override DataValue GetValue() => DataValue.FromJToken(DataObject);
+
+        public override bool WasModified => _modified;
+        public override void ClearModified()
+        {
+            _modified = false;
+        }
     }
 }

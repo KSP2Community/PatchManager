@@ -40,17 +40,12 @@ namespace PatchManager.SassyPatching.Nodes.Statements
         /// Execute this selection block on a dataset
         /// </summary>
         /// <param name="snapshot">The environment that contains this selection block</param>
-        /// <param name="datasetType">The type of dataset this is being executed (e.g. parts_data)</param>
-        /// <param name="dataset">The dataset to execute this patch on</param>
-        public bool ExecuteFresh(Environment snapshot, string datasetType, string name, ref string dataset)
+        /// <param name="inSelectable">The selectable to execute this patch on</param>
+        public bool ExecuteFresh(Environment snapshot, ISelectable inSelectable)
         {
             // var subEnvironment = new Environment(snapshot.GlobalEnvironment, snapshot);
-            var selections = Selector.SelectAllTopLevel(datasetType, name, dataset, snapshot, out var rulesetMatchingObject);
+            var selections = Selector.SelectAllTopLevel(inSelectable, snapshot);
         
-            if (rulesetMatchingObject == null || selections.Count == 0)
-            {
-                return false;
-            }
             // Get the first matching selection if there are somehow more than one
             foreach (var selectable in selections) {
                 var modifiable = selectable.Selectable.OpenModification();
@@ -74,11 +69,7 @@ namespace PatchManager.SassyPatching.Nodes.Statements
 
 
             }
-            var newDataSet = rulesetMatchingObject.Serialize();
-            if (newDataSet == dataset) return false;
-            dataset = newDataSet;
-            return true;
-
+            return inSelectable.WasModified;
         }
 
         public INewAsset ExecuteCreation(Environment snapshot, List<DataValue> arguments)

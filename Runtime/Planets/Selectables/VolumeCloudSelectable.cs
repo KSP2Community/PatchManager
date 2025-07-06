@@ -10,10 +10,14 @@ namespace PatchManager.Planets.Selectables
 {
     public sealed class VolumeCloudSelectable : BaseSelectable
     {
-        #pragma warning disable CS0414 // Field is assigned but its value is never used
         private bool _modified;
-        #pragma warning restore CS0414 // Field is assigned but its value is never used
-        private bool _deleted;
+        public override bool WasModified => false;
+        public override void ClearModified()
+        {
+            _modified = false;
+        }
+
+        public bool Deleted;
 
         /// <summary>
         /// Marks this part selectable as having been modified any level down///
@@ -29,7 +33,7 @@ namespace PatchManager.Planets.Selectables
         public void SetDeleted()
         {
             SetModified();
-            _deleted = true;
+            Deleted = true;
         }
 
         public readonly JObject VolumeCloudOverrideObject;
@@ -86,6 +90,7 @@ namespace PatchManager.Planets.Selectables
 
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var newLayer = new CloudsDataOverride
             {
                 layerName = elementType
@@ -98,7 +103,7 @@ namespace PatchManager.Planets.Selectables
             return selectable;
         }
         /// <inheritdoc />
-        public override string Serialize() => _deleted ? "" : VolumeCloudOverrideObject.ToString();
+        public override string Serialize() => Deleted ? "" : VolumeCloudOverrideObject.ToString();
 
         /// <inheritdoc />
         public override DataValue GetValue() => DataValue.FromJToken(VolumeCloudOverrideObject);

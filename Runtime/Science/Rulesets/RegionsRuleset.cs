@@ -16,12 +16,23 @@ namespace PatchManager.Science.Rulesets
     [PatcherRuleset("regions","science_region")]
     public class RegionsRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => label == "science_region";
+        public string[] Labels => new[] { "science_region" };
 
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
             new RegionsSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is RegionsSelectable
+        {
+            Deleted: false
+        };
+
+        // TODO: Evaluate whether or not this is the case
+        public bool CanGetAssetNameFromSelectableName => false;
+        public string SelectableNameToAssetName(string selectableName)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues) 

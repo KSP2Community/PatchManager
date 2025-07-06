@@ -20,10 +20,21 @@ namespace PatchManager.Generic.SassyPatching.Rulesets
             return true;
         }
 
+        public string[] Labels => null;
+
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData)
         {
             return new JTokenSelectable(() => { }, JToken.Parse(jsonData), name, type);
+        }
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is JTokenSelectable;
+
+        public bool CanGetAssetNameFromSelectableName => false;
+
+        public string SelectableNameToAssetName(string selectableName)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <inheritdoc />

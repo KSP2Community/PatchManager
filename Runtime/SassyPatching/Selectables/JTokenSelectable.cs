@@ -12,6 +12,7 @@ namespace PatchManager.SassyPatching.Selectables
     /// </summary>
     public class JTokenSelectable : BaseSelectable
     {
+        private bool _dirty = false;
         private readonly Action _markDirty;
         /// <summary>
         /// This is the token being modified
@@ -27,7 +28,12 @@ namespace PatchManager.SassyPatching.Selectables
         /// <param name="elementType">The type of element this is, can be different from the name</param>
         public JTokenSelectable(Action markDirty, JToken token, string name, string? elementType = null)
         {
-            _markDirty = markDirty;
+            _markDirty = () =>
+            {
+                _dirty = true;
+               
+                markDirty();
+            };
             Token = token;
             ElementType = elementType ?? name;
             _getName = _ => name;
@@ -129,5 +135,11 @@ namespace PatchManager.SassyPatching.Selectables
 
         /// <inheritdoc />
         public override DataValue GetValue() => DataValue.FromJToken(Token);
+
+        public override bool WasModified => _dirty;
+        public override void ClearModified()
+        {
+            _dirty = false;
+        }
     }
 }

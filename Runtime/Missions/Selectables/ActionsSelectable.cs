@@ -23,6 +23,16 @@ namespace PatchManager.Missions.Selectables
         /// </summary>
         public JArray Actions;
 
+        public void SetModified()
+        {
+            Selectable.SetModified();
+        }
+
+        public override bool WasModified => Selectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         private static string TrimTypeName(string typeName)
         {
             var comma = typeName.IndexOf(',');
@@ -97,11 +107,12 @@ namespace PatchManager.Missions.Selectables
             other is ActionsSelectable actionsSelectable && actionsSelectable.Actions == Actions;
 
         /// <inheritdoc />
-        public override IModifiable OpenModification() => new JTokenModifiable(Actions, Selectable.SetModified);
+        public override IModifiable OpenModification() => new JTokenModifiable(Actions, SetModified);
 
         /// <inheritdoc />
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var actualType = MissionsTypes.Actions[elementType];
             var elementObject = new JObject()
             {
@@ -112,7 +123,7 @@ namespace PatchManager.Missions.Selectables
                 elementObject[key] = value;
             }
 
-            var selectable = new JTokenSelectable(Selectable.SetModified, elementObject,
+            var selectable = new JTokenSelectable(SetModified, elementObject,
                 token => TrimTypeName(((JObject)token)!.Value<string>()!), elementType);
             Children.Add(selectable);
             Classes.Add(elementType);

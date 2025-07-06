@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
+using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes.Attributes;
 using PatchManager.SassyPatching.Nodes.Statements;
-using PatchManager.Shared.Interfaces;
 using UniLinq;
 
 namespace PatchManager.SassyPatching.Execution
 {
-    public class SassyGenerator : ITextAssetGenerator
+    public class SassyGenerator
     {// This is a snapshot of the environment before the patch was registered, note it will still reference the same global environment as its file, as that is only mutated by function declarations
         // Same w/ universe environment, as that should only contain stage definitions and such
         private Environment _environmentSnapshot;
@@ -43,12 +43,12 @@ namespace PatchManager.SassyPatching.Execution
 
         /// <inheritdoc />
         public ulong Priority { get; }
-        public string Create(out string label, out string name)
+        public ISelectable Create(out string label, out string name)
         {
             var val = _rootSelectionBlock.ExecuteCreation(_environmentSnapshot, _arguments);
             label = val.Label;
             name = val.Name;
-            return val.Text;
+            return val.Selectable;
         }
     }
 }

@@ -21,8 +21,8 @@ namespace PatchManager.Parts.Rulesets
     [PatcherRuleset("parts", "parts_data")]
     public class PartsRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => label == "parts_data";
+
+        public string[] Labels => new[] { "parts_data" };
 
         /// <summary>
         /// Converts the part json to an ISelectable following this ruleset
@@ -35,6 +35,16 @@ namespace PatchManager.Parts.Rulesets
         {
             return new PartSelectable(jsonData);
         }
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is PartSelectable
+        {
+            Deleted: false
+        };
+
+        public bool CanGetAssetNameFromSelectableName => true;
+
+        public string SelectableNameToAssetName(string selectableName) => selectableName;
+
         /// <inheritdoc />
         /// <summary>
         /// Create a new part asset

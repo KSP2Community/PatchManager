@@ -22,6 +22,16 @@ namespace PatchManager.Missions.Selectables
         /// </summary>
         public JArray ContentBranches;
 
+        public void SetModified()
+        {
+            Selectable.SetModified();
+        }
+        public override bool WasModified => Selectable.WasModified;
+        public override void ClearModified()
+        {
+            
+        }
+
         /// <summary>
         /// Create a new ContentBranchesSelectable
         /// </summary>
@@ -73,11 +83,12 @@ namespace PatchManager.Missions.Selectables
                                                             contentBranchesSelectable.ContentBranches == ContentBranches;
 
         /// <inheritdoc/>
-        public override IModifiable OpenModification() => new JTokenModifiable(ContentBranches, Selectable.SetModified);
+        public override IModifiable OpenModification() => new JTokenModifiable(ContentBranches, SetModified);
 
         /// <inheritdoc/>
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var branch = new MissionContentBranch
             {
                 ID = elementType

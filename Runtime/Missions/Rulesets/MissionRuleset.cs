@@ -16,11 +16,21 @@ namespace PatchManager.Missions.Rulesets
     public class MissionRuleset : IPatcherRuleSet
     {
         /// <inheritdoc/>
-        public bool Matches(string label) => label == "missions";
+        public string[] Labels => new[] { "missions" };
 
         /// <inheritdoc/>
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
             new MissionSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is MissionSelectable
+        {
+            Deleted: false
+        };
+
+        // TODO: Validate
+        public bool CanGetAssetNameFromSelectableName => true;
+
+        public string SelectableNameToAssetName(string selectableName) => selectableName;
 
         /// <inheritdoc/>
         public INewAsset CreateNew(List<DataValue> dataValues)

@@ -5,10 +5,11 @@ using Antlr4.Runtime;
 using PatchManager.SassyPatching.Attributes;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes;
-using PatchManager.Shared.Interfaces;
 using SassyPatchGrammar;
 using System.Reflection;
+using JetBrains.Annotations;
 using PatchManager.SassyPatching.Exceptions;
+using PatchManager.SassyPatching.NewAssets;
 using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Utility;
 using PatchManager.Shared;
@@ -104,17 +105,6 @@ namespace PatchManager.SassyPatching.Execution
         public List<string> AllMods;
 
         /// <summary>
-        /// This is an action that is taken
-        /// </summary>
-        public readonly Action<ITextPatcher> RegisterPatcher;
-
-
-        /// <summary>
-        /// Register a generator patch
-        /// </summary>
-        public readonly Action<ITextAssetGenerator> RegisterGenerator;
-
-        /// <summary>
         /// This logs errors in this universe
         /// </summary>
         public readonly Action<string> ErrorLogger;
@@ -138,12 +128,10 @@ namespace PatchManager.SassyPatching.Execution
         /// <param name="registerPatcher">This action receives patchers and registers them for later execution</param>
         /// <param name="errorLogger">The action to be taken to log an error</param>
         /// <param name="messageLogger">The action to be taken to log a message</param>
-        public Universe(Action<ITextPatcher> registerPatcher, Action<string> errorLogger, Action<string> messageLogger, Action<ITextAssetGenerator> registerGenerator, List<string> allMods)
+        public Universe(Action<string> errorLogger, Action<string> messageLogger, List<string> allMods)
         {
-            RegisterPatcher = registerPatcher;
             ErrorLogger = errorLogger;
             MessageLogger = messageLogger;
-            RegisterGenerator = registerGenerator;
             LoadedLabels = new List<string>(_preloadedLabels);
             AllMods = allMods;
             MessageLogger("Setup universe!");
@@ -461,6 +449,7 @@ namespace PatchManager.SassyPatching.Execution
             }
         }
 
+
         private void SortStages()
         {
             MessageLogger($"Sorting {UnsortedStages.Count} stages");
@@ -547,6 +536,236 @@ namespace PatchManager.SassyPatching.Execution
         public static void RegisterRawLibrary(string modId, string name, string raw)
         {
             AllRawLibraries.Add($"{modId}:{name}", raw);
+        }
+        
+        
+        #region Patch running
+
+        
+        public int TotalPatchCount;
+        public List<SassyTextPatcher> GenericPatches = new();
+        public Dictionary<string, List<SassyTextPatcher>> LabelPatches = new();
+        public Dictionary<string, List<SassyTextPatcher>> NamePatches = new();
+        public Dictionary<string, Dictionary<string, List<SassyTextPatcher>>> LabelNamePatches = new();
+        
+        
+        private void RegisterPatcher(SassyTextPatcher patcher)
+        {
+            TotalPatchCount += 1;
+            if (patcher.RuleSet.Labels == null && patcher.AssetName == null)
+            {
+                AddSorted(GenericPatches, patcher);
+            } else if (patcher.RuleSet.Labels != null && patcher.AssetName == null)
+            {
+                foreach (var label in patcher.RuleSet.Labels)
+                {
+                    if (LabelPatches.TryGetValue(label, out var patchers))
+                    {
+                        AddSorted(patchers, patcher);
+                    }
+                    else
+                    {
+                        LabelPatches[label] = new List<SassyTextPatcher> { patcher };
+                    }
+                }
+            } else if (patcher.RuleSet.Labels == null && patcher.AssetName != null)
+            {
+                if (NamePatches.TryGetValue(patcher.AssetName, out var patchers))
+                {
+                    AddSorted(patchers, patcher);
+                }
+                else
+                {
+                    NamePatches[patcher.AssetName] = new List<SassyTextPatcher> { patcher };
+                }
+            } else if (patcher.RuleSet.Labels != null && patcher.AssetName != null)
+            {
+                foreach (var label in patcher.RuleSet.Labels)
+                {
+                    if (LabelNamePatches.TryGetValue(label, out var namePatchers))
+                    {
+                        if (namePatchers.TryGetValue(patcher.AssetName, out var patchers))
+                        {
+                            AddSorted(patchers, patcher);
+                        }
+                        else
+                        {
+                            namePatchers[patcher.AssetName] = new List<SassyTextPatcher> { patcher };
+                        }
+                    }
+                    else
+                    {
+                        LabelNamePatches[label] = new Dictionary<string, List<SassyTextPatcher>>
+                        {
+                            [patcher.AssetName] = new() { patcher }
+                        };
+                    }
+                }
+            }
+        }
+
+
+        private static void AddSorted(List<SassyTextPatcher> patchers, SassyTextPatcher patcher)
+        {
+            var index = patchers.FindIndex(x => x.Priority > patcher.Priority);
+            if (index == -1)
+            {
+                patchers.Add(patcher);
+            }
+            else
+            {
+                patchers.Insert(index,patcher);
+            }
+        }
+        
+        public string RunAllPatchesFor(string label, string name, string data, out int patchCount, out int errorCount)
+        {
+            patchCount = 0;
+            errorCount = 0;
+            var enumerator = new PatchEnumerator(GenericPatches, LabelPatches.GetValueOrDefault(label), NamePatches.GetValueOrDefault(name), LabelNamePatches.GetValueOrDefault(label)?.GetValueOrDefault(name));
+            ISelectable previous = null;
+            while (enumerator.Next is { } next)
+            {
+                try
+                {
+
+                    if (previous == null)
+                    {
+                        if (next.TryPatchBegin(label, name, data, out previous)) patchCount++;
+                    }
+                    else
+                    {
+                        if (next.TryPatch(label, name, ref previous, out var stop)) patchCount++;
+                        if (stop)
+                        {
+                            return string.Empty;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorCount += 1;
+                    ErrorLogger($"Patching {label}:{name} failed due to {e}");
+                }
+            }
+
+            return previous?.Serialize() ?? data;
+        }
+
+        public string RunAllPatchesFor(string label, string name, ISelectable selectable, out int patchCount, out int errorCount)
+        {
+            patchCount = 0;
+            errorCount = 0;
+            var enumerator = new PatchEnumerator(GenericPatches, LabelPatches.GetValueOrDefault(label), NamePatches.GetValueOrDefault(name), LabelNamePatches.GetValueOrDefault(label)?.GetValueOrDefault(name));
+            while (enumerator.Next is { } next)
+            {
+                try
+                {
+                    if (next.TryPatch(label, name, ref selectable, out var stop)) patchCount++;
+                    if (stop)
+                    {
+                        return string.Empty;
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorCount += 1;
+                    ErrorLogger($"Patching {label}:{name} failed due to {e}");
+                }
+            }
+            return selectable.Serialize();
+        }
+
+        private class PatchEnumerator
+        {
+            private List<SassyTextPatcher> _generic;
+            [CanBeNull] private List<SassyTextPatcher> _label;
+            [CanBeNull] private List<SassyTextPatcher> _name;
+            [CanBeNull] private List<SassyTextPatcher> _labelName;
+            private int _genericIndex = 0;
+            private int _labelIndex = 0;
+            private int _nameIndex = 0;
+            private int _labelNameIndex = 0;
+            public PatchEnumerator(List<SassyTextPatcher> generic, List<SassyTextPatcher> label,
+                List<SassyTextPatcher> name, List<SassyTextPatcher> labelName)
+            {
+                _generic = generic;
+                _label = label;
+                _name = name;
+                _labelName = labelName;
+            }
+
+            [CanBeNull]
+            public SassyTextPatcher Next
+            {
+                get
+                {
+                    SassyTextPatcher generic = null;
+                    SassyTextPatcher label = null;
+                    SassyTextPatcher name = null;
+                    SassyTextPatcher labelName = null;
+                    var minPriority = ulong.MaxValue;
+
+                    if (_genericIndex < _generic.Count)
+                    {
+                        generic = _generic[_genericIndex];
+                        minPriority = Math.Min(minPriority, generic.Priority);
+                    }
+
+                    if (_label != null && _labelIndex < _label.Count)
+                    {
+                        label = _label[_labelIndex];
+                        minPriority = Math.Min(minPriority, label.Priority);
+                    }
+
+                    if (_name != null && _nameIndex < _name.Count)
+                    {
+                        name = _name[_nameIndex];
+                        minPriority = Math.Min(minPriority, name.Priority);
+                    }
+
+                    if (_labelName != null && _labelNameIndex < _labelName.Count)
+                    {
+                        labelName = _labelName[_labelNameIndex];
+                        minPriority = Math.Min(minPriority, labelName.Priority);
+                    }
+
+                    if (generic != null && minPriority == generic.Priority)
+                    {
+                        _genericIndex += 1;
+                        return generic;
+                    }
+                    
+                    if (label != null && minPriority == label.Priority)
+                    {
+                        _labelIndex += 1;
+                        return label;
+                    }
+
+                    if (name != null && minPriority == name.Priority)
+                    {
+                        _nameIndex += 1;
+                        return name;
+                    }
+
+                    if (labelName != null && minPriority == labelName.Priority)
+                    {
+                        _labelNameIndex += 1;
+                        return labelName;
+                    }
+
+                    return null;
+                }
+            }
+        }
+        
+        #endregion
+
+        public List<SassyGenerator> Generators = new();
+
+        public void RegisterGenerator(SassyGenerator generator)
+        {
+            Generators.Add(generator);
         }
     }
 }

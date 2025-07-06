@@ -16,12 +16,20 @@ namespace PatchManager.Science.Rulesets
     [PatcherRuleset("experiments","scienceExperiment"),UsedImplicitly]
     public class ExperimentRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => label == "scienceExperiment";
+        public string[] Labels => new [] {"scienceExperiment"};
 
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
             new ExperimentSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is ExperimentSelectable
+        {
+            Deleted: false
+        };
+        
+        // TODO: Evaluate whether or not this is the case
+        public bool CanGetAssetNameFromSelectableName => true;
+        public string SelectableNameToAssetName(string selectableName) => selectableName;
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)

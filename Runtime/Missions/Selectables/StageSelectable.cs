@@ -26,6 +26,15 @@ namespace PatchManager.Missions.Selectables
 
         private int _conditionIndex = -1;
 
+        public void SetModified()
+        {
+            MissionSelectable.SetModified();
+        }
+        public override bool WasModified => MissionSelectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         /// <summary>
         /// Create a new stage selectable.
         /// </summary>
@@ -97,11 +106,12 @@ namespace PatchManager.Missions.Selectables
             other is StageSelectable stageSelectable && stageSelectable.StageObject == StageObject;
 
         /// <inheritdoc/>
-        public override IModifiable OpenModification() => new JTokenModifiable(StageObject, MissionSelectable.SetModified);
+        public override IModifiable OpenModification() => new JTokenModifiable(StageObject, SetModified);
 
         /// <inheritdoc/>
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var conditionType = MissionsTypes.Conditions[elementType];
             // var conditionObject = JObject.FromObject(Activator.CreateInstance(conditionType));
             var conditionObject = new JObject();
@@ -126,7 +136,7 @@ namespace PatchManager.Missions.Selectables
             else
             {
                 var selectable = new JTokenSelectable(
-                    MissionSelectable.SetModified,
+                    SetModified,
                     conditionObject,
                     "scriptableCondition",
                     "scriptableCondition"

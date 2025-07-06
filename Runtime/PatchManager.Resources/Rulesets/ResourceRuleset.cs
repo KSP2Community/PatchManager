@@ -14,8 +14,8 @@ namespace PatchManager.Resources.Rulesets
     [PatcherRuleset("resources", "resources")]
     public class ResourceRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => label == "resources";
+
+        public string[] Labels => new string[] { "resources" };
 
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData)
@@ -26,6 +26,22 @@ namespace PatchManager.Resources.Rulesets
                 return new RecipeSelectable(jsonData);
             }
             return new ResourceSelectable(jsonData);
+        }
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is RecipeSelectable
+        {
+            Deleted: false
+        } or ResourceSelectable
+        {
+            Deleted: false
+        };
+
+        // TODO: Validate
+        public bool CanGetAssetNameFromSelectableName => false;
+
+        public string SelectableNameToAssetName(string selectableName)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <inheritdoc />

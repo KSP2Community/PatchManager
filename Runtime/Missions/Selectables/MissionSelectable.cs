@@ -13,10 +13,8 @@ namespace PatchManager.Missions.Selectables
     /// </summary>
     public sealed class MissionSelectable : BaseSelectable
     {
-#pragma warning disable CS0414 // Field is assigned but its value is never used
         private bool _modified;
-#pragma warning restore CS0414 // Field is assigned but its value is never used
-        private bool _deleted;
+        public bool Deleted;
 
         /// <summary>
         /// Marks this part selectable as having been modified any level down
@@ -32,7 +30,7 @@ namespace PatchManager.Missions.Selectables
         public void SetDeleted()
         {
             SetModified();
-            _deleted = true;
+            Deleted = true;
         }
 
         /// <summary>
@@ -101,10 +99,16 @@ namespace PatchManager.Missions.Selectables
             "You cannot add elements to the main body of the mission, try using ContentBranches, or missionStages for that");
 
         /// <inheritdoc/>
-        public override string Serialize() => _deleted ? "" : MissionObject.ToString();
+        public override string Serialize() => Deleted ? "" : MissionObject.ToString();
 
         /// <inheritdoc/>
         public override DataValue GetValue() => DataValue.FromJToken(MissionObject);
+
+        public override bool WasModified => _modified;
+        public override void ClearModified()
+        {
+            _modified = false;
+        }
 
         /// <inheritdoc/>
         public override string ElementType => "missions";

@@ -12,9 +12,17 @@ namespace PatchManager.Planets.Rulesets
     [PatcherRuleset("volume-cloud-override","volume_cloud_overrides")]
     public class VolumeCloudOverrideRuleset : IPatcherRuleSet
     {
-        public bool Matches(string label) => label == "volume_cloud_overrides";
-
+        public string[] Labels => new [] {"volume_cloud_overrides"};
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) => new VolumeCloudSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is VolumeCloudSelectable
+        {
+            Deleted: false
+        };
+
+        public bool CanGetAssetNameFromSelectableName => true;
+
+        public string SelectableNameToAssetName(string selectableName) => $"volume_cloud_override_{selectableName.ToLowerInvariant()}";
 
         public INewAsset CreateNew(List<DataValue> dataValues)
         {

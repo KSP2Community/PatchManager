@@ -69,5 +69,9 @@ namespace PatchManager.SassyPatching.Interfaces
         /// </summary>
         /// <returns>The value representation of the selectable</returns>
         public DataValue GetValue();
+
+        public bool WasModified { get; }
+
+        public void ClearModified();
     }
 }

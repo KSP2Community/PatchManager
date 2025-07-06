@@ -57,9 +57,9 @@ namespace PatchManager.SassyPatching.Nodes.Selectors
         }
 
         /// <inheritdoc />
-        public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
+        public override List<SelectableWithEnvironment> SelectAllTopLevel(ISelectable selectable, Environment baseEnvironment)
         {
-            var start = Selectors[0].SelectAllTopLevel(type, name, data, baseEnvironment, out rulesetMatchingObject);
+            var start = Selectors[0].SelectAllTopLevel(selectable, baseEnvironment);
             return SelectAllSkippingFirst(start);
         }
 
