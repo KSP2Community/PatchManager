@@ -12,10 +12,19 @@ namespace PatchManager.Planets.Rulesets
     [PatcherRuleset("atmosphere-override","atmosphere_overrides")]
     public class AtmosphereOverrideRuleset : IPatcherRuleSet
     {
-        public bool Matches(string label) => label == "atmosphere_overrides";
+        public string[] Labels => new[] { "atmosphere_overrides" };
 
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
             new AtmosphereOverrideSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is AtmosphereOverrideSelectable
+        {
+            Deleted: false
+        };
+
+        public bool CanGetAssetNameFromSelectableName => true;
+
+        public string SelectableNameToAssetName(string selectableName) => $"atmosphere_override_{selectableName.ToLowerInvariant()}";
 
         public INewAsset CreateNew(List<DataValue> dataValues)
         {

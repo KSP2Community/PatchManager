@@ -14,12 +14,24 @@ namespace PatchManager.Science.Rulesets
     [PatcherRuleset("science","techNodeData")]
     public class ScienceRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => label == "techNodeData";
+
+        public string[] Labels => new[] { "techNodeData" };
 
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
             new ScienceSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is ScienceSelectable
+        {
+            Deleted: false
+        };
+        
+        // TODO: Evaluate whether or not this is the case
+        public bool CanGetAssetNameFromSelectableName => false;
+        public string SelectableNameToAssetName(string selectableName)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)

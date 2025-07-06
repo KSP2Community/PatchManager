@@ -27,6 +27,15 @@ namespace PatchManager.Missions.Selectables
         /// </summary>
         private JArray _missionRewardDefinitions;
 
+        public void SetModified()
+        {
+            MissionSelectable.SetModified();
+        }
+        public override bool WasModified => MissionSelectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         /// <summary>
         /// Creates a new mission reward selectable.
         /// </summary>
@@ -84,17 +93,18 @@ namespace PatchManager.Missions.Selectables
 
         /// <inheritdoc/>
         public override IModifiable OpenModification() =>
-            new JTokenModifiable(MissionReward, MissionSelectable.SetModified);
+            new JTokenModifiable(MissionReward, SetModified);
 
         /// <inheritdoc/>
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var obj = new JObject
             {
                 ["MissionRewardType"] = elementType
             };
             Classes.Add(elementType);
-            var selectable = new JTokenSelectable(MissionSelectable.SetModified, obj,
+            var selectable = new JTokenSelectable(SetModified, obj,
                 token => ((JObject)token)["MissionRewardType"]!.Value<string>(), elementType);
             Children.Add(selectable);
             _missionRewardDefinitions.Add(obj);

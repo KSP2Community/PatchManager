@@ -171,8 +171,8 @@ namespace PatchManager.Core
                 visible = true
             };
             var text = new TextElement();
-            text.text += $"Amount of loaded patchers: {PatchingManager.Patchers.Count}\n";
-            text.text += $"Amount of loaded generators: {PatchingManager.Generators.Count}\n";
+            text.text += $"Amount of loaded patchers: {PatchingManager.Universe.TotalPatchCount}\n";
+            text.text += $"Amount of loaded generators: {PatchingManager.Universe.Generators.Count}\n";
             text.text += $"Amount of loaded libraries: {PatchingManager.Universe.AllLibraries.Count}\n";
             if (_wasCacheInvalidated)
             {

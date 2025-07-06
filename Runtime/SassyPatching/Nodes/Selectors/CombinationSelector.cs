@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
 using Environment = PatchManager.SassyPatching.Execution.Environment;
@@ -49,20 +50,10 @@ namespace PatchManager.SassyPatching.Nodes.Selectors
         }
 
         /// <inheritdoc />
-        public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
+        public override List<SelectableWithEnvironment> SelectAllTopLevel(ISelectable inSelectable, Environment baseEnvironment)
         {
-            var start = new List<SelectableWithEnvironment>();
-            rulesetMatchingObject = null;
-            foreach (var selector in Selectors)
-            {
-                // ReSharper disable once IdentifierTypo
-                start = SelectionUtilities.CombineSelections(start,selector.SelectAllTopLevel(type, name, data,baseEnvironment, out var rsmo));
-                if (rsmo != null && rulesetMatchingObject == null)
-                {
-                    rulesetMatchingObject = rsmo;
-                }
-            }
-            return start;
+            throw new InterpreterException(Coordinate,
+                "Top level combination is not supported, use an intersection with the ruleset on the left and the combination in parentheses");
         }
 
         public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)

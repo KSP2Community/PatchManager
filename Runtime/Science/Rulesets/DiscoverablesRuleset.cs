@@ -16,12 +16,24 @@ namespace PatchManager.Science.Rulesets
     [PatcherRuleset("discoverables","science_region_discoverables")]
     public class DiscoverablesRuleset : IPatcherRuleSet
     {
-        /// <inheritdoc />
-        public bool Matches(string label) => label == "science_region_discoverables";
+
+        public string[] Labels => new[] { "science_region_discoverables" };
 
         /// <inheritdoc />
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) =>
             new DiscoverablesSelectable(JObject.Parse(jsonData));
+
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is DiscoverablesSelectable
+        {
+            Deleted: false
+        };
+
+        // TODO: Evaluate whether or not this is the case
+        public bool CanGetAssetNameFromSelectableName => false;
+        public string SelectableNameToAssetName(string selectableName)
+        {
+            throw new System.NotImplementedException();
+        }
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)

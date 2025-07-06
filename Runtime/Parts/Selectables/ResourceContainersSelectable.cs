@@ -14,6 +14,15 @@ namespace PatchManager.Parts.Selectables
         private PartSelectable _selectable;
         private Dictionary<string, int> _resourceIndices;
 
+        public void SetModified()
+        {
+            _selectable.SetModified();
+        }
+        public override bool WasModified => _selectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         internal ResourceContainersSelectable(JArray containers, PartSelectable selectable)
         {
             _containers = containers;
@@ -68,7 +77,7 @@ namespace PatchManager.Parts.Selectables
         /// <inheritdoc />
         public override ISelectable AddElement(string elementType)
         {
-            _selectable.SetModified();
+            SetModified();
             var obj = JObject.FromObject(new
             {
                 name = elementType,

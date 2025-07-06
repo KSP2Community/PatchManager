@@ -29,6 +29,16 @@ namespace PatchManager.Missions.Selectables
         /// </summary>
         private JArray _children;
 
+        public void SetModified()
+        {
+            MissionSelectable.SetModified();
+        }
+
+        public override bool WasModified => MissionSelectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         /// <summary>
         /// Create a new condition set selectable
         /// </summary>
@@ -97,11 +107,12 @@ namespace PatchManager.Missions.Selectables
                                                             conditionSetSelectable.ConditionSet == ConditionSet;
 
         /// <inheritdoc />
-        public override IModifiable OpenModification() => new JTokenModifiable(ConditionSet, MissionSelectable.SetModified);
+        public override IModifiable OpenModification() => new JTokenModifiable(ConditionSet, SetModified);
 
         /// <inheritdoc />
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var conditionType = MissionsTypes.Conditions[elementType];
             var conditionObject = new JObject()
             {
@@ -121,7 +132,7 @@ namespace PatchManager.Missions.Selectables
             }
             else
             {
-                var selectable = new JTokenSelectable(MissionSelectable.SetModified, conditionObject,
+                var selectable = new JTokenSelectable(SetModified, conditionObject,
                     "scriptableCondition", "scriptableCondition");
                 Children.Add(selectable);
                 return selectable;

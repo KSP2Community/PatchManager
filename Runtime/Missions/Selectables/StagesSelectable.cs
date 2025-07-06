@@ -22,6 +22,15 @@ namespace PatchManager.Missions.Selectables
         /// </summary>
         public JArray Stages;
 
+        public void SetModified()
+        {
+            MissionSelectable.SetModified();
+        }
+        public override bool WasModified => MissionSelectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         /// <summary>
         /// Creates a new stages selectable.
         /// </summary>
@@ -73,11 +82,12 @@ namespace PatchManager.Missions.Selectables
             other is StagesSelectable stagesSelectable && stagesSelectable.Stages == Stages;
 
         /// <inheritdoc/>
-        public override IModifiable OpenModification() => new JTokenModifiable(Stages, MissionSelectable.SetModified);
+        public override IModifiable OpenModification() => new JTokenModifiable(Stages, SetModified);
 
         /// <inheritdoc/>
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var num = long.Parse(elementType[1..]);
             var obj = new MissionStage
             {

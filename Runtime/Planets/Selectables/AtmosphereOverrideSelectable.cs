@@ -9,10 +9,13 @@ namespace PatchManager.Planets.Selectables
 {
     public sealed class AtmosphereOverrideSelectable : BaseSelectable
     {
-    #pragma warning disable CS0414 // Field is assigned but its value is never used
         private bool _modified;
-    #pragma warning restore CS0414 // Field is assigned but its value is never used
-        private bool _deleted;
+        public bool Deleted;
+        public override bool WasModified => _modified;
+        public override void ClearModified()
+        {
+            _modified = false;
+        }
 
         /// <summary>
         /// Marks this part selectable as having been modified any level down
@@ -28,7 +31,7 @@ namespace PatchManager.Planets.Selectables
         public void SetDeleted()
         {
             SetModified();
-            _deleted = true;
+            Deleted = true;
         }
 
         public readonly JObject AtmosphereOverrideObject;
@@ -68,7 +71,7 @@ namespace PatchManager.Planets.Selectables
         public override ISelectable AddElement(string elementType) =>
             throw new Exception("Adding elements to atmosphere overrides is not allowed");
         /// <inheritdoc />
-        public override string Serialize() => _deleted ? "" : AtmosphereOverrideObject.ToString();
+        public override string Serialize() => Deleted ? "" : AtmosphereOverrideObject.ToString();
 
         /// <inheritdoc />
         public override DataValue GetValue() => DataValue.FromJToken(AtmosphereOverrideObject);

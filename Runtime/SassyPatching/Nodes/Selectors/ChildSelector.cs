@@ -48,8 +48,8 @@ namespace PatchManager.SassyPatching.Nodes.Selectors
         }
 
         /// <inheritdoc />
-        public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject) =>
-            SelectChildren(Parent.SelectAllTopLevel(type, name, data, baseEnvironment, out rulesetMatchingObject));
+        public override List<SelectableWithEnvironment> SelectAllTopLevel(ISelectable inSelectable, Environment baseEnvironment) =>
+            SelectChildren(Parent.SelectAllTopLevel(inSelectable, baseEnvironment));
 
         public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset) =>
             SelectChildren(Parent.CreateNew(rulesetArguments, baseEnvironment, out newAsset));

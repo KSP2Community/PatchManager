@@ -27,6 +27,15 @@ namespace PatchManager.Parts.Selectables
         /// </summary>
         public readonly PartSelectable Selectable;
 
+        public void SetModified()
+        {
+            Selectable.SetModified();
+        }
+        public override bool WasModified => Selectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         /// <summary>
         /// Initialize the selectable
         /// </summary>
@@ -109,18 +118,19 @@ namespace PatchManager.Parts.Selectables
             SerializedData == dataEngineSelectable.SerializedData;
 
         /// <inheritdoc />
-        public override IModifiable OpenModification() => new JTokenModifiable(SerializedData, Selectable.SetModified);
+        public override IModifiable OpenModification() => new JTokenModifiable(SerializedData, SetModified);
 
         /// <inheritdoc />
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var engineModeData = new Data_Engine.EngineMode()
             {
                 engineID = elementType
             };
             var json = JObject.FromObject(engineModeData);
             ((JArray)SerializedData["engineModes"]).Add(json);
-            return new JTokenSelectable(Selectable.SetModified, json, mode => mode["engineID"].Value<string>(),
+            return new JTokenSelectable(SetModified, json, mode => mode["engineID"].Value<string>(),
                 "engine_mode");
         }
 

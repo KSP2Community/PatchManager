@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
@@ -27,33 +28,15 @@ namespace PatchManager.SassyPatching.Nodes.Selectors
         }
 
         /// <inheritdoc />
-        public override List<SelectableWithEnvironment> SelectAllTopLevel(string type, string name, string data, Environment baseEnvironment, out ISelectable rulesetMatchingObject)
+        public override List<SelectableWithEnvironment> SelectAllTopLevel(ISelectable selectable, Environment baseEnvironment)
         {
-            if (!Universe.RuleSets.TryGetValue(RulesetName, out var ruleSet))
+            return new List<SelectableWithEnvironment> { new ()
             {
-                throw new InterpreterException(Coordinate, $"Ruleset: {RulesetName} does not exist!");
-            }
-
-            if (ruleSet.Matches(type))
-            {
-                rulesetMatchingObject = ruleSet.ConvertToSelectable(type, name,data);
-                if (rulesetMatchingObject != null)
-                {
-                    return
-                        new List<SelectableWithEnvironment>
-                        {
-                            new()
-                            {
-                                Selectable = rulesetMatchingObject,
-                                Environment = new Environment(baseEnvironment.GlobalEnvironment, baseEnvironment)
-                            }
-                        };
-                }
-            }
-            rulesetMatchingObject = null;
-            return new List<SelectableWithEnvironment> { };
-
+                Selectable = selectable,
+                Environment = new Environment(baseEnvironment.GlobalEnvironment, baseEnvironment)
+            }};
         }
+        
 
         public override List<SelectableWithEnvironment> CreateNew(List<DataValue> rulesetArguments, Environment baseEnvironment, out INewAsset newAsset)
         {

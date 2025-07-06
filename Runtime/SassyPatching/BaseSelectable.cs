@@ -15,7 +15,7 @@ namespace PatchManager.SassyPatching
         /// The children of this selectable
         /// </summary>
         public abstract List<ISelectable> Children { get; }
-
+        
         /// <inheritdoc />
         public List<ISelectable> SelectEverything() => Children;
 
@@ -69,5 +69,9 @@ namespace PatchManager.SassyPatching
         /// <inheritdoc />
 
         public abstract DataValue GetValue();
+
+        public abstract bool WasModified { get; }
+
+        public abstract void ClearModified();
     }
 }

@@ -14,14 +14,24 @@ namespace PatchManager.Resources.Rulesets
     [PatcherRuleset("resource_units","resource_units")]
     public class ResourceUnitRuleset : IPatcherRuleSet
     {
-        public bool Matches(string label) => label == "resource_units";
+
+        public string[] Labels => new [] {"resource_units"};
 
         public ISelectable ConvertToSelectable(string type, string name, string jsonData) => new JTokenSelectable(() =>
         {
         }, JObject.Parse(jsonData), name, type);
 
+        public bool CanIngestSelectable(ISelectable selectable) => selectable is JTokenSelectable;
+
+        public bool CanGetAssetNameFromSelectableName => false;
+
         private static int _globallyIncrementingId = 0;
-        
+
+        public string SelectableNameToAssetName(string selectableName)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public INewAsset CreateNew(List<DataValue> dataValues)
         {
             var id = _globallyIncrementingId++;

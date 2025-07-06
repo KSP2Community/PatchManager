@@ -12,9 +12,15 @@ namespace PatchManager.Resources.Selectables
     /// </summary>
     public sealed class RecipeSelectable : BaseSelectable
     {
-
+        private bool _needToReconstruct;
         private bool _modified;
-        private bool _deleted;
+        public override bool WasModified => _modified;
+        public override void ClearModified()
+        {
+            _modified = false;
+        }
+
+        public bool Deleted;
         private readonly string _originalData;
         internal readonly JObject JObject;
         internal readonly JArray Ingredients;
@@ -25,6 +31,7 @@ namespace PatchManager.Resources.Selectables
         /// </summary>
         public void SetModified()
         {
+            _needToReconstruct = true;
             _modified = true;
         }
 
@@ -34,7 +41,7 @@ namespace PatchManager.Resources.Selectables
         public void SetDeleted()
         {
             SetModified();
-            _deleted = true;
+            Deleted = true;
         }
 
         internal RecipeSelectable(string data)
@@ -110,7 +117,7 @@ namespace PatchManager.Resources.Selectables
         }
 
         /// <inheritdoc />
-        public override string Serialize() => _modified ? _deleted ? "" : JObject.ToString() : _originalData;
+        public override string Serialize() => _needToReconstruct ? Deleted ? "" : JObject.ToString() : _originalData;
 
         /// <inheritdoc />
         public override DataValue GetValue() => OpenModification().Get();

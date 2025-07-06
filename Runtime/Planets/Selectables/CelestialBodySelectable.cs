@@ -9,10 +9,14 @@ namespace PatchManager.Planets.Selectables
 {
     public sealed class CelestialBodySelectable : BaseSelectable
     {
-    #pragma warning disable CS0414 // Field is assigned but its value is never used
         private bool _modified;
-    #pragma warning restore CS0414 // Field is assigned but its value is never used
-        private bool _deleted;
+        public override bool WasModified => _modified;
+        public override void ClearModified()
+        {
+            _modified = false;
+        }
+
+        public bool Deleted;
 
         /// <summary>
         /// Marks this part selectable as having been modified any level down
@@ -28,7 +32,7 @@ namespace PatchManager.Planets.Selectables
         public void SetDeleted()
         {
             SetModified();
-            _deleted = true;
+            Deleted = true;
         }
 
         public JObject CelestialBodyObject;
@@ -67,6 +71,7 @@ namespace PatchManager.Planets.Selectables
 
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             var obj = new JObject();
             DataObject[elementType] = obj;
             var n = new JTokenSelectable(SetModified, obj, elementType);
@@ -74,7 +79,7 @@ namespace PatchManager.Planets.Selectables
             return n;
         }
 
-        public override string Serialize() => _deleted ? "" : CelestialBodyObject.ToString();
+        public override string Serialize() => Deleted ? "" : CelestialBodyObject.ToString();
 
         public override DataValue GetValue() => DataValue.FromJToken(DataObject);
 

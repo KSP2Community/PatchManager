@@ -27,6 +27,15 @@ namespace PatchManager.Parts.Selectables
 
         private Dictionary<string, int> _dataIndices;
 
+        public void SetModified()
+        {
+            Selectable.SetModified();
+        }
+        public override bool WasModified => Selectable.WasModified;
+        public override void ClearModified()
+        {
+        }
+
         /// <inheritdoc />
         public ModuleSelectable(JToken token, PartSelectable selectable)
         {
@@ -58,7 +67,7 @@ namespace PatchManager.Parts.Selectables
             {
                 return (ISelectable)Activator.CreateInstance(adapterType, moduleData, this);
             }
-            return new JTokenSelectable(Selectable.SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
+            return new JTokenSelectable(SetModified, moduleData["DataObject"], moduleData["Name"].Value<string>());
         }
 
         /// <inheritdoc />
@@ -94,12 +103,13 @@ namespace PatchManager.Parts.Selectables
         /// <inheritdoc />
         public override IModifiable OpenModification()
         {
-            return new JTokenModifiable(SerializedData, Selectable.SetModified);
+            return new JTokenModifiable(SerializedData, SetModified);
         }
 
         /// <inheritdoc />
         public override ISelectable AddElement(string elementType)
         {
+            SetModified();
             if (!PartsUtilities.DataModules.TryGetValue(elementType, out var dataModuleType))
             {
                 throw new Exception($"Unknown data module {elementType}");
