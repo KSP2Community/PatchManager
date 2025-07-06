@@ -15,6 +15,7 @@ using UniLinq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 using FlowAction = PatchManager.Core.Flow.FlowAction;
 
@@ -76,11 +77,14 @@ namespace PatchManager.Core
             if (!isValid)
             {
                 _wasCacheInvalidated = true;
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,
-                    () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1,
-                    () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: loading Patches from Addressables",
+                    LoadPatchesFromAddressables));
+                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2,
+                    () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(3,
+                    () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(4,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
             else
@@ -88,6 +92,24 @@ namespace PatchManager.Core
                 SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
+        }
+
+        private static void RegisterAllPatches(Action resolve, Action<string> reject)
+        {
+            PatchingManager.RegisterPatches();
+            resolve();
+        }
+
+        private static void LoadPatchesFromAddressables(Action resolve, Action<string> reject)
+        {
+            var handle = GameManager.Instance.Assets.LoadAssetsAsync<TextAsset>(PATCH_LABEL, asset => { PatchingManager.ImportAssetPatch(asset, REDUX_MOD_ID); });
+            handle.Completed += result =>
+            {
+                if (result.Status == AsyncOperationStatus.Succeeded)
+                    resolve();
+                else
+                    reject("Failed to load patch assets!");
+            };
         }
 
         /// <inheritdoc />
@@ -123,16 +145,6 @@ namespace PatchManager.Core
                     .Replace("\\", "-")
             ).ToHashSet());
 
-            var handle = GameManager.Instance.Assets.LoadAssetsAsync<TextAsset>(PATCH_LABEL, asset =>
-            {
-                PatchingManager.ImportAssetPatch(asset, REDUX_MOD_ID);
-            });
-            handle.Completed += _ =>
-            {
-                Addressables.Release(handle);
-            };
-            handle.WaitForCompletion();
-
             foreach (var modFolder in modFolders)
             {
                 Logging.LogInfo($"Loading patchers from {modFolder.Folder}");
@@ -144,8 +156,6 @@ namespace PatchManager.Core
             {
                 PatchingManager.ImportSinglePatch(standalonePatch);
             }
-
-            PatchingManager.RegisterPatches();
         }
 
         /// <summary>
@@ -177,12 +187,13 @@ namespace PatchManager.Core
             if (_wasCacheInvalidated)
             {
                 text.text += $"Total amount of patches: {PatchingManager.TotalPatchCount}\n";
+                text.text += $"Total amount of errors: {PatchingManager.TotalErrorCount}\n";
             }
             else
             {
-                text.text += "Total amount of patches: Unknown (loaded from cache)\n";
+                text.text += $"Total amount of patches: {CacheManager.Inventory.PatchCount}\n";
+                text.text += $"Total amount of errors: {CacheManager.Inventory.ErrorCount}\n";
             }
-            text.text += $"Total amount of errors: {PatchingManager.TotalErrorCount}\n";
 
             text.text += "Patched labels:";
             foreach (var label in PatchingManager.Universe.LoadedLabels)

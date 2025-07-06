@@ -82,6 +82,16 @@ namespace PatchManager.Core.Cache
             CreateCacheFolderIfNotExists();
         }
 
+        public static void SetTotalPatchCount(int count)
+        {
+            Inventory.PatchCount = count;
+        }
+        
+        public static void SetTotalErrorCount(int count)
+        {
+            Inventory.ErrorCount = count;
+        }
+        
         public static void SaveInventory()
         {
             Inventory.Save(InventoryPath);

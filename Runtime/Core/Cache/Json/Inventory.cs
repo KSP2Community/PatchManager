@@ -31,6 +31,9 @@ namespace PatchManager.Core.Cache.Json
         [JsonProperty("patch_hashes", Required = Required.Always)]
         public PatchHashes Patches { get; internal set; }
 
+        [JsonProperty("patch_count")] public int PatchCount { get; internal set; } = 0;
+        [JsonProperty("error_count")] public int ErrorCount { get; internal set; } = 0;
+
         /// <summary>
         /// Get a <see cref="CacheEntry"/> by its label.
         /// </summary>

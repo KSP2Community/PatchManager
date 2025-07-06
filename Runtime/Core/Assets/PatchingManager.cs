@@ -350,6 +350,11 @@ namespace PatchManager.Core.Assets
             }
 
             InjectPatchManagerTips = !killLoadingBarTips;
+            if (killLoadingBarTips)
+            {
+                CacheManager.SetTotalPatchCount(TotalPatchCount);
+                CacheManager.SetTotalErrorCount(TotalErrorCount);
+            }
             resolve();
         }
     }
