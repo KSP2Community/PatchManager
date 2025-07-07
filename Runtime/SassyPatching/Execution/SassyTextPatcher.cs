@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Data;
 using Castle.Core.Internal;
 using JetBrains.Annotations;
+using PatchManager.Generic.SassyPatching.Rulesets;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.SassyPatching.Nodes.Attributes;
@@ -23,6 +25,7 @@ namespace PatchManager.SassyPatching.Execution
         private SelectionBlock _rootSelectionBlock;
         public IPatcherRuleSet RuleSet;
         [CanBeNull] public string AssetName;
+        [CanBeNull] public string AssetType; // We have one overload for asset types
         internal SassyTextPatcher(Environment environmentSnapshot, SelectionBlock rootSelectionBlock)
         {
             _environmentSnapshot = environmentSnapshot;
@@ -53,14 +56,15 @@ namespace PatchManager.SassyPatching.Execution
                             $"Ruleset {rulesetSelector.RulesetName} does not exist!");
                     }
                     RuleSet = ruleSet;
-                    if (RuleSet.CanGetAssetNameFromSelectableName && intersectionSelector.Selectors[1] is NameSelector nameSelector)
+                    if (RuleSet.CanGetAssetNameFromSelectableName && intersectionSelector.Selectors[1] is NameSelector nameSelector && !(nameSelector.NamePattern.Contains('*') || nameSelector.NamePattern.Contains('?')))
                     {
-                        if (nameSelector.NamePattern.Contains('*') || nameSelector.NamePattern.Contains('?'))
-                        {
-                            return;
-                        }
+                        AssetName = RuleSet.SelectableNameToAssetName(nameSelector.NamePattern.Interpolate(_environmentSnapshot));
+                    }
 
-                        AssetName = RuleSet.SelectableNameToAssetName(nameSelector.NamePattern);
+                    if (RuleSet is JsonRuleset jsonRuleset &&
+                        intersectionSelector.Selectors[1] is ElementSelector elementSelector)
+                    {
+                        AssetType = elementSelector.ElementName.Interpolate(_environmentSnapshot);
                     }
                 }
                 else

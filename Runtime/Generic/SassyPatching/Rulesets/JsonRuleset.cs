@@ -30,12 +30,9 @@ namespace PatchManager.Generic.SassyPatching.Rulesets
 
         public bool CanIngestSelectable(ISelectable selectable) => selectable is JTokenSelectable;
 
-        public bool CanGetAssetNameFromSelectableName => false;
+        public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string SelectableNameToAssetName(string selectableName) => selectableName;
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)
