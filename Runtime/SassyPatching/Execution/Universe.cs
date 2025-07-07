@@ -8,6 +8,7 @@ using PatchManager.SassyPatching.Nodes;
 using SassyPatchGrammar;
 using System.Reflection;
 using JetBrains.Annotations;
+using PatchManager.Generic.SassyPatching.Rulesets;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.NewAssets;
 using PatchManager.SassyPatching.Nodes.Expressions;
@@ -552,7 +553,18 @@ namespace PatchManager.SassyPatching.Execution
         private void RegisterPatcher(SassyTextPatcher patcher)
         {
             TotalPatchCount += 1;
-            if (patcher.RuleSet.Labels == null && patcher.AssetName == null)
+            if (patcher.RuleSet is JsonRuleset && patcher.AssetType != null)
+            {
+                if (LabelPatches.TryGetValue(patcher.AssetType, out var patchers))
+                {
+                    AddSorted(patchers, patcher);
+                }
+                else
+                {
+                    LabelPatches[patcher.AssetType] = new List<SassyTextPatcher> {patcher};
+                }
+            }
+            else if (patcher.RuleSet.Labels == null && patcher.AssetName == null)
             {
                 AddSorted(GenericPatches, patcher);
             } else if (patcher.RuleSet.Labels != null && patcher.AssetName == null)
