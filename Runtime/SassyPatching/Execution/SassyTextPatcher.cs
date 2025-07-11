@@ -24,7 +24,7 @@ namespace PatchManager.SassyPatching.Execution
         private Environment _environmentSnapshot;
         private SelectionBlock _rootSelectionBlock;
         public IPatcherRuleSet RuleSet;
-        [CanBeNull] public string AssetName;
+        [CanBeNull] public string[] AssetName;
         [CanBeNull] public string AssetType; // We have one overload for asset types
         internal SassyTextPatcher(Environment environmentSnapshot, SelectionBlock rootSelectionBlock)
         {

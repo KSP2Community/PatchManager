@@ -9,7 +9,7 @@ using PatchManager.Planets.Selectables;
 
 namespace PatchManager.Planets.Rulesets
 {
-    [PatcherRuleset("body","celestial_bodies")]
+    [PatcherRuleset("body", "celestial_bodies")]
     public class CelestialBodyRuleset : IPatcherRuleSet
     {
         public string[] Labels => new[] { "celestial_bodies" };
@@ -24,7 +24,8 @@ namespace PatchManager.Planets.Rulesets
 
         public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName) => selectableName;
+        public string[] SelectableNameToAssetName(string selectableName) => new[]
+            { selectableName };
 
         public INewAsset CreateNew(List<DataValue> dataValues)
         {

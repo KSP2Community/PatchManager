@@ -29,7 +29,7 @@ namespace PatchManager.Science.Rulesets
         
         // TODO: Evaluate whether or not this is the case
         public bool CanGetAssetNameFromSelectableName => true;
-        public string SelectableNameToAssetName(string selectableName) => selectableName;
+        public string[] SelectableNameToAssetName(string selectableName) => new [] { selectableName };
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)

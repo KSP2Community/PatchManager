@@ -27,7 +27,7 @@ namespace PatchManager.Resources.Rulesets
 
         private static int _globallyIncrementingId = 0;
 
-        public string SelectableNameToAssetName(string selectableName)
+        public string[] SelectableNameToAssetName(string selectableName)
         {
             throw new System.NotImplementedException();
         }

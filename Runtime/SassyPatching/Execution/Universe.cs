@@ -582,35 +582,42 @@ namespace PatchManager.SassyPatching.Execution
                 }
             } else if (patcher.RuleSet.Labels == null && patcher.AssetName != null)
             {
-                if (NamePatches.TryGetValue(patcher.AssetName, out var patchers))
+                foreach (var name in patcher.AssetName)
                 {
-                    AddSorted(patchers, patcher);
-                }
-                else
-                {
-                    NamePatches[patcher.AssetName] = new List<SassyTextPatcher> { patcher };
+                    if (NamePatches.TryGetValue(name, out var patchers))
+                    {
+                        AddSorted(patchers, patcher);
+                    }
+                    else
+                    {
+                        NamePatches[name] = new List<SassyTextPatcher> { patcher };
+                    }
                 }
             } else if (patcher.RuleSet.Labels != null && patcher.AssetName != null)
             {
                 foreach (var label in patcher.RuleSet.Labels)
                 {
-                    if (LabelNamePatches.TryGetValue(label, out var namePatchers))
+                    foreach (var name in patcher.AssetName)
                     {
-                        if (namePatchers.TryGetValue(patcher.AssetName, out var patchers))
+                        
+                        if (LabelNamePatches.TryGetValue(label, out var namePatchers))
                         {
-                            AddSorted(patchers, patcher);
+                            if (namePatchers.TryGetValue(name, out var patchers))
+                            {
+                                AddSorted(patchers, patcher);
+                            }
+                            else
+                            {
+                                namePatchers[name] = new List<SassyTextPatcher> { patcher };
+                            }
                         }
                         else
                         {
-                            namePatchers[patcher.AssetName] = new List<SassyTextPatcher> { patcher };
+                            LabelNamePatches[label] = new Dictionary<string, List<SassyTextPatcher>>
+                            {
+                                [name] = new() { patcher }
+                            };
                         }
-                    }
-                    else
-                    {
-                        LabelNamePatches[label] = new Dictionary<string, List<SassyTextPatcher>>
-                        {
-                            [patcher.AssetName] = new() { patcher }
-                        };
                     }
                 }
             }

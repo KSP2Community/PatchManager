@@ -34,7 +34,7 @@ namespace PatchManager.SassyPatching.Interfaces
         
         public bool CanGetAssetNameFromSelectableName { get; }
 
-        public string SelectableNameToAssetName(string selectableName);
+        public string[] SelectableNameToAssetName(string selectableName);
         
         /// <summary>
         /// Creates a new asset for the patcher

@@ -22,7 +22,7 @@ namespace PatchManager.Planets.Rulesets
 
         public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName) => $"volume_cloud_override_{selectableName.ToLowerInvariant()}";
+        public string[] SelectableNameToAssetName(string selectableName) => new [] {$"volume_cloud_override_{selectableName.ToLowerInvariant()}"};
 
         public INewAsset CreateNew(List<DataValue> dataValues)
         {

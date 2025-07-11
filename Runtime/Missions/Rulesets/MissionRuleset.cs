@@ -30,7 +30,14 @@ namespace PatchManager.Missions.Rulesets
         // TODO: Validate
         public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName) => selectableName;
+        public string[] SelectableNameToAssetName(string selectableName) => new[]
+        {
+            selectableName,
+            // For the main KSP2 missions
+            $"KSP2Mission_{selectableName}",
+            // For the tutorial missions
+            selectableName.Replace(' ','_')
+        };
 
         /// <inheritdoc/>
         public INewAsset CreateNew(List<DataValue> dataValues)

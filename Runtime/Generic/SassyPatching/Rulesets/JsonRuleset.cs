@@ -32,7 +32,7 @@ namespace PatchManager.Generic.SassyPatching.Rulesets
 
         public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName) => selectableName;
+        public string[] SelectableNameToAssetName(string selectableName) => new [] {selectableName};
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)

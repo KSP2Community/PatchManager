@@ -39,7 +39,7 @@ namespace PatchManager.Resources.Rulesets
         // TODO: Validate
         public bool CanGetAssetNameFromSelectableName => false;
 
-        public string SelectableNameToAssetName(string selectableName)
+        public string[] SelectableNameToAssetName(string selectableName)
         {
             throw new System.NotImplementedException();
         }

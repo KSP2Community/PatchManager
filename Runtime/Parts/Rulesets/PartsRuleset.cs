@@ -43,7 +43,7 @@ namespace PatchManager.Parts.Rulesets
 
         public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName) => selectableName;
+        public string[] SelectableNameToAssetName(string selectableName) => new[] {selectableName};
 
         /// <inheritdoc />
         /// <summary>

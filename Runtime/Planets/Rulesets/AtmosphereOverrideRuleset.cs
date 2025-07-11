@@ -24,7 +24,7 @@ namespace PatchManager.Planets.Rulesets
 
         public bool CanGetAssetNameFromSelectableName => true;
 
-        public string SelectableNameToAssetName(string selectableName) => $"atmosphere_override_{selectableName.ToLowerInvariant()}";
+        public string[] SelectableNameToAssetName(string selectableName) => new [] { $"atmosphere_override_{selectableName.ToLowerInvariant()}" };
 
         public INewAsset CreateNew(List<DataValue> dataValues)
         {

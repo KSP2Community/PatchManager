@@ -34,7 +34,7 @@ namespace PatchManager.Planets.Rulesets
         
         public bool CanGetAssetNameFromSelectableName => false;
 
-        public string SelectableNameToAssetName(string selectableName) => $"GalaxyDefinition_{selectableName}";
+        public string[] SelectableNameToAssetName(string selectableName) => new [] {$"GalaxyDefinition_{selectableName}"};
 
         /// <inheritdoc />
         public INewAsset CreateNew(List<DataValue> dataValues)
