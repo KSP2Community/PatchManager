@@ -10,7 +10,7 @@ using PatchManager.SassyPatching.Execution;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using ReduxLib.Configuration;
-using SpaceWarp.API.Mods.JSON;
+using SpaceWarp2.API.Mods.JSON;
 using UniLinq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -66,7 +66,7 @@ namespace PatchManager.Core
         /// </summary>
         public override void Init()
         {
-            if (_shouldAlwaysInvalidate.Value || SpaceWarp.API.Mods.PluginList.ModListChangedSinceLastRun)
+            if (_shouldAlwaysInvalidate.Value || SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
             {
                 CacheManager.CreateCacheFolderIfNotExists();
                 CacheManager.InvalidateCache();
@@ -77,19 +77,19 @@ namespace PatchManager.Core
             if (!isValid)
             {
                 _wasCacheInvalidated = true;
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: loading Patches from Addressables",
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: loading Patches from Addressables",
                     LoadPatchesFromAddressables));
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(1, () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(2,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1, () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(2,
                     () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(3,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
                     () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(4,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
             else
             {
-                SpaceWarp.API.Loading.Loading.GeneralLoadingActions.Insert(0,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
         }
@@ -116,10 +116,10 @@ namespace PatchManager.Core
         public override void PreLoad()
         {
             // Go here instead so that the static constructor recognizes everything
-            var disabledPlugins = File.ReadAllText(SpaceWarp.API.CommonPaths.DisabledPlugins)
+            var disabledPlugins = File.ReadAllText(SpaceWarp2.API.CommonPaths.DisabledPlugins)
                 .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
 
-            var modFolders = Directory.GetDirectories(SpaceWarp.API.CommonPaths.ModsFolder, "*", SearchOption.AllDirectories)
+            var modFolders = Directory.GetDirectories(SpaceWarp2.API.CommonPaths.ModsFolder, "*", SearchOption.AllDirectories)
                 .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
                 .Select(x => (
                     Folder: x,
@@ -130,7 +130,7 @@ namespace PatchManager.Core
             var gameRoot = new DirectoryInfo(".");
 
             var standalonePatches = Directory.EnumerateFiles(
-                    SpaceWarp.API.CommonPaths.ModsFolder,
+                    SpaceWarp2.API.CommonPaths.ModsFolder,
                     "*.patch",
                     SearchOption.AllDirectories
                 )

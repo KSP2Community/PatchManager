@@ -10,7 +10,7 @@ using PatchManager.Core.Utility;
 using PatchManager.SassyPatching.Execution;
 using PatchManager.SassyPatching.Interfaces;
 using PatchManager.Shared;
-using SpaceWarp.API.Mods;
+using SpaceWarp2.API.Mods;
 using UniLinq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;

@@ -2,7 +2,7 @@
 using KSP.Game.Flow;
 using PatchManager.Shared;
 using ReduxLib.GameInterfaces;
-using SpaceWarp.API.Loading;
+using SpaceWarp2.API.Loading;
 
 namespace PatchManager.Core.Flow
 {

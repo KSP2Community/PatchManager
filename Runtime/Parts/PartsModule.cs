@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using PatchManager.Parts.Patchers;
 using PatchManager.Shared.Modules;
-using SpaceWarp.API.Loading;
+using SpaceWarp2.API.Loading;
 
 namespace PatchManager.Parts
 {

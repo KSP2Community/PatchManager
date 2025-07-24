@@ -89,7 +89,7 @@ namespace PatchManager
                 return detailsContainer;
             }
 
-            SpaceWarp.UI.API.ModList.RegisterDetailsFoldoutGenerator("PatchManager", GeneratePatchManagerText);
+            SpaceWarp2.UI.API.ModList.RegisterDetailsFoldoutGenerator("PatchManager", GeneratePatchManagerText);
         }
     }
 }
