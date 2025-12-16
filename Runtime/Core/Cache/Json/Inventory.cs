@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PatchManager.Shared;
 using UniLinq;
 
@@ -33,6 +34,9 @@ namespace PatchManager.Core.Cache.Json
 
         [JsonProperty("patch_count")] public int PatchCount { get; internal set; } = 0;
         [JsonProperty("error_count")] public int ErrorCount { get; internal set; } = 0;
+
+        [JsonProperty("serialized_configs")]
+        public Dictionary<string, Dictionary<string, JToken>> SerializedConfigs { get; internal set; } = new();
 
         /// <summary>
         /// Get a <see cref="CacheEntry"/> by its label.

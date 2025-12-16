@@ -8,6 +8,7 @@ using PatchManager.SassyPatching.Nodes;
 using SassyPatchGrammar;
 using System.Reflection;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 using PatchManager.Generic.SassyPatching.Rulesets;
 using PatchManager.SassyPatching.Exceptions;
 using PatchManager.SassyPatching.NewAssets;
@@ -17,6 +18,7 @@ using PatchManager.Shared;
 using UniLinq;
 using Unity.VisualScripting;
 using UnityEngine;
+using VSwift.Modules.Extensions;
 
 namespace PatchManager.SassyPatching.Execution
 {
@@ -97,6 +99,41 @@ namespace PatchManager.SassyPatching.Execution
             ConfigUpdates.Add((priority, label, name, updateExpression,snapshot));
         }
 #nullable disable
+
+        /// <summary>
+        /// Exports all the config values in this universe into a dictionary of dictionaries
+        /// </summary>
+        /// <returns>The exported configuration values</returns>
+        public Dictionary<string, Dictionary<string, JToken>> ExportConfigs()
+        {
+            Dictionary<string, Dictionary<string, JToken>> export = new();
+            foreach (var kvp in Configs)
+            {
+                export[kvp.Key] = new Dictionary<string, JToken>();
+                foreach (var kvp2 in kvp.Value)
+                {
+                    export[kvp.Key][kvp2.Key] = kvp2.ToJToken();
+                }
+            }
+            return export;
+        }
+
+        /// <summary>
+        /// Updates the configuration values from a dictionary of dictionaries
+        /// </summary>
+        /// <param name="import">The previously exported configuration values</param>
+        public void ImportConfigs(Dictionary<string, Dictionary<string, JToken>> import)
+        {
+            foreach (var kvp in import)
+            {
+                if (!Configs.ContainsKey(kvp.Key)) Configs[kvp.Key] = new Dictionary<string, DataValue>();
+                foreach (var kvp2 in kvp.Value)
+                {
+                    Configs[kvp.Key][kvp2.Key] = DataValue.FromJToken(kvp2.Value);
+                }
+            }
+        }
+        
         /// <summary>
         /// All stages defined by every mod
         /// </summary>

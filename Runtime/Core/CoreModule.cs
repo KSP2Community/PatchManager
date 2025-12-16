@@ -84,12 +84,14 @@ namespace PatchManager.Core
                     () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
                     () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4, () => new FlowAction("Patch Manager: Exporting configurations", PatchingManager.ExportConfigurations));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(5,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
             else
             {
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: Importing previous configurations", PatchingManager.ImportConfigurations));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
         }

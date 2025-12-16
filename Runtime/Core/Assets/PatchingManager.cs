@@ -357,5 +357,17 @@ namespace PatchManager.Core.Assets
             }
             resolve();
         }
+
+        public static void ImportConfigurations(Action resolve, Action<string> reject)
+        {
+            Universe.ImportConfigs(CacheManager.Inventory.SerializedConfigs);
+            resolve();
+        }
+
+        public static void ExportConfigurations(Action resolve, Action<string> reject)
+        {
+            CacheManager.Inventory.SerializedConfigs = Universe.ExportConfigs();
+            resolve();
+        }
     }
 }
