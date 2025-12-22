@@ -71,13 +71,21 @@ namespace PatchManager.SassyPatching.Execution
                 {
                     RecursivelyFindRuleSet(intersectionSelector.Selectors[0]);
                 }
-            } else if (selector is ChildSelector childSelector)
+            } 
+            else if (selector is ChildSelector childSelector)
             {
                 RecursivelyFindRuleSet(childSelector.Parent);
             }
+            else if (selector is RulesetSelector rulesetSelector)
+            {
+                if (!Universe.RuleSets.TryGetValue(rulesetSelector.RulesetName, out var ruleSet))
+                {
+                    throw new InterpreterException(rulesetSelector.Coordinate,
+                        $"Ruleset {rulesetSelector.RulesetName} does not exist!");
+                }
+                RuleSet = ruleSet;
+            }
         }
-        
-        
 
         public string OriginalGuid { get; }
         public string PriorityString { get; }
