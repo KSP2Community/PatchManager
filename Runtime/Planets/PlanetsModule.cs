@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using JetBrains.Annotations;
 using KSP.Game;
 using KSP.IO;
 using Newtonsoft.Json;
@@ -23,16 +21,24 @@ namespace PatchManager.Planets
             var volumeCloud = IOProvider.FromJson<VolumeCloudConfigurationOverride>(volumeCloudOverride.text);
             OverrideManager.VolumeCloudOverrides[volumeCloud.bodyName.ToLowerInvariant()] = volumeCloud;
         }
-    
+
         /// <summary>
         /// Runs when the mod is first initialized.
         /// </summary>
         public override void Load()
         {
-            GameManager.Instance.Assets.LoadByLabel("atmosphere_overrides", RegisterAtmosphereOverride,
-                delegate(IList<TextAsset> assetLocations) { Addressables.Release(assetLocations); });
-            GameManager.Instance.Assets.LoadByLabel("volume_cloud_overrides", RegisterVolumeCloudOverride, 
-                delegate(IList<TextAsset> assetLocations) { Addressables.Release(assetLocations); });
+            GameManager.Instance.Assets.LoadByLabel<TextAsset>(
+                "atmosphere_overrides",
+                RegisterAtmosphereOverride,
+                Addressables.Release,
+                false
+            );
+            GameManager.Instance.Assets.LoadByLabel<TextAsset>(
+                "volume_cloud_overrides",
+                RegisterVolumeCloudOverride,
+                Addressables.Release,
+                false
+            );
         }
     }
 }
