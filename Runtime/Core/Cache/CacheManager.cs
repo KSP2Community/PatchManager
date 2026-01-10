@@ -91,6 +91,16 @@ namespace PatchManager.Core.Cache
         {
             Inventory.ErrorCount = count;
         }
+
+        public static void SetTotalDefinitionCount(int count)
+        {
+            Inventory.DefinitionCount = count;
+        }
+        
+        public static void SetTotalAssetCount(int count)
+        {
+            Inventory.NewAssetCount = count;
+        }
         
         public static void SaveInventory()
         {

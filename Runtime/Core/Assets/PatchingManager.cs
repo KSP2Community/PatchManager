@@ -29,6 +29,8 @@ namespace PatchManager.Core.Assets
 
         internal static int TotalPatchCount;
         internal static int TotalErrorCount;
+        internal static int TotalNewAssetCount;
+        internal static int TotalDefinitionPatchCount;
 
         public static void GenerateUniverse(HashSet<string> singleFileModIds)
         {
@@ -81,6 +83,7 @@ namespace PatchManager.Core.Assets
             if (patchCount > 0)
             {
                 Logging.LogInfo($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+                TotalDefinitionPatchCount += 1;
             }
 
             return text;
@@ -296,20 +299,21 @@ namespace PatchManager.Core.Assets
                 }
                 catch (Exception e)
                 {
+                    TotalErrorCount += 1;
                     Logging.LogError($"Failed to generate an asset due to: {e}");
                 }
             }
+            
+            TotalNewAssetCount = Universe.Generators.Count;
+            UpdateLoadingBarData();
 
             resolve();
         }
 
-        internal static bool InjectPatchManagerTips = false;
 
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
             var distinctKeys = Universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
-
-            InjectPatchManagerTips = true;
 
             GenericFlowAction CreateIndexedFlowAction(int idx)
             {
@@ -339,23 +343,38 @@ namespace PatchManager.Core.Assets
         private static IEnumerator WaitForCacheRebuildSingleHandle(
             AsyncOperationHandle<IList<TextAsset>> handle,
             Action resolve,
-            bool killLoadingBarTips
+            bool isFinalHandle
         )
         {
             while (!handle.IsDone)
             {
                 // "Shuffle" it
-                GameManager.Instance.Game.UI.LoadingBar.ShuffleLoadingTip();
+                UpdateLoadingBarData();
                 yield return null;
             }
 
-            InjectPatchManagerTips = !killLoadingBarTips;
-            if (killLoadingBarTips)
+            if (isFinalHandle)
             {
                 CacheManager.SetTotalPatchCount(TotalPatchCount);
                 CacheManager.SetTotalErrorCount(TotalErrorCount);
+                CacheManager.SetTotalDefinitionCount(TotalDefinitionPatchCount);
+                CacheManager.SetTotalAssetCount(TotalNewAssetCount);
             }
             resolve();
+        }
+
+        private static void UpdateLoadingBarData()
+        {
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
+                TotalDefinitionPatchCount;
+            
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerErrorCount =
+                TotalErrorCount;
+
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =
+                TotalNewAssetCount;
+            
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerPatchCount = TotalPatchCount;
         }
 
         public static void ImportConfigurations(Action resolve, Action<string> reject)

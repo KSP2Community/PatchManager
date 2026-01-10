@@ -167,6 +167,15 @@ namespace PatchManager.Core
         {
             Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
             Locators.Register(new ArchiveResourceLocator());
+            // Perfect place to load the patch manager information from the old inventory as well
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
+                CacheManager.Inventory.DefinitionCount;
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =
+                CacheManager.Inventory.NewAssetCount;
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerPatchCount =
+                CacheManager.Inventory.PatchCount;
+            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerErrorCount =
+                CacheManager.Inventory.ErrorCount;
             resolve();
         }
 

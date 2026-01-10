@@ -34,6 +34,8 @@ namespace PatchManager.Core.Cache.Json
 
         [JsonProperty("patch_count")] public int PatchCount { get; internal set; } = 0;
         [JsonProperty("error_count")] public int ErrorCount { get; internal set; } = 0;
+        [JsonProperty("definition_count")] public int DefinitionCount { get; internal set; } = 0;
+        [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; } = 0;
 
         [JsonProperty("serialized_configs")]
         public Dictionary<string, Dictionary<string, JToken>> SerializedConfigs { get; internal set; } = new();
