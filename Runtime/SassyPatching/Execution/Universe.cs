@@ -9,14 +9,13 @@ using SassyPatchGrammar;
 using System.Reflection;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
+using PatchManager.Core.Assets;
 using PatchManager.Generic.SassyPatching.Rulesets;
 using PatchManager.SassyPatching.Exceptions;
-using PatchManager.SassyPatching.NewAssets;
 using PatchManager.SassyPatching.Nodes.Expressions;
 using PatchManager.SassyPatching.Utility;
 using PatchManager.Shared;
 using UniLinq;
-using Unity.VisualScripting;
 using UnityEngine;
 using VSwift.Modules.Extensions;
 
@@ -133,7 +132,7 @@ namespace PatchManager.SassyPatching.Execution
                 }
             }
         }
-        
+
         /// <summary>
         /// All stages defined by every mod
         /// </summary>
@@ -359,6 +358,7 @@ namespace PatchManager.SassyPatching.Execution
             catch (Exception e)
             {
                 ErrorLogger($"Could not run patch: {modId}:{name} due to: {e}");
+                PatchingManager.TotalErrorCount++;
             }
         }
 
@@ -394,6 +394,7 @@ namespace PatchManager.SassyPatching.Execution
             catch (Exception e)
             {
                 ErrorLogger($"Could not load library: {libName} due to: {e.Message}");
+                PatchingManager.TotalErrorCount++;
             }
         }
 
@@ -575,18 +576,18 @@ namespace PatchManager.SassyPatching.Execution
         {
             AllRawLibraries.Add($"{modId}:{name}", raw);
         }
-        
-        
+
+
         #region Patch running
 
-        
+
         public int TotalPatchCount;
         public List<SassyTextPatcher> GenericPatches = new();
         public Dictionary<string, List<SassyTextPatcher>> LabelPatches = new();
         public Dictionary<string, List<SassyTextPatcher>> NamePatches = new();
         public Dictionary<string, Dictionary<string, List<SassyTextPatcher>>> LabelNamePatches = new();
-        
-        
+
+
         private void RegisterPatcher(SassyTextPatcher patcher)
         {
             TotalPatchCount += 1;
@@ -636,7 +637,7 @@ namespace PatchManager.SassyPatching.Execution
                 {
                     foreach (var name in patcher.AssetName)
                     {
-                        
+
                         if (LabelNamePatches.TryGetValue(label, out var namePatchers))
                         {
                             if (namePatchers.TryGetValue(name, out var patchers))
@@ -673,7 +674,7 @@ namespace PatchManager.SassyPatching.Execution
                 patchers.Insert(index,patcher);
             }
         }
-        
+
         public string RunAllPatchesFor(string label, string name, string data, out int patchCount, out int errorCount)
         {
             patchCount = 0;
@@ -791,7 +792,7 @@ namespace PatchManager.SassyPatching.Execution
                         _genericIndex += 1;
                         return generic;
                     }
-                    
+
                     if (label != null && minPriority == label.Priority)
                     {
                         _labelIndex += 1;
@@ -814,7 +815,7 @@ namespace PatchManager.SassyPatching.Execution
                 }
             }
         }
-        
+
         #endregion
 
         public List<SassyGenerator> Generators = new();
