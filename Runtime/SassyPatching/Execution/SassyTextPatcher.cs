@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using Castle.Core.Internal;
+using Redux;
 using JetBrains.Annotations;
 using PatchManager.Generic.SassyPatching.Rulesets;
 using PatchManager.SassyPatching.Exceptions;
@@ -46,7 +46,7 @@ namespace PatchManager.SassyPatching.Execution
 
         private void RecursivelyFindRuleSet(Selector selector)
         {
-            if (selector is IntersectionSelector intersectionSelector) 
+            if (selector is IntersectionSelector intersectionSelector)
             {
                 if (intersectionSelector.Selectors[0] is RulesetSelector rulesetSelector)
                 {
@@ -71,7 +71,7 @@ namespace PatchManager.SassyPatching.Execution
                 {
                     RecursivelyFindRuleSet(intersectionSelector.Selectors[0]);
                 }
-            } 
+            }
             else if (selector is ChildSelector childSelector)
             {
                 RecursivelyFindRuleSet(childSelector.Parent);
@@ -108,7 +108,7 @@ namespace PatchManager.SassyPatching.Execution
                 shouldStop = true;
                 return false;
             }
-                
+
             previousSelectable = RuleSet.ConvertToSelectable(patchType, name, serialized);
             return _rootSelectionBlock.ExecuteFresh(_environmentSnapshot, previousSelectable);
         }
