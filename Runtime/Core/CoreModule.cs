@@ -66,7 +66,7 @@ namespace PatchManager.Core
         /// </summary>
         public override void Init()
         {
-            if (_shouldAlwaysInvalidate.Value || SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
+            if (Application.isEditor || _shouldAlwaysInvalidate.Value || SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
             {
                 CacheManager.CreateCacheFolderIfNotExists();
                 CacheManager.InvalidateCache();
