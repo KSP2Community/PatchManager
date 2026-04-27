@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.Reflection;
 using KSP.Game;
-using KSP.OAB;
-using KSP.Sim;
 using KSP.Sim.Definitions;
-using KSP.Sim.impl;
 using PatchManager.Shared;
+using Redux.Ksp1Import.Modules;
 using UniLinq;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -32,6 +31,13 @@ namespace PatchManager.Parts.Patchers
             foreach (var module in partData.serializedPartModules)
             {
                 var behaviourType = module.BehaviourType;
+                if (behaviourType == null || !typeof(Component).IsAssignableFrom(behaviourType))
+                {
+                    Logging.LogWarning(
+                        $"Skipping invalid part module behaviour on {partData.partName}: {behaviourType}");
+                    continue;
+                }
+
                 // Debug.Log($"ApplyOnGameObject - {partData.partName} testing {behaviourType.FullName}");
                 if (obj.GetComponent(behaviourType) != null)
                 {
@@ -40,6 +46,13 @@ namespace PatchManager.Parts.Patchers
 
                 // Debug.Log($"ApplyOnGameObject - {partData.partName} adding {behaviourType.FullName}");
                 var instance = obj.AddComponent(behaviourType);
+                if (instance == null)
+                {
+                    Logging.LogWarning(
+                        $"Unable to add part module behaviour {behaviourType.FullName} to {partData.partName}.");
+                    continue;
+                }
+
                 Logging.LogInfo(
                     $"Attempting to setup serialized fields on {partData.partName} of type {behaviourType}");
                 foreach (var field in behaviourType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
@@ -58,10 +71,30 @@ namespace PatchManager.Parts.Patchers
                     }
 
                     // Logging.LogInfo($"Field type {field.FieldType} is subclass of ModuleData, setting value");
-                    var data = module.ModuleData.FirstOrDefault(x => x.DataObject.GetType() == field.FieldType);
+                    var data = default(SerializedModuleData);
+                    var foundData = false;
+                    foreach (var moduleData in module.ModuleData)
+                    {
+                        if (moduleData.DataObject != null && moduleData.DataObject.GetType() == field.FieldType)
+                        {
+                            data = moduleData;
+                            foundData = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundData)
+                    {
+                        Logging.LogWarning(
+                            $"No serialized data of type {field.FieldType.FullName} found for module {behaviourType.FullName} on {partData.partName}.");
+                        continue;
+                    }
+
                     data.DataObject?.RebuildDataContext();
                     field.SetValue(instance, data.DataObject);
                 }
+
+                Ksp1PartModuleRuntimeSetup.Configure(instance, obj, partData);
             }
 
             foreach (var component in obj.GetComponents<PartBehaviourModule>())
@@ -70,6 +103,11 @@ namespace PatchManager.Parts.Patchers
                 var t = component.GetType();
                 if (partData.serializedPartModules.All(x => x.BehaviourType != t))
                 {
+                    if (IsRequiredBySerializedModule(t, partData))
+                    {
+                        continue;
+                    }
+
                     // Debug.Log($"ApplyOnGameObject - {partData.partName} removing {component.GetType().FullName}");
                     if (Application.isEditor)
                     {
@@ -83,6 +121,40 @@ namespace PatchManager.Parts.Patchers
             }
 
             gameObject = obj;
+        }
+
+        private static bool IsRequiredBySerializedModule(Type componentType, PartData partData)
+        {
+            foreach (var module in partData.serializedPartModules)
+            {
+                var behaviourType = module.BehaviourType;
+                if (behaviourType == null)
+                {
+                    continue;
+                }
+
+                foreach (var attribute in behaviourType.GetCustomAttributes(typeof(RequireComponent), true))
+                {
+                    if (attribute is RequireComponent requireComponent && RequiresComponent(requireComponent, componentType))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool RequiresComponent(RequireComponent requireComponent, Type componentType)
+        {
+            return RequiresComponent(requireComponent.m_Type0, componentType) ||
+                   RequiresComponent(requireComponent.m_Type1, componentType) ||
+                   RequiresComponent(requireComponent.m_Type2, componentType);
+        }
+
+        private static bool RequiresComponent(Type requiredType, Type componentType)
+        {
+            return requiredType != null && requiredType.IsAssignableFrom(componentType);
         }
     }
 }
