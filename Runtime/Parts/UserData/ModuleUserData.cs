@@ -57,7 +57,7 @@ public class ModuleUserData
         {
             return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, moduleData));
         }
-        return JsonUserData.GetFromJToken(moduleData);
+        return JsonUserData.GetFromJToken(moduleData["DataObject"]);
     }
 
     /// <summary>

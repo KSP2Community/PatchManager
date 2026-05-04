@@ -64,8 +64,8 @@ function PartUserData:HasModule(moduleType) end
 ---Iterable with `pairs()`; each iteration yields `(name, value)` pairs in declaration order.
 ---@class ModuleUserData : JsonUserData, SerializedPartModule
 ---@field Count integer Gets the number of data entries on this module.
----@field [string] EngineUserData | SerializedModuleDataUserData
----@field [integer] EngineUserData | SerializedModuleDataUserData
+---@field [string] EngineUserData | JsonUserData
+---@field [integer] EngineUserData | JsonUserData
 local ModuleUserData = {}
 
 ---Refreshes the data-name and conversion caches from the current state of the module's `ModuleData` array.
@@ -73,18 +73,18 @@ function ModuleUserData:RefreshData() end
 
 ---Adds a new module-data entry of the given type and runs callback against it.
 ---@param type string                                      The data module's short name as registered in `PartsUtilities.DataModules`.
----@param callback fun(entry: EngineUserData|SerializedModuleDataUserData) Callback that receives the new entry for further configuration.
+---@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the new entry for further configuration.
 ---@error Thrown when type is not a registered data module.
 function ModuleUserData:AddData(type, callback) end
 
 ---Runs callback against the existing data entry of the given type, doing nothing if absent.
 ---@param type string                                      The data module's short name.
----@param callback fun(entry: EngineUserData|SerializedModuleDataUserData) Callback that receives the existing entry for further configuration.
+---@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the existing entry for further configuration.
 function ModuleUserData:PatchData(type, callback) end
 
 ---Patches the named data entry if it exists, otherwise adds it.
 ---@param type string                                      The data module's short name.
----@param callback fun(entry: EngineUserData|SerializedModuleDataUserData) Callback that receives the entry for further configuration.
+---@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the entry for further configuration.
 function ModuleUserData:EnsureData(type, callback) end
 
 ---Removes the data entry of the given type from the module.
@@ -290,8 +290,6 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field DataType string
 ---@field DataObject ModuleDataPayload
 
----Synthetic wrapper around a single `ModuleData` entry of a `ModuleUserData` whose `DataType` does not have a registered `ModuleDataAdapter`.
----@class SerializedModuleDataUserData : JsonUserData, SerializedModuleData
 
 ---Represents the serialized resource relationship data for a part, describing the resources it consumes, generates, and contains.
 ---@class SerializedResourceInfo : JsonUserData
