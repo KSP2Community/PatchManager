@@ -6,7 +6,7 @@ using KSP.Game;
 using Newtonsoft.Json;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
-using PatchManager.SassyPatching.Execution;
+using PatchManager.LuaPatching;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using ReduxLib.Configuration;
@@ -66,7 +66,8 @@ namespace PatchManager.Core
         /// </summary>
         public override void Init()
         {
-            if (Application.isEditor || _shouldAlwaysInvalidate.Value || SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
+            if (Application.isEditor || _shouldAlwaysInvalidate.Value ||
+                SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
             {
                 CacheManager.CreateCacheFolderIfNotExists();
                 CacheManager.InvalidateCache();
@@ -77,21 +78,21 @@ namespace PatchManager.Core
             if (!isValid)
             {
                 _wasCacheInvalidated = true;
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: loading Patches from Addressables",
-                    LoadPatchesFromAddressables));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1, () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0, () =>
+                    new FlowAction("Patch Manager: loading Patches from Addressables",
+                        LoadPatchesFromAddressables));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
+                    () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(2,
                     () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
                     () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4, () => new FlowAction("Patch Manager: Exporting configurations", PatchingManager.ExportConfigurations));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(5,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
             else
             {
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0, () => new FlowAction("Patch Manager: Importing previous configurations", PatchingManager.ImportConfigurations));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
         }
@@ -104,7 +105,8 @@ namespace PatchManager.Core
 
         private static void LoadPatchesFromAddressables(Action resolve, Action<string> reject)
         {
-            var handle = GameManager.Instance.Assets.LoadAssetsAsync<TextAsset>(PATCH_LABEL, asset => { PatchingManager.ImportAssetPatch(asset, REDUX_MOD_ID); });
+            var handle = GameManager.Instance.Assets.LoadAssetsAsync<TextAsset>(PATCH_LABEL,
+                asset => { PatchingManager.ImportAssetPatch(asset, REDUX_MOD_ID); });
             handle.Completed += result =>
             {
                 if (result.Status == AsyncOperationStatus.Succeeded)
@@ -121,7 +123,8 @@ namespace PatchManager.Core
             var disabledPlugins = File.ReadAllText(SpaceWarp2.API.CommonPaths.DisabledPlugins)
                 .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
 
-            var modFolders = Directory.GetDirectories(SpaceWarp2.API.CommonPaths.ModsFolder, "*", SearchOption.AllDirectories)
+            var modFolders = Directory
+                .GetDirectories(SpaceWarp2.API.CommonPaths.ModsFolder, "*", SearchOption.AllDirectories)
                 .Where(dir => ShouldLoad(disabledPlugins, Path.Combine(dir, "swinfo.json")))
                 .Select(x => (
                     Folder: x,
@@ -193,8 +196,8 @@ namespace PatchManager.Core
             };
             var text = new TextElement();
             text.text += $"Amount of loaded patchers: {PatchingManager.Universe.TotalPatchCount}\n";
-            text.text += $"Amount of loaded generators: {PatchingManager.Universe.Generators.Count}\n";
-            text.text += $"Amount of loaded libraries: {PatchingManager.Universe.AllLibraries.Count}\n";
+            text.text += $"Amount of loaded generators: {PatchingManager.Universe.AllNewAssets.Count}\n";
+            text.text += $"Amount of loaded libraries: {PatchingManager.Universe.LibraryCount}\n";
             if (_wasCacheInvalidated)
             {
                 text.text += $"Total amount of patches: {PatchingManager.TotalPatchCount}\n";
@@ -207,7 +210,7 @@ namespace PatchManager.Core
             }
 
             text.text += "Patched labels:";
-            foreach (var label in PatchingManager.Universe.LoadedLabels)
+            foreach (var label in PatchingManager.Universe.PatchedLabels)
             {
                 text.text += $"\n- {label}";
             }
@@ -222,7 +225,8 @@ namespace PatchManager.Core
         /// <inheritdoc />
         public override void BindConfiguration(IConfigFile modConfiguration)
         {
-            _shouldAlwaysInvalidate = new(modConfiguration.Bind("Advanced", "Always Invalidate Patch Manager Cache", false,
+            _shouldAlwaysInvalidate = new(modConfiguration.Bind("Advanced", "Always Invalidate Patch Manager Cache",
+                false,
                 "Should patch manager always invalidate its cache upon load"));
         }
 

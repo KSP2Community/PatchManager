@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using KSP.Game;
 using KSP.Game.Flow;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Utility;
-using PatchManager.SassyPatching.Execution;
-using PatchManager.SassyPatching.Interfaces;
+using PatchManager.LuaPatching;
 using PatchManager.Shared;
 using SpaceWarp2.API.Mods;
 using UniLinq;
@@ -25,7 +26,7 @@ namespace PatchManager.Core.Assets
         private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
         private static int _initialLibraryCount;
-        private static Dictionary<string, List<(string name, ISelectable data)>> _createdAssets = new();
+        private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
         internal static int TotalPatchCount;
         internal static int TotalErrorCount;
@@ -38,48 +39,21 @@ namespace PatchManager.Core.Assets
             loadedPlugins.AddRange(singleFileModIds);
             Universe = new(Logging.LogError, Logging.LogMessage,
                 loadedPlugins);
-            _initialLibraryCount = Universe.AllLibraries.Count;
+            _initialLibraryCount = Universe.LibraryCount;
         }
-
-        // private static void RegisterPatcher(ITextPatcher patcher)
-        // {
-        //     for (var index = 0; index < Patchers.Count; index++)
-        //     {
-        //         if (Patchers[index].Priority <= patcher.Priority)
-        //         {
-        //             continue;
-        //         }
-        //
-        //         Patchers.Insert(index, patcher);
-        //         return;
-        //     }
-        //
-        //     Patchers.Add(patcher);
-        // }
-        //
-        // private static void RegisterGenerator(ITextAssetGenerator generator)
-        // {
-        //     for (var index = 0; index < Generators.Count; index++)
-        //     {
-        //         if (Generators[index].Priority <= generator.Priority)
-        //         {
-        //             continue;
-        //         }
-        //
-        //         Generators.Insert(index, generator);
-        //         return;
-        //     }
-        //
-        //     Generators.Add(generator);
-        // }
 
         private static string PatchJson(string label, string assetName, string text)
         {
             Logging.LogInfo($"Patching {label}:{assetName}");
-
-            text = Universe.RunAllPatchesFor(label, assetName, text, out var patchCount, out var errorCount);
-            TotalErrorCount += errorCount;
-            TotalPatchCount += patchCount;
+            var patchCount = 0;
+            var errorCount = 0;
+            if (text != "")
+            {
+                var result = Universe.RunAllPatchesFor(label, assetName, JToken.Parse(text), out patchCount, out errorCount);
+                text = result == null ? "" : result.ToString(Formatting.Indented);
+                TotalErrorCount += errorCount;
+                TotalPatchCount += patchCount;
+            }
             if (patchCount > 0)
             {
                 Logging.LogInfo($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
@@ -89,19 +63,19 @@ namespace PatchManager.Core.Assets
             return text;
         }
         
-        private static string PatchJson(string label, string assetName, ISelectable data)
+        private static string PatchJson(LuaAsset data)
         {
-            Logging.LogInfo($"Patching {label}:{assetName}");
+            Logging.LogInfo($"Patching {data.Label}:{data.Name}");
 
-            var text = Universe.RunAllPatchesFor(label, assetName, data, out var patchCount, out var errorCount);
+            var t = Universe.RunAllPatchesFor(data, out var patchCount, out var errorCount);
             TotalErrorCount += errorCount;
             TotalPatchCount += patchCount;
             if (patchCount > 0)
             {
-                Logging.LogInfo($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+                Logging.LogInfo($"Patched {data.Label}:{data.Name} with {patchCount} patches. Total: {TotalPatchCount}");
             }
 
-            return text;
+            return t == null ? "" : t.ToString(Formatting.Indented);
         }
 
 
@@ -111,7 +85,7 @@ namespace PatchManager.Core.Assets
         {
             Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
 
-            var currentLibraryCount = Universe.AllLibraries.Count - _initialLibraryCount;
+            var currentLibraryCount = Universe.LibraryCount - _initialLibraryCount;
 
             if (currentLibraryCount > _previousLibraryCount)
             {
@@ -143,9 +117,9 @@ namespace PatchManager.Core.Assets
         public static void RegisterPatches()
         {
             Logging.LogInfo($"Registering all patches!");
-            Universe.RegisterAllPatches();
+            Universe.SetupPatchesForRun();
             Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
-            Logging.LogInfo($"{Universe.Generators.Count} generators registered!");
+            Logging.LogInfo($"{Universe.AllNewAssets.Count} assets created!");
         }
 
         /// <summary>
@@ -192,8 +166,8 @@ namespace PatchManager.Core.Assets
             {
                 foreach (var (name, text) in createdAsset)
                 {
-                    var patchedText = PatchJson(label, name, text);
-                    if (patchedText == "") continue;
+                    var patchedText = PatchJson(text);
+                    if (string.IsNullOrEmpty(patchedText)) continue;
                     archiveFiles[name] = patchedText;
                     labelCacheEntry.Assets.Add(name);
                     assetsCacheEntries.Add(name, new CacheEntry
@@ -219,7 +193,7 @@ namespace PatchManager.Core.Assets
                     }
 
                     // Handle deletion
-                    if (patchedText == "")
+                    if (string.IsNullOrEmpty(patchedText))
                     {
                         return;
                     }
@@ -258,20 +232,19 @@ namespace PatchManager.Core.Assets
                 Logging.LogInfo($"Cache for label '{label}' rebuilt.");
             }
 
-            if (handle.Status == AsyncOperationStatus.Failed && !unchanged)
-            {
-                SaveArchive();
-            }
-
             handle.Completed += results =>
             {
-                if (results.Status != AsyncOperationStatus.Succeeded || unchanged)
+                if (unchanged)
                 {
                     return;
                 }
 
                 SaveArchive();
-                Addressables.Release(results);
+
+                if (results.Status == AsyncOperationStatus.Succeeded)
+                {
+                    Addressables.Release(results);
+                }
             };
 
             return handle;
@@ -279,21 +252,20 @@ namespace PatchManager.Core.Assets
 
         public static void CreateNewAssets(Action resolve, Action<string> reject)
         {
-            foreach (var generator in Universe.Generators)
+            foreach (var generator in Universe.AllNewAssets)
             {
                 try
                 {
-                    var data = generator.Create(out var label, out var name);
-                    Logging.LogDebug($"Generated an asset with the label {label}, and name {name}:\n{data}");
+                    Logging.LogDebug($"Generated an asset with the label {generator.Label}, and name {generator.Name}");
 
-                    if (!_createdAssets.ContainsKey(label))
+                    if (!_createdAssets.ContainsKey(generator.Label))
                     {
-                        _createdAssets[label] = new List<(string name, ISelectable data)>();
+                        _createdAssets[generator.Label] = new List<(string name, LuaAsset data)>();
                     }
 
-                    if (!_createdAssets[label].Any(x => x.name == name))
+                    if (!_createdAssets[generator.Label].Any(x => x.name == generator.Name))
                     {
-                        _createdAssets[label].Add((name, data));
+                        _createdAssets[generator.Label].Add((generator.Name, generator));
                     }
 
                 }
@@ -304,7 +276,7 @@ namespace PatchManager.Core.Assets
                 }
             }
             
-            TotalNewAssetCount = Universe.Generators.Count;
+            TotalNewAssetCount = Universe.AllNewAssets.Count;
             UpdateLoadingBarData();
 
             resolve();
@@ -313,7 +285,7 @@ namespace PatchManager.Core.Assets
 
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
-            var distinctKeys = Universe.LoadedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
+            var distinctKeys = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
             GenericFlowAction CreateIndexedFlowAction(int idx)
             {
@@ -375,18 +347,6 @@ namespace PatchManager.Core.Assets
                 TotalNewAssetCount;
             
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerPatchCount = TotalPatchCount;
-        }
-
-        public static void ImportConfigurations(Action resolve, Action<string> reject)
-        {
-            Universe.ImportConfigs(CacheManager.Inventory.SerializedConfigs);
-            resolve();
-        }
-
-        public static void ExportConfigurations(Action resolve, Action<string> reject)
-        {
-            CacheManager.Inventory.SerializedConfigs = Universe.ExportConfigs();
-            resolve();
         }
     }
 }

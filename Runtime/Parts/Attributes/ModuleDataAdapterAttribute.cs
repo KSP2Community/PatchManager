@@ -3,9 +3,9 @@
 namespace PatchManager.Parts.Attributes
 {
     /// <summary>
-    /// Types that take this attribute must inherit from (ISelectable) and must have a constructor that takes the following arguments
+    /// Types that take this attribute must have a constructor that takes the following arguments
     /// JObject - ModuleData.DataObject
-    /// ModuleSelectable - Module
+    /// ModuleUserData - Module
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class ModuleDataAdapterAttribute : Attribute

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using KSP.Sim.Definitions;
 using KSP.Sim.impl;
 using PatchManager.Parts.Attributes;
-using PatchManager.SassyPatching.Interfaces;
 using UniLinq;
 
 namespace PatchManager.Parts
@@ -116,7 +115,7 @@ namespace PatchManager.Parts
         /// </summary>
         /// <param name="validTargets">The types that this adapter is valid for</param>
         /// <typeparam name="T">The type of the adapter</typeparam>
-        public static void RegisterModuleDataAdapter<T>(params Type[] validTargets) where T : ISelectable
+        public static void RegisterModuleDataAdapter<T>(params Type[] validTargets)
         {
             foreach (var type in validTargets)
             {
