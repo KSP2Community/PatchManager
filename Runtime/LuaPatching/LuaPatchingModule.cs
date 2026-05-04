@@ -20,6 +20,9 @@ namespace PatchManager.LuaPatching
         /// </summary>
         public override void Init()
         {
+            MoonSharpExceptionWrapPatch.Install();
+            UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 UserData.RegisterAssembly(assembly, false);
