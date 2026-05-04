@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using PatchManager.Parts.Patchers;
 using PatchManager.Shared.Modules;
 using SpaceWarp2.API.Loading;
@@ -12,7 +12,7 @@ namespace PatchManager.Parts
     public class PartsModule : BaseModule
     {
         /// <summary>
-        /// Initialize the module
+        /// Snapshots the available module-data adapters and registers the saved-vessel part-definition update flow action.
         /// </summary>
         public override void Init()
         {

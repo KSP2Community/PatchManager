@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using KSP.Game;
 using KSP.Game.Load;
@@ -9,16 +9,30 @@ using UniLinq;
 
 namespace PatchManager.Parts.Patchers
 {
+    /// <summary>
+    /// IFlowAction that brings saved-vessel data into sync with the current part definitions: trims removed modules,
+    /// adds new modules, fills in new resource containers, and drops vessels whose parts no longer exist.
+    /// </summary>
     internal class UpdateSavedVesselPartDefinitions : IFlowAction
     {
         private LoadGameData _loadGameData;
 
+        /// <summary>
+        /// Creates the flow action bound to the given save-load context.
+        /// </summary>
+        /// <param name="loadGameData">The save-load context whose vessels will be updated.</param>
         public UpdateSavedVesselPartDefinitions(LoadGameData loadGameData)
         {
             _loadGameData = loadGameData;
         }
+
+        /// <inheritdoc />
         public string Name => "Updating saved vessel part definitions";
+
+        /// <inheritdoc />
         public string Description => "Updating saved vessel part definitions";
+
+        /// <inheritdoc />
         public void DoAction(Action resolve, Action<string> reject)
         {
             if (_loadGameData.SavedGame.Vessels == null)
@@ -50,7 +64,7 @@ namespace PatchManager.Parts.Patchers
                             part.PartModulesState.RemoveAt(i);
                         }
                     }
-        
+
                     foreach (var mod in def.data.serializedPartModules)
                     {
                         if (part.PartModulesState.All(x => x.Name != mod.Name))
@@ -58,7 +72,7 @@ namespace PatchManager.Parts.Patchers
                             part.PartModulesState.Add(mod);
                         }
                     }
-        
+
                     foreach (var resource in def.data.resourceContainers)
                     {
                         if (!part.partState.resources.ContainsKey(resource.name))

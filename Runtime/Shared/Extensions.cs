@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UniLinq;
 
 namespace PatchManager.Shared
@@ -9,7 +9,7 @@ namespace PatchManager.Shared
     public static class Extensions
     {
         /// <summary>
-        /// Deconstructs a <see cref="KeyValuePair"/> into its key and value.
+        /// Deconstructs a <see cref="KeyValuePair" /> into its key and value.
         /// </summary>
         /// <param name="keyValuePair">Key-value pair to deconstruct.</param>
         /// <param name="key">The deconstructed key.</param>
@@ -27,8 +27,8 @@ namespace PatchManager.Shared
         }
 
         /// <summary>
-        /// Adds the contents of an <see cref="IEnumerable{T}"/> of type <see cref="KeyValuePair{TKey,TValue}"/>
-        /// to a <see cref="Dictionary{TKey,TValue}"/>.
+        /// Adds the contents of an <see cref="IEnumerable{T}" /> of type <see cref="KeyValuePair{TKey,TValue}" />
+        /// to a <see cref="Dictionary{TKey,TValue}" />.
         /// </summary>
         /// <param name="target">Target dictionary to add to.</param>
         /// <param name="source">Source enumerable to add from.</param>
@@ -51,14 +51,14 @@ namespace PatchManager.Shared
         }
 
         /// <summary>
-        /// Adds the contents of an <see cref="IEnumerable{T}"/> of type <see cref="KeyValuePair{TKey,IEnumerable}"/>
-        /// to a <see cref="Dictionary{TKey,IEnumerable}"/>. If the key already exists, the contents of the value
+        /// Adds the contents of an <see cref="IEnumerable{T}" /> of type <see cref="KeyValuePair{TKey,IEnumerable}" />
+        /// to a <see cref="Dictionary{TKey,IEnumerable}" />. If the key already exists, the contents of the value
         /// enumerable will be added to the existing value enumerable.
         /// </summary>
         /// <param name="target">Target dictionary to add to.</param>
         /// <param name="source">Source enumerable to add from.</param>
         /// <typeparam name="TKey">Type of the key.</typeparam>
-        /// <typeparam name="TValue">Type of the value <see cref="IEnumerable{T}"/>.</typeparam>
+        /// <typeparam name="TValue">Type of the value <see cref="IEnumerable{T}" />.</typeparam>
         public static void AddRangeMerge<TKey, TValue>(
             this Dictionary<TKey, IEnumerable<TValue>> target,
             IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> source
@@ -75,13 +75,13 @@ namespace PatchManager.Shared
                 target.Add(kvp.Key, kvp.Value);
             }
         }
-    
+
         /// <summary>
-        /// Gets the relative path to a working directory with both paths expressed as strings
+        /// Gets the relative path to a working directory with both paths expressed as strings.
         /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="workingDirectory"></param>
-        /// <returns></returns>
+        /// <param name="fullPath">The full path to make relative.</param>
+        /// <param name="workingDirectory">The base directory to make the path relative to.</param>
+        /// <returns>The relative path from <paramref name="workingDirectory" /> to <paramref name="fullPath" />, or <paramref name="fullPath" /> unchanged when the two paths are on different drives.</returns>
         public static string MakeRelativePathTo(this string fullPath, string workingDirectory)
         {
             string result = string.Empty;

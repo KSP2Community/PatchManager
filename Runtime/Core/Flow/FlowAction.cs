@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ReduxLib.GameInterfaces;
 
 namespace PatchManager.Core.Flow
@@ -11,10 +11,10 @@ namespace PatchManager.Core.Flow
         private readonly Action<Action,Action<string>> _doAction;
 
         /// <summary>
-        /// Creates a new instance of <see cref="FlowAction"/>.
+        /// Creates a new instance of <see cref="FlowAction" />.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="doAction"></param>
+        /// <param name="name">The action name (also used as its description).</param>
+        /// <param name="doAction">The work to perform; receives <c>resolve</c> and <c>reject</c> callbacks.</param>
         public FlowAction(string name, Action<Action, Action<string>> doAction)
         {
             Name = name;
@@ -25,6 +25,9 @@ namespace PatchManager.Core.Flow
         /// <inheritdoc />
         public string Name { get; }
 
+        /// <summary>
+        /// Description shown alongside the action; defaults to <see cref="Name" />.
+        /// </summary>
         public string Description { get; }
 
         /// <inheritdoc />

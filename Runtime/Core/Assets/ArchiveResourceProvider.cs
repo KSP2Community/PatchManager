@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using PatchManager.Core.Cache;
 using PatchManager.Shared;
@@ -8,14 +8,11 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 namespace PatchManager.Core.Assets
 {
     /// <summary>
-    /// Provides assets found by <see cref="ArchiveResourceLocator"/>.
+    /// Provides assets found by <see cref="ArchiveResourceLocator" />.
     /// </summary>
     internal class ArchiveResourceProvider : ResourceProviderBase
     {
-        /// <summary>
-        /// Provides assets found by <see cref="ArchiveResourceLocator"/>.
-        /// </summary>
-        /// <param name="provideHandle">Information about the asset to be provided.</param>
+        /// <inheritdoc />
         public override void Provide(ProvideHandle provideHandle)
         {
             try

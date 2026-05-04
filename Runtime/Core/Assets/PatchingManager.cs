@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -19,8 +19,15 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace PatchManager.Core.Assets
 {
+    /// <summary>
+    /// Bridges the Lua patch <see cref="LuaPatching.Universe" /> to addressables: imports patch files, runs the
+    /// patching pipeline against each addressable, and writes the results into the on-disk archive cache.
+    /// </summary>
     internal static class PatchingManager
     {
+        /// <summary>
+        /// The current patch universe; created by <see cref="GenerateUniverse" />.
+        /// </summary>
         internal static Universe Universe;
 
         private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
@@ -28,11 +35,31 @@ namespace PatchManager.Core.Assets
         private static int _initialLibraryCount;
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
+        /// <summary>
+        /// Total patches successfully applied this run.
+        /// </summary>
         internal static int TotalPatchCount;
+
+        /// <summary>
+        /// Total patch errors encountered this run.
+        /// </summary>
         internal static int TotalErrorCount;
+
+        /// <summary>
+        /// Total new assets created this run.
+        /// </summary>
         internal static int TotalNewAssetCount;
+
+        /// <summary>
+        /// Total distinct asset definitions modified by patches this run.
+        /// </summary>
         internal static int TotalDefinitionPatchCount;
 
+        /// <summary>
+        /// Constructs a new patch <see cref="LuaPatching.Universe" /> seeded with every loaded SpaceWarp plugin's
+        /// GUID plus the supplied single-file mod IDs.
+        /// </summary>
+        /// <param name="singleFileModIds">Mod IDs for single-file patches that are not registered as plugins.</param>
         public static void GenerateUniverse(HashSet<string> singleFileModIds)
         {
             var loadedPlugins = PluginList.AllEnabledAndActivePlugins.Select(x => x.Guid).ToList();
@@ -62,7 +89,7 @@ namespace PatchManager.Core.Assets
 
             return text;
         }
-        
+
         private static string PatchJson(LuaAsset data)
         {
             Logging.LogInfo($"Patching {data.Label}:{data.Name}");
@@ -81,6 +108,12 @@ namespace PatchManager.Core.Assets
 
         private static int _previousLibraryCount = -1;
 
+        /// <summary>
+        /// Loads every <c>.lua</c> patch file under <paramref name="modFolder" /> and records each <c>.patch</c>
+        /// file's hash in the cache checksum.
+        /// </summary>
+        /// <param name="modName">The mod ID; used as the script's <c>ModId</c> global.</param>
+        /// <param name="modFolder">The directory containing the mod's patches.</param>
         public static void ImportModPatches(string modName, string modFolder)
         {
             Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
@@ -101,12 +134,21 @@ namespace PatchManager.Core.Assets
             }
         }
 
+        /// <summary>
+        /// Loads a single <c>.patch</c> file and records its hash in the cache checksum.
+        /// </summary>
+        /// <param name="fileInfo">The patch file to load.</param>
         public static void ImportSinglePatch(FileInfo fileInfo)
         {
             Universe.LoadSinglePatchFile(fileInfo, new DirectoryInfo("."));
             CurrentPatchHashes.Patches.Add(fileInfo.FullName, Hash.FromFile(fileInfo.FullName));
         }
 
+        /// <summary>
+        /// Loads a patch from a <see cref="TextAsset" /> and records its hash in the cache checksum.
+        /// </summary>
+        /// <param name="asset">The text asset whose contents are the patch script.</param>
+        /// <param name="modId">The mod ID to associate the patch with.</param>
         public static void ImportAssetPatch(TextAsset asset, string modId)
         {
             Universe.LoadPatchAsset(asset, modId);
@@ -114,6 +156,9 @@ namespace PatchManager.Core.Assets
             CurrentPatchHashes.Patches.TryAdd($"{modId}/{asset.name}", Hash.FromString(asset.text));
         }
 
+        /// <summary>
+        /// Finalizes the universe's patch registry and logs the total registered-patch and new-asset counts.
+        /// </summary>
         public static void RegisterPatches()
         {
             Logging.LogInfo($"Registering all patches!");
@@ -250,6 +295,12 @@ namespace PatchManager.Core.Assets
             return handle;
         }
 
+        /// <summary>
+        /// Collects every queued new asset from the universe into the per-label staging dictionary, then resolves
+        /// the supplied callback.
+        /// </summary>
+        /// <param name="resolve">Callback invoked once collection finishes.</param>
+        /// <param name="reject">Reject callback (currently unused).</param>
         public static void CreateNewAssets(Action resolve, Action<string> reject)
         {
             foreach (var generator in Universe.AllNewAssets)
@@ -275,7 +326,7 @@ namespace PatchManager.Core.Assets
                     Logging.LogError($"Failed to generate an asset due to: {e}");
                 }
             }
-            
+
             TotalNewAssetCount = Universe.AllNewAssets.Count;
             UpdateLoadingBarData();
 
@@ -283,6 +334,12 @@ namespace PatchManager.Core.Assets
         }
 
 
+        /// <summary>
+        /// Schedules a per-label cache-rebuild flow action for every label that has either patches or queued new
+        /// assets, then resolves the supplied callback.
+        /// </summary>
+        /// <param name="resolve">Callback invoked once scheduling finishes.</param>
+        /// <param name="reject">Reject callback (currently unused).</param>
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
             var distinctKeys = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
@@ -339,13 +396,13 @@ namespace PatchManager.Core.Assets
         {
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
                 TotalDefinitionPatchCount;
-            
+
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerErrorCount =
                 TotalErrorCount;
 
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =
                 TotalNewAssetCount;
-            
+
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerPatchCount = TotalPatchCount;
         }
     }

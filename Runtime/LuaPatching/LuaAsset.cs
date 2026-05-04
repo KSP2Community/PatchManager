@@ -3,21 +3,29 @@ using MoonSharp.Interpreter;
 namespace PatchManager.LuaPatching;
 
 /// <summary>
-/// Represents a lua asset, created using CreateNew
+/// A new asset queued for creation by a Lua patch script.
 /// </summary>
 public class LuaAsset
 {
     /// <summary>
-    /// The Converter associated with this newly created asset
+    /// The converter currently producing JSON for <see cref="CurrentValue" />. Replaced when a chained patch
+    /// switches to a different converter.
     /// </summary>
     public IConverter ConverterInstance;
+
     /// <summary>
-    /// The value that was returned at creation time
+    /// The asset's current Lua-facing value. Initialized at creation time and replaced by each patch that
+    /// runs against this asset.
     /// </summary>
     public DynValue CurrentValue;
+
     /// <summary>
-    /// 
+    /// The addressables label the asset is tagged with for group-based loading.
     /// </summary>
     public string Label;
+
+    /// <summary>
+    /// The addressables address of the asset (globally unique).
+    /// </summary>
     public string Name;
 }

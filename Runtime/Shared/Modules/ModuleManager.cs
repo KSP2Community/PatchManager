@@ -14,9 +14,9 @@ namespace PatchManager.Shared.Modules
 
         /// <summary>
         /// Registers a PatchManager module DLL to be loaded. The module must contain a single class that inherits
-        /// from <see cref="IModule"/>.
+        /// from <see cref="IModule" />.
         /// </summary>
-        /// <param name="path">Path to the module DLL file</param>
+        /// <param name="moduleType">The module's type; must implement <see cref="IModule" /> and have a parameterless constructor.</param>
         [PublicAPI]
         public static void Register(Type moduleType)
         {

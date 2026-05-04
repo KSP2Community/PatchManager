@@ -7,9 +7,14 @@ using PatchManager.Resources.UserData;
 
 namespace PatchManager.Resources;
 
+/// <summary>
+/// <see cref="IConverter" /> registered as <c>"Resource"</c>; routes JSON to a typed <see cref="RecipeUserData" />
+/// or <see cref="ResourceUserData" /> based on whether the asset's <c>isRecipe</c> flag is set.
+/// </summary>
 [Converter("Resource")]
 public class ResourceConverter : IConverter
 {
+    /// <inheritdoc />
     public DynValue FromJson(JToken json)
     {
         if (json == null) return DynValue.Nil;
@@ -21,16 +26,17 @@ public class ResourceConverter : IConverter
         return  MoonSharp.Interpreter.UserData.Create(new ResourceUserData(obj));
     }
 
+    /// <inheritdoc />
     public JToken ToJson(DynValue value)
     {
         if (value.Type == DataType.Nil) return null;
         if (value.UserData.Object is RecipeUserData recipeUserData)
         {
-            return recipeUserData.FullToken.ToString(Formatting.Indented);
+            return recipeUserData.FullToken;
         }
         else if (value.UserData.Object is ResourceUserData resourceUserData)
         {
-            return resourceUserData.FullToken.ToString(Formatting.Indented);
+            return resourceUserData.FullToken;
         }
         else
         {

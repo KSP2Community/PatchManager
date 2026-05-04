@@ -8,18 +8,60 @@ using PatchManager.Shared;
 
 namespace PatchManager.LuaPatching;
 
+/// <summary>
+/// Lua-facing wrapper exposing a Newtonsoft <see cref="JToken" /> as a table-like UserData.
+/// </summary>
+/// <remarks>
+/// Patch scripts read and mutate JSON assets through this type: object keys become string indices,
+/// array elements become 1-indexed integer indices (matching Lua convention), and iteration is exposed
+/// through the <c>__pairs</c> / <c>__ipairs</c> metamethods on <see cref="Pairs" />.
+/// Reads against the wrong token type are non-fatal -- they log a debug message and return
+/// <see cref="DynValue.Nil" /> or an empty result. Writes against the wrong token type throw, since
+/// silently accepting a write would lose data. Subclasses (<see cref="Utility.IndexedListUserData" />,
+/// <see cref="Utility.ExtensibleJsonUserData" />) override these members to layer name-indexed lookup or
+/// virtual properties on top of the underlying JSON.
+/// </remarks>
 [MoonSharpUserData]
 public class JsonUserData
 {
+    /// <summary>
+    /// The wrapped JSON token. Hidden from Lua; C# callers may read or replace it directly.
+    /// </summary>
     [MoonSharpHidden] public JToken Token;
 
+    /// <summary>
+    /// Creates a new wrapper around the given JSON token.
+    /// </summary>
+    /// <param name="token">The token to wrap.</param>
     public JsonUserData(JToken token)
     {
         Token = token;
     }
 
+    /// <summary>
+    /// Converts a Lua <see cref="DynValue" /> into the equivalent <see cref="JToken" />.
+    /// </summary>
+    /// <remarks>
+    /// Lua numbers become integers when they have no fractional part. Lua tables become JSON arrays when
+    /// their integer length is non-zero, JSON objects otherwise. Nested <see cref="JsonUserData" /> values
+    /// are unwrapped to their underlying token. Use the protected overload to disambiguate against an existing
+    /// slot's type.
+    /// </remarks>
+    /// <param name="dv">The Lua value to convert.</param>
+    /// <returns>The JSON representation of <paramref name="dv" />.</returns>
     public static JToken GetJTokenForDynValue(DynValue dv) => GetJTokenForDynValue(null, dv);
 
+    /// <summary>
+    /// Converts a Lua <see cref="DynValue" /> into a <see cref="JToken" />, using <paramref name="previous" />'s type
+    /// as a hint for ambiguous numeric and empty-table cases.
+    /// </summary>
+    /// <remarks>
+    /// Used by indexer setters so that assigning a Lua number to an existing integer slot keeps it integer,
+    /// and so that an empty Lua table replacing a JSON array does not collapse into an empty object.
+    /// </remarks>
+    /// <param name="previous">The token currently at the target slot, or <c>null</c> when none.</param>
+    /// <param name="value">The Lua value to convert.</param>
+    /// <returns>The JSON representation of <paramref name="value" />.</returns>
     protected static JToken GetJTokenForDynValue([CanBeNull] JToken previous, DynValue value)
     {
         switch (value.Type)
@@ -43,7 +85,7 @@ public class JsonUserData
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
                 if (lVal == value.Number)
                 {
-                    return new JValue(lVal); 
+                    return new JValue(lVal);
                 }
                 return new JValue(value.Number);
             case DataType.String:
@@ -83,12 +125,18 @@ public class JsonUserData
                 throw new Exception($"Unexpected value type {value.Type}");
         }
     }
-    
+
     /// <summary>
-    /// 1 Indexed array index
+    /// Gets or sets the array element at the given 1-indexed position.
     /// </summary>
-    /// <param name="index"></param>
-    /// <exception cref="Exception"></exception>
+    /// <remarks>
+    /// Reads on a non-array token log a debug message and return <see cref="DynValue.Nil" />; out-of-range
+    /// reads also return <see cref="DynValue.Nil" />. Writes throw when the token is not an array; assigning
+    /// at <c>Count + 1</c> appends.
+    /// </remarks>
+    /// <param name="index">The 1-indexed array position.</param>
+    /// <returns>The element at the given position, or <see cref="DynValue.Nil" /> if absent or out of range.</returns>
+    /// <exception cref="Exception">Thrown when setting on a token whose type is not <see cref="JTokenType.Array" />, or when the index is out of range.</exception>
     public virtual DynValue this[int index]
     {
         get
@@ -125,6 +173,16 @@ public class JsonUserData
         }
     }
 
+    /// <summary>
+    /// Gets or sets the object property with the given key.
+    /// </summary>
+    /// <remarks>
+    /// Reads on a non-object token log a debug message and return <see cref="DynValue.Nil" />; reads of missing
+    /// keys also return <see cref="DynValue.Nil" />. Writes throw when the token is not an object.
+    /// </remarks>
+    /// <param name="index">The property name.</param>
+    /// <returns>The property value, or <see cref="DynValue.Nil" /> if absent.</returns>
+    /// <exception cref="Exception">Thrown when setting on a token whose type is not <see cref="JTokenType.Object" />.</exception>
     public virtual DynValue this[string index]
     {
         get
@@ -148,6 +206,11 @@ public class JsonUserData
         }
     }
 
+    /// <summary>
+    /// Removes the array element at the given 1-indexed position.
+    /// </summary>
+    /// <param name="index">The 1-indexed array position to remove.</param>
+    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" /> or when the index is out of range.</exception>
     public virtual void Remove(int index)
     {
         if (Token.Type != JTokenType.Array)
@@ -161,6 +224,11 @@ public class JsonUserData
         array.RemoveAt(index);
     }
 
+    /// <summary>
+    /// Removes the object property with the given key.
+    /// </summary>
+    /// <param name="key">The property name to remove.</param>
+    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Object" />.</exception>
     public virtual void Remove(string key)
     {
         if (Token.Type != JTokenType.Object)
@@ -171,6 +239,9 @@ public class JsonUserData
         obj.Remove(key);
     }
 
+    /// <summary>
+    /// Gets the number of elements in the wrapped array, or 0 when the token is not an array (also logs a debug message).
+    /// </summary>
     public virtual int Count
     {
         get
@@ -181,6 +252,15 @@ public class JsonUserData
         }
     }
 
+    /// <summary>
+    /// Returns an iterator suitable for Lua's <c>__pairs</c> / <c>__ipairs</c> metamethods.
+    /// </summary>
+    /// <remarks>
+    /// Arrays yield 1-indexed (index, value) tuples; objects yield (key, value) tuples; any other token type
+    /// yields nothing and logs a debug message. Bound to both metamethods, so <c>pairs</c> and <c>ipairs</c>
+    /// in Lua produce the same iterator.
+    /// </remarks>
+    /// <returns>The iterator callback.</returns>
     [MoonSharpUserDataMetamethod("__pairs")]
     [MoonSharpUserDataMetamethod("__ipairs")]
     public virtual DynValue Pairs()
@@ -230,8 +310,9 @@ public class JsonUserData
     }
 
     /// <summary>
-    /// Clear out an array
+    /// Removes every element from the wrapped array.
     /// </summary>
+    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Clear()
     {
         if (Token.Type == JTokenType.Array)
@@ -244,6 +325,12 @@ public class JsonUserData
         }
     }
 
+    /// <summary>
+    /// Inserts an element at the given 1-indexed position, shifting later elements right.
+    /// </summary>
+    /// <param name="index">The 1-indexed position to insert at.</param>
+    /// <param name="value">The element to insert.</param>
+    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Insert(int index, DynValue value)
     {
         if (Token.Type == JTokenType.Array)
@@ -256,6 +343,11 @@ public class JsonUserData
         }
     }
 
+    /// <summary>
+    /// Appends an element to the end of the wrapped array.
+    /// </summary>
+    /// <param name="value">The element to append.</param>
+    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Append(DynValue value)
     {
         if (Token.Type == JTokenType.Array)
@@ -267,7 +359,14 @@ public class JsonUserData
             throw new Exception("JSON Object is not an array");
         }
     }
-    
+
+    /// <summary>
+    /// Enumerates the property names of the wrapped object.
+    /// </summary>
+    /// <remarks>
+    /// Returns an empty sequence (and logs a debug message) when the token is not an object.
+    /// </remarks>
+    /// <returns>The property names of the wrapped object.</returns>
     public virtual IEnumerable<string> Keys()
     {
         if (Token.Type != JTokenType.Object)
@@ -280,9 +379,20 @@ public class JsonUserData
             yield return value.Key;
         }
     }
-    
+
+    /// <summary>
+    /// Returns whether the wrapped object contains a property with the given key.
+    /// </summary>
+    /// <param name="key">The property name to test.</param>
+    /// <returns>True if the wrapped object contains <paramref name="key" />, false otherwise.</returns>
     public virtual bool HasKey(string key) => Keys().Contains(key);
 
+    /// <summary>
+    /// Invokes <paramref name="callback" /> with the value at <paramref name="key" /> when the key is present;
+    /// does nothing otherwise.
+    /// </summary>
+    /// <param name="key">The property name to patch.</param>
+    /// <param name="callback">The callback to invoke with the existing value.</param>
     public virtual void Patch(string key, Action<DynValue> callback)
     {
         if (HasKey(key))
@@ -290,12 +400,18 @@ public class JsonUserData
             callback(this[key]);
         }
     }
-    
+
     /// <summary>
-    /// Get a dynamic value from a JToken
+    /// Lifts a JSON token into the corresponding Lua-facing <see cref="DynValue" />.
     /// </summary>
-    /// <param name="token">The token to get the dynamic value from</param>
-    /// <returns></returns>
+    /// <remarks>
+    /// Objects and arrays are wrapped in a fresh <see cref="JsonUserData" />; primitives become the matching
+    /// <see cref="DynValue" /> kind; <see cref="JTokenType.None" />, <see cref="JTokenType.Null" />, and
+    /// <see cref="JTokenType.Undefined" /> all map to <see cref="DynValue.Nil" />.
+    /// </remarks>
+    /// <param name="token">The token to lift.</param>
+    /// <returns>The Lua value for the given token.</returns>
+    /// <exception cref="Exception">Thrown when <paramref name="token" />'s type is not one of the handled token types.</exception>
     [MoonSharpHidden]
     public static DynValue GetFromJToken(JToken token)
     {

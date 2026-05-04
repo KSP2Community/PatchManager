@@ -29,9 +29,9 @@ namespace PatchManager.Core.Cache.Json
         public Dictionary<string, string> Patches { get; internal set; }
 
         /// <summary>
-        /// Create a default instance of <see cref="PatchHashes"/> with current KSP 2 and Patch Manager versions.
+        /// Create a default instance of <see cref="PatchHashes" /> with current KSP 2 and Patch Manager versions.
         /// </summary>
-        /// <returns>Default instance of <see cref="PatchHashes"/></returns>
+        /// <returns>Default instance of <see cref="PatchHashes" />.</returns>
         public static PatchHashes CreateDefault()
         {
             return new PatchHashes

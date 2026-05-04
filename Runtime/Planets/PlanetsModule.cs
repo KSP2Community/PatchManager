@@ -8,6 +8,9 @@ using UnityEngine.AddressableAssets;
 
 namespace PatchManager.Planets
 {
+    /// <summary>
+    /// Planet patching module.
+    /// </summary>
     public class PlanetsModule : BaseModule
     {
         private static void RegisterAtmosphereOverride(TextAsset atmosphereOverride)
@@ -23,7 +26,7 @@ namespace PatchManager.Planets
         }
 
         /// <summary>
-        /// Runs when the mod is first initialized.
+        /// Loads the atmosphere and volume-cloud override addressables and registers them with <c>OverrideManager</c>.
         /// </summary>
         public override void Load()
         {

@@ -62,7 +62,7 @@ namespace PatchManager.Core
         }
 
         /// <summary>
-        /// Reads all patch files.
+        /// Decides whether to invalidate the cache, then schedules the patch-loading flow actions for the SpaceWarp loader.
         /// </summary>
         public override void Init()
         {
@@ -231,7 +231,7 @@ namespace PatchManager.Core
         }
 
         /// <summary>
-        /// This is the current universe that patch manager is using (used for interop reasons)
+        /// The current universe that patch manager is using (exposed for interop).
         /// </summary>
         [PublicAPI]
         public static Universe CurrentUniverse => PatchingManager.Universe;

@@ -8,13 +8,22 @@ using PatchManager.LuaPatching.Utility;
 
 namespace PatchManager.Planets.UserData;
 
+/// <summary>
+/// Galaxy definition wrapper that exposes each celestial body in the galaxy's <c>CelestialBodies</c> array as a
+/// virtual property keyed by GUID.
+/// </summary>
 [MoonSharpUserData]
 public class GalaxyUserData : ExtensibleJsonUserData
 {
+    /// <summary>
+    /// Creates the wrapper around the galaxy JSON.
+    /// </summary>
+    /// <param name="token">The galaxy definition JSON.</param>
     public GalaxyUserData(JToken token) : base(token)
     {
     }
 
+    /// <inheritdoc />
     public override IEnumerable<string> GetExtraAndOverriddenKeys()
     {
         foreach (var body in (JArray)Token["CelestialBodies"])
@@ -23,6 +32,7 @@ public class GalaxyUserData : ExtensibleJsonUserData
         }
     }
 
+    /// <inheritdoc />
     public override DynValue TryToGet(string property)
     {
         foreach (var body in (JArray)Token["CelestialBodies"])
@@ -36,6 +46,7 @@ public class GalaxyUserData : ExtensibleJsonUserData
         return null;
     }
 
+    /// <inheritdoc />
     public override bool TryToSet(string property, DynValue value)
     {
         foreach (var body in (JArray)Token["CelestialBodies"])
@@ -48,6 +59,7 @@ public class GalaxyUserData : ExtensibleJsonUserData
         return false;
     }
 
+    /// <inheritdoc />
     public override bool TryToRemove(string property)
     {
         var index = 0;
@@ -70,6 +82,12 @@ public class GalaxyUserData : ExtensibleJsonUserData
         throw new Exception("Cannot remove this property.");
     }
 
+    /// <summary>
+    /// Adds a new celestial body with the given GUID to the galaxy and runs <paramref name="callback" /> against
+    /// it for further configuration.
+    /// </summary>
+    /// <param name="planetName">The new body's GUID.</param>
+    /// <param name="callback">Callback that receives the new body for further configuration.</param>
     public void Add(string planetName, Action<JsonUserData> callback)
     {
         var obj = new SerializedCelestialBody

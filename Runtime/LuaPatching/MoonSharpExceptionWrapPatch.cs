@@ -8,12 +8,15 @@ using UnityEngine;
 namespace PatchManager.LuaPatching
 {
     /// <summary>
-    /// Wraps CLR exceptions escaping MoonSharp's <c>Processor.Internal_ExecCall</c> in a
-    /// <see cref="ScriptRuntimeException"/> with the Lua source location and the original CLR
-    /// stack trace. Upstream does <c>catch (Exception e) { throw e; }</c>, which both strips the
-    /// stack and bypasses MoonSharp's interpreter-exception channel — so consumers see a bare
-    /// CLR exception with no script context.
+    /// Wraps CLR exceptions that escape MoonSharp's <c>Processor.Internal_ExecCall</c> in a
+    /// <see cref="ScriptRuntimeException" /> with the Lua source location and the original CLR stack trace.
     /// </summary>
+    /// <remarks>
+    /// Upstream does <c>catch (Exception e) { throw e; }</c>, which both strips the stack and bypasses MoonSharp's
+    /// interpreter-exception channel, so consumers see a bare CLR exception with no script context. The Harmony
+    /// finalizer this class installs swaps the escaping exception for a <see cref="ScriptRuntimeException" /> whose
+    /// message embeds the original type, message, and stack alongside MoonSharp's standard source-line decoration.
+    /// </remarks>
     internal static class MoonSharpExceptionWrapPatch
     {
         private static bool _installed;
@@ -32,6 +35,13 @@ namespace PatchManager.LuaPatching
         private static readonly MethodInfo DecorateMessageMethod = typeof(InterpreterException).GetMethod(
             "DecorateMessage", BindingFlags.NonPublic | BindingFlags.Instance);
 
+        /// <summary>
+        /// Installs the Harmony finalizer once. Subsequent calls are no-ops.
+        /// </summary>
+        /// <remarks>
+        /// Logs a warning and returns silently when MoonSharp's internal types or methods cannot be resolved, since
+        /// the patch is a diagnostic aid and its absence should not block patching.
+        /// </remarks>
         public static void Install()
         {
             if (_installed) return;

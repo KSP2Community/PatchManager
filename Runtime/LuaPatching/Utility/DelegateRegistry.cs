@@ -7,6 +7,19 @@ using MoonSharp.Interpreter;
 
 namespace PatchManager.LuaPatching.Utility;
 
+/// <summary>
+/// Registers MoonSharp Lua-to-CLR converters for delegate types so Lua functions can be passed directly to
+/// CLR APIs that take strongly-typed delegates (<see cref="Action" />, <see cref="Func{TResult}" />, custom
+/// delegate types) of any arity.
+/// </summary>
+/// <remarks>
+/// MoonSharp only ships built-in conversions for a fixed set of delegate types, so passing a Lua function
+/// to a method expecting <c>Action&lt;Foo&gt;</c> would otherwise throw at the boundary. This registry
+/// scans a type's methods for delegate parameters via <see cref="RegisterDelegatesFromMethodsOf" /> and,
+/// for each unique delegate type, compiles a wrapper (via expression trees) that marshals primitives,
+/// strings, enums, and UserData both ways. By-ref, out, and pointer parameters are unsupported and the
+/// containing delegate type is skipped silently.
+/// </remarks>
 public static class DelegateRegistry
 {
     private static readonly HashSet<Type> _registered = new();
@@ -20,6 +33,11 @@ public static class DelegateRegistry
     private static readonly MethodInfo ClosureCallMethod =
         typeof(Closure).GetMethod("Call", new[] { typeof(DynValue[]) });
 
+    /// <summary>
+    /// Walks every public instance and static method on <paramref name="type" /> and registers each delegate
+    /// parameter type encountered.
+    /// </summary>
+    /// <param name="type">The type whose methods to scan.</param>
     public static void RegisterDelegatesFromMethodsOf(Type type)
     {
         if (type == null) return;
@@ -32,6 +50,15 @@ public static class DelegateRegistry
         }
     }
 
+    /// <summary>
+    /// Registers a Lua-function-to-CLR-delegate converter for <paramref name="delegateType" /> if not already registered.
+    /// </summary>
+    /// <remarks>
+    /// Skipped silently for <c>null</c>, the abstract <see cref="Delegate" /> / <see cref="MulticastDelegate" />
+    /// bases, non-delegate types, and delegate types whose <c>Invoke</c> signature uses by-ref, out, or pointer
+    /// parameters.
+    /// </remarks>
+    /// <param name="delegateType">The delegate type to make convertible from a Lua function.</param>
     public static void RegisterDelegateType(Type delegateType)
     {
         if (delegateType == null) return;

@@ -7,12 +7,20 @@ using PatchManager.LuaPatching.Utility;
 
 namespace PatchManager.Missions.UserData;
 
+/// <summary>
+/// Mission definition wrapper exposing the <c>missionStages</c> array as a typed <see cref="StagesUserData" /> and
+/// the optional <c>ContentBranches</c> array as a typed <see cref="ContentBranchesUserData" />.
+/// </summary>
 [MoonSharpUserData]
 public class MissionUserData : ExtensibleJsonUserData
 {
     private DynValue _stages;
     [CanBeNull] private DynValue _contentBranches;
 
+    /// <summary>
+    /// Creates the wrapper around the mission JSON, seeding the typed stages and content-branches caches.
+    /// </summary>
+    /// <param name="token">The mission definition JSON.</param>
     public MissionUserData(JToken token) : base(token)
     {
         _stages = MoonSharp.Interpreter.UserData.Create(new StagesUserData((JArray)token["missionStages"]));
@@ -40,12 +48,14 @@ public class MissionUserData : ExtensibleJsonUserData
         }
     }
 
+    /// <inheritdoc />
     public override IEnumerable<string> GetExtraAndOverriddenKeys()
     {
         yield return "missionStages";
         yield return "ContentBranches";
     }
 
+    /// <inheritdoc />
     public override DynValue TryToGet(string property)
     {
         if (property == "missionStages") return _stages;
@@ -53,6 +63,7 @@ public class MissionUserData : ExtensibleJsonUserData
         return null;
     }
 
+    /// <inheritdoc />
     public override bool TryToSet(string property, DynValue value)
     {
         if (property is "missionStages") throw new Exception("You cannot set this property.");
@@ -65,6 +76,7 @@ public class MissionUserData : ExtensibleJsonUserData
         return false;
     }
 
+    /// <inheritdoc />
     public override bool TryToRemove(string property)
     {
         if (property == "ContentBranches")

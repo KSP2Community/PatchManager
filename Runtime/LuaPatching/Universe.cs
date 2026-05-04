@@ -19,16 +19,42 @@ using UnityEngine.Audio;
 namespace PatchManager.LuaPatching
 {
     /// <summary>
-    /// Lua Based Execution
+    /// The central orchestrator for Lua-based patching: loads patch scripts, registers patches and new assets,
+    /// sorts stages topologically, and runs the resulting pipeline against each patched asset.
     /// </summary>
+    /// <remarks>
+    /// Static initialization scans every loaded assembly for converters (via <see cref="ConverterAttribute" />)
+    /// and Lua-exposed submodules (via <see cref="PatchManagerModuleAttribute" />) and registers them in
+    /// <see cref="Converters" /> and <see cref="SubmoduleTypes" />. Each universe instance then constructs its own
+    /// <see cref="PatchManagerCore" /> and live submodule instances, exposes them as the global <c>PM</c>
+    /// table, and tracks per-mod patch state. Mods load Lua patches via the <c>LoadPatch*</c> methods, which are
+    /// expected to register patches and stages through <c>PM</c>; once loading is done, <see cref="SetupPatchesForRun" />
+    /// finalizes ordering and the <c>RunAllPatchesFor</c> overloads execute the chain against each asset.
+    /// </remarks>
     public class Universe
     {
         /// <summary>
-        /// Static universe instance
+        /// Logs an error from patch loading or execution. Supplied by the host.
         /// </summary>
         public readonly Action<string> ErrorLogger;
+
+        /// <summary>
+        /// Logs an informational message from patch loading or execution. Supplied by the host.
+        /// </summary>
         public readonly Action<string> MessageLogger;
+
+        /// <summary>
+        /// The set of mod IDs the universe was constructed with, used by stage scheduling and
+        /// <see cref="PatchManagerCore.Loaded" />.
+        /// </summary>
         public readonly HashSet<string> AllMods;
+
+        /// <summary>
+        /// Creates a new universe, instantiates each registered submodule, and seeds the per-mod stage priorities.
+        /// </summary>
+        /// <param name="errorLogger">Callback for error-level logging.</param>
+        /// <param name="messageLogger">Callback for informational logging.</param>
+        /// <param name="allMods">The mod IDs participating in patching, in load order.</param>
         public Universe(Action<string> errorLogger, Action<string> messageLogger, List<string> allMods)
         {
             ErrorLogger = errorLogger;
@@ -44,13 +70,37 @@ namespace PatchManager.LuaPatching
         }
 
         /// <summary>
-        /// The current instance of the patch manager library as a DynValue
+        /// The <c>PM</c> global, bound to the per-universe <see cref="PatchManagerCore" /> instance.
         /// </summary>
         public DynValue PatchManagerLibraryInstance;
+
+        /// <summary>
+        /// Live submodule instances keyed by name. Populated from <see cref="SubmoduleTypes" /> at construction time.
+        /// </summary>
         public Dictionary<string, DynValue> Submodules = new();
+
+        /// <summary>
+        /// Submodule types discovered at static-init time, keyed by their
+        /// <see cref="PatchManagerModuleAttribute.SubmoduleName" />.
+        /// </summary>
         public static Dictionary<string, Type> SubmoduleTypes = new();
+
+        /// <summary>
+        /// Converter instances discovered at static-init time, keyed by their
+        /// <see cref="ConverterAttribute.Name" />.
+        /// </summary>
         public static Dictionary<string, IConverter> Converters = new();
+
+        /// <summary>
+        /// Per-mod "previous implicit stage" pointer used by <see cref="PatchManagerCore.ImplicitStage" /> to
+        /// chain stages declared by the same mod.
+        /// </summary>
         public readonly Dictionary<string, string> LastImplicitWithinMod = new();
+
+        /// <summary>
+        /// Global "previous implicit stage" pointer used by <see cref="PatchManagerCore.GlobalStage" /> and
+        /// as the fallback for <see cref="LastImplicitWithinMod" />.
+        /// </summary>
         public string LastImplicitGlobal = "";
 
         private void SetupBasePriorities(List<string> modLoadOrder)
@@ -119,11 +169,19 @@ namespace PatchManager.LuaPatching
         }
 
         private static PatchManagerScriptLoader _managerScriptLoader = new();
-        
+
         #region Patch Loading
 
+        /// <summary>
+        /// Number of Lua library files (filenames starting with <c>_</c>) discovered across loaded patch directories.
+        /// </summary>
         public int LibraryCount = 0;
 
+        /// <summary>
+        /// Loads and runs a single <c>.patch</c> Lua file, registering whatever patches it declares.
+        /// </summary>
+        /// <param name="file">The patch file to load.</param>
+        /// <param name="directoryInfo">The directory the patch was discovered in; exposed to the script as the <c>Location</c> global.</param>
         public void LoadSinglePatchFile(FileInfo file, DirectoryInfo directoryInfo)
         {
             var patchScript = new Script(CoreModules.Preset_SoftSandbox)
@@ -155,7 +213,17 @@ namespace PatchManager.LuaPatching
                 ErrorLogger(e.ToString());
             }
         }
-        
+
+        /// <summary>
+        /// Loads every <c>.lua</c> file under the given directory (excluding files starting with <c>_</c>) and runs
+        /// each one to register its patches.
+        /// </summary>
+        /// <remarks>
+        /// Library files (filenames starting with <c>_</c>) are not executed but counted in <see cref="LibraryCount" />.
+        /// All scripts share a single <see cref="Script" /> with the given <paramref name="modId" />.
+        /// </remarks>
+        /// <param name="directory">The directory containing the patch files.</param>
+        /// <param name="modId">The mod ID; exposed to scripts as the <c>ModId</c> global and used as their default stage.</param>
         public void LoadPatchesInDirectory(DirectoryInfo directory, string modId)
         {
             var patchScript = new Script(CoreModules.Preset_SoftSandbox)
@@ -195,6 +263,11 @@ namespace PatchManager.LuaPatching
             LibraryCount += directory.EnumerateFiles("_*.lua", SearchOption.AllDirectories).Count();
         }
 
+        /// <summary>
+        /// Loads and runs a single Lua patch from a <see cref="TextAsset" />.
+        /// </summary>
+        /// <param name="textAsset">The text asset whose contents are the patch script.</param>
+        /// <param name="modId">The mod ID; exposed to the script as the <c>ModId</c> global.</param>
         public void LoadPatchAsset(TextAsset textAsset, string modId)
         {
             var patchScript = new Script(CoreModules.Preset_SoftSandbox)
@@ -229,11 +302,25 @@ namespace PatchManager.LuaPatching
 
         #region Patch/Stage Registering
 
+        /// <summary>
+        /// Every known stage keyed by name, including the implicit per-mod and per-mod-post stages set up at construction.
+        /// </summary>
         public Dictionary<string, Stage> AllStages = new();
-        
+
+        /// <summary>
+        /// Assets queued for creation via <see cref="PatchManagerCore.New" />.
+        /// </summary>
         public List<LuaAsset> AllNewAssets = new();
+
+        /// <summary>
+        /// Registered patches keyed by addressables label. Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
+        /// </summary>
         public Dictionary<string,List<LuaPatch>> AllPatches = new();
 
+        /// <summary>
+        /// Registers a patch and records its label in <see cref="PatchedLabels" />.
+        /// </summary>
+        /// <param name="patch">The patch to register.</param>
         public void AddPatch(LuaPatch patch)
         {
             if (AllPatches.TryGetValue(patch.Label, out var l))
@@ -245,14 +332,24 @@ namespace PatchManager.LuaPatching
                 AllPatches[patch.Label] = new List<LuaPatch> { patch };
             }
             PatchedLabels.Add(patch.Label);
+            TotalPatchCount++;
         }
 
+        /// <summary>
+        /// Queues a new asset for creation and records its label in <see cref="PatchedLabels" />.
+        /// </summary>
+        /// <param name="asset">The asset to queue.</param>
         public void AddAsset(LuaAsset asset)
         {
             AllNewAssets.Add(asset);
             PatchedLabels.Add(asset.Label);
         }
 
+        /// <summary>
+        /// Adds a stage to <see cref="AllStages" /> under the given name.
+        /// </summary>
+        /// <param name="name">The stage name.</param>
+        /// <param name="stage">The stage to register.</param>
         public void AddStage(string name, Stage stage)
         {
             AllStages.Add(name, stage);
@@ -262,6 +359,9 @@ namespace PatchManager.LuaPatching
 
         #region Stage Sorting
 
+        /// <summary>
+        /// Topologically sorted stages, mapped to their ordering priority. Populated by the internal sort step.
+        /// </summary>
         public Dictionary<string, ulong> SortedStages = new();
         private void SortStages()
         {
@@ -291,7 +391,7 @@ namespace PatchManager.LuaPatching
                 SortedStages[stage] = n++;
             }
         }
-        
+
         private static bool SingleSortStep(
             Dictionary<string, Stage> toBeSorted,
             List<string> sortedStages
@@ -320,13 +420,27 @@ namespace PatchManager.LuaPatching
         }
 
         #endregion
-        
+
         #region Patch Running
 
+        /// <summary>
+        /// Total number of patches registered with the universe.
+        /// </summary>
         public int TotalPatchCount;
 
+        /// <summary>
+        /// The set of addressables labels with at least one patch or new-asset registered. Replaced by
+        /// <see cref="SetupPatchesForRun" /> with the keys of <see cref="AllPatches" />.
+        /// </summary>
         public HashSet<string> PatchedLabels = new();
 
+        /// <summary>
+        /// Finalizes the patch registry: rebuilds <see cref="PatchedLabels" /> from <see cref="AllPatches" />, then
+        /// sorts each label's patches by stage priority.
+        /// </summary>
+        /// <remarks>
+        /// Must run after all patches have been registered and before any <c>RunAllPatchesFor</c> call.
+        /// </remarks>
         public void SetupPatchesForRun()
         {
             PatchedLabels = AllPatches.Keys.ToHashSet();
@@ -341,6 +455,22 @@ namespace PatchManager.LuaPatching
             }
         }
 
+        /// <summary>
+        /// Runs every patch matching <paramref name="label" /> / <paramref name="name" /> against the given JSON,
+        /// returning the final result.
+        /// </summary>
+        /// <remarks>
+        /// Patches are chained: each one operates on the previous patch's <see cref="DynValue" /> when the converters
+        /// match, otherwise the chain is flushed back to JSON, lifted by the new converter, and chaining resumes.
+        /// Returns <paramref name="data" /> unchanged when no patch applied; returns <c>null</c> when a patch
+        /// removed the asset.
+        /// </remarks>
+        /// <param name="label">The asset's addressables label.</param>
+        /// <param name="name">The asset's addressables address.</param>
+        /// <param name="data">The asset's parsed JSON.</param>
+        /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
+        /// <param name="errorCount">Set to the number of patches that threw.</param>
+        /// <returns>The patched JSON, or <c>null</c> when the asset was removed.</returns>
         public JToken RunAllPatchesFor(string label, string name, JToken data, out int patchCount, out int errorCount)
         {
             patchCount = 0;
@@ -387,6 +517,14 @@ namespace PatchManager.LuaPatching
             return anyApplied ? previousConverter!.ToJson(previousInstance) : data;
         }
 
+        /// <summary>
+        /// Runs every patch matching the given new asset against its <see cref="LuaAsset.CurrentValue" />, returning
+        /// the final JSON.
+        /// </summary>
+        /// <param name="asset">The new asset to patch.</param>
+        /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
+        /// <param name="errorCount">Set to the number of patches that threw.</param>
+        /// <returns>The patched JSON for the asset.</returns>
         public JToken RunAllPatchesFor(LuaAsset asset, out int patchCount, out int errorCount)
         {
             patchCount = 0;
@@ -426,14 +564,27 @@ namespace PatchManager.LuaPatching
         }
 
 
+        /// <summary>
+        /// Returns the patches registered for <paramref name="label" />, in stage-sorted order, filtered by name pattern.
+        /// </summary>
+        /// <param name="label">The addressables label to look up.</param>
+        /// <param name="name">The asset's addressables address; matched against each patch's name pattern.</param>
+        /// <returns>The matching patches, or an empty sequence when no patches are registered for the label.</returns>
         public IEnumerable<LuaPatch> GetAllSortedPatchesFor(string label, string name) =>
             AllPatches.TryGetValue(label, out var patches)
                 ? patches.Where(patcher => string.IsNullOrEmpty(patcher.Name) || MatchesPattern(name, patcher.Name))
                 : Enumerable.Empty<LuaPatch>();
 
         #endregion
-        
+
         #region utilities
+        /// <summary>
+        /// Returns whether <paramref name="name" /> matches the given pattern, where <c>*</c> matches any run of
+        /// characters and <c>?</c> matches an optional character.
+        /// </summary>
+        /// <param name="name">The candidate asset name.</param>
+        /// <param name="pattern">The wildcard pattern.</param>
+        /// <returns>True if <paramref name="name" /> matches <paramref name="pattern" />, false otherwise.</returns>
         public static bool MatchesPattern(string name, string pattern) =>
             Regex.IsMatch(name, $"^{pattern.Replace("*", ".*").Replace("?", ".?")}$");
         #endregion

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using PatchManager.Core;
 using PatchManager.Generic;
 using PatchManager.Missions;
@@ -13,9 +13,19 @@ using UnityEngine.UIElements;
 
 namespace PatchManager
 {
+    /// <summary>
+    /// Main PatchManager mod entry point: registers every PatchManager submodule and drives them through SpaceWarp's lifecycle.
+    /// </summary>
     public class PatchManager : KerbalMod
     {
+        /// <summary>
+        /// Singleton instance, set during <see cref="Awake" />.
+        /// </summary>
         internal static PatchManager Instance;
+
+        /// <summary>
+        /// Registers each PatchManager submodule, binds shared configuration, and runs the modules' <see cref="IModule.Init" /> hooks.
+        /// </summary>
         public void Awake()
         {
             // Let's register all our modules!
@@ -36,16 +46,19 @@ namespace PatchManager
             ModuleManager.InitAll();
         }
 
+        /// <inheritdoc />
         public override void OnPreInitialized()
         {
             ModuleManager.PreLoadAll();
         }
 
+        /// <inheritdoc />
         public override void OnInitialized()
         {
             ModuleManager.LoadAll();
         }
 
+        /// <inheritdoc />
         public override void OnPostInitialized()
         {
             InitializePatchManagerDetailsFoldout();

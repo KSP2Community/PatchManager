@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using KSP.Sim.Definitions;
 using KSP.Sim.impl;
@@ -42,6 +42,10 @@ namespace PatchManager.Parts
             }
         }
 
+        /// <summary>
+        /// Map of module short-name (with and without the <c>PartComponent</c> prefix) to the module's component
+        /// type and behaviour type. Lazily populated by scanning every loaded assembly.
+        /// </summary>
         internal static IReadOnlyDictionary<string, (Type componentModule, Type behaviour)> ComponentModules
         {
             get
@@ -77,6 +81,10 @@ namespace PatchManager.Parts
             }
         }
 
+        /// <summary>
+        /// Map of data-module short-name (with and without the <c>Data_</c> prefix) to its <see cref="ModuleData" />
+        /// type. Lazily populated by scanning every loaded assembly.
+        /// </summary>
         internal static IReadOnlyDictionary<string, Type> DataModules
         {
             get
@@ -90,8 +98,16 @@ namespace PatchManager.Parts
             }
         }
 
+        /// <summary>
+        /// Map of <see cref="ModuleData" /> type to the registered Lua-facing adapter type. Populated by
+        /// <see cref="GrabModuleDataAdapters" /> and <see cref="RegisterModuleDataAdapter{T}" />.
+        /// </summary>
         internal static readonly Dictionary<Type, Type> ModuleDataAdapters = new();
 
+        /// <summary>
+        /// Discovers every type marked with <see cref="Attributes.ModuleDataAdapterAttribute" /> across all loaded
+        /// assemblies and registers them in <see cref="ModuleDataAdapters" />.
+        /// </summary>
         internal static void GrabModuleDataAdapters()
         {
             foreach (var type in AppDomain.CurrentDomain.GetAssemblies()
@@ -111,10 +127,10 @@ namespace PatchManager.Parts
         }
 
         /// <summary>
-        /// Registers a module data adapter for the given types
+        /// Registers a module data adapter for the given types.
         /// </summary>
-        /// <param name="validTargets">The types that this adapter is valid for</param>
-        /// <typeparam name="T">The type of the adapter</typeparam>
+        /// <param name="validTargets">The types that this adapter is valid for.</param>
+        /// <typeparam name="T">The type of the adapter.</typeparam>
         public static void RegisterModuleDataAdapter<T>(params Type[] validTargets)
         {
             foreach (var type in validTargets)
