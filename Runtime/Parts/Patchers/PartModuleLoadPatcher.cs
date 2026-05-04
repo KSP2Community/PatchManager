@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 using System.Reflection;
 using KSP.Game;
@@ -11,13 +11,25 @@ using Object = UnityEngine.Object;
 
 namespace PatchManager.Parts.Patchers
 {
+    /// <summary>
+    /// Static state container plus helper that wires runtime <see cref="PartBehaviourModule" /> components onto a
+    /// part's <see cref="GameObject" /> based on its serialized module list.
+    /// </summary>
     internal static class PartModuleLoadPatcher
     {
         /// <summary>
-        /// This is a map of part names to prefab names. It is populated by the PartDataDeserializePatcher.
+        /// Map of part name to prefab-asset name. Consulted by <see cref="ApplyOnGameObject" /> to swap in a custom prefab.
         /// </summary>
         internal static Dictionary<string, string> PartPrefabMap { get; } = new();
 
+        /// <summary>
+        /// Adds a <see cref="PartBehaviourModule" /> component for each serialized module on <paramref name="partData" />,
+        /// wires up serialized fields from the corresponding <see cref="ModuleData" />, removes orphaned behaviour
+        /// components, and replaces <paramref name="gameObject" /> with an instantiated prefab when one is registered
+        /// for the part.
+        /// </summary>
+        /// <param name="gameObject">The part's GameObject; may be reassigned to a freshly-instantiated prefab.</param>
+        /// <param name="partData">The part's data, supplying the list of serialized modules.</param>
         internal static void ApplyOnGameObject(ref GameObject gameObject, PartData partData)
         {
             var obj = gameObject;

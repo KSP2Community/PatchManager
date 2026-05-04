@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using KSP.Game;
@@ -18,11 +18,15 @@ namespace PatchManager.Resources
     public class ResourcesModule : BaseModule
     {
         /// <summary>
-        /// Implement the resource units from https://github.com/KSP2Community/CommunityResources
+        /// Implements the resource units from https://github.com/KSP2Community/CommunityResources.
         /// </summary>
         internal static readonly Dictionary<string, string> ResourceUnits = new();
 
 
+        /// <summary>
+        /// Loads the <c>resource_units</c> addressables (when registered) into <see cref="ResourceUnits" /> and
+        /// adds the non-stageable resources UI controller.
+        /// </summary>
         public override void Load()
         {
             if (GameManager.Instance.Assets.RegisteredResourceLocators.Any(x => x.Keys.Contains("resource_units")))
@@ -40,7 +44,7 @@ namespace PatchManager.Resources
             {
                 Logging.LogInfo("No custom resource units were defined");
             }
-            
+
             PatchManager.Instance.AddComponent<NonStageableResourcesUIController>();
         }
 

@@ -5,7 +5,7 @@ using System.IO.Compression;
 namespace PatchManager.Core.Cache
 {
     /// <summary>
-    /// Wrapper for <see cref="ZipArchive"/> for use with the caching system.
+    /// Wrapper for <see cref="ZipArchive" /> for use with the caching system.
     /// </summary>
     public class Archive : IDisposable
     {
@@ -32,9 +32,7 @@ namespace PatchManager.Core.Cache
             _stream.Seek(0, SeekOrigin.Begin);
         }
 
-        /// <summary>
-        /// Disposes the archive object.
-        /// </summary>
+        /// <inheritdoc />
         public void Dispose()
         {
             if (_isDisposed)

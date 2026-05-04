@@ -28,7 +28,7 @@ namespace PatchManager.Planets.Overrides
         public float? RayleighExponentialDistribution;
         public Vector3? MieScattering;
         public float? MieScatteringScale;
-        public float? MieAnistropy;
+        public float? MieAnisotropy;
         public float? MieExponentialDistribution;
         public float? AbsorptionScale;
         public Vector3? Absorption;
@@ -60,11 +60,12 @@ namespace PatchManager.Planets.Overrides
                 atmosphereModel.RayleighExponentialDistribution = RayleighExponentialDistribution.Value;
             if (MieScattering.HasValue) atmosphereModel.MieScattering = MieScattering.Value;
             if (MieScatteringScale.HasValue) atmosphereModel.MieScatteringScale = MieScatteringScale.Value;
-            if (MieAnistropy.HasValue) atmosphereModel.MieAnisotropy = MieAnistropy.Value;
+            if (MieAnisotropy.HasValue) atmosphereModel.MieAnisotropy = MieAnisotropy.Value;
             if (MieExponentialDistribution.HasValue)
                 atmosphereModel.MieExponentialDistribution = MieExponentialDistribution.Value;
             if (AbsorptionScale.HasValue) atmosphereModel.AbsorptionScale = AbsorptionScale.Value;
             if (Absorption.HasValue) atmosphereModel.Absorption = Absorption.Value;
+            if (AbsorptionMaxDensity.HasValue) atmosphereModel.AbsorptionMaxDensity = AbsorptionMaxDensity.Value;
             if (AbsorptionHeightMinMax.HasValue) atmosphereModel.AbsorptionHeightMinMax = AbsorptionHeightMinMax.Value;
             if (!string.IsNullOrEmpty(TransmittanceTexture))
             {

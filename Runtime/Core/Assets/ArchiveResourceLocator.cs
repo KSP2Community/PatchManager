@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using PatchManager.Core.Cache;
 using PatchManager.Shared;
@@ -14,23 +14,13 @@ namespace PatchManager.Core.Assets
     /// </summary>
     internal class ArchiveResourceLocator : IResourceLocator
     {
-        /// <summary>
-        /// The ID of the locator.
-        /// </summary>
+        /// <inheritdoc />
         public string LocatorId => GetType().FullName;
 
-        /// <summary>
-        /// The labels registered in the locator.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<object> Keys => CacheManager.Inventory.CacheEntries.Keys;
 
-        /// <summary>
-        /// Locates an asset file in a cache archive by its label and type.
-        /// </summary>
-        /// <param name="key">Label to find.</param>
-        /// <param name="type">Type of assets to find.</param>
-        /// <param name="locations">List of found locations.</param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public bool Locate(object key, Type type, out IList<IResourceLocation> locations)
         {
             var label = key.ToString();

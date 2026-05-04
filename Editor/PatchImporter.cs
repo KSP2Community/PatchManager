@@ -2,9 +2,10 @@ using System.IO;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
+
 namespace PatchManager.Editor
 {
-    [ScriptedImporter(1, "patch")]
+    [ScriptedImporter(1, "lua")]
     public class PatchImporter: ScriptedImporter
     {
         public override void OnImportAsset(AssetImportContext ctx)

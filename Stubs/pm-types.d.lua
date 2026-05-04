@@ -1,0 +1,230 @@
+---@meta
+-- AUTO-GENERATED from analysis of codebase and assets - do not edit by hand.
+-- Source: ksp2redux/Assets/Code/Root/PartCategories.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/MetaAssemblySizeFilterType.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/AssemblyPartStageType.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/PartPhysicsModes.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/OABEditorPartCategory.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/AssemblyPartTypeFilter.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/OABPartHideMode.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/OABOrientation.cs
+-- Source: ksp2redux/Assets/Code/KSP/OAB/MirrorTechnique.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/AttachNodeType.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/AttachNodeMethod.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/TransformDirAxis.cs
+-- Source: ksp2redux/Assets/Code/KSP/Modules/EngineState.cs
+-- Source: ksp2redux/Assets/Code/KSP/Modules/EngineType.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/ResourceSystem/ResourceFlowMode.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/ResourceSystem/ResourceTransferMode.cs
+-- Source: ksp2redux/Assets/Code/KSP/VolumeCloud/VolumeCloudConfiguration.cs
+-- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceExperimentType.cs
+-- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceSitutation.cs
+-- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceReportType.cs
+
+---Categories available for classifying parts in the vehicle assembly editor.
+---@alias PartCategories
+---| "none"
+---| "Production"
+---| "Control"
+---| "Structural"
+---| "Aero"
+---| "Utility"
+---| "Science"
+---| "Pods"
+---| "FuelTank"
+---| "Engine"
+---| "Communication"
+---| "Electrical"
+---| "Ground"
+---| "Thermal"
+---| "Payload"
+---| "Coupling"
+---| "ColonyEssentials"
+---| "Favorites"
+---| "SubAssemblies"
+---| "Amenities"
+---| "Storage"
+
+---Size filter categories for a meta assembly in the object assembly building.
+---@alias MetaAssemblySizeFilterType
+---| "Auto"
+---| "XS"
+---| "XSPLUS"
+---| "S"
+---| "SPLUS"
+---| "M"
+---| "MPLUS"
+---| "L"
+---| "LPLUS"
+---| "XL"
+---| "XLPLUS"
+---| "XXL"
+---| "XXXL"
+---| "XXXXL"
+---| "XXXXXL"
+---| "XXXXXXL"
+
+---The staging role of a part in the Object Assembly Builder.
+---@alias AssemblyPartStageType
+---| "None"
+---| "LiquidEngine"
+---| "SolidEngine"
+---| "Parachute"
+---| "Science"
+---| "DecouplerHorizontal"
+---| "DecouplerVertical"
+---| "Fairing"
+
+---The physics simulation modes available for a part.
+---@alias PartPhysicsModes
+---| "Full"
+---| "None"
+
+---Part category classifications used in the Object Assembly Builder editor.
+---@alias OABEditorPartCategory
+---| "VAB"             # 0
+---| "BAE"             # 1
+---| "ALL"             # 2
+---| "NONE"            # 3
+---| "VAB_ORBITAL"     # 10
+---| "VAB_TERRESTRIAL" # 11
+---| "BAE_ORBITAL"     # 20
+---| "BAE_TERRESTRIAL" # 21
+
+---Vehicle type categories for filtering assembly parts in the Object Assembly Building.
+---@alias AssemblyPartTypeFilter integer
+---| 0   # Rocket
+---| 1   # Airplane
+---| 2   # Spaceplane
+---| 3   # Rover
+---| "Rocket"
+---| "Airplane"
+---| "Spaceplane"
+---| "Rover"
+
+---The hide mode for a part entry in the Object Assembly Building.
+---@alias OABPartHideMode integer
+---| 0   # Shown
+---| 1   # ShownByDefault
+---| 2   # Hidden
+---| 3   # HiddenByDefault
+---| "Shown"
+---| "ShownByDefault"
+---| "Hidden"
+---| "HiddenByDefault"
+
+---Represents the build orientation mode for the Object Assembly Building.
+---@alias OABOrientation
+---| "NONE"
+---| "VAB"
+---| "AIRPLANE"
+
+---The technique used to mirror a part in the Object Assembly Builder.
+---@alias MirrorTechnique
+---| "Auto"
+---| "Scale"
+---| "Rotation"
+---| "RotationYZ"
+---| "RotationXZ"
+---| "RotationXY"
+
+---The type of attachment node used to connect spacecraft parts.
+---@alias AttachNodeType
+---| "Stack"
+---| "Surface"
+---| "Dock"
+
+---The physics attachment method used for a part attach node.
+---@alias AttachNodeMethod
+---| "FIXED_JOINT"
+---| "HINGE_JOINT"
+---| "LOCKED_JOINT"
+---| "MERGED_PHYSICS"
+---| "NO_PHYSICS"
+---| "NONE"
+
+---The directional axis of a transform, representing the X, Y, or Z axis.
+---@alias TransformDirAxis
+---| "X"
+---| "Y"
+---| "Z"
+
+---Represents the operational state of a rocket engine.
+---@alias EngineState integer
+---| 0   # Off
+---| 1   # Running
+---| 2   # RunningIncreasing
+---| 3   # RunningDecreasing
+---| 4   # Starved
+---| 5   # ChangingMode
+---| 6   # Starting
+---| 7   # Stopping
+---| "Off"
+---| "Running"
+---| "RunningIncreasing"
+---| "RunningDecreasing"
+---| "Starved"
+---| "ChangingMode"
+---| "Starting"
+---| "Stopping"
+
+---The category of propulsion technology for an engine module.
+---@alias EngineType
+---| "Generic"
+---| "SolidBooster"
+---| "Methalox"
+---| "Piston"
+---| "Turbine"
+---| "ScramJet"
+---| "Electric"
+---| "Nuclear"
+---| "MonoProp"
+---| "Helium3"
+---| "MetallicHydrogen"
+---| "NuclearSaltwater"
+---| "Antimatter"
+
+---Flow mode governing how resources are distributed between parts in a vessel.
+---@alias ResourceFlowMode
+---| 0   # NULL
+---| 1   # NO_FLOW
+---| 2   # ALL_VESSEL
+---| 3   # STAGE_PRIORITY_FLOW
+---| 4   # STACK_PRIORITY_SEARCH
+---| 5   # STAGE_STACK_FLOW_BALANCE
+
+---The mode of resource transfer between parts.
+---@alias ResourceTransferMode
+---| 0   # NONE
+---| 1   # PUMP
+
+---The type of a volumetric cloud layer.
+---@alias CloudsLayerType integer
+---| 1   # Cumulus
+---| 2   # Stratus
+---| 3   # Box
+---| "Cumulus"
+---| "Stratus"
+---| "Box"
+
+---The type of result produced by a science experiment.
+---@alias ScienceExperimentType
+---| "DataType"
+---| "SampleType"
+---| "Both"
+
+---Science situations that classify a vessel's current orbital or surface environment for science collection.
+---@alias ScienceSitutation
+---| "None"
+---| "HighOrbit"
+---| "LowOrbit"
+---| "Atmosphere"
+---| "Splashed"
+---| "Landed"
+
+---Kinds of science report, distinguishing digital data from physical samples.
+---@alias ScienceReportType
+---| 1   # DataType
+---| 2   # SampleType
+---| "DataType"
+---| "SampleType"
