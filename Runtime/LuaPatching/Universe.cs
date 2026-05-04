@@ -23,13 +23,13 @@ namespace PatchManager.LuaPatching
     /// sorts stages topologically, and runs the resulting pipeline against each patched asset.
     /// </summary>
     /// <remarks>
-    /// Static initialization scans every loaded assembly for converters (via <see cref="ConverterAttribute" />)
-    /// and Lua-exposed submodules (via <see cref="PatchManagerModuleAttribute" />) and registers them in
-    /// <see cref="Converters" /> and <see cref="SubmoduleTypes" />. Each universe instance then constructs its own
-    /// <see cref="PatchManagerCore" /> and live submodule instances, exposes them as the global <c>PM</c>
-    /// table, and tracks per-mod patch state. Mods load Lua patches via the <c>LoadPatch*</c> methods, which are
-    /// expected to register patches and stages through <c>PM</c>; once loading is done, <see cref="SetupPatchesForRun" />
-    /// finalizes ordering and the <c>RunAllPatchesFor</c> overloads execute the chain against each asset.
+    /// Converter and submodule discovery is performed by <see cref="LuaPatchingModule" /> at module-init time,
+    /// which populates <see cref="Converters" /> and <see cref="SubmoduleTypes" /> by scanning every loaded
+    /// assembly. Each universe instance then constructs its own <see cref="PatchManagerCore" /> and live
+    /// submodule instances, exposes them as the global <c>PM</c> table, and tracks per-mod patch state. Mods
+    /// load Lua patches via the <c>LoadPatch*</c> methods, which are expected to register patches and stages
+    /// through <c>PM</c>; once loading is done, <see cref="SetupPatchesForRun" /> finalizes ordering and the
+    /// <c>RunAllPatchesFor</c> overloads execute the chain against each asset.
     /// </remarks>
     public class Universe
     {
@@ -80,13 +80,13 @@ namespace PatchManager.LuaPatching
         public Dictionary<string, DynValue> Submodules = new();
 
         /// <summary>
-        /// Submodule types discovered at static-init time, keyed by their
+        /// Submodule types discovered at module-init time by <see cref="LuaPatchingModule" />, keyed by their
         /// <see cref="PatchManagerModuleAttribute.SubmoduleName" />.
         /// </summary>
         public static Dictionary<string, Type> SubmoduleTypes = new();
 
         /// <summary>
-        /// Converter instances discovered at static-init time, keyed by their
+        /// Converter instances discovered at module-init time by <see cref="LuaPatchingModule" />, keyed by their
         /// <see cref="ConverterAttribute.Name" />.
         /// </summary>
         public static Dictionary<string, IConverter> Converters = new();
@@ -116,7 +116,7 @@ namespace PatchManager.LuaPatching
                 MessageLogger($"Adding stage: {mod}");
                 var post = new Stage();
                 post.RunsAfter.Add(mod);
-                lastPost = $"{mod}:post";
+                lastPost = $"{mod}:__post";
                 AllStages[lastPost] = post;
                 MessageLogger($"Adding stage: {lastPost}");
                 LastImplicitWithinMod[mod] = mod;
@@ -127,45 +127,7 @@ namespace PatchManager.LuaPatching
         static Universe()
         {
             MoonSharpExceptionWrapPatch.Install();
-
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                UserData.RegisterAssembly(assembly, false);
-            }
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in assembly.GetTypes())
-                {
-                    var attributes = type.GetCustomAttributes(true);
-                    if (attributes.OfType<MoonSharpUserDataAttribute>().Any())
-                    {
-                        DelegateRegistry.RegisterDelegatesFromMethodsOf(type);
-                    }
-
-                    if (attributes.OfType<PatchManagerModuleAttribute>().FirstOrDefault() is { } pmma)
-                    {
-                        if (!attributes.OfType<MoonSharpUserDataAttribute>().Any())
-                        {
-                            Debug.LogWarning($"Universe Preinitialization, found Patch Manager module {pmma.SubmoduleName} without MoonSharpUserData Attribute, skipping!");
-                            continue;
-                        }
-
-                        SubmoduleTypes[pmma.SubmoduleName] = type;
-                    }
-
-                    if (attributes.OfType<ConverterAttribute>().FirstOrDefault() is { } conv)
-                    {
-                        if (!typeof(IConverter).IsAssignableFrom(type))
-                        {
-                            Debug.LogWarning($"Universe Preinitialization, found Patch Manager converter {conv.Name} that does not implement IConverter, skipping");
-                            continue;
-                        }
-                        Converters[conv.Name] = (IConverter)Activator.CreateInstance(type);
-                    }
-                }
-            }
         }
 
         private static PatchManagerScriptLoader _managerScriptLoader = new();

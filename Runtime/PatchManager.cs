@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PatchManager.Core;
 using PatchManager.Generic;
+using PatchManager.LuaPatching;
 using PatchManager.Missions;
 using PatchManager.Parts;
 using PatchManager.Planets;
@@ -30,6 +31,7 @@ namespace PatchManager
         {
             // Let's register all our modules!
             Instance = this;
+            ModuleManager.Register(typeof(LuaPatchingModule));
             ModuleManager.Register(typeof(CoreModule));
             ModuleManager.Register(typeof(GenericModule));
             ModuleManager.Register(typeof(MissionsModule));
