@@ -62,6 +62,7 @@ namespace PatchManager.LuaPatching
             {
                 Submodules[k] = UserData.Create(Activator.CreateInstance(v, pmc, this));
             }
+
             SetupBasePriorities(allMods);
         }
 
@@ -117,9 +118,11 @@ namespace PatchManager.LuaPatching
                 MessageLogger($"Adding stage: {lastPost}");
                 LastImplicitWithinMod[mod] = mod;
             }
+
             LastImplicitGlobal = lastPost;
             MessageLogger($"Last implicit global: {lastPost}");
         }
+
         static Universe()
         {
             MoonSharpExceptionWrapPatch.Install();
@@ -256,6 +259,7 @@ namespace PatchManager.LuaPatching
                 ErrorLogger(e.ToString());
             }
         }
+
         #endregion
 
         #region Patch/Stage Registering
@@ -273,7 +277,7 @@ namespace PatchManager.LuaPatching
         /// <summary>
         /// Registered patches keyed by addressables label. Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
         /// </summary>
-        public Dictionary<string,List<LuaPatch>> AllPatches = new();
+        public Dictionary<string, List<LuaPatch>> AllPatches = new();
 
         /// <summary>
         /// Registers a patch and records its label in <see cref="PatchedLabels" />.
@@ -289,6 +293,7 @@ namespace PatchManager.LuaPatching
             {
                 AllPatches[patch.Label] = new List<LuaPatch> { patch };
             }
+
             PatchedLabels.Add(patch.Label);
             TotalPatchCount++;
         }
@@ -321,15 +326,17 @@ namespace PatchManager.LuaPatching
         /// Topologically sorted stages, mapped to their ordering priority. Populated by the internal sort step.
         /// </summary>
         public Dictionary<string, ulong> SortedStages = new();
+
         private void SortStages()
         {
             MessageLogger($"Sorting {AllStages.Count} stages");
             List<string> sortedStages = new();
             var hs = AllStages.Keys.ToHashSet();
-            foreach (var (k,v) in AllStages)
+            foreach (var (k, v) in AllStages)
             {
                 v.UpdateRequirements(hs);
             }
+
             Dictionary<string, Stage> toSort = new(AllStages);
             while (toSort.Count > 0)
             {
@@ -359,7 +366,8 @@ namespace PatchManager.LuaPatching
             var found = false;
             foreach (var (name, stage) in toBeSorted)
             {
-                if (!stage.RunsAfter.All(sortedStages.Contains) || toBeSorted.Values.Any(x => x.RunsBefore.Contains(name)))
+                if (!stage.RunsAfter.All(sortedStages.Contains) ||
+                    toBeSorted.Values.Any(x => x.RunsBefore.Contains(name)))
                 {
                     continue;
                 }
@@ -374,6 +382,7 @@ namespace PatchManager.LuaPatching
             {
                 toBeSorted.Remove(remove);
             }
+
             return found;
         }
 
@@ -472,6 +481,7 @@ namespace PatchManager.LuaPatching
                     ErrorLogger(e.ToString());
                 }
             }
+
             return anyApplied ? previousConverter!.ToJson(previousInstance) : data;
         }
 
@@ -533,9 +543,15 @@ namespace PatchManager.LuaPatching
                 ? patches.Where(patcher => string.IsNullOrEmpty(patcher.Name) || MatchesPattern(name, patcher.Name))
                 : Enumerable.Empty<LuaPatch>();
 
+        public bool HasAnyPatchFor(string label, string name) => AllPatches.TryGetValue(label, out var patches)
+                                                                 && patches.Any(p =>
+                                                                     string.IsNullOrEmpty(p.Name) ||
+                                                                     MatchesPattern(name, p.Name));
+
         #endregion
 
         #region utilities
+
         /// <summary>
         /// Returns whether <paramref name="name" /> matches the given pattern, where <c>*</c> matches any run of
         /// characters and <c>?</c> matches an optional character.
@@ -545,6 +561,7 @@ namespace PatchManager.LuaPatching
         /// <returns>True if <paramref name="name" /> matches <paramref name="pattern" />, false otherwise.</returns>
         public static bool MatchesPattern(string name, string pattern) =>
             Regex.IsMatch(name, $"^{pattern.Replace("*", ".*").Replace("?", ".?")}$");
+
         #endregion
     }
 }

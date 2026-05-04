@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -231,10 +231,18 @@ namespace PatchManager.Core.Assets
             {
                 try
                 {
-                    var patchedText = PatchJson(label, asset.name, asset.text);
-                    if (patchedText != asset.text)
+                    string patchedText;
+                    if (Universe.HasAnyPatchFor(label, asset.name))
                     {
-                        unchanged = false;
+                        patchedText = PatchJson(label, asset.name, asset.text);
+                        if (patchedText != asset.text)
+                        {
+                            unchanged = false;
+                        }
+                    }
+                    else
+                    {
+                        patchedText = asset.text;
                     }
 
                     // Handle deletion
