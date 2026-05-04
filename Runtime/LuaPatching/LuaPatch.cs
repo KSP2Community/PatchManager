@@ -44,6 +44,11 @@ public class LuaPatch
     public string Stage;
 
     /// <summary>
+    /// Precomputed stage priority used by sorting
+    /// </summary>
+    [MoonSharpHidden] public ulong StagePriority;
+    
+    /// <summary>
     /// Runs this patch as the first in a chain, lifting the raw JSON through <see cref="ConverterInstance" /> first.
     /// </summary>
     /// <param name="json">The asset's raw JSON.</param>

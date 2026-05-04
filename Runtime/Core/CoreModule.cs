@@ -31,6 +31,7 @@ namespace PatchManager.Core
         private const string REDUX_MOD_ID = "Redux";
 
         private ConfigValue<bool> _shouldAlwaysInvalidate;
+        private ConfigValue<bool> _indentedPatchOutput;
 
         private bool _wasCacheInvalidated;
 
@@ -228,6 +229,12 @@ namespace PatchManager.Core
             _shouldAlwaysInvalidate = new(modConfiguration.Bind("Advanced", "Always Invalidate Patch Manager Cache",
                 false,
                 "Should patch manager always invalidate its cache upon load"));
+
+            _indentedPatchOutput = new(modConfiguration.Bind("Advanced", "Indent Patched JSON", false,
+                    "Format patched JSON output with indentation in the cache. Useful for inspection but is slightly slower. Always enabled in the unity editor"
+                ));
+
+            PatchingManager.UseIndentedOutput = Application.isEditor || _indentedPatchOutput.Value;
         }
 
         /// <summary>

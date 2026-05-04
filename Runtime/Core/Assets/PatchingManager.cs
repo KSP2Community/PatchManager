@@ -35,6 +35,8 @@ namespace PatchManager.Core.Assets
         private static int _initialLibraryCount;
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
+        internal static bool UseIndentedOutput;
+
         /// <summary>
         /// Total patches successfully applied this run.
         /// </summary>
@@ -71,19 +73,19 @@ namespace PatchManager.Core.Assets
 
         private static string PatchJson(string label, string assetName, string text)
         {
-            Logging.LogInfo($"Patching {label}:{assetName}");
+            Logging.LogDebug($"Patching {label}:{assetName}");
             var patchCount = 0;
             var errorCount = 0;
             if (text != "")
             {
                 var result = Universe.RunAllPatchesFor(label, assetName, JToken.Parse(text), out patchCount, out errorCount);
-                text = result == null ? "" : result.ToString(Formatting.Indented);
+                text = result == null ? "" : result.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
                 TotalErrorCount += errorCount;
                 TotalPatchCount += patchCount;
             }
             if (patchCount > 0)
             {
-                Logging.LogInfo($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
+                Logging.LogDebug($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
                 TotalDefinitionPatchCount += 1;
             }
 
@@ -92,17 +94,17 @@ namespace PatchManager.Core.Assets
 
         private static string PatchJson(LuaAsset data)
         {
-            Logging.LogInfo($"Patching {data.Label}:{data.Name}");
+            Logging.LogDebug($"Patching {data.Label}:{data.Name}");
 
             var t = Universe.RunAllPatchesFor(data, out var patchCount, out var errorCount);
             TotalErrorCount += errorCount;
             TotalPatchCount += patchCount;
             if (patchCount > 0)
             {
-                Logging.LogInfo($"Patched {data.Label}:{data.Name} with {patchCount} patches. Total: {TotalPatchCount}");
+                Logging.LogDebug($"Patched {data.Label}:{data.Name} with {patchCount} patches. Total: {TotalPatchCount}");
             }
 
-            return t == null ? "" : t.ToString(Formatting.Indented);
+            return t == null ? "" : t.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
         }
 
 
@@ -235,10 +237,7 @@ namespace PatchManager.Core.Assets
                     if (Universe.HasAnyPatchFor(label, asset.name))
                     {
                         patchedText = PatchJson(label, asset.name, asset.text);
-                        if (patchedText != asset.text)
-                        {
-                            unchanged = false;
-                        }
+                        unchanged = false; // Any patch can change
                     }
                     else
                     {
@@ -287,16 +286,21 @@ namespace PatchManager.Core.Assets
 
             handle.Completed += results =>
             {
-                if (unchanged)
+                try
                 {
-                    return;
+                    if (unchanged)
+                    {
+                        return;
+                    }
+
+                    SaveArchive();
                 }
-
-                SaveArchive();
-
-                if (results.Status == AsyncOperationStatus.Succeeded)
+                finally
                 {
-                    Addressables.Release(results);
+                    if (results.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        Addressables.Release(results);
+                    }
                 }
             };
 

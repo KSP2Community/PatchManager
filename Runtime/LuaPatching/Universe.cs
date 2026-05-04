@@ -327,63 +327,72 @@ namespace PatchManager.LuaPatching
         /// </summary>
         public Dictionary<string, ulong> SortedStages = new();
 
+        
+        // Reimplemented using Kahn's algorithm for dependency sorting
         private void SortStages()
         {
             MessageLogger($"Sorting {AllStages.Count} stages");
-            List<string> sortedStages = new();
             var hs = AllStages.Keys.ToHashSet();
             foreach (var (k, v) in AllStages)
             {
                 v.UpdateRequirements(hs);
             }
 
-            Dictionary<string, Stage> toSort = new(AllStages);
-            while (toSort.Count > 0)
+            var n = AllStages.Count;
+            var inDegree = new Dictionary<string, int>(n);
+            var outEdges = new Dictionary<string, HashSet<string>>(n);
+            foreach (var name in AllStages.Keys)
             {
-                if (!SingleSortStep(toSort, sortedStages))
+                inDegree[name] = 0;
+                outEdges[name] = new HashSet<string>();
+            }
+
+            foreach (var (name, stage) in AllStages)
+            {
+                foreach (var pre in stage.RunsAfter)
                 {
-                    throw new Exception(
-                        $"Unable to sort stages to define patch order, the following stages cause a circular dependency: {string.Join(", ", toSort.Keys)}");
+                    if (pre == name) continue;
+                    if (outEdges[pre].Add(name)) inDegree[name]++;
+                }
+
+                foreach (var suc in stage.RunsBefore)
+                {
+                    if (suc == name) continue;
+                    if (outEdges[name].Add(suc)) inDegree[suc]++;
                 }
             }
 
-            // For debug purposes
+            var queue = new Queue<string>();
+            foreach (var (name, d) in inDegree)
+            {
+                if (d == 0) queue.Enqueue(name);
+            }
+
+            var sortedStages = new List<string>();
+            while (queue.Count > 0)
+            {
+                var name = queue.Dequeue();
+                sortedStages.Add(name);
+                foreach (var suc in outEdges[name])
+                {
+                    if (--inDegree[suc] == 0) queue.Enqueue(suc);
+                }
+            }
+            
+            if (sortedStages.Count != n)
+            {
+                var unsorted = AllStages.Keys.Where(k => !sortedStages.Contains(k));
+                throw new Exception(
+                    $"Unable to sort stages to define patch order, the following stages cause a circular dependency: {string.Join(", ", unsorted)}");
+            }
+            
             MessageLogger("Sorted stages!");
-            ulong n = 0;
+            ulong p = 0;
             foreach (var stage in sortedStages)
             {
-                MessageLogger($"{stage}: {n}");
-                SortedStages[stage] = n++;
+                MessageLogger($"{stage}: {p}");
+                SortedStages[stage] = p++;
             }
-        }
-
-        private static bool SingleSortStep(
-            Dictionary<string, Stage> toBeSorted,
-            List<string> sortedStages
-        )
-        {
-            var remove = "";
-            var found = false;
-            foreach (var (name, stage) in toBeSorted)
-            {
-                if (!stage.RunsAfter.All(sortedStages.Contains) ||
-                    toBeSorted.Values.Any(x => x.RunsBefore.Contains(name)))
-                {
-                    continue;
-                }
-
-                remove = name;
-                found = true;
-                sortedStages.Add(name);
-                break;
-            }
-
-            if (found)
-            {
-                toBeSorted.Remove(remove);
-            }
-
-            return found;
         }
 
         #endregion
@@ -402,6 +411,13 @@ namespace PatchManager.LuaPatching
         public HashSet<string> PatchedLabels = new();
 
         /// <summary>
+        /// All buckets for each patch type
+        /// </summary>
+        public Dictionary<string, LabelPatchBuckets> AllPatchesBuckets = new();
+
+        private static readonly char[] WildcardChars = { '*', '?' };
+
+        /// <summary>
         /// Finalizes the patch registry: rebuilds <see cref="PatchedLabels" /> from <see cref="AllPatches" />, then
         /// sorts each label's patches by stage priority.
         /// </summary>
@@ -410,15 +426,55 @@ namespace PatchManager.LuaPatching
         /// </remarks>
         public void SetupPatchesForRun()
         {
+            // We have to sort our stages first, stuff wasn't running in any order prior...
+            SortStages();
             PatchedLabels = AllPatches.Keys.ToHashSet();
-            foreach (var (k, v) in AllPatches)
+            foreach (var (label, patches) in AllPatches)
             {
-                v.Sort((x, y) =>
+                foreach (var p in patches)
                 {
-                    var xPrio = SortedStages.GetValueOrDefault(x.Stage, ulong.MaxValue);
-                    var yPrio = SortedStages.GetValueOrDefault(y.Stage, ulong.MaxValue);
-                    return xPrio.CompareTo(yPrio);
-                });
+                    p.StagePriority = SortedStages.GetValueOrDefault(p.Stage, ulong.MaxValue);
+                }
+
+                patches.Sort((x, y) => x.StagePriority.CompareTo(y.StagePriority));
+
+                var exactGroups = new Dictionary<string, List<LuaPatch>>();
+                var matchAll = new List<LuaPatch>();
+                var wildcard = new List<WildcardEntry>();
+
+                foreach (var p in patches)
+                {
+                    if (string.IsNullOrEmpty(p.Name) || p.Name == "*")
+                    {
+                        matchAll.Add(p);
+                    }
+                    else if (p.Name.IndexOfAny(WildcardChars) < 0)
+                    {
+                        if (!exactGroups.TryGetValue(p.Name, out var groups))
+                        {
+                            exactGroups[p.Name] = groups = new List<LuaPatch>();
+                        }
+
+                        groups.Add(p);
+                    }
+                    else
+                    {
+                        wildcard.Add(new WildcardEntry(NamePattern.Get(p.Name), p));
+                    }
+                }
+
+                var buckets = new LabelPatchBuckets
+                {
+                    MatchAll = matchAll.ToArray(),
+                    Wildcard = wildcard.ToArray(),
+                };
+
+                foreach (var (n, i) in exactGroups)
+                {
+                    buckets.Exact[n] = i.ToArray();
+                }
+
+                AllPatchesBuckets[label] = buckets;
             }
         }
 
@@ -538,30 +594,106 @@ namespace PatchManager.LuaPatching
         /// <param name="label">The addressables label to look up.</param>
         /// <param name="name">The asset's addressables address; matched against each patch's name pattern.</param>
         /// <returns>The matching patches, or an empty sequence when no patches are registered for the label.</returns>
-        public IEnumerable<LuaPatch> GetAllSortedPatchesFor(string label, string name) =>
-            AllPatches.TryGetValue(label, out var patches)
-                ? patches.Where(patcher => string.IsNullOrEmpty(patcher.Name) || MatchesPattern(name, patcher.Name))
-                : Enumerable.Empty<LuaPatch>();
+        public IEnumerable<LuaPatch> GetAllSortedPatchesFor(string label, string name)
+        {
+            if (!AllPatchesBuckets.TryGetValue(label, out var buckets)) yield break;
 
-        public bool HasAnyPatchFor(string label, string name) => AllPatches.TryGetValue(label, out var patches)
-                                                                 && patches.Any(p =>
-                                                                     string.IsNullOrEmpty(p.Name) ||
-                                                                     MatchesPattern(name, p.Name));
+            var exact = buckets.Exact.TryGetValue(name, out var e) ? e : Array.Empty<LuaPatch>();
+            var matchAll = buckets.MatchAll;
+            var wildcard = buckets.Wildcard;
+            var exactI = 0;
+            var matchAllI = 0;
+            var wildCardI = 0;
+
+            while (true)
+            {
+                while (wildCardI < wildcard.Length && !wildcard[wildCardI].Pattern.Matches(name)) wildCardI++;
+
+                var exactPatch = exactI < exact.Length ? exact[exactI] : null;
+                var matchAllPatch = matchAllI < matchAll.Length ? matchAll[matchAllI] : null;
+                var wildcardPatch = wildCardI < wildcard.Length ? wildcard[wildCardI].Patch : null;
+
+                if (exactPatch == null && matchAllPatch == null && wildcardPatch == null) yield break;
+
+                var best = exactPatch;
+                if (matchAllPatch != null && (best == null || matchAllPatch.StagePriority < best.StagePriority))
+                    best = matchAllPatch;
+                if (wildcardPatch != null && (best == null || wildcardPatch.StagePriority < best.StagePriority))
+                    best = wildcardPatch;
+
+                if (ReferenceEquals(best, exactPatch)) exactI++;
+                else if (ReferenceEquals(best, matchAllPatch)) matchAllI++;
+                else wildCardI++;
+
+                yield return best;
+            }
+        }
+
+        /// <summary>
+        /// Check if there are any patches that match the given label/name combo
+        /// </summary>
+        /// <param name="label">The label</param>
+        /// <param name="name">The name</param>
+        /// <returns>true if any patches match</returns>
+        public bool HasAnyPatchFor(string label, string name)
+        {
+            if (!AllPatchesBuckets.TryGetValue(label, out var buckets)) return false;
+            if (buckets.MatchAll.Length > 0) return true;
+            if (buckets.Exact.ContainsKey(name)) return true;
+            return buckets.Wildcard.Any(w => w.Pattern.Matches(name));
+        }
 
         #endregion
 
         #region utilities
 
         /// <summary>
-        /// Returns whether <paramref name="name" /> matches the given pattern, where <c>*</c> matches any run of
-        /// characters and <c>?</c> matches an optional character.
+        /// Stores information about wildcard patches
         /// </summary>
-        /// <param name="name">The candidate asset name.</param>
-        /// <param name="pattern">The wildcard pattern.</param>
-        /// <returns>True if <paramref name="name" /> matches <paramref name="pattern" />, false otherwise.</returns>
-        public static bool MatchesPattern(string name, string pattern) =>
-            Regex.IsMatch(name, $"^{pattern.Replace("*", ".*").Replace("?", ".?")}$");
+        public readonly struct WildcardEntry
+        {
+            /// <summary>
+            /// The pattern that this patch applies to
+            /// </summary>
+            public readonly NamePattern Pattern;
 
+            /// <summary>
+            /// The patch itself
+            /// </summary>
+            public readonly LuaPatch Patch;
+
+            /// <summary>
+            /// Creates a new WildcardEntry instance
+            /// </summary>
+            /// <param name="pattern">The pattern the patch applies to</param>
+            /// <param name="patch">The patch itself</param>
+            public WildcardEntry(NamePattern pattern, LuaPatch patch)
+            {
+                Pattern = pattern;
+                Patch = patch;
+            }
+        }
+
+        /// <summary>
+        /// Buckets for each label
+        /// </summary>
+        public sealed class LabelPatchBuckets
+        {
+            /// <summary>
+            /// Exact name matching patches
+            /// </summary>
+            public Dictionary<string, LuaPatch[]> Exact = new();
+
+            /// <summary>
+            /// All matching patches
+            /// </summary>
+            public LuaPatch[] MatchAll = Array.Empty<LuaPatch>();
+
+            /// <summary>
+            /// Wildcard matching patches
+            /// </summary>
+            public WildcardEntry[] Wildcard = Array.Empty<WildcardEntry>();
+        }
         #endregion
     }
 }
