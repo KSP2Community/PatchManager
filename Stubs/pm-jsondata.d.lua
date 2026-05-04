@@ -6,8 +6,8 @@
 
 ---Lua-facing wrapper exposing a Newtonsoft JToken as a table-like UserData.
 ---@class JsonUserData
----@field [integer] JsonUserData
----@field [string] JsonUserData
+---@field [integer] any
+---@field [string] any
 ---@field Count integer Gets the number of elements in the wrapped array, or 0 when the token is not an array (also logs a debug message).
 local JsonUserData = {}
 
@@ -30,7 +30,7 @@ function JsonUserData:Clear() end
 
 ---Inserts an element at the given 1-indexed position, shifting later elements right.
 ---@param index integer The 1-indexed position to insert at.
----@param value any The element to insert.
+---@param value any     The element to insert.
 ---@error Thrown when the token is not `JTokenType.Array`.
 function JsonUserData:Insert(index, value) end
 
@@ -50,7 +50,7 @@ function JsonUserData:HasKey(key) end
 
 ---Invokes `callback` with the value at `key` when the key is present;
 ---does nothing otherwise.
----@param key string The property name to patch.
+---@param key string             The property name to patch.
 ---@param callback fun(value: any) The callback to invoke with the existing value.
 function JsonUserData:Patch(key, callback) end
 

@@ -42,17 +42,17 @@ function ResourcesLuaModule:NewResource(name, callback) end
 function ResourcesLuaModule:RegisterUnits(value) end
 
 ---Plain resource definition wrapper exposing the inner `data` subtree while preserving the full envelope for round-tripping.
----@class ResourceUserData : JsonUserData, ResourceDefinition
+---@class ResourceUserData : ResourceDefinition, JsonUserData
 local ResourceUserData = {}
 
 ---Recipe-style resource definition wrapper exposing the inner `recipeData` subtree while preserving the full
 ---envelope, and exposing the `ingredients` array as a typed IngredientsUserData.
----@class RecipeUserData : ExtensibleJsonUserData, ResourceRecipeDefinition
+---@class RecipeUserData : ResourceRecipeDefinition, ExtensibleJsonUserData
 ---@field ingredients IngredientsUserData The recipe's ingredients array, surfaced as a typed wrapper.
 local RecipeUserData = {}
 
 ---Synthetic per-element wrapper for entries of an `IngredientsUserData`.
----@class IngredientUserData : JsonUserData, ResourceRecipeIngredientDefinition
+---@class IngredientUserData : ResourceRecipeIngredientDefinition, JsonUserData
 
 ---Indexed-list wrapper for a recipe's `ingredients` array, keyed by each ingredient's `name`.
 ---@class IngredientsUserData : IndexedListUserData<IngredientUserData>

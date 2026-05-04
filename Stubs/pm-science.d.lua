@@ -26,7 +26,7 @@
 -- ============================================================
 
 ---Synthetic per-element wrapper for entries of a `DiscoverablesUserData`.
----@class DiscoverablePositionUserData : JsonUserData, CelestialBodyDiscoverablePosition
+---@class DiscoverablePositionUserData : CelestialBodyDiscoverablePosition, JsonUserData
 
 ---Indexed-list wrapper for a science region's discoverables, keyed by each entry's `ScienceRegionId`, while
 ---preserving the full envelope for round-tripping.
@@ -40,10 +40,10 @@ local DiscoverablesUserData = {}
 function DiscoverablesUserData:Name(source) end
 
 ---Science experiment wrapper exposing the inner `Data` subtree while preserving the full envelope for round-tripping.
----@class ExperimentUserData : JsonUserData, ExperimentDefinition
+---@class ExperimentUserData : ExperimentDefinition, JsonUserData
 
 ---Synthetic per-element wrapper for entries of a `ScienceRegionsUserData`.
----@class ScienceRegionUserData : JsonUserData, ScienceRegionDefinition
+---@class ScienceRegionUserData : ScienceRegionDefinition, JsonUserData
 
 ---Indexed-list wrapper for a body's science regions, keyed by each region's `id`, while preserving the full
 ---envelope for round-tripping and exposing the body name and situation data as typed properties.
@@ -60,7 +60,7 @@ function ScienceRegionsUserData:Name(source) end
 ---Synthetic wrapper around a tech-tree node's JSON. Tech nodes are patched through the generic JSON converter,
 ---so there is no purpose-built C# wrapper class -- this stub gives Lua scripts the typed `TechNodeData`
 ---field surface plus the inherited `JsonUserData` methods.
----@class TechNodeUserData : JsonUserData, TechNodeData
+---@class TechNodeUserData : TechNodeData, JsonUserData
 
 -- ============================================================
 -- Submodule

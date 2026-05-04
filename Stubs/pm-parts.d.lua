@@ -29,7 +29,7 @@
 
 ---Part definition wrapper exposing the inner `data` subtree, the typed `resourceContainers` array, and
 ---each part module as a virtual property keyed by the module's short name.
----@class PartUserData : ExtensibleJsonUserData, PartData
+---@class PartUserData : PartData, ExtensibleJsonUserData
 ---@field resourceContainers ResourceContainersUserData The typed wrapper around the part's `resourceContainers` array.
 ---@field [string] ModuleUserData
 local PartUserData = {}
@@ -62,7 +62,7 @@ function PartUserData:HasModule(moduleType) end
 ---Standalone wrapper for a part module's serialized JSON, exposing each `ModuleData` entry by name with a
 ---typed adapter when one is registered for the data type.
 ---Iterable with `pairs()`; each iteration yields `(name, value)` pairs in declaration order.
----@class ModuleUserData : JsonUserData, SerializedPartModule
+---@class ModuleUserData : SerializedPartModule, JsonUserData
 ---@field Count integer Gets the number of data entries on this module.
 ---@field [string] EngineUserData | JsonUserData
 ---@field [integer] EngineUserData | JsonUserData
@@ -97,7 +97,7 @@ function ModuleUserData:RemoveData(type) end
 function ModuleUserData:HasData(type) end
 
 ---Synthetic per-element wrapper for entries of a `ModesUserData`.
----@class EngineModeUserData : JsonUserData, Data_Engine_EngineMode
+---@class EngineModeUserData : Data_Engine_EngineMode, JsonUserData
 
 ---Indexed-list wrapper for an engine's `engineModes` array, keyed by each mode's `engineID`.
 ---@class ModesUserData : IndexedListUserData<EngineModeUserData>
@@ -111,11 +111,11 @@ function ModesUserData:Add(mode, callback) end
 ---`Data_Engine` module-data adapter that exposes the engine's `engineModes` array as a typed
 ---ModesUserData rather than a raw JsonUserData.
 ---Wraps the `Data_Engine` module-data type (its JSON shape lives at `data["DataObject"]`).
----@class EngineUserData : ExtensibleJsonUserData, Data_Engine
+---@class EngineUserData : Data_Engine, ExtensibleJsonUserData
 ---@field engineModes ModesUserData The engine's `engineModes` array, exposed as a typed `ModesUserData`.
 
 ---Synthetic per-element wrapper for entries of a `ResourceContainersUserData`.
----@class ResourceContainerUserData : JsonUserData, ContainedResourceDefinition
+---@class ResourceContainerUserData : ContainedResourceDefinition, JsonUserData
 
 ---Indexed-list wrapper for a part's `resourceContainers` array, keyed by each container's `name`.
 ---@class ResourceContainersUserData : IndexedListUserData<ResourceContainerUserData>

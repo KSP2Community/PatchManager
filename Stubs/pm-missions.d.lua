@@ -34,12 +34,12 @@
 
 ---Mission definition wrapper exposing the `missionStages` array as a typed StagesUserData and
 ---the optional `ContentBranches` array as a typed ContentBranchesUserData.
----@class MissionUserData : ExtensibleJsonUserData, MissionData
+---@class MissionUserData : MissionData, ExtensibleJsonUserData
 ---@field missionStages StagesUserData
 ---@field ContentBranches ContentBranchesUserData?
 
 ---Mission stage wrapper exposing the optional `MissionReward` object as a typed MissionRewardUserData.
----@class StageUserData : ExtensibleJsonUserData, MissionStage
+---@class StageUserData : MissionStage, ExtensibleJsonUserData
 ---@field MissionReward MissionRewardUserData?
 
 ---Indexed-list wrapper for a mission's `missionStages` array, keyed by each stage's `name`, wrapping
@@ -48,14 +48,14 @@
 ---@class StagesUserData : IndexedListUserData<StageUserData>
 
 ---Synthetic per-element wrapper for entries of a `ContentBranchesUserData`.
----@class ContentBranchUserData : JsonUserData, MissionContentBranch
+---@class ContentBranchUserData : MissionContentBranch, JsonUserData
 
 ---Indexed-list wrapper for a mission's `ContentBranches` array, keyed by each branch's `ID`.
 ---Iterable with `pairs()`.
 ---@class ContentBranchesUserData : IndexedListUserData<ContentBranchUserData>
 
 ---Synthetic per-element wrapper for entries of a `MissionRewardUserData`.
----@class MissionRewardDefinitionUserData : JsonUserData, MissionRewardDefinition
+---@class MissionRewardDefinitionUserData : MissionRewardDefinition, JsonUserData
 
 ---Indexed-list wrapper for a stage's `MissionRewardDefinitions` array, keyed by each reward's `MissionRewardType`.
 ---Iterable with `pairs()`.
@@ -71,13 +71,13 @@
 local MissionsLuaModule = {}
 
 ---Registers a patch that runs against every mission definition.
----@param callback fun(mission: MissionUserData): string  The patch callback. Returns `"remove"` to delete the mission, `nil` to keep it.
+---@param callback fun(mission: MissionUserData): string?  The patch callback. Returns `"remove"` to delete the mission, `nil` to keep it.
 ---@return LuaPatch patch  The registered patch.
 function MissionsLuaModule:PatchAll(callback) end
 
 ---Registers a patch that runs against the mission matching name.
 ---@param name string  The mission name pattern (supports `*` and `?` wildcards).
----@param callback fun(mission: MissionUserData): string  The patch callback. Returns `"remove"` to delete the mission, `nil` to keep it.
+---@param callback fun(mission: MissionUserData): string?  The patch callback. Returns `"remove"` to delete the mission, `nil` to keep it.
 ---@return LuaPatch patch  The registered patch.
 function MissionsLuaModule:Patch(name, callback) end
 
@@ -99,7 +99,7 @@ function MissionsLuaModule:GetMessage(name) end
 function MissionsLuaModule:CreateStage(name, callback) end
 
 ---Synthetic wrapper around a `ConditionSet` JSON returned by `:And`, `:Or`, and `:Not`.
----@class ConditionSetUserData : JsonUserData, ConditionSet
+---@class ConditionSetUserData : ConditionSet, JsonUserData
 
 ---Returns a condition set that requires every supplied condition to be true.
 ---@param ... Condition  The conditions to combine.

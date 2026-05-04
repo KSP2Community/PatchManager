@@ -76,14 +76,14 @@ function PlanetsLuaModule:CreateCloudOverride(name, callback) end
 ---JSON UserData wrapping a celestial body's `data` subtree while preserving the full envelope for round-tripping.
 ---The wrapped Token is the inner `data` object (shape `CelestialBodyProperties`); the outer envelope is held
 ---internally for serialization round-trip.
----@class CelestialBodyUserData : JsonUserData, CelestialBodyProperties
+---@class CelestialBodyUserData : CelestialBodyProperties, JsonUserData
 
 ---Galaxy definition wrapper that exposes each celestial body in the galaxy's `CelestialBodies` array as a
 ---virtual property keyed by GUID.
 ---Synthetic wrapper around a `SerializedCelestialBody` JSON entry within a `GalaxyDefinition`.
----@class SerializedCelestialBodyUserData : JsonUserData, SerializedCelestialBody
+---@class SerializedCelestialBodyUserData : SerializedCelestialBody, JsonUserData
 
----@class GalaxyUserData : ExtensibleJsonUserData, GalaxyDefinition
+---@class GalaxyUserData : GalaxyDefinition, ExtensibleJsonUserData
 ---@field [string] SerializedCelestialBodyUserData The celestial body entry keyed by its GUID.
 local GalaxyUserData = {}
 
@@ -95,17 +95,17 @@ function GalaxyUserData:Add(planetName, callback) end
 
 ---Volume-cloud configuration wrapper that exposes the `cumulusList` array as a typed
 ---CloudUserData rather than a raw JsonUserData.
----@class VolumeCloudUserData : ExtensibleJsonUserData, VolumeCloudConfigurationOverride
+---@class VolumeCloudUserData : VolumeCloudConfigurationOverride, ExtensibleJsonUserData
 ---@field cumulusList CloudUserData The cumulus layer list, exposed as a name-indexed CloudUserData.
 
 ---Synthetic per-element wrapper for entries of a `CloudUserData`.
----@class CloudLayerUserData : JsonUserData, CloudsDataOverride
+---@class CloudLayerUserData : CloudsDataOverride, JsonUserData
 
 ---Indexed-list wrapper for a volume cloud's `cumulusList`, keyed by each layer's `layerName`.
 ---@class CloudUserData : IndexedListUserData<CloudLayerUserData>
 
 ---Atmosphere override wrapped as a generic JsonUserData for patching.
----@class AtmosphereOverrideUserData : JsonUserData, AtmosphereOverride
+---@class AtmosphereOverrideUserData : AtmosphereOverride, JsonUserData
 
 
 -- =====================================================================
