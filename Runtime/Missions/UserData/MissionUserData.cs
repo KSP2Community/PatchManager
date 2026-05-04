@@ -67,10 +67,11 @@ public class MissionUserData : ExtensibleJsonUserData
     public override bool TryToSet(string property, DynValue value)
     {
         if (property is "missionStages") throw new Exception("You cannot set this property.");
-        else if (property == "ContentBranches")
+        if (property == "ContentBranches")
         {
             Token["ContentBranches"] = GetJTokenForDynValue(new JArray(), value);
             RefreshContentBranches();
+            return true;
         }
 
         return false;
@@ -83,6 +84,7 @@ public class MissionUserData : ExtensibleJsonUserData
         {
             ((JObject)Token).Remove("ContentBranches");
             RefreshContentBranches();
+            return true;
         }
 
         throw new Exception("You cannot remove this property.");

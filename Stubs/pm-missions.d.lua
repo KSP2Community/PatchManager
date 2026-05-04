@@ -45,21 +45,21 @@
 ---Indexed-list wrapper for a mission's `missionStages` array, keyed by each stage's `name`, wrapping
 ---each entry in a typed StageUserData.
 ---Iterable with `pairs()`.
----@class StagesUserData : IndexedListUserData
----@field [string] StageUserData
----@field [integer] StageUserData
+---@class StagesUserData : IndexedListUserData<StageUserData>
+
+---Synthetic per-element wrapper for entries of a `ContentBranchesUserData`.
+---@class ContentBranchUserData : JsonUserData, MissionContentBranch
 
 ---Indexed-list wrapper for a mission's `ContentBranches` array, keyed by each branch's `ID`.
 ---Iterable with `pairs()`.
----@class ContentBranchesUserData : IndexedListUserData
----@field [string] JsonUserData
----@field [integer] JsonUserData
+---@class ContentBranchesUserData : IndexedListUserData<ContentBranchUserData>
+
+---Synthetic per-element wrapper for entries of a `MissionRewardUserData`.
+---@class MissionRewardDefinitionUserData : JsonUserData, MissionRewardDefinition
 
 ---Indexed-list wrapper for a stage's `MissionRewardDefinitions` array, keyed by each reward's `MissionRewardType`.
 ---Iterable with `pairs()`.
----@class MissionRewardUserData : IndexedListUserData
----@field [string] JsonUserData
----@field [integer] JsonUserData
+---@class MissionRewardUserData : IndexedListUserData<MissionRewardDefinitionUserData>
 
 --#endregion
 
@@ -98,25 +98,28 @@ function MissionsLuaModule:GetMessage(name) end
 ---@return StageUserData stage  The created stage.
 function MissionsLuaModule:CreateStage(name, callback) end
 
+---Synthetic wrapper around a `ConditionSet` JSON returned by `:And`, `:Or`, and `:Not`.
+---@class ConditionSetUserData : JsonUserData, ConditionSet
+
 ---Returns a condition set that requires every supplied condition to be true.
 ---@param ... Condition  The conditions to combine.
----@return JsonUserData  A condition-set wrapper representing the conjunction.
+---@return ConditionSetUserData  A condition-set wrapper representing the conjunction.
 function MissionsLuaModule:And(...) end
 
 ---Returns a condition set that requires at least one supplied condition to be true.
 ---@param ... Condition  The conditions to combine.
----@return JsonUserData  A condition-set wrapper representing the disjunction.
+---@return ConditionSetUserData  A condition-set wrapper representing the disjunction.
 function MissionsLuaModule:Or(...) end
 
 ---Returns a condition set that inverts the supplied condition.
 ---@param condition Condition  The condition to negate.
----@return JsonUserData  A condition-set wrapper representing the negation.
+---@return ConditionSetUserData  A condition-set wrapper representing the negation.
 function MissionsLuaModule:Not(condition) end
 
 ---Creates a new mission action of the given short type name and runs callback against
 ---the underlying JSON for further configuration.
 ---@param type string  The action's short name as registered in `MissionsTypes.Actions`.
----@param callback fun(action: JsonUserData)  Callback that receives the action's JSON for further configuration.
+---@param callback fun(action: JsonUserData)  Callback that receives the action's JSON for further configuration. Action shape is polymorphic across registered types; access fields generically through the JsonUserData surface.
 ---@return JsonUserData  A wrapper around the configured action JSON.
 function MissionsLuaModule:Action(type, callback) end
 

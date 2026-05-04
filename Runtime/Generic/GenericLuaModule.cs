@@ -19,8 +19,8 @@ namespace PatchManager.Generic;
 [MoonSharpUserData]
 public class GenericLuaModule
 {
-    private PatchManagerCore _core;
-    private Universe _universe;
+    private readonly PatchManagerCore _core;
+    private readonly Universe _universe;
 
     /// <summary>
     /// Creates the submodule bound to the given core and universe.

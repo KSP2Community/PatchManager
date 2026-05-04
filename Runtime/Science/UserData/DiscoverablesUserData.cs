@@ -14,7 +14,7 @@ public class DiscoverablesUserData : IndexedListUserData
     /// <summary>
     /// The complete JSON envelope, mutated indirectly through the inner <c>Discoverables</c> array.
     /// </summary>
-    public JToken FullToken;
+    [MoonSharpHidden] public JToken FullToken;
 
     /// <summary>
     /// Creates a wrapper for the discoverables envelope, exposing its <c>Discoverables</c> array.

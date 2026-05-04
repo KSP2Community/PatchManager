@@ -158,7 +158,7 @@ public abstract class IndexedListUserData : JsonUserData
     /// <inheritdoc />
     public override void Remove(int index)
     {
-        if (index <= 0 || index >= Indices.Count) throw new IndexOutOfRangeException();
+        if (index <= 0 || index > Indices.Count) throw new IndexOutOfRangeException();
         Indices.Remove(Name(List[index-1]));
         List.RemoveAt(index-1);
         Conversions.RemoveAt(index-1);
@@ -191,15 +191,20 @@ public abstract class IndexedListUserData : JsonUserData
         SoftRefresh();
     }
 
-    // public override void Patch(Script script, string index, DynValue value)
-    // {
-    //     if (!Indices.TryGetValue(index, out var idx)) return;
-    //     var oldName = Name(List[idx]);
-    //     script.Call(value, Conversions[idx]);
-    //     var newName = Name(List[idx]);
-    //     if (oldName != newName)
-    //     {
-    //         HardRefresh();
-    //     }
-    // }
+    /// <inheritdoc />
+    /// <remarks>
+    /// Refreshes the name-index map after the callback runs, so a callback that mutates the item's name property
+    /// re-keys the list on its new name.
+    /// </remarks>
+    public override void Patch(string key, Action<DynValue> callback)
+    {
+        if (!Indices.TryGetValue(key, out var idx)) return;
+        var oldName = Name(List[idx]);
+        callback(Conversions[idx]);
+        var newName = Name(List[idx]);
+        if (oldName != newName)
+        {
+            HardRefresh();
+        }
+    }
 }

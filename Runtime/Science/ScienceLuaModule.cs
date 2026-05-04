@@ -86,9 +86,10 @@ public class ScienceLuaModule
     /// Creates a new science experiment with the given name and runs <paramref name="callback" /> against it for
     /// further configuration.
     /// </summary>
+    /// <param name="script">The host Lua script.</param>
     /// <param name="name">The experiment name.</param>
     /// <param name="callback">Callback that receives the new experiment for further configuration.</param>
-    public void NewExperiment(string name, Action<ExperimentUserData> callback)
+    public void NewExperiment(Script script, string name, Action<ExperimentUserData> callback)
     {
         var core = new ExperimentCore
         {
@@ -164,7 +165,7 @@ public class ScienceLuaModule
     {
         PatchTechNode(script, nodeName, node =>
         {
-            var array = (JArray)node.Token["UnlockedPartIds"];
+            var array = (JArray)node.Token["UnlockedPartsIDs"];
             foreach (var part in parts)
             {
                 array.Add(part);

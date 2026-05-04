@@ -30,12 +30,12 @@ public class IngredientsUserData : IndexedListUserData
     /// <param name="script">The active script (used to construct the underlying Lua table).</param>
     /// <param name="name">The ingredient's resource name.</param>
     /// <param name="unitsPerRecipeUnit">How many units of the ingredient are consumed per unit of recipe output.</param>
-    public void Add(Script script, string name, string unitsPerRecipeUnit)
+    public void Add(Script script, string name, double unitsPerRecipeUnit)
     {
         Append(DynValue.NewTable(new Table(script)
         {
             ["name"] = DynValue.NewString(name),
-            ["unitsPerRecipeUnit"] = DynValue.NewString(unitsPerRecipeUnit)
+            ["unitsPerRecipeUnit"] = DynValue.NewNumber(unitsPerRecipeUnit)
         }));
     }
 }

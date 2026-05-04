@@ -34,13 +34,10 @@ public class ResourceConverter : IConverter
         {
             return recipeUserData.FullToken;
         }
-        else if (value.UserData.Object is ResourceUserData resourceUserData)
+        if (value.UserData.Object is ResourceUserData resourceUserData)
         {
             return resourceUserData.FullToken;
         }
-        else
-        {
-            return null;
-        }
+        throw new System.Exception($"ResourceConverter.ToJson: unsupported value type {value.UserData.Object?.GetType()}");
     }
 }

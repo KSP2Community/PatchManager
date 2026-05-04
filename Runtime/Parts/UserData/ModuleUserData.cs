@@ -55,7 +55,7 @@ public class ModuleUserData
         var type = Type.GetType(moduleData["DataType"].Value<string>());
         if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
         {
-            return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(type, moduleData));
+            return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, moduleData));
         }
         return JsonUserData.GetFromJToken(moduleData);
     }

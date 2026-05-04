@@ -39,7 +39,7 @@ namespace PatchManager.Planets.Overrides
         public float? detailStrength;
         public float? cloudsDensity;
         public float? normalScale;
-        public Color? scaleCloudColor = Color.white;
+        public Color? scaleCloudColor;
         
         public void ApplyTo(VolumeCloudConfiguration.CloudsData obj)
         {

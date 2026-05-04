@@ -5,8 +5,7 @@ using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop;
 using MoonSharp.Interpreter.Interop.RegistrationPolicies;
 using PatchManager.LuaPatching;
-using PatchManager.Runtime.LuaPatching.Utility;
-namespace PatchManager.Runtime.LuaPatching.Utility;
+namespace PatchManager.LuaPatching.Utility;
 
 /// <summary>
 /// MoonSharp <see cref="IRegistrationPolicy" /> that wraps every UserData type with a string indexer in an

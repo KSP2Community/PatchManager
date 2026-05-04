@@ -66,7 +66,11 @@ function JsonUserData:Patch(key, callback) end
 ---@class ExtensibleJsonUserData : JsonUserData
 
 ---JSON-array UserData base class that exposes the array as a name-indexed lookup table.
----@class IndexedListUserData : JsonUserData
+---Subclasses that override C# `Convert(JToken)` produce typed items and parameterize `T` with that type.
+---Subclasses that do not override `Convert` use `JsonUserData` for `T`.
+---@class IndexedListUserData<T> : JsonUserData
+---@field [string] T
+---@field [integer] T
 local IndexedListUserData = {}
 
 ---Rebuilds the name-index map without rebuilding the cached Lua conversions.
@@ -75,6 +79,12 @@ function IndexedListUserData:SoftRefresh() end
 ---Returns the lookup name for the given item.
 ---Implementations typically read a known property off `source` (for example `"name"`
 ---or `"engineID"`). The returned string becomes the key Lua scripts use to address the item.
----@param source any The item to extract the name from.
+---@param source T The item to extract the name from.
 ---@return string name The lookup name for the item.
 function IndexedListUserData:Name(source) end
+
+---Invokes `callback` with the typed item at `key` when the key is present; refreshes the
+---name-index map afterwards so a callback that mutates the item's name re-keys the list.
+---@param key string The lookup name of the item to patch.
+---@param callback fun(item: T) The callback to invoke with the existing item.
+function IndexedListUserData:Patch(key, callback) end

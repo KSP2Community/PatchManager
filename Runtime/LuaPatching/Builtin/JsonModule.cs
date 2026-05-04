@@ -44,6 +44,6 @@ public class JsonModule
     [MoonSharpModuleMethod]
     public DynValue Int(ScriptExecutionContext context, CallbackArguments args)
     {
-        return UserData.Create(new JsonUserData(new JValue((long)args[0].CastToNumber()!)));
+        return UserData.Create(new JsonUserData(new JValue((long)args[0].CastToNumber())));
     }
 }

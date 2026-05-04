@@ -2,19 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text.RegularExpressions;
-using Discord.Sdk;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop.RegistrationPolicies;
 using Newtonsoft.Json.Linq;
 using PatchManager.LuaPatching.Attributes;
 using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
-using PatchManager.Runtime.LuaPatching.Utility;
 using ReduxLib.Logging;
 using UnityEngine;
-using UnityEngine.Audio;
 
 namespace PatchManager.LuaPatching
 {

@@ -164,11 +164,20 @@ public class MissionsLuaModule
     public DynValue Action(string type, Action<JsonUserData> callback)
     {
         var actualType = MissionsTypes.Actions[type];
+        object instance;
+        try
+        {
+            instance = Activator.CreateInstance(actualType);
+        }
+        catch (MissingMethodException e)
+        {
+            throw new Exception($"Mission action type {actualType.FullName} (registered as \"{type}\") must declare a parameterless constructor to be instantiable by PM.Missions:Action.", e);
+        }
         var elementObject = new JObject
         {
             ["$type"] = actualType.AssemblyQualifiedName
         };
-        foreach (var (key, value) in JObject.FromObject(Activator.CreateInstance(actualType)))
+        foreach (var (key, value) in JObject.FromObject(instance))
         {
             elementObject[key] = value;
         }

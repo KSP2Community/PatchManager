@@ -17,7 +17,7 @@ public class CelestialBodyUserData : JsonUserData
     /// <summary>
     /// The complete JSON envelope, mutated indirectly through the inner <c>data</c> subtree.
     /// </summary>
-    public JToken FullToken;
+    [MoonSharpHidden] public JToken FullToken;
 
     /// <summary>
     /// Creates a wrapper for the celestial body envelope, exposing the inner <c>data</c> subtree to patch scripts.

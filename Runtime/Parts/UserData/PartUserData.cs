@@ -4,7 +4,6 @@ using MoonSharp.Interpreter;
 using Newtonsoft.Json.Linq;
 using PatchManager.LuaPatching;
 using PatchManager.LuaPatching.Utility;
-using UnityEditor.Experimental.GraphView;
 
 namespace PatchManager.Parts.UserData;
 
@@ -25,7 +24,7 @@ public class PartUserData : ExtensibleJsonUserData
     /// <summary>
     /// The complete JSON envelope, mutated indirectly through the inner <c>data</c> subtree.
     /// </summary>
-    public JToken FullToken;
+    [MoonSharpHidden] public JToken FullToken;
 
     private readonly Dictionary<string, int> _moduleIndices = new();
     private readonly Dictionary<string, DynValue> _partModules = new();
@@ -66,7 +65,7 @@ public class PartUserData : ExtensibleJsonUserData
         if (property == "serializedPartModules")
         {
             // Note, users should not edit this directly, but if they want to they can
-            return GetFromJToken(Token["data"]!["serializedPartModules"]);
+            return GetFromJToken(Token["serializedPartModules"]);
         }
         if (property == "resourceContainers") return _resourceUserData;
         if (_partModules.TryGetValue(property, out var module)) return module;
@@ -121,9 +120,9 @@ public class PartUserData : ExtensibleJsonUserData
             ["BehaviourType"] =  mod.behaviour.AssemblyQualifiedName,
             ["ModuleData"] = new JArray()
         };
-        (Token["data"]["serializedPartModules"] as JArray)?.Add(moduleObject);
-        _moduleIndices[moduleType.Replace("PartComponent", "")] =
-            (Token["data"]["serializedPartModules"] as JArray)!.Count;
+        var array = (Token["serializedPartModules"] as JArray)!;
+        array.Add(moduleObject);
+        _moduleIndices[moduleType.Replace("PartComponent", "")] = array.Count - 1;
 
         var typed = new ModuleUserData(moduleObject);
         var ud = MoonSharp.Interpreter.UserData.Create(typed);

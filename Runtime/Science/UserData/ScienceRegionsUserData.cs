@@ -15,7 +15,7 @@ public class ScienceRegionsUserData : IndexedListUserData
     /// <summary>
     /// The complete JSON envelope, mutated indirectly through the inner <c>Regions</c> array.
     /// </summary>
-    public JToken FullToken;
+    [MoonSharpHidden] public JToken FullToken;
 
     /// <summary>
     /// Creates a wrapper for the science regions envelope, exposing its <c>Regions</c> array.

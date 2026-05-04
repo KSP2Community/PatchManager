@@ -25,9 +25,12 @@
 -- UserData wrappers
 -- ============================================================
 
+---Synthetic per-element wrapper for entries of a `DiscoverablesUserData`.
+---@class DiscoverablePositionUserData : JsonUserData, CelestialBodyDiscoverablePosition
+
 ---Indexed-list wrapper for a science region's discoverables, keyed by each entry's `ScienceRegionId`, while
 ---preserving the full envelope for round-tripping.
----@class DiscoverablesUserData : IndexedListUserData
+---@class DiscoverablesUserData : IndexedListUserData<DiscoverablePositionUserData>
 ---@field BodyName string Gets the celestial body's name from the envelope's `BodyName` field.
 local DiscoverablesUserData = {}
 
@@ -39,9 +42,12 @@ function DiscoverablesUserData:Name(source) end
 ---Science experiment wrapper exposing the inner `Data` subtree while preserving the full envelope for round-tripping.
 ---@class ExperimentUserData : JsonUserData, ExperimentDefinition
 
+---Synthetic per-element wrapper for entries of a `ScienceRegionsUserData`.
+---@class ScienceRegionUserData : JsonUserData, ScienceRegionDefinition
+
 ---Indexed-list wrapper for a body's science regions, keyed by each region's `id`, while preserving the full
 ---envelope for round-tripping and exposing the body name and situation data as typed properties.
----@class ScienceRegionsUserData : IndexedListUserData
+---@class ScienceRegionsUserData : IndexedListUserData<ScienceRegionUserData>
 ---@field BodyName string Gets the celestial body's name from the envelope's `BodyName` field.
 ---@field SituationData CBSituationData Gets or sets the situation data wrapping the envelope's `SituationData` field.
 local ScienceRegionsUserData = {}

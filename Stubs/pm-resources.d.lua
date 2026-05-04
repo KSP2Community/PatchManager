@@ -51,13 +51,16 @@ local ResourceUserData = {}
 ---@field ingredients IngredientsUserData The recipe's ingredients array, surfaced as a typed wrapper.
 local RecipeUserData = {}
 
+---Synthetic per-element wrapper for entries of an `IngredientsUserData`.
+---@class IngredientUserData : JsonUserData, ResourceRecipeIngredientDefinition
+
 ---Indexed-list wrapper for a recipe's `ingredients` array, keyed by each ingredient's `name`.
----@class IngredientsUserData : IndexedListUserData
+---@class IngredientsUserData : IndexedListUserData<IngredientUserData>
 local IngredientsUserData = {}
 
 ---Adds a new ingredient with the given name and units-per-recipe-unit ratio.
 ---@param name string                The ingredient's resource name.
----@param unitsPerRecipeUnit string  How many units of the ingredient are consumed per unit of recipe output.
+---@param unitsPerRecipeUnit number  How many units of the ingredient are consumed per unit of recipe output.
 function IngredientsUserData:Add(name, unitsPerRecipeUnit) end
 
 ---Resource asset JSON envelope wrapping a plain `ResourceDefinition` under the `data` field.

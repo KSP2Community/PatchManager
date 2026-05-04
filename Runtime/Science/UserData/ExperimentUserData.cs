@@ -13,7 +13,7 @@ public class ExperimentUserData : JsonUserData
     /// <summary>
     /// The complete JSON envelope, mutated indirectly through the inner <c>Data</c> subtree.
     /// </summary>
-    public JToken FullToken;
+    [MoonSharpHidden] public JToken FullToken;
 
     /// <summary>
     /// Creates a wrapper for the experiment envelope, exposing the inner <c>Data</c> subtree to patch scripts.

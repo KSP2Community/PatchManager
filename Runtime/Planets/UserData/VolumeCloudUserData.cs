@@ -10,6 +10,7 @@ namespace PatchManager.Planets.UserData;
 /// Volume-cloud configuration wrapper that exposes the <c>cumulusList</c> array as a typed
 /// <see cref="CloudUserData" /> rather than a raw <see cref="PatchManager.LuaPatching.JsonUserData" />.
 /// </summary>
+[MoonSharpUserData]
 public class VolumeCloudUserData : ExtensibleJsonUserData
 {
     /// <summary>

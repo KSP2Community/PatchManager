@@ -64,8 +64,8 @@ function PartUserData:HasModule(moduleType) end
 ---Iterable with `pairs()`; each iteration yields `(name, value)` pairs in declaration order.
 ---@class ModuleUserData : JsonUserData, SerializedPartModule
 ---@field Count integer Gets the number of data entries on this module.
----@field [string] EngineUserData | JsonUserData
----@field [integer] EngineUserData | JsonUserData
+---@field [string] EngineUserData | SerializedModuleDataUserData
+---@field [integer] EngineUserData | SerializedModuleDataUserData
 local ModuleUserData = {}
 
 ---Refreshes the data-name and conversion caches from the current state of the module's `ModuleData` array.
@@ -73,18 +73,18 @@ function ModuleUserData:RefreshData() end
 
 ---Adds a new module-data entry of the given type and runs callback against it.
 ---@param type string                                      The data module's short name as registered in `PartsUtilities.DataModules`.
----@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the new entry for further configuration.
+---@param callback fun(entry: EngineUserData|SerializedModuleDataUserData) Callback that receives the new entry for further configuration.
 ---@error Thrown when type is not a registered data module.
 function ModuleUserData:AddData(type, callback) end
 
 ---Runs callback against the existing data entry of the given type, doing nothing if absent.
 ---@param type string                                      The data module's short name.
----@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the existing entry for further configuration.
+---@param callback fun(entry: EngineUserData|SerializedModuleDataUserData) Callback that receives the existing entry for further configuration.
 function ModuleUserData:PatchData(type, callback) end
 
 ---Patches the named data entry if it exists, otherwise adds it.
 ---@param type string                                      The data module's short name.
----@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the entry for further configuration.
+---@param callback fun(entry: EngineUserData|SerializedModuleDataUserData) Callback that receives the entry for further configuration.
 function ModuleUserData:EnsureData(type, callback) end
 
 ---Removes the data entry of the given type from the module.
@@ -96,14 +96,16 @@ function ModuleUserData:RemoveData(type) end
 ---@return boolean present True if an entry exists, false otherwise.
 function ModuleUserData:HasData(type) end
 
+---Synthetic per-element wrapper for entries of a `ModesUserData`.
+---@class EngineModeUserData : JsonUserData, Data_Engine_EngineMode
+
 ---Indexed-list wrapper for an engine's `engineModes` array, keyed by each mode's `engineID`.
----@class ModesUserData : IndexedListUserData
----@field [string] JsonUserData
+---@class ModesUserData : IndexedListUserData<EngineModeUserData>
 local ModesUserData = {}
 
 ---Adds a new engine mode with the given `engineID` and runs callback against it for further configuration.
----@param mode string                          The new mode's `engineID`.
----@param callback fun(mode: JsonUserData)     Callback that receives the new mode for further configuration.
+---@param mode string                              The new mode's `engineID`.
+---@param callback fun(mode: EngineModeUserData)   Callback that receives the new mode for further configuration.
 function ModesUserData:Add(mode, callback) end
 
 ---`Data_Engine` module-data adapter that exposes the engine's `engineModes` array as a typed
@@ -112,9 +114,11 @@ function ModesUserData:Add(mode, callback) end
 ---@class EngineUserData : ExtensibleJsonUserData, Data_Engine
 ---@field engineModes ModesUserData The engine's `engineModes` array, exposed as a typed `ModesUserData`.
 
+---Synthetic per-element wrapper for entries of a `ResourceContainersUserData`.
+---@class ResourceContainerUserData : JsonUserData, ContainedResourceDefinition
+
 ---Indexed-list wrapper for a part's `resourceContainers` array, keyed by each container's `name`.
----@class ResourceContainersUserData : IndexedListUserData
----@field [string] JsonUserData
+---@class ResourceContainersUserData : IndexedListUserData<ResourceContainerUserData>
 local ResourceContainersUserData = {}
 
 ---Adds a new resource container with the given resource type, capacity, and optional initial fill.
@@ -285,6 +289,9 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field Name string
 ---@field DataType string
 ---@field DataObject ModuleDataPayload
+
+---Synthetic wrapper around a single `ModuleData` entry of a `ModuleUserData` whose `DataType` does not have a registered `ModuleDataAdapter`.
+---@class SerializedModuleDataUserData : JsonUserData, SerializedModuleData
 
 ---Represents the serialized resource relationship data for a part, describing the resources it consumes, generates, and contains.
 ---@class SerializedResourceInfo : JsonUserData

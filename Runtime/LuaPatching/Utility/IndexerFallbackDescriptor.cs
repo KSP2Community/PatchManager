@@ -3,7 +3,7 @@ using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop;
 using PatchManager.LuaPatching;
 
-namespace PatchManager.Runtime.LuaPatching.Utility;
+namespace PatchManager.LuaPatching.Utility;
 
 /// <summary>
 /// Wraps an <see cref="IUserDataDescriptor" /> so that string-key lookups that miss the type's declared

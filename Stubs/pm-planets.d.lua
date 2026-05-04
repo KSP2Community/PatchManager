@@ -80,14 +80,17 @@ function PlanetsLuaModule:CreateCloudOverride(name, callback) end
 
 ---Galaxy definition wrapper that exposes each celestial body in the galaxy's `CelestialBodies` array as a
 ---virtual property keyed by GUID.
+---Synthetic wrapper around a `SerializedCelestialBody` JSON entry within a `GalaxyDefinition`.
+---@class SerializedCelestialBodyUserData : JsonUserData, SerializedCelestialBody
+
 ---@class GalaxyUserData : ExtensibleJsonUserData, GalaxyDefinition
----@field [string] JsonUserData The celestial body entry keyed by its GUID.
+---@field [string] SerializedCelestialBodyUserData The celestial body entry keyed by its GUID.
 local GalaxyUserData = {}
 
 ---Adds a new celestial body with the given GUID to the galaxy and runs callback against
 ---it for further configuration.
 ---@param planetName string The new body's GUID.
----@param callback fun(body: JsonUserData) Callback that receives the new body for further configuration.
+---@param callback fun(body: SerializedCelestialBodyUserData) Callback that receives the new body for further configuration.
 function GalaxyUserData:Add(planetName, callback) end
 
 ---Volume-cloud configuration wrapper that exposes the `cumulusList` array as a typed
@@ -95,9 +98,11 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@class VolumeCloudUserData : ExtensibleJsonUserData, VolumeCloudConfigurationOverride
 ---@field cumulusList CloudUserData The cumulus layer list, exposed as a name-indexed CloudUserData.
 
+---Synthetic per-element wrapper for entries of a `CloudUserData`.
+---@class CloudLayerUserData : JsonUserData, CloudsDataOverride
+
 ---Indexed-list wrapper for a volume cloud's `cumulusList`, keyed by each layer's `layerName`.
----@class CloudUserData : IndexedListUserData
----@field [string] JsonUserData The cumulus layer entry keyed by its `layerName`.
+---@class CloudUserData : IndexedListUserData<CloudLayerUserData>
 
 ---Atmosphere override wrapped as a generic JsonUserData for patching.
 ---@class AtmosphereOverrideUserData : JsonUserData, AtmosphereOverride
@@ -340,17 +345,20 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field scaledElipRadMult Vector3
 ---@field scaledRadiusHorizMultiplier number
 ---@field rotates boolean
+---@field isRotating? boolean Legacy JSON field name for `rotates` (present in stock `Kerbin.bytes`); current converters read `rotates`.
 ---@field rotationPeriod number
 ---@field hasSolarRotationPeriod boolean
 ---@field initialRotation number
 ---@field axialTilt Quaternion
 ---@field isTidallyLocked boolean
 ---@field clampInverseRotThreshold boolean
+---@field hasInverseRotationThresholdClamp? boolean Legacy JSON field name for `clampInverseRotThreshold` (present in stock `Kerbin.bytes`); current converters read `clampInverseRotThreshold`.
 ---@field hasInverseRotation boolean
 ---@field inverseRotThresholdAltitude number
 ---@field scaledShaderFadeFar number
 ---@field scaledShaderFadeNear number
 ---@field MineDustColor Color
+---@field isStar boolean JSON field name for the C# `IsStar` flag, mapped via `CelestialBodyPropertiesConverter`.
 
 ---Represents the science data multipliers and altitude thresholds for a celestial body.
 ---@class CelestialBodyProperties_ScienceParams : JsonUserData
@@ -387,7 +395,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field referenceBodyGuid string
 ---@field OrbitProperties SerializedOrbitProperties
 ---@field OrbiterProperties SerializedOribiterDefinition
----@field PrefabKey? string Addressables key for the body's prefab. Observed in stock GalaxyDefinition_Default but not declared on the C# class.
+---@field PrefabKey? string Present in stock `GalaxyDefinition_Default` JSON but not declared on the C# class. Reachable when reading existing data; not produced by `PM` or by the C# serializer.
 
 ---Represents a serializable set of Keplerian orbital elements and the reference body for an orbit.
 ---@class SerializedOrbitProperties : JsonUserData

@@ -273,7 +273,7 @@ public class JsonUserData
                 if (index <= Count)
                 {
                     var res = DynValue.NewTuple(
-                        DynValue.NewNumber(index + 1),
+                        DynValue.NewNumber(index),
                         this[index]
                     );
                     index++;
