@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using AssetsExporter.Extensions;
 using KSP.IO;
 using KSP.Sim.Definitions;
 using MoonSharp.Interpreter;
