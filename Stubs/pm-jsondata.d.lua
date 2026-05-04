@@ -4,70 +4,72 @@
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Utility/ExtensibleJsonUserData.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Utility/IndexedListUserData.cs
 
----Lua-facing wrapper exposing a Newtonsoft JToken as a table-like UserData.
----@class JsonUserData
----@field [integer] any
----@field [string] any
+---@class _JsonUserDataBase
 ---@field Count integer Gets the number of elements in the wrapped array, or 0 when the token is not an array (also logs a debug message).
-local JsonUserData = {}
+local _JsonUserDataBase = {}
 
 ---Removes the array element at the given 1-indexed position.
 ---@param index integer The 1-indexed array position to remove.
 ---@error Thrown when the token is not `JTokenType.Array` or when the index is out of range.
----@overload fun(self: JsonUserData, key: string)
-function JsonUserData:Remove(index) end
+---@overload fun(self: _JsonUserDataBase, key: string)
+function _JsonUserDataBase:Remove(index) end
 
 ---Returns an iterator suitable for Lua's `__pairs` / `__ipairs` metamethods.
 ---Bound to both `__pairs` and `__ipairs`, so `pairs` and `ipairs` in Lua produce the same iterator.
 ---Arrays yield 1-indexed (index, value) tuples; objects yield (key, value) tuples; any other token type
 ---yields nothing and logs a debug message.
 ---@return any iterator The iterator callback.
-function JsonUserData:Pairs() end
+function _JsonUserDataBase:Pairs() end
 
 ---Removes every element from the wrapped array.
 ---@error Thrown when the token is not `JTokenType.Array`.
-function JsonUserData:Clear() end
+function _JsonUserDataBase:Clear() end
 
 ---Inserts an element at the given 1-indexed position, shifting later elements right.
 ---@param index integer The 1-indexed position to insert at.
 ---@param value any     The element to insert.
 ---@error Thrown when the token is not `JTokenType.Array`.
-function JsonUserData:Insert(index, value) end
+function _JsonUserDataBase:Insert(index, value) end
 
 ---Appends an element to the end of the wrapped array.
 ---@param value any The element to append.
 ---@error Thrown when the token is not `JTokenType.Array`.
-function JsonUserData:Append(value) end
+function _JsonUserDataBase:Append(value) end
 
 ---Enumerates the property names of the wrapped object.
 ---@return string[] keys The property names of the wrapped object.
-function JsonUserData:Keys() end
+function _JsonUserDataBase:Keys() end
 
 ---Returns whether the wrapped object contains a property with the given key.
 ---@param key string The property name to test.
 ---@return boolean present True if the wrapped object contains `key`, false otherwise.
-function JsonUserData:HasKey(key) end
+function _JsonUserDataBase:HasKey(key) end
 
 ---Invokes `callback` with the value at `key` when the key is present;
 ---does nothing otherwise.
 ---@param key string             The property name to patch.
 ---@param callback fun(value: any) The callback to invoke with the existing value.
-function JsonUserData:Patch(key, callback) end
+function _JsonUserDataBase:Patch(key, callback) end
+
+---Lua-facing wrapper exposing a Newtonsoft JToken as a table-like UserData.
+---@class JsonUserData : _JsonUserDataBase
+---@field [integer] any
+---@field [string] any
 
 ---A `JsonUserData` known to wrap a JSON array of `T`. Has all `JsonUserData` methods, but the array-shaped ones (`[integer]`, `Insert`, `Append`, `Clear`, `Count`, `Remove(integer)`) are the appropriate surface. Element accesses through `[integer]`, `Insert`, and `Append` are typed as `T`.
----@class JsonList<T> : JsonUserData
+---@class _JsonList<T> : JsonUserData
 ---@field [integer] T
 
+---@alias JsonList<T> _JsonList<T> | T[]
+
 ---A `JsonUserData` known to wrap a JSON object of `T`-valued string keys. Has all `JsonUserData` methods, but the object-shaped ones (`[string]`, `Remove(string)`, `Keys`, `HasKey`, `Patch`, `Pairs`) are the appropriate surface. Value accesses through `[string]` are typed as `T`.
----@class JsonTable<T> : JsonUserData
+---@class _JsonTable<T> : JsonUserData
 ---@field [string] T
 
----JSON-object UserData base class that lets subclasses override or add string-keyed properties.
+---@alias JsonTable<T> _JsonTable<T> | { [string]: T }
+
 ---@class ExtensibleJsonUserData : JsonUserData
 
----JSON-array UserData base class that exposes the array as a name-indexed lookup table.
----Subclasses that override C# `Convert(JToken)` produce typed items and parameterize `T` with that type.
----Subclasses that do not override `Convert` use `JsonUserData` for `T`.
 ---@class IndexedListUserData<T> : JsonUserData
 ---@field [string] T
 ---@field [integer] T

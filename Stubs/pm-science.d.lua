@@ -26,7 +26,7 @@
 -- ============================================================
 
 ---Synthetic per-element wrapper for entries of a `DiscoverablesUserData`.
----@class DiscoverablePositionUserData : CelestialBodyDiscoverablePosition, JsonUserData
+---@class DiscoverablePositionUserData : _CelestialBodyDiscoverablePosition, JsonUserData
 
 ---Indexed-list wrapper for a science region's discoverables, keyed by each entry's `ScienceRegionId`, while
 ---preserving the full envelope for round-tripping.
@@ -40,10 +40,10 @@ local DiscoverablesUserData = {}
 function DiscoverablesUserData:Name(source) end
 
 ---Science experiment wrapper exposing the inner `Data` subtree while preserving the full envelope for round-tripping.
----@class ExperimentUserData : ExperimentDefinition, JsonUserData
+---@class ExperimentUserData : _ExperimentDefinition, JsonUserData
 
 ---Synthetic per-element wrapper for entries of a `ScienceRegionsUserData`.
----@class ScienceRegionUserData : ScienceRegionDefinition, JsonUserData
+---@class ScienceRegionUserData : _ScienceRegionDefinition, JsonUserData
 
 ---Indexed-list wrapper for a body's science regions, keyed by each region's `id`, while preserving the full
 ---envelope for round-tripping and exposing the body name and situation data as typed properties.
@@ -60,7 +60,7 @@ function ScienceRegionsUserData:Name(source) end
 ---Synthetic wrapper around a tech-tree node's JSON. Tech nodes are patched through the generic JSON converter,
 ---so there is no purpose-built C# wrapper class -- this stub gives Lua scripts the typed `TechNodeData`
 ---field surface plus the inherited `JsonUserData` methods.
----@class TechNodeUserData : TechNodeData, JsonUserData
+---@class TechNodeUserData : _TechNodeData, JsonUserData
 
 -- ============================================================
 -- Submodule
@@ -132,13 +132,15 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 
 ---Represents the serializable core data for a science experiment, including a version stamp and an ExperimentDefinition.
 ---Top-level envelope at addressables label `scienceExperiment`.
----@class ExperimentCore : JsonUserData
+---@class _ExperimentCore : _JsonUserDataBase
 ---@field version number
 ---@field data ExperimentDefinition
 
+---@alias ExperimentCore _ExperimentCore | { version: number, data: ExperimentDefinition }
+
 ---Represents the definition of a science experiment, including its valid research locations, type, and associated data and sample values.
 ---This is the shape of the inner `data` subtree (what ExperimentUserData wraps).
----@class ExperimentDefinition : JsonUserData
+---@class _ExperimentDefinition : _JsonUserDataBase
 ---@field ExperimentID string
 ---@field DisplayName string
 ---@field DisplayRequirements string
@@ -153,29 +155,37 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@field TransmissionSize number
 ---@field RequiresEVA boolean
 
+---@alias ExperimentDefinition _ExperimentDefinition | { ExperimentID: string, DisplayName: string, DisplayRequirements: string, ExperimentType: ScienceExperimentType, DataFlavorDescriptions: JsonList<FlavorDescription>, SampleFlavorDescriptions: JsonList<FlavorDescription>, DataReportDisplayName: string, SampleReportDisplayName: string, ValidLocations: JsonList<ResearchLocation>, DataValue: number, SampleValue: number, TransmissionSize: number, RequiresEVA: boolean }
+
 ---Represents a flavor text description associated with a specific science research location.
----@class FlavorDescription : JsonUserData
+---@class _FlavorDescription : _JsonUserDataBase
 ---@field ResearchLocationID string
 ---@field LocalizationTag string
 
+---@alias FlavorDescription _FlavorDescription | { ResearchLocationID: string, LocalizationTag: string }
+
 ---Represents a science research location defined by a celestial body, science situation, and optional science region.
----@class ResearchLocation : JsonUserData
+---@class _ResearchLocation : _JsonUserDataBase
 ---@field RequiresRegion boolean
 ---@field BodyName string
 ---@field ScienceSituation ScienceSitutation
 ---@field ScienceRegion string
 ---@field ResearchLocationId string
 
+---@alias ResearchLocation _ResearchLocation | { RequiresRegion: boolean, BodyName: string, ScienceSituation: ScienceSitutation, ScienceRegion: string, ResearchLocationId: string }
+
 ---Represents the science regions data for a celestial body, including situation data and region definitions.
 ---Top-level envelope at addressables label `science_region`.
----@class CelestialBodyScienceRegionsData : JsonUserData
+---@class _CelestialBodyScienceRegionsData : _JsonUserDataBase
 ---@field Version string
 ---@field BodyName string
 ---@field SituationData CBSituationData
 ---@field Regions JsonList<ScienceRegionDefinition>
 
+---@alias CelestialBodyScienceRegionsData _CelestialBodyScienceRegionsData | { Version: string, BodyName: string, SituationData: CBSituationData, Regions: JsonList<ScienceRegionDefinition> }
+
 ---Represents altitude boundaries and science scalar multipliers for the science situations of a celestial body.
----@class CBSituationData : JsonUserData
+---@class _CBSituationData : _JsonUserDataBase
 ---@field HighOrbitMaxAltitude number
 ---@field LowOrbitMaxAltutude number
 ---@field AtmosphereMaxAltutude number
@@ -186,30 +196,38 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@field SplashedScalar number
 ---@field LandedScalar number
 
+---@alias CBSituationData _CBSituationData | { HighOrbitMaxAltitude: number, LowOrbitMaxAltutude: number, AtmosphereMaxAltutude: number, CelestialBodyScalar: number, HighOrbitScalar: number, LowOrbitScalar: number, AtmosphereScalar: number, SplashedScalar: number, LandedScalar: number }
+
 ---Represents a science region definition, specifying situation scalars for atmosphere, splashed, and landed states.
----@class ScienceRegionDefinition : JsonUserData
+---@class _ScienceRegionDefinition : _JsonUserDataBase
 ---@field Id string
 ---@field AtmosphereScalar number
 ---@field SplashedScalar number
 ---@field LandedScalar number
 ---@field MapId integer
 
+---@alias ScienceRegionDefinition _ScienceRegionDefinition | { Id: string, AtmosphereScalar: number, SplashedScalar: number, LandedScalar: number, MapId: integer }
+
 ---Represents the baked set of discoverable positions associated with a named celestial body.
 ---Top-level envelope at addressables label `science_region_discoverables`.
----@class CelestialBodyBakedDiscoverables : JsonUserData
+---@class _CelestialBodyBakedDiscoverables : _JsonUserDataBase
 ---@field Version string
 ---@field BodyName string
 ---@field Discoverables JsonList<CelestialBodyDiscoverablePosition>
 
+---@alias CelestialBodyBakedDiscoverables _CelestialBodyBakedDiscoverables | { Version: string, BodyName: string, Discoverables: JsonList<CelestialBodyDiscoverablePosition> }
+
 ---Represents a discoverable position on a celestial body, defined by a science region, a spatial location, and a detection radius.
----@class CelestialBodyDiscoverablePosition : JsonUserData
+---@class _CelestialBodyDiscoverablePosition : _JsonUserDataBase
 ---@field ScienceRegionId string
 ---@field Position Vector3d
 ---@field Radius number
 
+---@alias CelestialBodyDiscoverablePosition _CelestialBodyDiscoverablePosition | { ScienceRegionId: string, Position: Vector3d, Radius: number }
+
 ---Represents the serialized data for a single tech tree node, including its display info, science point cost, unlock requirements, and position.
 ---Top-level shape at addressables label `techNodeData`.
----@class TechNodeData : JsonUserData
+---@class _TechNodeData : _JsonUserDataBase
 ---@field Version integer
 ---@field ID string
 ---@field NameLocKey string
@@ -225,8 +243,12 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@field TierToUnlock integer
 ---@field TechTreePosition Vector2
 
+---@alias TechNodeData _TechNodeData | { Version: integer, ID: string, NameLocKey: string, IconID: string, CategoryID: string, HiddenByNodeID: string, DescriptionLocKey: string, RequiredSciencePoints: integer, UnlockedPartsIDs: JsonList<string>, RequiredTechNodeIDs: JsonList<string>, RequiredMissionIDs: JsonList<string>, RequiredResearchData: JsonList<TechRequiredResearchData>, TierToUnlock: integer, TechTreePosition: Vector2 }
+
 ---Represents research conditions required to unlock a technology node, including experiment, location, and report type.
----@class TechRequiredResearchData : JsonUserData
+---@class _TechRequiredResearchData : _JsonUserDataBase
 ---@field ExperimentID string
 ---@field ResearchLocationID? string
 ---@field ResearchReportType? ScienceReportType
+
+---@alias TechRequiredResearchData _TechRequiredResearchData | { ExperimentID: string, ResearchLocationID: string?, ResearchReportType: ScienceReportType? }

@@ -27,11 +27,13 @@
 -- Wrapper UserData
 -- ============================================================================
 
+---@class _PartUserDataModuleIndexer
+---@field [string] ModuleUserData
+
 ---Part definition wrapper exposing the inner `data` subtree, the typed `resourceContainers` array, and
 ---each part module as a virtual property keyed by the module's short name.
----@class PartUserData : PartData, ExtensibleJsonUserData
+---@class PartUserData : _PartData, _PartUserDataModuleIndexer, ExtensibleJsonUserData
 ---@field resourceContainers ResourceContainersUserData The typed wrapper around the part's `resourceContainers` array.
----@field [string] ModuleUserData
 local PartUserData = {}
 
 ---Adds a new part module of the given type and runs callback against it for further configuration.
@@ -59,13 +61,15 @@ function PartUserData:RemoveModule(moduleType) end
 ---@return boolean present True if a module of that type is registered, false otherwise.
 function PartUserData:HasModule(moduleType) end
 
+---@class _ModuleUserDataDataIndexer
+---@field [string] EngineUserData | JsonUserData
+---@field [integer] EngineUserData | JsonUserData
+
 ---Standalone wrapper for a part module's serialized JSON, exposing each `ModuleData` entry by name with a
 ---typed adapter when one is registered for the data type.
 ---Iterable with `pairs()`; each iteration yields `(name, value)` pairs in declaration order.
----@class ModuleUserData : SerializedPartModule, JsonUserData
+---@class ModuleUserData : _SerializedPartModule, _ModuleUserDataDataIndexer, JsonUserData
 ---@field Count integer Gets the number of data entries on this module.
----@field [string] EngineUserData | JsonUserData
----@field [integer] EngineUserData | JsonUserData
 local ModuleUserData = {}
 
 ---Refreshes the data-name and conversion caches from the current state of the module's `ModuleData` array.
@@ -97,7 +101,7 @@ function ModuleUserData:RemoveData(type) end
 function ModuleUserData:HasData(type) end
 
 ---Synthetic per-element wrapper for entries of a `ModesUserData`.
----@class EngineModeUserData : Data_Engine_EngineMode, JsonUserData
+---@class EngineModeUserData : _Data_Engine_EngineMode, JsonUserData
 
 ---Indexed-list wrapper for an engine's `engineModes` array, keyed by each mode's `engineID`.
 ---@class ModesUserData : IndexedListUserData<EngineModeUserData>
@@ -111,11 +115,11 @@ function ModesUserData:Add(mode, callback) end
 ---`Data_Engine` module-data adapter that exposes the engine's `engineModes` array as a typed
 ---ModesUserData rather than a raw JsonUserData.
 ---Wraps the `Data_Engine` module-data type (its JSON shape lives at `data["DataObject"]`).
----@class EngineUserData : Data_Engine, ExtensibleJsonUserData
+---@class EngineUserData : _Data_Engine, ExtensibleJsonUserData
 ---@field engineModes ModesUserData The engine's `engineModes` array, exposed as a typed `ModesUserData`.
 
 ---Synthetic per-element wrapper for entries of a `ResourceContainersUserData`.
----@class ResourceContainerUserData : ContainedResourceDefinition, JsonUserData
+---@class ResourceContainerUserData : _ContainedResourceDefinition, JsonUserData
 
 ---Indexed-list wrapper for a part's `resourceContainers` array, keyed by each container's `name`.
 ---@class ResourceContainersUserData : IndexedListUserData<ResourceContainerUserData>
@@ -157,15 +161,17 @@ function PartsLuaModule:Patch(name, callback) end
 -- ============================================================================
 
 ---Represents the top-level container for a serialized part definition, holding part and module data with versioned JSON deserialization support.
----@class PartCore : JsonUserData
+---@class _PartCore : _JsonUserDataBase
 ---@field version number
 ---@field useExternal boolean
 ---@field data PartData
 ---@field modules JsonList<ModuleDataPayload>
 ---@field legacyModules string
 
+---@alias PartCore _PartCore | { version: number, useExternal: boolean, data: PartData, modules: JsonList<ModuleDataPayload>, legacyModules: string }
+
 ---Represents the serializable data definition for a spacecraft part, including physical properties, attachment rules, resource containers, part modules, and OAB editor settings.
----@class PartData : JsonUserData
+---@class _PartData : _JsonUserDataBase
 ---@field partName string A unique key for the part - appears in save files, not user facing.
 ---@field author string The name of the person or people working on the part.
 ---@field category PartCategories
@@ -231,13 +237,17 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field PickUpPointOffset Vector3 Offset at which the player cursor "grabs" the part when in OAB.
 ---@field PickupRotationPointOffset Vector3 Offset at which the part is rotated in the OAB when the player is grabbing a part.
 
+---@alias PartData _PartData | { partName: string, author: string, category: PartCategories, family: string, childStageOffset: integer, cost: integer, crewCapacity: integer, stageOffset: integer, isCompound: boolean, sizeCategory: MetaAssemblySizeFilterType, stageType: AssemblyPartStageType, resourceCosts: JsonList<PartResourceCostDefinition>, tags: string, stagingIconAssetAddress: string, PartSizeDiameter: number, angularDrag: number, breakingForce: number, breakingTorque: number, buoyancy: number, buoyancyUseSine: boolean, coLiftOffset: Vector3, coMassOffset: Vector3, coPressureOffset: Vector3, coBuoyancy: Vector3, coDisplacement: Vector3, crashTolerance: number, explosionPotential: number, fuelCrossFeed: boolean, heatConductivity: number, mass: number, maxTemp: number, attachRules: AttachRules, attachNodes: JsonList<AttachNodeDefinition>, resourceContainers: JsonList<ContainedResourceDefinition>, AllowKinematicPhysicsIfIntersectTerrain: boolean, serializedPartModules: JsonList<SerializedPartModule>, resourceSummary: SerializedResourceInfo, PAMModuleSortOverride: JsonList<SerializedPartModuleDisplayOrder>, PAMModuleVisualsOverride: JsonList<SerializedPartModuleDisplayVisuals>, collisionVolumeBoundsScale: Vector3, emissiveConstant: number, maximumDrag: number, minimumDrag: number, physicsMode: PartPhysicsModes, inverseStageCarryover: boolean, skinMassPerArea: number, bodyLiftOnlyUnattachedLift: boolean, bodyLiftOnlyAttachName: string, maxLength: integer, radiatorHeadroom: number, radiatorMax: number, skinMaxTemp: number, skinInternalConductionMult: number, thermalMassModifier: number, buoyancyUseCubeNamed: string, HasReportStorage: boolean, oabEditorCategory: OABEditorPartCategory, partType: AssemblyPartTypeFilter, partHideMode: OABPartHideMode, PreferredOrientation: OABOrientation, MirrorTechnique: MirrorTechnique, CanSuggestOrientation: boolean, PickUpPointOffset: Vector3, PickupRotationPointOffset: Vector3 }
+
 ---Represents the resource cost of a part as a named resource and unit quantity.
----@class PartResourceCostDefinition : JsonUserData
+---@class _PartResourceCostDefinition : _JsonUserDataBase
 ---@field name string
 ---@field resourceUnits number
 
+---@alias PartResourceCostDefinition _PartResourceCostDefinition | { name: string, resourceUnits: number }
+
 ---Represents the attachment rules for a part, defining which attachment modes and behaviors are permitted.
----@class AttachRules : JsonUserData
+---@class _AttachRules : _JsonUserDataBase
 ---@field stack boolean
 ---@field srfAttach boolean
 ---@field allowStack boolean
@@ -247,8 +257,10 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field allowRotate boolean
 ---@field allowRoot boolean
 
+---@alias AttachRules _AttachRules | { stack: boolean, srfAttach: boolean, allowStack: boolean, allowSrfAttach: boolean, allowCollision: boolean, allowDock: boolean, allowRotate: boolean, allowRoot: boolean }
+
 ---Represents the definition of a part attachment node, including its position, orientation, type, and joint configuration.
----@class AttachNodeDefinition : JsonUserData
+---@class _AttachNodeDefinition : _JsonUserDataBase
 ---@field nodeID string Required. Must be unique for this node.
 ---@field NodeSymmetryGroupID string Optional field that can be used to group nodes together, eg. 2 downward facing nodes grouped into a 'bottom' group. The group ID would be the same on both nodes. Empty means no group, which is default behavior.
 ---@field nodeType AttachNodeType
@@ -270,51 +282,65 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field overrideDragArea number
 ---@field isCompoundJoint boolean
 
+---@alias AttachNodeDefinition _AttachNodeDefinition | { nodeID: string, NodeSymmetryGroupID: string, nodeType: AttachNodeType, attachMethod: AttachNodeMethod, IsMultiJoint: boolean, MultiJointMaxJoint: integer, MultiJointRadiusOffset: number, MultiJointOnSingleAxis: boolean, SingleJointAxis: TransformDirAxis, MultiJointFullBreakStrength: boolean, position: Vector3d, orientation: Vector3d, size: integer, visualSize: number, isResourceCrossfeed: boolean, isRigid: boolean, angularStrengthMultiplier: number, contactArea: number, overrideDragArea: number, isCompoundJoint: boolean }
+
 ---Represents the definition of a resource contained within a part, including capacity, initial amount, and staging configuration.
----@class ContainedResourceDefinition : JsonUserData
+---@class _ContainedResourceDefinition : _JsonUserDataBase
 ---@field name string
 ---@field capacityUnits number
 ---@field initialUnits number
 ---@field NonStageable boolean
 
+---@alias ContainedResourceDefinition _ContainedResourceDefinition | { name: string, capacityUnits: number, initialUnits: number, NonStageable: boolean }
+
 ---Represents a serialized snapshot of a part module, storing its name, component type, behaviour type, and associated module data.
----@class SerializedPartModule : JsonUserData
+---@class _SerializedPartModule : _JsonUserDataBase
 ---@field Name string
 ---@field ComponentType string
 ---@field BehaviourType string
 ---@field ModuleData JsonList<ModuleDataPayload>
 
+---@alias SerializedPartModule _SerializedPartModule | { Name: string, ComponentType: string, BehaviourType: string, ModuleData: JsonList<ModuleDataPayload> }
+
 ---Represents the serialized form of a `ModuleData` object for persistent storage.
----@class SerializedModuleData : JsonUserData
+---@class _SerializedModuleData : _JsonUserDataBase
 ---@field Name string
 ---@field DataType string
 ---@field DataObject ModuleDataPayload
 
+---@alias SerializedModuleData _SerializedModuleData | { Name: string, DataType: string, DataObject: ModuleDataPayload }
+
 
 ---Represents the serialized resource relationship data for a part, describing the resources it consumes, generates, and contains.
----@class SerializedResourceInfo : JsonUserData
+---@class _SerializedResourceInfo : _JsonUserDataBase
 ---@field Consumes JsonList<string>
 ---@field Generates JsonList<string>
 ---@field Contains JsonList<string>
 
+---@alias SerializedResourceInfo _SerializedResourceInfo | { Consumes: JsonList<string>, Generates: JsonList<string>, Contains: JsonList<string> }
+
 ---Serializable sort order entry that maps a part component module name to its display sort index in the parts manager.
----@class SerializedPartModuleDisplayOrder : JsonUserData
+---@class _SerializedPartModuleDisplayOrder : _JsonUserDataBase
 ---@field PartComponentModuleName string
 ---@field sortIndex integer
 
+---@alias SerializedPartModuleDisplayOrder _SerializedPartModuleDisplayOrder | { PartComponentModuleName: string, sortIndex: integer }
+
 ---Serializable visual configuration for a part component module's display in the parts manager, including display name and header and footer visibility.
----@class SerializedPartModuleDisplayVisuals : JsonUserData
+---@class _SerializedPartModuleDisplayVisuals : _JsonUserDataBase
 ---@field PartComponentModuleName string
 ---@field ModuleDisplayName string
 ---@field ShowHeader boolean
 ---@field ShowFooter boolean
+
+---@alias SerializedPartModuleDisplayVisuals _SerializedPartModuleDisplayVisuals | { PartComponentModuleName: string, ModuleDisplayName: string, ShowHeader: boolean, ShowFooter: boolean }
 
 -- ============================================================================
 -- ModuleData payload schemas (each describes the `DataObject` shape)
 -- ============================================================================
 
 ---Serializable data definition for `Module_Engine`. Schema for the `data["DataObject"]` sub-object of a `Data_Engine` module-data entry.
----@class Data_Engine : JsonUserData
+---@class _Data_Engine : _JsonUserDataBase
 ---@field DataType "KSP.Sim.Definitions.Data_Engine, Assembly-CSharp"
 ---@field IndependentThrottle boolean
 ---@field IndependentThrottlePercentage number
@@ -344,8 +370,10 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field EmissiveLerpRateDown number
 ---@field DeployedModeAnimationStateShortName string
 
+---@alias Data_Engine _Data_Engine | { DataType: "KSP.Sim.Definitions.Data_Engine, Assembly-CSharp", IndependentThrottle: boolean, IndependentThrottlePercentage: number, activeEngineMode: string, EngineStatePriorChangeMode: EngineState, EngineChangingToMode: integer, EngineAutoSwitchMode: boolean, thrustPercentage: number, FinalThrustValue: number, RealISPValue: number, stagingOn: boolean, staged: boolean, Flameout: boolean, EngineIgnited: boolean, EngineShutdown: boolean, currentThrottle: number, thrustCurveDisplay: number, thrustCurveRatio: number, EngineSpool: number, ThrustDirRelativePartWorldSpace: Vector3, currentEngineModeIndex: integer, engineModes: JsonList<Data_Engine_EngineMode>, UseEmissive: boolean, EmissiveMaterialNames: JsonList<string>, EmissiveTemperatureCurve: FloatCurve, EmissiveLerpRateUp: number, EmissiveLerpRateDown: number, DeployedModeAnimationStateShortName: string }
+
 ---Represents the configuration for a single engine mode, including thrust, propellant, atmosphere, exhaust damage, and throttle parameters.
----@class Data_Engine_EngineMode : JsonUserData
+---@class _Data_Engine_EngineMode : _JsonUserDataBase
 ---@field engineID string The Engine ID. should be in English.
 ---@field EngineDisplayName string The Engine ID display name, should be a localization tag to get localized engine mode in the UI. This only appears in the UI for multi-mode engines.
 ---@field thrustVectorTransformName string The Thrust Transform name in the model for this engine mode. This is only used to find the thrust transforms if ThrustTransformNamesMultipliers list below is left empty.
@@ -431,23 +459,31 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field throttleIspCurveAtmStrength FloatCurve Modifies Isp based on throttle. Time is pressure in atm, value is how much throttling affects Isp (i.e. Isp = input * Lerp(1, throttleIspCurve, throttleIspCurveAtmStrength).
 ---@field throttleIspCurve FloatCurve Modifies Isp based on throttle. time is throttle, value is multiplier to Isp.
 
+---@alias Data_Engine_EngineMode _Data_Engine_EngineMode | { engineID: string, EngineDisplayName: string, thrustVectorTransformName: string, ThrustTransformNamesMultipliers: JsonList<ThrustTransformGroup>, throttleLocked: boolean, ignitionThreshold: number, clampPropReceived: boolean, clampPropReceivedMinLowerAmount: number, allowRestart: boolean, allowShutdown: boolean, shieldedCanActivate: boolean, atmosphereCurve: FloatCurve, useThrustCurve: boolean, thrustCurve: FloatCurve, disableUnderwater: boolean, nonThrustMotor: boolean, minThrust: number, maxThrust: number, engineType: EngineType, propellant: PropellantDefinition, useEngineResponseTime: boolean, engineAccelerationSpeed: number, engineDecelerationSpeed: number, GenerateHeat: boolean, HeatAtmosphereCurve: FloatCurve, NormalizeHeatForFlow: boolean, exhaustDamage: boolean, exhaustDamageRadiusMultiplier: number, ExhaustDamageValue: number, exhaustDamageLogEvent: boolean, exhaustSplashbackDamage: boolean, exhaustDamageFalloffPower: number, exhaustDamageSplashbackFallofPower: number, exhaustDamageSplashbackMult: number, exhaustDamageSplashbackMaxMutliplier: number, exhaustDamageDistanceOffset: number, exhaustDamageMaxRange: number, exhaustDamageMaxMutliplier: number, exhaustShockwave: boolean, exhaustShockwaveLogEvent: boolean, exhaustShockwaveInterval: number, exhaustShockwaveMultiplier: number, exhaustShockwaveFalloffPower: number, exhaustShockwaveDistanceOffset: number, exhaustShockwaveMaxRange: number, exhaustShockwaveMaxMultiplier: number, throttleUseAlternate: boolean, throttleResponseRate: number, throttleIgniteLevelMult: number, throttleStartupMult: number, throttleStartedMult: number, throttleInstantShutdown: boolean, throttleShutdownMult: number, throttleInstant: boolean, throttlingBaseRate: number, throttlingBaseClamp: number, throttlingBaseDivisor: number, atmChangeFlow: boolean, atmCurve: FloatCurve, useAtmCurve: boolean, velCurve: FloatCurve, useVelCurve: boolean, CLAMP: number, atmCurveIsp: FloatCurve, useAtmCurveIsp: boolean, velCurveIsp: FloatCurve, useVelCurveIsp: boolean, flameoutBar: number, flowMultCap: number, flowMultCapSharpness: number, multFlow: number, multIsp: number, engineSpoolTime: number, engineSpoolIdle: number, ModeExitWaitTime: number, ModeExitRunningWaitTime: number, ModeEnterWaitTime: number, ModeEnterRunningWaitTime: number, DeactivateEngineWaitTime: number, ActivateEngineWaitTime: number, RunAnimationOnActivateDeactivate: boolean, useThrottleIspCurve: boolean, throttleIspCurveAtmStrength: FloatCurve, throttleIspCurve: FloatCurve }
+
 ---Represents a propellant configuration defining a fuel mixture name, multiplier, and ingredient overrides for a module.
----@class PropellantDefinition : JsonUserData
+---@class _PropellantDefinition : _JsonUserDataBase
 ---@field mixtureName string
 ---@field mixtureMultiplier number
 ---@field ignoreForThrustCurve boolean
 ---@field ingredientOverrides JsonList<ResourceRecipeIngredientDefinitionOverride>
 
+---@alias PropellantDefinition _PropellantDefinition | { mixtureName: string, mixtureMultiplier: number, ignoreForThrustCurve: boolean, ingredientOverrides: JsonList<ResourceRecipeIngredientDefinitionOverride> }
+
 ---Represents a serializable override for a resource recipe ingredient definition, specifying name, units per recipe unit, and flow mode.
----@class ResourceRecipeIngredientDefinitionOverride : JsonUserData
+---@class _ResourceRecipeIngredientDefinitionOverride : _JsonUserDataBase
 ---@field name string
 ---@field unitsPerRecipeUnit number
 ---@field flowMode ResourceFlowMode
 
+---@alias ResourceRecipeIngredientDefinitionOverride _ResourceRecipeIngredientDefinitionOverride | { name: string, unitsPerRecipeUnit: number, flowMode: ResourceFlowMode }
+
 ---Represents a named thrust transform and its proportional contribution multiplier.
----@class ThrustTransformGroup : JsonUserData
+---@class _ThrustTransformGroup : _JsonUserDataBase
 ---@field ThrustTransformName string The Thrust Transform name in the model for this ThrustTransform - Multiplier combo.
 ---@field ThrustTransformMultiplier number Proportional contribution of this Thrust Transform. The sum of all values must be equal to a value of exactly 1 (which represents 100%).
+
+---@alias ThrustTransformGroup _ThrustTransformGroup | { ThrustTransformName: string, ThrustTransformMultiplier: number }
 
 -- ============================================================================
 -- Polymorphism: ModuleData payload union

@@ -42,17 +42,17 @@ function ResourcesLuaModule:NewResource(name, callback) end
 function ResourcesLuaModule:RegisterUnits(value) end
 
 ---Plain resource definition wrapper exposing the inner `data` subtree while preserving the full envelope for round-tripping.
----@class ResourceUserData : ResourceDefinition, JsonUserData
+---@class ResourceUserData : _ResourceDefinition, JsonUserData
 local ResourceUserData = {}
 
 ---Recipe-style resource definition wrapper exposing the inner `recipeData` subtree while preserving the full
 ---envelope, and exposing the `ingredients` array as a typed IngredientsUserData.
----@class RecipeUserData : ResourceRecipeDefinition, ExtensibleJsonUserData
+---@class RecipeUserData : _ResourceRecipeDefinition, ExtensibleJsonUserData
 ---@field ingredients IngredientsUserData The recipe's ingredients array, surfaced as a typed wrapper.
 local RecipeUserData = {}
 
 ---Synthetic per-element wrapper for entries of an `IngredientsUserData`.
----@class IngredientUserData : ResourceRecipeIngredientDefinition, JsonUserData
+---@class IngredientUserData : _ResourceRecipeIngredientDefinition, JsonUserData
 
 ---Indexed-list wrapper for a recipe's `ingredients` array, keyed by each ingredient's `name`.
 ---@class IngredientsUserData : IndexedListUserData<IngredientUserData>
@@ -64,21 +64,25 @@ local IngredientsUserData = {}
 function IngredientsUserData:Add(name, unitsPerRecipeUnit) end
 
 ---Resource asset JSON envelope wrapping a plain `ResourceDefinition` under the `data` field.
----@class ResourceDefinitionEnvelope : JsonUserData
+---@class _ResourceDefinitionEnvelope : _JsonUserDataBase
 ---@field version number               Asset schema version.
 ---@field useExternal boolean          Whether the asset is loaded from an external source.
 ---@field isRecipe? boolean            When true, the envelope carries `recipeData` instead of `data`; routes to RecipeDefinitionEnvelope.
 ---@field data ResourceDefinition      The inner resource definition payload.
 
+---@alias ResourceDefinitionEnvelope _ResourceDefinitionEnvelope | { version: number, useExternal: boolean, isRecipe: boolean?, data: ResourceDefinition }
+
 ---Recipe asset JSON envelope wrapping a `ResourceRecipeDefinition` under the `recipeData` field.
----@class RecipeDefinitionEnvelope : JsonUserData
+---@class _RecipeDefinitionEnvelope : _JsonUserDataBase
 ---@field version number                       Asset schema version.
 ---@field useExternal boolean                  Whether the asset is loaded from an external source.
 ---@field isRecipe boolean                     Always true for recipe envelopes.
 ---@field recipeData ResourceRecipeDefinition  The inner recipe definition payload.
 
+---@alias RecipeDefinitionEnvelope _RecipeDefinitionEnvelope | { version: number, useExternal: boolean, isRecipe: boolean, recipeData: ResourceRecipeDefinition }
+
 ---Represents the definition data for a resource in the simulation resource system.
----@class ResourceDefinition : JsonUserData
+---@class _ResourceDefinition : _JsonUserDataBase
 ---@field name string
 ---@field displayNameKey string
 ---@field abbreviationKey string
@@ -96,8 +100,10 @@ function IngredientsUserData:Add(name, unitsPerRecipeUnit) end
 ---@field resourceIconAssetAddress string
 ---@field vfxFuelType string
 
+---@alias ResourceDefinition _ResourceDefinition | { name: string, displayNameKey: string, abbreviationKey: string, mapOverlayColor: Color, isTweakable: boolean, isVisible: boolean, massPerUnit: number, volumePerUnit: number, specificHeatCapacityPerUnit: number, flowMode: ResourceFlowMode, transferMode: ResourceTransferMode, costPerUnit: number, ignoreForIsp: boolean, NonStageable: boolean, resourceIconAssetAddress: string, vfxFuelType: string }
+
 ---Represents the definition of a resource recipe, including its display name, icon, ingredients, and VFX fuel type.
----@class ResourceRecipeDefinition : JsonUserData
+---@class _ResourceRecipeDefinition : _JsonUserDataBase
 ---@field name string
 ---@field displayNameKey string
 ---@field abbreviationKey string
@@ -105,7 +111,11 @@ function IngredientsUserData:Add(name, unitsPerRecipeUnit) end
 ---@field ingredients JsonList<ResourceRecipeIngredientDefinition>
 ---@field vfxFuelType string
 
+---@alias ResourceRecipeDefinition _ResourceRecipeDefinition | { name: string, displayNameKey: string, abbreviationKey: string, resourceIconAssetAddress: string, ingredients: JsonList<ResourceRecipeIngredientDefinition>, vfxFuelType: string }
+
 ---Represents a single ingredient in a resource recipe, specifying the resource name and its quantity per recipe unit.
----@class ResourceRecipeIngredientDefinition : JsonUserData
+---@class _ResourceRecipeIngredientDefinition : _JsonUserDataBase
 ---@field name string
 ---@field unitsPerRecipeUnit number
+
+---@alias ResourceRecipeIngredientDefinition _ResourceRecipeIngredientDefinition | { name: string, unitsPerRecipeUnit: number }

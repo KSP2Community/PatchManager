@@ -4,34 +4,42 @@
 -- Source: ksp2redux/Assets/Code/Root/Vector3d.cs
 
 ---JSON shape of `UnityEngine.Bounds`.
----@class Bounds : JsonUserData
+---@class _Bounds : _JsonUserDataBase
 ---@field m_Center Vector3
 ---@field m_Extent Vector3
 
+---@alias Bounds _Bounds | { m_Center: Vector3, m_Extent: Vector3 }
+
 ---JSON shape of `UnityEngine.Color`.
----@class Color : JsonUserData
+---@class _Color : _JsonUserDataBase
 ---@field r number
 ---@field g number
 ---@field b number
 ---@field a number
 
+---@alias Color _Color | { r: number, g: number, b: number, a: number }
+
 ---JSON shape of `UnityEngine.Color32`. Components are 0-255 integers.
----@class Color32 : JsonUserData
+---@class _Color32 : _JsonUserDataBase
 ---@field r integer
 ---@field g integer
 ---@field b integer
 ---@field a integer
 
+---@alias Color32 _Color32 | { r: integer, g: integer, b: integer, a: integer }
+
 ---JSON shape of `UnityEngine.AnimationCurve` (the Newtonsoft serialization). Named `Curve` for brevity.
----@class Curve : JsonUserData
+---@class _Curve : _JsonUserDataBase
 ---@field m_Curve JsonList<Keyframe>
 ---@field m_PostInfinity integer
 ---@field m_PreInfinity integer
 ---@field m_RotationOrder integer
 ---@field serializedVersion string
 
+---@alias Curve _Curve | { m_Curve: JsonList<Keyframe>, m_PostInfinity: integer, m_PreInfinity: integer, m_RotationOrder: integer, serializedVersion: string }
+
 ---JSON shape of `UnityEngine.Gradient`. Newtonsoft uses Unity's serialization layout with up to 8 key slots.
----@class Gradient : JsonUserData
+---@class _Gradient : _JsonUserDataBase
 ---@field atime0 integer
 ---@field atime1 integer
 ---@field atime2 integer
@@ -61,18 +69,24 @@
 ---@field m_NumColorKeys integer
 ---@field serializedVersion string
 
+---@alias Gradient _Gradient | { atime0: integer, atime1: integer, atime2: integer, atime3: integer, atime4: integer, atime5: integer, atime6: integer, atime7: integer, ctime0: integer, ctime1: integer, ctime2: integer, ctime3: integer, ctime4: integer, ctime5: integer, ctime6: integer, ctime7: integer, key0: Color, key1: Color, key2: Color, key3: Color, key4: Color, key5: Color, key6: Color, key7: Color, m_Mode: integer, m_NumAlphaKeys: integer, m_NumColorKeys: integer, serializedVersion: string }
+
 ---JSON shape of `UnityEngine.GradientAlphaKey`.
----@class GradientAlphaKey : JsonUserData
+---@class _GradientAlphaKey : _JsonUserDataBase
 ---@field alpha number
 ---@field time number
 
+---@alias GradientAlphaKey _GradientAlphaKey | { alpha: number, time: number }
+
 ---JSON shape of `UnityEngine.GradientColorKey`.
----@class GradientColorKey : JsonUserData
+---@class _GradientColorKey : _JsonUserDataBase
 ---@field color Color
 ---@field time number
 
+---@alias GradientColorKey _GradientColorKey | { color: Color, time: number }
+
 ---JSON shape of `UnityEngine.Keyframe` - a single point on an `AnimationCurve`.
----@class Keyframe : JsonUserData
+---@class _Keyframe : _JsonUserDataBase
 ---@field inTangent number
 ---@field inWeight number
 ---@field outTangent number
@@ -82,43 +96,57 @@
 ---@field value number
 ---@field weightedMode integer
 
+---@alias Keyframe _Keyframe | { inTangent: number, inWeight: number, outTangent: number, outWeight: number, tangentMode: integer, time: number, value: number, weightedMode: integer }
+
 ---JSON shape of `UnityEngine.LayerMask`. Serialized as a single integer mask.
 ---@alias LayerMask integer
 
 ---JSON shape of `UnityEngine.Quaternion`.
----@class Quaternion : JsonUserData
+---@class _Quaternion : _JsonUserDataBase
 ---@field x number
 ---@field y number
 ---@field z number
 ---@field w number
 
+---@alias Quaternion _Quaternion | { x: number, y: number, z: number, w: number }
+
 ---JSON shape of `UnityEngine.Rect`.
----@class Rect : JsonUserData
+---@class _Rect : _JsonUserDataBase
 ---@field height number
 ---@field width number
 ---@field x number
 ---@field y number
 
+---@alias Rect _Rect | { height: number, width: number, x: number, y: number }
+
 ---JSON shape of `UnityEngine.Vector2`.
----@class Vector2 : JsonUserData
+---@class _Vector2 : _JsonUserDataBase
 ---@field x number
 ---@field y number
+
+---@alias Vector2 _Vector2 | { x: number, y: number }
 
 ---JSON shape of `UnityEngine.Vector3`.
----@class Vector3 : JsonUserData
+---@class _Vector3 : _JsonUserDataBase
 ---@field x number
 ---@field y number
 ---@field z number
+
+---@alias Vector3 _Vector3 | { x: number, y: number, z: number }
 
 ---JSON shape of KSP's double-precision `Vector3d`.
----@class Vector3d : JsonUserData
+---@class _Vector3d : _JsonUserDataBase
 ---@field x number
 ---@field y number
 ---@field z number
 
+---@alias Vector3d _Vector3d | { x: number, y: number, z: number }
+
 ---JSON shape of `UnityEngine.Vector4`.
----@class Vector4 : JsonUserData
+---@class _Vector4 : _JsonUserDataBase
 ---@field x number
 ---@field y number
 ---@field z number
 ---@field w number
+
+---@alias Vector4 _Vector4 | { x: number, y: number, z: number, w: number }

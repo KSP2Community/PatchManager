@@ -34,12 +34,12 @@
 
 ---Mission definition wrapper exposing the `missionStages` array as a typed StagesUserData and
 ---the optional `ContentBranches` array as a typed ContentBranchesUserData.
----@class MissionUserData : MissionData, ExtensibleJsonUserData
+---@class MissionUserData : _MissionData, ExtensibleJsonUserData
 ---@field missionStages StagesUserData
 ---@field ContentBranches ContentBranchesUserData?
 
 ---Mission stage wrapper exposing the optional `MissionReward` object as a typed MissionRewardUserData.
----@class StageUserData : MissionStage, ExtensibleJsonUserData
+---@class StageUserData : _MissionStage, ExtensibleJsonUserData
 ---@field MissionReward MissionRewardUserData?
 
 ---Indexed-list wrapper for a mission's `missionStages` array, keyed by each stage's `name`, wrapping
@@ -48,14 +48,14 @@
 ---@class StagesUserData : IndexedListUserData<StageUserData>
 
 ---Synthetic per-element wrapper for entries of a `ContentBranchesUserData`.
----@class ContentBranchUserData : MissionContentBranch, JsonUserData
+---@class ContentBranchUserData : _MissionContentBranch, JsonUserData
 
 ---Indexed-list wrapper for a mission's `ContentBranches` array, keyed by each branch's `ID`.
 ---Iterable with `pairs()`.
 ---@class ContentBranchesUserData : IndexedListUserData<ContentBranchUserData>
 
 ---Synthetic per-element wrapper for entries of a `MissionRewardUserData`.
----@class MissionRewardDefinitionUserData : MissionRewardDefinition, JsonUserData
+---@class MissionRewardDefinitionUserData : _MissionRewardDefinition, JsonUserData
 
 ---Indexed-list wrapper for a stage's `MissionRewardDefinitions` array, keyed by each reward's `MissionRewardType`.
 ---Iterable with `pairs()`.
@@ -99,7 +99,7 @@ function MissionsLuaModule:GetMessage(name) end
 function MissionsLuaModule:CreateStage(name, callback) end
 
 ---Synthetic wrapper around a `ConditionSet` JSON returned by `:And`, `:Or`, and `:Not`.
----@class ConditionSetUserData : ConditionSet, JsonUserData
+---@class ConditionSetUserData : _ConditionSet, JsonUserData
 
 ---Returns a condition set that requires every supplied condition to be true.
 ---@param ... Condition  The conditions to combine.
@@ -128,7 +128,7 @@ function MissionsLuaModule:Action(type, callback) end
 --#region Mission JSON schemas (root MissionData and nested types)
 
 ---Represents a mission definition, including its identity, type, state, stages, and branching structure.
----@class MissionData : JsonUserData
+---@class _MissionData : _JsonUserDataBase
 ---@field ID string
 ---@field MissionGroup string
 ---@field name string
@@ -152,8 +152,10 @@ function MissionsLuaModule:Action(type, callback) end
 ---@field ContentBranches JsonList<MissionContentBranch>
 ---@field MissionSaveAssetKey string
 
+---@alias MissionData _MissionData | { ID: string, MissionGroup: string, name: string, description: string, GameModeFeatureId: string, type: MissionType, Owner: MissionOwner, state: MissionState, missionScript: string, missionStages: JsonList<MissionStage>, currentStageIndex: integer, Hidden: boolean, MissionGranterKey: string, TriumphLoopVideoKey: string, VisibleRewards: boolean, pendingCompletionTest: boolean, maxStageID: integer, uiDisplayType: UIDisplayType, ExceptionBranches: JsonList<MissionBranch>, PreRequisiteBranches: JsonList<MissionBranch>, ContentBranches: JsonList<MissionContentBranch>, MissionSaveAssetKey: string }
+
 ---Represents a single stage within a mission definition, including its actions, branches, conditions, and reward configuration.
----@class MissionStage : JsonUserData
+---@class _MissionStage : _JsonUserDataBase
 ---@field StageID integer
 ---@field name string
 ---@field description string
@@ -171,45 +173,59 @@ function MissionsLuaModule:Action(type, callback) end
 ---@field completed boolean
 ---@field active boolean
 
+---@alias MissionStage _MissionStage | { StageID: integer, name: string, description: string, Objective: string, DisplayObjective: boolean, RevealObjectiveOnActivate: boolean, MissionRewardType: MissionRewardType, RewardAmount: string, MissionReward: MissionReward, IgnoreExceptionBranches: boolean, actions: JsonList<MissionAction>, branches: JsonList<MissionBranch>, parentMissionID: string, scriptableCondition: Condition, completed: boolean, active: boolean }
+
 ---Represents a conditional branch in a mission that evaluates a Condition and transitions to a target stage when the condition is met.
----@class MissionBranch : JsonUserData
+---@class _MissionBranch : _JsonUserDataBase
 ---@field condition Condition
 ---@field TargetStage integer
 ---@field ExceptionBranch boolean
 ---@field IsPreRequisiteBranch boolean
 ---@field IsExceptionBranch boolean
 
+---@alias MissionBranch _MissionBranch | { condition: Condition, TargetStage: integer, ExceptionBranch: boolean, IsPreRequisiteBranch: boolean, IsExceptionBranch: boolean }
+
 ---Represents a named branch of mission actions that can be activated or deactivated on demand by branch ID.
----@class MissionContentBranch : JsonUserData
+---@class _MissionContentBranch : _JsonUserDataBase
 ---@field ID string
 ---@field actions JsonList<MissionAction>
 
+---@alias MissionContentBranch _MissionContentBranch | { ID: string, actions: JsonList<MissionAction> }
+
 ---Represents the reward associated with a mission, containing a collection of MissionRewardDefinition entries.
----@class MissionReward : JsonUserData
+---@class _MissionReward : _JsonUserDataBase
 ---@field MissionRewardDefinitions JsonList<MissionRewardDefinition>
 
+---@alias MissionReward _MissionReward | { MissionRewardDefinitions: JsonList<MissionRewardDefinition> }
+
 ---Represents a single reward associated with a mission.
----@class MissionRewardDefinition : JsonUserData
+---@class _MissionRewardDefinition : _JsonUserDataBase
 ---@field MissionRewardType MissionRewardType
 ---@field RewardAmount number
 ---@field RewardKey string
+
+---@alias MissionRewardDefinition _MissionRewardDefinition | { MissionRewardType: MissionRewardType, RewardAmount: number, RewardKey: string }
 
 --#endregion
 
 --#region Mission condition polymorphism
 
 ---A base class for mission conditions, providing virtual evaluation and lifecycle methods used by concrete condition implementations.
----@class ConditionBase : JsonUserData
+---@class _ConditionBase : _JsonUserDataBase
 ---@field ConditionType ConditionTypeName
 
+---@alias ConditionBase _ConditionBase | { ConditionType: ConditionTypeName }
+
 ---A composite Condition that evaluates a collection of child conditions combined by a LogicalOperator.
----@class ConditionSet : ConditionBase
+---@class _ConditionSet : _ConditionBase
 ---@field ConditionType "ConditionSet"
 ---@field Children JsonList<Condition>
 ---@field ConditionMode LogicalOperator
 
+---@alias ConditionSet _ConditionSet | { ConditionType: "ConditionSet", Children: JsonList<Condition>, ConditionMode: LogicalOperator }
+
 ---Condition that tests a PropertyWatcher value against a threshold using a PropertyOperator comparison.
----@class PropertyCondition : ConditionBase
+---@class _PropertyCondition : _ConditionBase
 ---@field ConditionType "PropertyCondition"
 ---@field RequireCurrentValue boolean
 ---@field PropertyTypeAQN string
@@ -221,16 +237,22 @@ function MissionsLuaModule:Action(type, callback) end
 ---@field isInput boolean
 ---@field Inputstring string
 
+---@alias PropertyCondition _PropertyCondition | { ConditionType: "PropertyCondition", RequireCurrentValue: boolean, PropertyTypeAQN: string, TestWatchedValue: number, TestWatchedstring: string, TestWatchedInt: integer, TestWatchedBool: boolean, propOperator: PropertyOperator, isInput: boolean, Inputstring: string }
+
 ---Condition that evaluates to true when a specified game message event type has been observed.
----@class EventCondition : ConditionBase
+---@class _EventCondition : _ConditionBase
 ---@field ConditionType "EventCondition"
 ---@field EventTypeAQN string
 
+---@alias EventCondition _EventCondition | { ConditionType: "EventCondition", EventTypeAQN: string }
+
 ---Condition that evaluates success by subscribing to a configurable message event type and delegating evaluation to a ScriptMethodReference script.
----@class ScriptCondition : ConditionBase
+---@class _ScriptCondition : _ConditionBase
 ---@field ConditionType "ScriptCondition"
 ---@field triggerEventTypeAQN string
 ---@field EvaluationScript ScriptMethodReference
+
+---@alias ScriptCondition _ScriptCondition | { ConditionType: "ScriptCondition", triggerEventTypeAQN: string, EvaluationScript: ScriptMethodReference }
 
 ---Union of every concrete mission condition shape; falls back to `table` for runtime-discovered or unregistered subtypes.
 ---@alias Condition table | ConditionSet | PropertyCondition | EventCondition | ScriptCondition
