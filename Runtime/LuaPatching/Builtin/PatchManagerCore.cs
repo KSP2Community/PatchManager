@@ -127,6 +127,63 @@ public class PatchManagerCore
     }
 
     /// <summary>
+    /// Registers a patch that runs against a single asset identified by its Addressables address.
+    /// </summary>
+    /// <param name="context">The host Lua script; its <c>ModId</c> global is used as the patch's default stage.</param>
+    /// <param name="converter">The name of the converter to use, as registered via <see cref="Attributes.ConverterAttribute" />.</param>
+    /// <param name="address">The Addressables address of the asset to patch.</param>
+    /// <param name="method">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
+    /// <returns>The registered patch, suitable for chaining (for example <see cref="LuaPatch.OnStage" />).</returns>
+    /// <exception cref="Exception">Thrown when <paramref name="converter" /> is not registered, or when <paramref name="method" /> is null.</exception>
+    public LuaPatch PatchAddress(Script context, string converter, string address, Func<DynValue, string> method)
+    {
+        if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
+        {
+            throw new Exception($"Unknown converter {converter}");
+        }
+
+        if (method == null)
+        {
+            throw new Exception($"Registering address {converter}:{address} with null method");
+        }
+
+        var newPatch = new LuaPatch
+        {
+            ConverterInstance = converterInstance,
+            Label = address,
+            Name = null,
+            PatchMethod = method,
+            Stage = context.Globals.Get("ModId").CastToString()
+        };
+        _universe.AddAddressPatch(newPatch);
+        return newPatch;
+    }
+
+    /// <summary>
+    /// Queues a brand-new asset for creation at the given Addressables address, with no label.
+    /// </summary>
+    /// <param name="converter">The name of the converter that will serialize <paramref name="newObject" /> to JSON.</param>
+    /// <param name="address">The Addressables address for the new asset (globally unique).</param>
+    /// <param name="newObject">The Lua-facing value for the new asset.</param>
+    /// <exception cref="Exception">Thrown when <paramref name="converter" /> is not registered.</exception>
+    public void NewAddress(string converter, string address, DynValue newObject)
+    {
+        if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
+        {
+            throw new Exception($"Unknown converter {converter}");
+        }
+
+        var newAsset = new LuaAsset
+        {
+            ConverterInstance = converterInstance,
+            Label = address,
+            Name = address,
+            CurrentValue = newObject,
+        };
+        _universe.AddAddressAsset(newAsset);
+    }
+
+    /// <summary>
     /// Creates a named stage that runs after the most recent implicit stage from the same host mod.
     /// </summary>
     /// <remarks>

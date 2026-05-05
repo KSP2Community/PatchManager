@@ -39,6 +39,12 @@ function PlanetsLuaModule:PatchAll(callback) end
 ---@return LuaPatch patch The registered patch.
 function PlanetsLuaModule:Patch(name, callback) end
 
+---Registers a celestial-body patch that runs against a single body identified by its Addressables address.
+---@param address string The Addressables address of the body to patch.
+---@param callback fun(body: CelestialBodyUserData): string? The patch callback. Returns `"remove"` to delete the body, `nil` to keep it.
+---@return LuaPatch patch The registered patch.
+function PlanetsLuaModule:PatchAddress(address, callback) end
+
 ---Registers a patch that runs against the default galaxy definition.
 ---@param callback fun(galaxy: GalaxyUserData): string? The patch callback. Returns `"remove"` to delete the galaxy, `nil` to keep it.
 ---@return LuaPatch patch The registered patch.

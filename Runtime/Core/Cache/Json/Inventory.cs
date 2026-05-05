@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PatchManager.Core.Assets;
 using PatchManager.Shared;
 using UniLinq;
 
@@ -129,7 +130,8 @@ namespace PatchManager.Core.Cache.Json
         internal void Save(string path)
         {
             CacheManager.CreateCacheFolderIfNotExists();
-            var inventoryText = JsonConvert.SerializeObject(this, Formatting.Indented);
+            var formatting = PatchingManager.UseIndentedOutput ? Formatting.Indented : Formatting.None;
+            var inventoryText = JsonConvert.SerializeObject(this, formatting);
             File.WriteAllText(path, inventoryText);
         }
     }

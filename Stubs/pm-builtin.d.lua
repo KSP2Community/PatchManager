@@ -41,6 +41,21 @@ function PatchManagerCore:Patch(converter, label, name, method) end
 ---@error Thrown when converter is not registered.
 function PatchManagerCore:New(converter, label, name, newObject) end
 
+---Registers a patch that runs against a single asset identified by its Addressables address.
+---@param converter string The name of the converter to use, as registered via ConverterAttribute.
+---@param address string The Addressables address of the asset to patch.
+---@param method fun(value: any): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
+---@return LuaPatch patch The registered patch, suitable for chaining (for example LuaPatch.OnStage).
+---@error Thrown when converter is not registered, or when method is nil.
+function PatchManagerCore:PatchAddress(converter, address, method) end
+
+---Queues a brand-new asset for creation at the given Addressables address, with no label.
+---@param converter string The name of the converter that will serialize newObject to JSON.
+---@param address string The Addressables address for the new asset (globally unique).
+---@param newObject any The Lua-facing value for the new asset.
+---@error Thrown when converter is not registered.
+function PatchManagerCore:NewAddress(converter, address, newObject) end
+
 ---Creates a named stage that runs after the most recent implicit stage from the same host mod.
 ---@param name string The stage name (registered as `"modId:name"`).
 ---@return Stage stage The created stage, suitable for chaining (for example Stage.Before / Stage.After).

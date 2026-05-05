@@ -11,6 +11,7 @@ using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
 using ReduxLib.Logging;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace PatchManager.LuaPatching
 {
@@ -280,6 +281,17 @@ namespace PatchManager.LuaPatching
         public Dictionary<string, List<LuaPatch>> AllPatches = new();
 
         /// <summary>
+        /// Registered patches keyed by addressables address, for assets that are not under any label.
+        /// Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
+        /// </summary>
+        public Dictionary<string, List<LuaPatch>> AllAddressPatches = new();
+
+        /// <summary>
+        /// Assets queued for creation via <see cref="PatchManagerCore.NewAddress" />.
+        /// </summary>
+        public List<LuaAsset> AllNewAddressAssets = new();
+
+        /// <summary>
         /// Registers a patch and records its label in <see cref="PatchedLabels" />.
         /// </summary>
         /// <param name="patch">The patch to register.</param>
@@ -299,6 +311,25 @@ namespace PatchManager.LuaPatching
         }
 
         /// <summary>
+        /// Registers an address-keyed patch and records its address in <see cref="PatchedAddresses" />.
+        /// </summary>
+        /// <param name="patch">The patch to register.</param>
+        public void AddAddressPatch(LuaPatch patch)
+        {
+            if (AllAddressPatches.TryGetValue(patch.Label, out var l))
+            {
+                l.Add(patch);
+            }
+            else
+            {
+                AllAddressPatches[patch.Label] = new List<LuaPatch> { patch };
+            }
+
+            PatchedAddresses.Add(patch.Label);
+            TotalPatchCount++;
+        }
+
+        /// <summary>
         /// Queues a new asset for creation and records its label in <see cref="PatchedLabels" />.
         /// </summary>
         /// <param name="asset">The asset to queue.</param>
@@ -306,6 +337,16 @@ namespace PatchManager.LuaPatching
         {
             AllNewAssets.Add(asset);
             PatchedLabels.Add(asset.Label);
+        }
+
+        /// <summary>
+        /// Queues a new address-keyed asset for creation and records its address in <see cref="PatchedAddresses" />.
+        /// </summary>
+        /// <param name="asset">The asset to queue.</param>
+        public void AddAddressAsset(LuaAsset asset)
+        {
+            AllNewAddressAssets.Add(asset);
+            PatchedAddresses.Add(asset.Label);
         }
 
         /// <summary>
@@ -411,6 +452,13 @@ namespace PatchManager.LuaPatching
         public HashSet<string> PatchedLabels = new();
 
         /// <summary>
+        /// The set of addressables addresses with at least one address patch or new-address asset registered.
+        /// Replaced by <see cref="SetupPatchesForRun" /> with the keys of <see cref="AllAddressPatches" /> unioned
+        /// with the labels of <see cref="AllNewAddressAssets" />.
+        /// </summary>
+        public HashSet<string> PatchedAddresses = new();
+
+        /// <summary>
         /// All buckets for each patch type
         /// </summary>
         public Dictionary<string, LabelPatchBuckets> AllPatchesBuckets = new();
@@ -475,6 +523,22 @@ namespace PatchManager.LuaPatching
                 }
 
                 AllPatchesBuckets[label] = buckets;
+            }
+
+            PatchedAddresses = AllAddressPatches.Keys.ToHashSet();
+            foreach (var asset in AllNewAddressAssets)
+            {
+                PatchedAddresses.Add(asset.Label);
+            }
+
+            foreach (var (_, patches) in AllAddressPatches)
+            {
+                foreach (var p in patches)
+                {
+                    p.StagePriority = SortedStages.GetValueOrDefault(p.Stage, ulong.MaxValue);
+                }
+
+                patches.Sort((x, y) => x.StagePriority.CompareTo(y.StagePriority));
             }
         }
 
@@ -641,6 +705,183 @@ namespace PatchManager.LuaPatching
             if (buckets.MatchAll.Length > 0) return true;
             if (buckets.Exact.ContainsKey(name)) return true;
             return buckets.Wildcard.Any(w => w.Pattern.Matches(name));
+        }
+
+        /// <summary>
+        /// Returns whether any address-keyed patch is registered for the given address.
+        /// </summary>
+        /// <param name="address">The Addressables address to test.</param>
+        /// <returns>True if any address patch targets the address, false otherwise.</returns>
+        public bool HasAnyPatchForAddress(string address) => AllAddressPatches.ContainsKey(address);
+
+        /// <summary>
+        /// Returns the primary Addressables address for <paramref name="key" />, or <c>nil</c> when the key
+        /// resolves to nothing.
+        /// </summary>
+        /// <param name="key">An Addressables key (address, label, or alias).</param>
+        /// <returns>The primary key of the first resolved location, or <c>nil</c>.</returns>
+        public string ResolvePrimaryKey(string key)
+        {
+            foreach (var locator in Addressables.ResourceLocators)
+            {
+                if (locator.Locate(key, null, out var locs)
+                    && locs != null && locs.Count > 0)
+                {
+                    return locs[0].PrimaryKey;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the primary Addressables address for every <see cref="UnityEngine.TextAsset" /> under
+        /// <paramref name="label" />, keyed by the asset's Unity object name (the file basename without
+        /// extension).
+        /// </summary>
+        /// <param name="label">The Addressables label whose assets to enumerate.</param>
+        /// <returns>A map from asset Unity name to primary address; empty when the label resolves to nothing.</returns>
+        public Dictionary<string, string> BuildPrimaryKeyMapForLabel(string label)
+        {
+            var map = new Dictionary<string, string>();
+            foreach (var locator in Addressables.ResourceLocators)
+            {
+                if (locator.Locate(label, typeof(UnityEngine.TextAsset), out var locs) && locs != null)
+                {
+                    foreach (var loc in locs)
+                    {
+                        var name = Path.GetFileNameWithoutExtension(loc.PrimaryKey);
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            map[name] = loc.PrimaryKey;
+                        }
+                    }
+                }
+            }
+            return map;
+        }
+
+        private static readonly Regex _addressablesGuidPattern = new(@"^[0-9a-f]{32}$", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Returns every Addressables label that includes the asset at <paramref name="address" />.
+        /// </summary>
+        /// <param name="address">The Addressables address to look up labels for.</param>
+        /// <returns>The discovered label keys; empty when the asset has no labels or does not exist.</returns>
+        public IEnumerable<string> DiscoverLabelsForAddress(string address)
+        {
+            string targetPrimary = null;
+            foreach (var locator in Addressables.ResourceLocators)
+            {
+                if (locator.Locate(address, null, out var locs)
+                    && locs != null && locs.Count > 0)
+                {
+                    targetPrimary = locs[0].PrimaryKey;
+                    MessageLogger($"DiscoverLabelsForAddress: '{address}' resolves to primary '{targetPrimary}' via locator '{locator.LocatorId}'");
+                    break;
+                }
+            }
+
+            if (targetPrimary == null)
+            {
+                MessageLogger($"DiscoverLabelsForAddress: could not resolve '{address}' to any location");
+                yield break;
+            }
+
+            var any = false;
+            foreach (var locator in Addressables.ResourceLocators)
+            {
+                foreach (var key in locator.Keys)
+                {
+                    if (key is not string keyStr || keyStr == address) continue;
+                    if (_addressablesGuidPattern.IsMatch(keyStr)) continue;
+                    if (locator.Locate(key, null, out var locsForKey)
+                        && locsForKey != null
+                        && locsForKey.Any(l => l.PrimaryKey == targetPrimary))
+                    {
+                        MessageLogger($"DiscoverLabelsForAddress: '{address}' shares primary with key '{keyStr}'");
+                        any = true;
+                        yield return keyStr;
+                    }
+                }
+            }
+
+            if (!any)
+            {
+                MessageLogger($"DiscoverLabelsForAddress: '{address}' had no matching labels (primary '{targetPrimary}')");
+            }
+        }
+
+        /// <summary>
+        /// For every entry in <see cref="PatchedAddresses" />, discovers the labels that contain the address
+        /// and adds each one to <see cref="PatchedLabels" /> so a label-flow rebuild gets scheduled.
+        /// </summary>
+        public void PromoteAddressLabelsToPatchedLabels()
+        {
+            foreach (var address in PatchedAddresses.ToList())
+            {
+                foreach (var label in DiscoverLabelsForAddress(address))
+                {
+                    PatchedLabels.Add(label);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Runs every address-keyed patch registered for <paramref name="address" /> against the given JSON,
+        /// returning the final result.
+        /// </summary>
+        /// <param name="address">The asset's Addressables address.</param>
+        /// <param name="data">The asset's parsed JSON.</param>
+        /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
+        /// <param name="errorCount">Set to the number of patches that threw.</param>
+        /// <returns>The patched JSON, or <c>null</c> when the asset was removed.</returns>
+        public JToken RunAllPatchesForAddress(string address, JToken data, out int patchCount, out int errorCount)
+        {
+            patchCount = 0;
+            errorCount = 0;
+            if (!AllAddressPatches.TryGetValue(address, out var patches)) return data;
+
+            IConverter? previousConverter = null;
+            DynValue? previousInstance = null;
+            var anyApplied = false;
+            foreach (var patch in patches)
+            {
+                try
+                {
+                    if (previousInstance == null)
+                    {
+                        previousConverter = patch.ConverterInstance;
+                        previousInstance = patch.ApplyFirst(data);
+                    }
+                    else if (ReferenceEquals(previousConverter, patch.ConverterInstance))
+                    {
+                        previousInstance = patch.ApplyInChain(previousInstance);
+                    }
+                    else
+                    {
+                        var stringValue = previousConverter.ToJson(previousInstance);
+                        previousConverter = patch.ConverterInstance;
+                        previousInstance = patch.ApplyFirst(stringValue);
+                    }
+
+                    anyApplied = true;
+                    patchCount++;
+                }
+                catch (InterpreterException e)
+                {
+                    errorCount++;
+                    ErrorLogger($"Patching address {address} failed due to: {e.DecoratedMessage}");
+                    ErrorLogger(e.ToString());
+                }
+                catch (Exception e)
+                {
+                    errorCount++;
+                    ErrorLogger($"Patching address {address} failed due to {e.Message}");
+                    ErrorLogger(e.ToString());
+                }
+            }
+
+            return anyApplied ? previousConverter!.ToJson(previousInstance) : data;
         }
 
         #endregion

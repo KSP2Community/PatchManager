@@ -34,6 +34,13 @@ namespace PatchManager.Core.Assets
 
         private static int _initialLibraryCount;
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
+        private static Dictionary<string, LuaAsset> _createdAddressAssets = new();
+
+        /// <summary>
+        /// Addresses whose patches were already applied as part of a label-flow rebuild and therefore should
+        /// not be rebuilt again by the standalone <see cref="RebuildAddressCache" /> dispatch.
+        /// </summary>
+        private static HashSet<string> _addressesCoveredByLabelFlow = new();
 
         internal static bool UseIndentedOutput;
 
@@ -105,6 +112,50 @@ namespace PatchManager.Core.Assets
             }
 
             return t == null ? "" : t.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
+        }
+
+        private static string PatchAddressJson(string address, string text)
+        {
+            Logging.LogDebug($"Patching address {address}");
+            var patchCount = 0;
+            var errorCount = 0;
+            if (text != "")
+            {
+                var result = Universe.RunAllPatchesForAddress(address, JToken.Parse(text), out patchCount, out errorCount);
+                text = result == null ? "" : result.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
+                TotalErrorCount += errorCount;
+                TotalPatchCount += patchCount;
+            }
+
+            if (patchCount > 0)
+            {
+                Logging.LogDebug($"Patched address {address} with {patchCount} patches. Total: {TotalPatchCount}");
+                TotalDefinitionPatchCount += 1;
+            }
+
+            return text;
+        }
+
+        private static string PatchAddressJson(LuaAsset asset)
+        {
+            Logging.LogDebug($"Patching address asset {asset.Label}");
+
+            var initialJson = asset.ConverterInstance.ToJson(asset.CurrentValue);
+            if (!Universe.HasAnyPatchForAddress(asset.Label))
+            {
+                return initialJson == null ? "" : initialJson.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
+            }
+
+            var result = Universe.RunAllPatchesForAddress(asset.Label, initialJson, out var patchCount, out var errorCount);
+            TotalErrorCount += errorCount;
+            TotalPatchCount += patchCount;
+
+            if (patchCount > 0)
+            {
+                Logging.LogDebug($"Patched address asset {asset.Label} with {patchCount} patches. Total: {TotalPatchCount}");
+            }
+
+            return result == null ? "" : result.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
         }
 
 
@@ -217,34 +268,60 @@ namespace PatchManager.Core.Assets
                     if (string.IsNullOrEmpty(patchedText)) continue;
                     archiveFiles[name] = patchedText;
                     labelCacheEntry.Assets.Add(name);
-                    assetsCacheEntries.Add(name, new CacheEntry
+                    assetsCacheEntries[name] = new CacheEntry
                     {
                         Label = name,
                         ArchiveFilename = archiveFilename,
                         Assets = new List<string> { name }
-                    });
+                    };
+
+                    var addressAlias = name.EndsWith(".json") ? null : name + ".json";
+                    if (addressAlias != null)
+                    {
+                        assetsCacheEntries[addressAlias] = new CacheEntry
+                        {
+                            Label = addressAlias,
+                            ArchiveFilename = archiveFilename,
+                            Assets = new List<string> { name }
+                        };
+                    }
                 }
 
                 createdAsset.Clear();
                 _createdAssets.Remove(label);
             }
 
+            var primaryKeyMap = Universe.BuildPrimaryKeyMapForLabel(label);
+
             var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
             {
                 try
                 {
+                    var address = primaryKeyMap.TryGetValue(asset.name, out var primary)
+                        ? primary
+                        : null;
+
                     string patchedText;
                     if (Universe.HasAnyPatchFor(label, asset.name))
                     {
                         patchedText = PatchJson(label, asset.name, asset.text);
-                        unchanged = false; // Any patch can change
+                        unchanged = false;
                     }
                     else
                     {
                         patchedText = asset.text;
                     }
 
-                    // Handle deletion
+                    if (address != null
+                        && Universe.HasAnyPatchForAddress(address)
+                        && !_addressesCoveredByLabelFlow.Contains(address)
+                        && !string.IsNullOrEmpty(patchedText))
+                    {
+                        patchedText = PatchAddressJson(address, patchedText);
+                        _addressesCoveredByLabelFlow.Add(address);
+                        unchanged = false;
+                    }
+
                     if (string.IsNullOrEmpty(patchedText))
                     {
                         return;
@@ -252,12 +329,22 @@ namespace PatchManager.Core.Assets
 
                     archiveFiles[asset.name] = patchedText;
                     labelCacheEntry.Assets.Add(asset.name);
-                    assetsCacheEntries.Add(asset.name, new CacheEntry
+                    assetsCacheEntries[asset.name] = new CacheEntry
                     {
                         Label = asset.name,
                         ArchiveFilename = archiveFilename,
                         Assets = new List<string> { asset.name }
-                    });
+                    };
+
+                    if (address != null && address != asset.name)
+                    {
+                        assetsCacheEntries[address] = new CacheEntry
+                        {
+                            Label = address,
+                            ArchiveFilename = archiveFilename,
+                            Assets = new List<string> { asset.name }
+                        };
+                    }
                 }
                 catch (Exception e)
                 {
@@ -308,8 +395,121 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Collects every queued new asset from the universe into the per-label staging dictionary, then resolves
-        /// the supplied callback.
+        /// Rebuilds the cache archive for a single Addressables address.
+        /// </summary>
+        /// <param name="address">The Addressables address to rebuild.</param>
+        /// <returns>The Addressables load handle, or <c>default</c> when the address resolves from a queued new asset or was already covered by a label flow.</returns>
+        private static AsyncOperationHandle<TextAsset> RebuildAddressCache(string address)
+        {
+            if (_addressesCoveredByLabelFlow.Contains(address))
+            {
+                Logging.LogDebug($"Skipping address rebuild for {address}; already covered by label flow.");
+                return default;
+            }
+
+            Logging.LogInfo($"Patching address: {address}");
+            var archiveFilename = $"{address.Replace("/", "_")}.zip";
+
+            var archiveFiles = new Dictionary<string, string>();
+
+            var addressCacheEntry = new CacheEntry
+            {
+                Label = address,
+                ArchiveFilename = archiveFilename,
+                Assets = new List<string> { address }
+            };
+            var unchanged = !_createdAddressAssets.ContainsKey(address);
+
+            void SaveArchive()
+            {
+                var archive = CacheManager.CreateArchive(archiveFilename);
+                foreach (var archiveFile in archiveFiles)
+                {
+                    archive.AddFile(archiveFile.Key, archiveFile.Value);
+                }
+
+                archive.Save();
+
+                CacheManager.CacheValidLabels.Add(address);
+                CacheManager.Inventory.CacheEntries[address] = addressCacheEntry;
+                CacheManager.SaveInventory();
+
+                Logging.LogInfo($"Cache for address '{address}' rebuilt.");
+            }
+
+            if (_createdAddressAssets.TryGetValue(address, out var createdAsset))
+            {
+                try
+                {
+                    var patchedText = PatchAddressJson(createdAsset);
+                    if (!string.IsNullOrEmpty(patchedText))
+                    {
+                        archiveFiles[address] = patchedText;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logging.LogError($"Unable to patch created address asset {address} due to: {e.Message}, {e.StackTrace}");
+                }
+
+                _createdAddressAssets.Remove(address);
+                SaveArchive();
+                return default;
+            }
+
+            var handle = Addressables.LoadAssetAsync<TextAsset>(address);
+            handle.Completed += result =>
+            {
+                try
+                {
+                    if (result.Status != AsyncOperationStatus.Succeeded || result.Result == null)
+                    {
+                        Logging.LogError($"Failed to load address {address} for patching: {result.OperationException?.Message ?? "unknown error"}");
+                        return;
+                    }
+
+                    var asset = result.Result;
+                    try
+                    {
+                        var patchedText = Universe.HasAnyPatchForAddress(address)
+                            ? PatchAddressJson(address, asset.text)
+                            : asset.text;
+
+                        if (patchedText != asset.text)
+                        {
+                            unchanged = false;
+                        }
+
+                        if (string.IsNullOrEmpty(patchedText))
+                        {
+                            return;
+                        }
+
+                        archiveFiles[address] = patchedText;
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogError($"Unable to patch address {address} due to: {e.Message}, {e.StackTrace}");
+                    }
+
+                    if (unchanged) return;
+                    SaveArchive();
+                }
+                finally
+                {
+                    if (result.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        Addressables.Release(result);
+                    }
+                }
+            };
+
+            return handle;
+        }
+
+        /// <summary>
+        /// Collects every queued new asset from the universe into the per-label and per-address staging
+        /// dictionaries, then resolves the supplied callback.
         /// </summary>
         /// <param name="resolve">Callback invoked once collection finishes.</param>
         /// <param name="reject">Reject callback (currently unused).</param>
@@ -339,7 +539,21 @@ namespace PatchManager.Core.Assets
                 }
             }
 
-            TotalNewAssetCount = Universe.AllNewAssets.Count;
+            foreach (var generator in Universe.AllNewAddressAssets)
+            {
+                try
+                {
+                    Logging.LogDebug($"Generated an address-keyed asset at {generator.Label}");
+                    _createdAddressAssets.TryAdd(generator.Label, generator);
+                }
+                catch (Exception e)
+                {
+                    TotalErrorCount += 1;
+                    Logging.LogError($"Failed to generate an address-keyed asset due to: {e}");
+                }
+            }
+
+            TotalNewAssetCount = Universe.AllNewAssets.Count + Universe.AllNewAddressAssets.Count;
             UpdateLoadingBarData();
 
             resolve();
@@ -348,6 +562,7 @@ namespace PatchManager.Core.Assets
 
         /// <summary>
         /// Schedules a per-label cache-rebuild flow action for every label that has either patches or queued new
+        /// assets, plus a per-address rebuild flow action for every address with patches or new address-keyed
         /// assets, then resolves the supplied callback.
         /// </summary>
         /// <param name="resolve">Callback invoked once scheduling finishes.</param>
@@ -355,25 +570,49 @@ namespace PatchManager.Core.Assets
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
             var distinctKeys = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
+            var distinctAddresses = Universe.PatchedAddresses
+                .Where(a => !distinctKeys.Contains(a))
+                .ToList();
 
-            GenericFlowAction CreateIndexedFlowAction(int idx)
+            var totalActions = distinctKeys.Count + distinctAddresses.Count;
+
+            GenericFlowAction CreateIndexedFlowAction(int idx, int globalIdx)
             {
                 return new GenericFlowAction(
                     $"Patch Manager: {distinctKeys[idx]}",
                     (resolve2, _) =>
                     {
                         var handle = RebuildCache(distinctKeys[idx]);
-                        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2, idx + 1 == distinctKeys.Count));
+                        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2, globalIdx + 1 == totalActions));
                     });
             }
 
-            if (distinctKeys.Count > 0)
+            GenericFlowAction CreateIndexedAddressFlowAction(int idx, int globalIdx)
             {
+                return new GenericFlowAction(
+                    $"Patch Manager: address {distinctAddresses[idx]}",
+                    (resolve2, _) =>
+                    {
+                        var handle = RebuildAddressCache(distinctAddresses[idx]);
+                        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleAddressHandle(handle, resolve2, globalIdx + 1 == totalActions));
+                    });
+            }
+
+            if (totalActions > 0)
+            {
+                for (var i = distinctAddresses.Count - 1; i >= 0; i--)
+                {
+                    GameManager.Instance.LoadingFlow.FlowActions.Insert(
+                        GameManager.Instance.LoadingFlow.flowIndex + 1,
+                        CreateIndexedAddressFlowAction(i, distinctKeys.Count + i)
+                    );
+                }
+
                 for (var i = distinctKeys.Count - 1; i >= 0; i--)
                 {
                     GameManager.Instance.LoadingFlow.FlowActions.Insert(
                         GameManager.Instance.LoadingFlow.flowIndex + 1,
-                        CreateIndexedFlowAction(i)
+                        CreateIndexedFlowAction(i, i)
                     );
                 }
             }
@@ -392,6 +631,31 @@ namespace PatchManager.Core.Assets
                 // "Shuffle" it
                 UpdateLoadingBarData();
                 yield return null;
+            }
+
+            if (isFinalHandle)
+            {
+                CacheManager.SetTotalPatchCount(TotalPatchCount);
+                CacheManager.SetTotalErrorCount(TotalErrorCount);
+                CacheManager.SetTotalDefinitionCount(TotalDefinitionPatchCount);
+                CacheManager.SetTotalAssetCount(TotalNewAssetCount);
+            }
+            resolve();
+        }
+
+        private static IEnumerator WaitForCacheRebuildSingleAddressHandle(
+            AsyncOperationHandle<TextAsset> handle,
+            Action resolve,
+            bool isFinalHandle
+        )
+        {
+            if (handle.IsValid())
+            {
+                while (!handle.IsDone)
+                {
+                    UpdateLoadingBarData();
+                    yield return null;
+                }
             }
 
             if (isFinalHandle)

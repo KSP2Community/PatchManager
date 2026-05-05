@@ -26,3 +26,14 @@ function GenericLuaModule:Patch(label, name, callback) end
 ---@param name string  The asset's addressables address.
 ---@param value any    The asset's Lua-facing value (typically a JsonUserData wrapping a `JObject` or `JArray`).
 function GenericLuaModule:New(label, name, value) end
+
+---Registers a JSON patch that runs against a single asset identified by its Addressables address.
+---@param address string                              The Addressables address of the asset to patch.
+---@param callback fun(data: JsonUserData): string?   The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
+---@return LuaPatch                                   The registered patch.
+function GenericLuaModule:PatchAddress(address, callback) end
+
+---Queues a brand-new JSON asset for creation at the given Addressables address, with no label.
+---@param address string The Addressables address for the new asset.
+---@param value any      The asset's Lua-facing value (typically a JsonUserData wrapping a `JObject` or `JArray`).
+function GenericLuaModule:NewAddress(address, value) end

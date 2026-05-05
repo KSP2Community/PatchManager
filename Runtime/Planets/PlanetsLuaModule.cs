@@ -56,6 +56,18 @@ public class PlanetsLuaModule
     }
 
     /// <summary>
+    /// Registers a celestial-body patch that runs against a single body identified by its Addressables address.
+    /// </summary>
+    /// <param name="script">The host Lua script.</param>
+    /// <param name="address">The Addressables address of the body to patch.</param>
+    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the body, <c>null</c> to keep it.</param>
+    /// <returns>The registered patch.</returns>
+    public LuaPatch PatchAddress(Script script, string address, Func<CelestialBodyUserData, string> callback)
+    {
+        return _core.PatchAddress(script, "Planet", address, callback.ToPatchMethod());
+    }
+
+    /// <summary>
     /// Registers a patch that runs against the default galaxy definition.
     /// </summary>
     /// <param name="script">The host Lua script.</param>

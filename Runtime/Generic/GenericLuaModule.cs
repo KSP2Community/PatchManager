@@ -69,4 +69,26 @@ public class GenericLuaModule
     {
         _core.New("JSON", label, name, value);
     }
+
+    /// <summary>
+    /// Registers a JSON patch that runs against a single asset identified by its Addressables address.
+    /// </summary>
+    /// <param name="script">The host Lua script.</param>
+    /// <param name="address">The Addressables address of the asset to patch.</param>
+    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
+    /// <returns>The registered patch.</returns>
+    public LuaPatch PatchAddress(Script script, string address, Func<JsonUserData, string> callback)
+    {
+        return _core.PatchAddress(script, "JSON", address, callback.ToPatchMethod());
+    }
+
+    /// <summary>
+    /// Queues a brand-new JSON asset for creation at the given Addressables address, with no label.
+    /// </summary>
+    /// <param name="address">The Addressables address for the new asset.</param>
+    /// <param name="value">The asset's Lua-facing value (typically a <see cref="JsonUserData" /> wrapping a <c>JObject</c> or <c>JArray</c>).</param>
+    public void NewAddress(string address, DynValue value)
+    {
+        _core.NewAddress("JSON", address, value);
+    }
 }
