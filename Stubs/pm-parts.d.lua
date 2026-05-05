@@ -76,9 +76,9 @@ local ModuleUserData = {}
 ---Refreshes the data-name and conversion caches from the current state of the module's `ModuleData` array.
 function ModuleUserData:RefreshData() end
 
----Adds a new module-data entry of the given type and runs callback against it.
----@param type string                                      The data module's short name as registered in `PartsUtilities.DataModules`.
----@param callback fun(entry: EngineUserData|JsonUserData) Callback that receives the new entry for further configuration.
+---Adds a new module-data entry of the given type and runs callback against it when supplied.
+---@param type string                                       The data module's short name as registered in `PartsUtilities.DataModules`.
+---@param callback? fun(entry: EngineUserData|JsonUserData) Optional callback that receives the new entry for further configuration.
 ---@error Thrown when type is not a registered data module.
 function ModuleUserData:AddData(type, callback) end
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using KSP.IO;
 using KSP.Sim.Definitions;
 using MoonSharp.Interpreter;
@@ -151,12 +152,12 @@ public class ModuleUserData
     public int Count => _dataValues.Count;
 
     /// <summary>
-    /// Adds a new module-data entry of the given type and runs <paramref name="callback" /> against it.
+    /// Adds a new module-data entry of the given type and runs <paramref name="callback" /> against it when supplied.
     /// </summary>
     /// <param name="type">The data module's short name as registered in <c>PartsUtilities.DataModules</c>.</param>
-    /// <param name="callback">Callback that receives the new entry for further configuration.</param>
+    /// <param name="callback">Optional callback that receives the new entry for further configuration.</param>
     /// <exception cref="Exception">Thrown when <paramref name="type" /> is not a registered data module.</exception>
-    public void AddData(string type, Action<DynValue> callback)
+    public void AddData(string type, [CanBeNull] Action<DynValue> callback = null)
     {
         if (!PartsUtilities.DataModules.TryGetValue(type, out var dataModuleType))
         {
@@ -202,7 +203,7 @@ public class ModuleUserData
         var userData = GetUserData(trueType);
         _dataIndices[type] = _dataValues.Count;
         _dataValues.Add(userData);
-        callback(userData);
+        callback?.Invoke(userData);
     }
 
     /// <summary>
