@@ -2,36 +2,27 @@
 -- AUTO-GENERATED from analysis of codebase and assets - do not edit by hand.
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Builtin/PatchManagerCore.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Builtin/JsonModule.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Stage.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/LuaPatch.cs
+-- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/LuaAsset.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Universe.cs
 
 ---The PatchManager Lua library, exposed to scripts as the global `PM`.
 ---@class PatchManagerCore
 ---@field JSON GenericLuaModule
----@field Parts PartsLuaModule
----@field Resources ResourcesLuaModule
 ---@field Missions MissionsLuaModule
+---@field Parts PartsLuaModule
 ---@field Planets PlanetsLuaModule
+---@field Resources ResourcesLuaModule
 ---@field Science ScienceLuaModule
 PatchManagerCore = {}
 
----Registers a patch that runs against every asset under the given addressables label.
+---Registers a patch keyed by the given addressables label and namespaced patch name.
 ---@param converter string The name of the converter to use, as registered via ConverterAttribute.
 ---@param label string The addressables label whose assets to patch.
----@param method fun(value: any): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch patch The registered patch, suitable for chaining (for example LuaPatch.OnStage).
----@error Thrown when converter is not registered, or when method is nil.
-function PatchManagerCore:PatchAll(converter, label, method) end
-
----Registers a patch that runs against assets under the given label whose name matches name.
----@param converter string The name of the converter to use, as registered via ConverterAttribute.
----@param label string The addressables label to patch.
----@param name string The addressables address pattern to match.
----@param method fun(value: any): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch patch The registered patch, suitable for chaining (for example LuaPatch.OnStage).
----@error Thrown when converter is not registered, or when method is nil.
-function PatchManagerCore:Patch(converter, label, name, method) end
+---@param name string The patch's local name; the host mod's ID is prepended to form the full namespaced name.
+---@return LuaPatch<JsonUserData, any> patch The registered patch, suitable for chaining (for example LuaPatch.Do).
+---@error Thrown when converter is not registered.
+function PatchManagerCore:Patch(converter, label, name) end
 
 ---Queues a brand-new asset for creation under the given label and address.
 ---@param converter string The name of the converter that will serialize newObject to JSON.
@@ -40,36 +31,6 @@ function PatchManagerCore:Patch(converter, label, name, method) end
 ---@param newObject any The Lua-facing value for the new asset.
 ---@error Thrown when converter is not registered.
 function PatchManagerCore:New(converter, label, name, newObject) end
-
----Registers a patch that runs against a single asset identified by its Addressables address.
----@param converter string The name of the converter to use, as registered via ConverterAttribute.
----@param address string The Addressables address of the asset to patch.
----@param method fun(value: any): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch patch The registered patch, suitable for chaining (for example LuaPatch.OnStage).
----@error Thrown when converter is not registered, or when method is nil.
-function PatchManagerCore:PatchAddress(converter, address, method) end
-
----Queues a brand-new asset for creation at the given Addressables address, with no label.
----@param converter string The name of the converter that will serialize newObject to JSON.
----@param address string The Addressables address for the new asset (globally unique).
----@param newObject any The Lua-facing value for the new asset.
----@error Thrown when converter is not registered.
-function PatchManagerCore:NewAddress(converter, address, newObject) end
-
----Creates a named stage that runs after the most recent implicit stage from the same host mod.
----@param name string The stage name (registered as `"modId:name"`).
----@return Stage stage The created stage, suitable for chaining (for example Stage.Before / Stage.After).
-function PatchManagerCore:ImplicitStage(name) end
-
----Creates a named stage that runs after the last implicit stage of the entire mod load order.
----@param name string The stage name (registered as `"modId:name"`).
----@return Stage stage The created stage, suitable for chaining (for example Stage.Before / Stage.After).
-function PatchManagerCore:GlobalStage(name) end
-
----Creates a named stage with no implicit ordering; callers must declare any required relations explicitly.
----@param name string The stage name (registered as `"modId:name"`).
----@return Stage stage The created stage, suitable for chaining (for example Stage.Before / Stage.After).
-function PatchManagerCore:Stage(name) end
 
 ---Returns whether the mod with the given ID is loaded.
 ---@param modId string The mod ID to test.
@@ -90,35 +51,116 @@ function JsonModule.Empty() end
 ---@return JsonUserData value A JsonUserData wrapping a `JValue` of integer type.
 function JsonModule.Int(value) end
 
----A patching stage with optional ordering constraints relative to other stages.
----@class Stage
----@field RunsBefore string[] Stage names this stage must run before.
----@field RunsAfter string[] Stage names this stage must run after.
-Stage = {}
-
----Adds each given stage name to RunsBefore and returns this stage for chaining.
----@param ... string The stage names this stage should run before.
----@return Stage self This stage.
-function Stage:Before(...) end
-
----Adds each given stage name to RunsAfter and returns this stage for chaining.
----@param ... string The stage names this stage should run after.
----@return Stage self This stage.
-function Stage:After(...) end
-
 ---A registered patch operation: which converter, which addressables target, what callback to run, and at which stage.
----@class LuaPatch
----@field ConverterInstance any The converter that produces the Lua value the patch operates on and serializes the result back to JSON.
----@field PatchMethod fun(value: any): string? The user-supplied callback that runs against each matched asset.
+---@class LuaPatch<T, V>
 ---@field Label string The addressables label whose assets this patch targets.
----@field Name string? The addressables address pattern this patch targets, or `nil` to match every asset in Label.
----@field Stage string The stage name that orders this patch relative to others. Defaults to the host mod's ID.
+---@field Name string The patch's namespaced name, typically `modId:<supplied-name>`.
+---@field PatchModId string The host mod's ID, used as the namespace for dependency-resolution lookups.
+---@field Names table<string, true> The asset names this patch targets, or empty to match every asset under Label.
+---@field NeedsMods table<string, true> The mod GUIDs this patch requires to run.
+---@field ConflictsMods table<string, true> The mod GUIDs this patch refuses to run alongside.
+---@field NeedsPatches table<string, true> The patch IDs that must also run for this patch to run.
+---@field ConflictsPatches table<string, true> The patch IDs this patch refuses to run alongside.
+---@field AfterPatches table<string, true> The patch IDs this patch runs after when they are present.
+---@field AfterMods table<string, true> The mod IDs whose patches this patch runs after when present.
+---@field BeforePatches table<string, true> The patch IDs this patch runs before when they are present.
+---@field BeforeMods table<string, true> The mod IDs whose patches this patch runs before when present.
 LuaPatch = {}
 
----Sets Stage to the given stage name and returns this patch for chaining.
----@param stage string The stage to schedule the patch in.
----@return LuaPatch self This patch.
-function LuaPatch:OnStage(stage) end
+---Sets the patch's apply callback.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param patchMethod fun(value: T): string? The supplied callback.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+---@error Thrown when a patch method has already been set.
+function LuaPatch:Do(patchMethod) end
+
+---Makes the patch target the assets with these names.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The asset names to target.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Named(...) end
+
+---Makes the patch require these mod IDs to run.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The required mod IDs.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Needs(...) end
+
+---Makes the patch refuse to run alongside these mod IDs.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The conflicting mod IDs.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Conflicts(...) end
+
+---Makes the patch require these other patches to run.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The required patch IDs; namespaced to the host mod when they do not already carry a namespace.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:NeedsPatch(...) end
+
+---Makes the patch refuse to run alongside these patches.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The conflicting patch IDs; namespaced to the host mod when they do not already carry a namespace.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:ConflictsPatch(...) end
+
+---Makes this patch run after the given patches when they exist.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The patch IDs to run after; namespaced to the host mod when they do not already carry a namespace.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:AfterPatch(...) end
+
+---Makes this patch run after every patch from the given mods.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The mod IDs whose patches this patch should run after.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:After(...) end
+
+---Makes this patch run before the given patches when they exist.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The patch IDs to run before; namespaced to the host mod when they do not already carry a namespace.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:BeforePatch(...) end
+
+---Makes this patch run before every patch from the given mods.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The mod IDs whose patches this patch should run before.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Before(...) end
+
+---Adds a predicate that gates the patch and reports skips through the summary.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param predicate fun(value: T): boolean The predicate evaluated against each candidate asset.
+---@param message? string Optional message logged when the predicate rejects an asset.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Requires(predicate, message) end
+
+---Adds a requirement that the asset expose key, optionally with a predicate against the resolved value.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param key string The key the asset must expose.
+---@param predicate? fun(value: V): boolean Optional predicate evaluated against the value resolved at key, not the asset itself.
+---@param message? string Optional assertion message logged when the key is present but the predicate fails.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Has(key, predicate, message) end
+
+---A new asset queued for creation by a Lua patch script.
+---@class LuaAsset
+---@field CurrentValue any The asset's current Lua-facing value. Initialized at creation time and replaced by each patch that runs against this asset.
+---@field Label string The addressables label the asset is tagged with for group-based loading.
+---@field Name string The addressables address of the asset (globally unique).
+LuaAsset = {}
 
 ---The PatchManager Lua library, exposed to scripts as the global `PM`.
 ---@type PatchManagerCore
@@ -129,10 +171,10 @@ PM = nil
 ---@type JsonModule
 J = nil
 
----The mod ID; exposed to scripts as the `ModId` global and used as their default stage.
+---The mod ID; exposed to scripts as the `ModId` global.
 ---@type string
 ModId = nil
 
----The directory the patch was discovered in; exposed to the script as the `Location` global.
+---The directory the patch was discovered in; exposed to the script as the `Location` global. Nil for patches loaded from a TextAsset.
 ---@type string?
 Location = nil

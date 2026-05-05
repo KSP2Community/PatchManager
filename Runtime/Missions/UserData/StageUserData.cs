@@ -31,7 +31,7 @@ public class StageUserData : ExtensibleJsonUserData
     {
         if (property == "MissionReward")
         {
-            if (((JObject)Token).TryGetValue(property, out var value))
+            if (RequireObject(Token, "missionStage").TryGetValue(property, out var value))
             {
                 return MoonSharp.Interpreter.UserData.Create(new MissionRewardUserData(value));
             }

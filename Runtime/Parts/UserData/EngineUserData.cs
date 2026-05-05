@@ -26,7 +26,7 @@ public class EngineUserData : ExtensibleJsonUserData
     /// <param name="moduleData">The engine module's <c>DataObject</c> JSON.</param>
     public EngineUserData(JObject moduleData) : base(moduleData)
     {
-        _modes = MoonSharp.Interpreter.UserData.Create(new ModesUserData((JArray)Token["engineModes"]));
+        _modes = MoonSharp.Interpreter.UserData.Create(new ModesUserData(RequireArray(Token["engineModes"], "engineModes")));
     }
 
     /// <inheritdoc />
@@ -49,7 +49,7 @@ public class EngineUserData : ExtensibleJsonUserData
 
         if (property == "engineModes")
         {
-            throw new Exception("Use the relevant Mode methods to update engine modes!");
+            throw new ScriptRuntimeException("Use the relevant Mode methods to update engine modes!");
         }
         return false;
     }
@@ -57,7 +57,7 @@ public class EngineUserData : ExtensibleJsonUserData
     /// <inheritdoc />
     public override bool TryToRemove(string property)
     {
-        throw new Exception("You cannot remove this property.");
+        throw new ScriptRuntimeException("You cannot remove this property.");
     }
 
 

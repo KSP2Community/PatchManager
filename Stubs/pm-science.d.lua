@@ -20,12 +20,15 @@
 -- Source: ksp2redux/Assets/Code/KSP/game/Science/CelestialBodyDiscoverablePosition.cs
 -- Source: ksp2redux/Assets/Code/KSP/game/Science/TechNodeData.cs
 -- Source: ksp2redux/Assets/Code/KSP/game/Science/TechRequiredResearchData.cs
+-- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceReportType.cs
 
 -- ============================================================
 -- UserData wrappers
 -- ============================================================
 
----Synthetic per-element wrapper for entries of a `DiscoverablesUserData`.
+---Synthetic per-element wrapper for entries of a `DiscoverablesUserData`. The underlying converter does not
+---override `Convert`, so each element is exposed as a generic `JsonUserData` carrying the
+---`CelestialBodyDiscoverablePosition` schema shape.
 ---@class DiscoverablePositionUserData : _CelestialBodyDiscoverablePosition, JsonUserData
 
 ---Indexed-list wrapper for a science region's discoverables, keyed by each entry's `ScienceRegionId`, while
@@ -42,7 +45,9 @@ function DiscoverablesUserData:Name(source) end
 ---Science experiment wrapper exposing the inner `Data` subtree while preserving the full envelope for round-tripping.
 ---@class ExperimentUserData : _ExperimentDefinition, JsonUserData
 
----Synthetic per-element wrapper for entries of a `ScienceRegionsUserData`.
+---Synthetic per-element wrapper for entries of a `ScienceRegionsUserData`. The underlying converter does not
+---override `Convert`, so each element is exposed as a generic `JsonUserData` carrying the
+---`ScienceRegionDefinition` schema shape.
 ---@class ScienceRegionUserData : _ScienceRegionDefinition, JsonUserData
 
 ---Indexed-list wrapper for a body's science regions, keyed by each region's `id`, while preserving the full
@@ -60,7 +65,7 @@ function ScienceRegionsUserData:Name(source) end
 ---Synthetic wrapper around a tech-tree node's JSON. Tech nodes are patched through the generic JSON converter,
 ---so there is no purpose-built C# wrapper class -- this stub gives Lua scripts the typed `TechNodeData`
 ---field surface plus the inherited `JsonUserData` methods.
----@class TechNodeUserData : _TechNodeData, JsonUserData
+---@class TechNodeUserData : JsonUserData, _TechNodeData
 
 -- ============================================================
 -- Submodule
@@ -71,55 +76,34 @@ function ScienceRegionsUserData:Name(source) end
 ---@class ScienceLuaModule
 local ScienceLuaModule = {}
 
----Registers a patch that runs against every science region's discoverables list.
----@param callback fun(data: DiscoverablesUserData): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch                                          The registered patch.
-function ScienceLuaModule:PatchAllDiscoverables(callback) end
+---Registers a discoverables-list patch with the given namespaced patch name.
+---The patch matches every discoverables asset by default; restrict it via `LuaPatch.Named`, which supports `*` and `?` wildcards.
+---@param name string                                                          The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<DiscoverablesUserData, DiscoverablePositionUserData> patch The registered patch.
+function ScienceLuaModule:PatchDiscoverables(name) end
 
----Registers a patch that runs against the discoverables list matching name.
----@param name string                                        The discoverables-asset name pattern (supports `*` and `?` wildcards).
----@param callback fun(data: DiscoverablesUserData): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch                                          The registered patch.
-function ScienceLuaModule:PatchDiscoverables(name, callback) end
+---Registers a science-experiment patch with the given namespaced patch name.
+---The patch matches every experiment by default; restrict it via `LuaPatch.Named`, which supports `*` and `?` wildcards.
+---@param name string                                  The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<ExperimentUserData, any> patch     The registered patch.
+function ScienceLuaModule:PatchExperiments(name) end
 
----Registers a patch that runs against every science experiment.
----@param callback fun(data: ExperimentUserData): string? The patch callback. Returns `"remove"` to delete the experiment, `nil` to keep it.
----@return LuaPatch                                       The registered patch.
-function ScienceLuaModule:PatchAllExperiments(callback) end
-
----Registers a patch that runs against the science experiment matching name.
----@param name string                                     The experiment name pattern (supports `*` and `?` wildcards).
----@param callback fun(data: ExperimentUserData): string? The patch callback. Returns `"remove"` to delete the experiment, `nil` to keep it.
----@return LuaPatch                                       The registered patch.
-function ScienceLuaModule:PatchExperiment(name, callback) end
-
----Creates a new science experiment with the given name and runs callback against it for
----further configuration.
+---Creates a new science experiment with the given name and runs callback against it for further configuration.
 ---@param name string                              The experiment name.
 ---@param callback fun(data: ExperimentUserData)   Callback that receives the new experiment for further configuration.
 function ScienceLuaModule:NewExperiment(name, callback) end
 
----Registers a patch that runs against every science-region asset.
----@param callback fun(data: ScienceRegionsUserData): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch                                           The registered patch.
-function ScienceLuaModule:PatchAllRegions(callback) end
+---Registers a science-region patch with the given namespaced patch name.
+---The patch matches every region asset by default; restrict it via `LuaPatch.Named`, which supports `*` and `?` wildcards.
+---@param name string                                                      The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<ScienceRegionsUserData, ScienceRegionUserData> patch   The registered patch.
+function ScienceLuaModule:PatchRegions(name) end
 
----Registers a patch that runs against the science-region asset matching name.
----@param name string                                         The region-asset name pattern (supports `*` and `?` wildcards).
----@param callback fun(data: ScienceRegionsUserData): string? The patch callback. Returns `"remove"` to delete the asset, `nil` to keep it.
----@return LuaPatch                                           The registered patch.
-function ScienceLuaModule:PatchRegions(name, callback) end
-
----Registers a JSON patch that runs against every tech-tree node.
----@param callback fun(data: TechNodeUserData): string? The patch callback. Returns `"remove"` to delete the node, `nil` to keep it.
----@return LuaPatch                                    The registered patch.
-function ScienceLuaModule:PatchAllTechNodes(callback) end
-
----Registers a JSON patch that runs against the tech-tree node matching name.
----@param name string                                  The tech node name pattern (supports `*` and `?` wildcards).
----@param callback fun(data: TechNodeUserData): string? The patch callback. Returns `"remove"` to delete the node, `nil` to keep it.
----@return LuaPatch                                    The registered patch.
-function ScienceLuaModule:PatchTechNode(name, callback) end
+---Registers a tech-tree-node patch with the given namespaced patch name.
+---The patch matches every tech-tree node by default; restrict it via `LuaPatch.Named`, which supports `*` and `?` wildcards.
+---@param name string                              The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<TechNodeUserData, any> patch   The registered patch.
+function ScienceLuaModule:PatchTechNodes(name) end
 
 ---Adds the given part IDs to the tech node named nodeName's `UnlockedPartIds` list.
 ---@param nodeName string The tech node name.

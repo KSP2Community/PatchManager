@@ -21,6 +21,6 @@ public class ContentBranchesUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["ID"].Value<string>();
+        return RequireString(source["ID"], "ContentBranches[].ID");
     }
 }

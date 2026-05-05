@@ -21,7 +21,7 @@ public class ScienceRegionsUserData : IndexedListUserData
     /// Creates a wrapper for the science regions envelope, exposing its <c>Regions</c> array.
     /// </summary>
     /// <param name="token">The science regions JSON envelope (containing a <c>Regions</c> array).</param>
-    public ScienceRegionsUserData(JToken token) : base((JArray)token["Regions"])
+    public ScienceRegionsUserData(JToken token) : base(RequireArray(token["Regions"], "Regions"))
     {
         FullToken = token;
     }
@@ -30,7 +30,7 @@ public class ScienceRegionsUserData : IndexedListUserData
     /// <summary>
     /// Gets the celestial body's name from the envelope's <c>BodyName</c> field.
     /// </summary>
-    public string BodyName { get => FullToken["BodyName"].Value<string>(); }
+    public string BodyName { get => RequireString(FullToken["BodyName"], "BodyName"); }
 
     /// <summary>
     /// Gets or sets the situation data wrapping the envelope's <c>SituationData</c> field.
@@ -43,6 +43,6 @@ public class ScienceRegionsUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["id"].Value<string>();
+        return RequireString(source["id"], "Regions[].id");
     }
 }

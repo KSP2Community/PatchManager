@@ -1,5 +1,6 @@
 using System;
 using MoonSharp.Interpreter;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PatchManager.LuaPatching;
 using PatchManager.LuaPatching.Attributes;
@@ -29,28 +30,18 @@ public class ResourcesLuaModule
         _core = pmc;
         _universe = universe;
     }
-
     /// <summary>
-    /// Registers a patch that runs against every resource definition.
+    /// Registers a resource patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the resource, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every resource by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAll(Script script, Func<JsonUserData, string> callback)
+    public LuaPatch Patch(Script script, string name)
     {
-        return _core.PatchAll(script, "Resource", "resources", callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a patch that runs against the resource matching <paramref name="name" />.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The resource name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the resource, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name, Func<JsonUserData, string> callback)
-    {
-        return _core.Patch(script, "Resource", "resources", name, callback.ToPatchMethod());
+        return _core.Patch(script, "Resource", "resources", name);
     }
 
     /// <summary>
@@ -63,7 +54,16 @@ public class ResourcesLuaModule
     {
         var value =
             $"{{\n    \"version\": 0.1,\n    \"useExternal\": false,\n    \"isRecipe\": true,\n    \"recipeData\": {{\n        \"name\": \"{name}\",\n        \"displayNameKey\": \"Resource/DisplayName/Unknown\",\n        \"abbreviationKey\": \"Resource/Abbreviation/UK\",\n        \"resourceIconAssetAddress\": \"\",\n        \"vfxFuelType\": \"NoFuel\",\n        \"ingredients\": []\n    }}    \n}}";
-        var typed = new RecipeUserData(JObject.Parse(value));
+        JObject parsed;
+        try
+        {
+            parsed = JObject.Parse(value);
+        }
+        catch (JsonReaderException e)
+        {
+            throw new ScriptRuntimeException($"PM.Resources:NewRecipe: '{name}' produced invalid JSON ({e.Message}); avoid quote and backslash characters in the name.");
+        }
+        var typed = new RecipeUserData(parsed);
         var ud = MoonSharp.Interpreter.UserData.Create(typed);
         callback(typed);
         _core.New("Resource", "resources", name, ud);
@@ -79,7 +79,16 @@ public class ResourcesLuaModule
     {
         var value =
             $"{{\n    \"version\": 0.1,\n    \"useExternal\": false,\n    \"data\": {{\n        \"name\": \"{name}\",\n        \"displayNameKey\": \"Resource/DisplayName/Unknown\",\n        \"abbreviationKey\": \"Resource/Abbreviation/UK\",\n        \"isTweakable\": true,\n        \"isVisible\": true,\n        \"massPerUnit\": 0,\n        \"volumePerUnit\": 0,\n        \"specificHeatCapacityPerUnit\": 0,\n        \"flowMode\": 0,\n        \"transferMode\": 0,\n        \"costPerUnit\": 0,\n\t\"NonStageable\": false,\n        \"resourceIconAssetAddress\": \"\",\n        \"vfxFuelType\": \"NoFuel\"     \n    }}    \n}}";
-        var typed = new ResourceUserData(JObject.Parse(value));
+        JObject parsed;
+        try
+        {
+            parsed = JObject.Parse(value);
+        }
+        catch (JsonReaderException e)
+        {
+            throw new ScriptRuntimeException($"PM.Resources:NewResource: '{name}' produced invalid JSON ({e.Message}); avoid quote and backslash characters in the name.");
+        }
+        var typed = new ResourceUserData(parsed);
         var ud = MoonSharp.Interpreter.UserData.Create(typed);
         callback(typed);
         _core.New("Resource", "resources", name, ud);

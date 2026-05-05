@@ -85,11 +85,11 @@ namespace PatchManager.Core
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
                     () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(2,
-                    () => new FlowAction("Patch Manager: Discovering address-to-label bindings", DiscoverAddressToLabelBindings));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
                     () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
                     () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
+                    () => new FlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(5,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
@@ -100,22 +100,16 @@ namespace PatchManager.Core
             }
         }
 
-        private static void RegisterAllPatches(Action resolve, Action<string> reject)
+        private void SavePatchSummary(Action resolve, Action<string> reject)
         {
-            PatchingManager.RegisterPatches();
+            PatchingManager.Universe.Summary.RecognizedModIds = PatchingManager.Universe.AllMods;
+            CacheManager.SaveSummary(PatchingManager.Universe.Summary);
             resolve();
         }
 
-        /// <summary>
-        /// For every <see cref="LuaPatching.Universe.PatchedAddresses" /> entry, queries Addressables for the
-        /// labels the asset belongs to and adds them to <see cref="LuaPatching.Universe.PatchedLabels" /> so
-        /// label-flow rebuilds get scheduled.
-        /// </summary>
-        /// <param name="resolve">Callback invoked once discovery finishes.</param>
-        /// <param name="reject">Reject callback (currently unused).</param>
-        private static void DiscoverAddressToLabelBindings(Action resolve, Action<string> reject)
+        private static void RegisterAllPatches(Action resolve, Action<string> reject)
         {
-            PatchingManager.Universe.PromoteAddressLabelsToPatchedLabels();
+            PatchingManager.RegisterPatches();
             resolve();
         }
 

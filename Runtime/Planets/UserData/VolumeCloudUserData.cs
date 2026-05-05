@@ -32,7 +32,7 @@ public class VolumeCloudUserData : ExtensibleJsonUserData
     {
         if (property == "cumulusList")
         {
-            return MoonSharp.Interpreter.UserData.Create(new CloudUserData((JArray)Token["cumulusList"]));
+            return MoonSharp.Interpreter.UserData.Create(new CloudUserData(RequireArray(Token["cumulusList"], "cumulusList")));
         }
 
         return null;
@@ -43,7 +43,7 @@ public class VolumeCloudUserData : ExtensibleJsonUserData
     {
         if (property == "cumulusList")
         {
-            throw new Exception("You cannot set this property.");
+            throw new ScriptRuntimeException("You cannot set this property.");
         }
         return false;
     }
@@ -53,7 +53,7 @@ public class VolumeCloudUserData : ExtensibleJsonUserData
     {
         if (property == "cumulusList")
         {
-            throw new Exception("You cannot remove this property.");
+            throw new ScriptRuntimeException("You cannot remove this property.");
         }
 
         return false;

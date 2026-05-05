@@ -18,8 +18,8 @@ public class ResourceConverter : IConverter
     public DynValue FromJson(JToken json)
     {
         if (json == null) return DynValue.Nil;
-        var obj = (JObject)json;
-        if (obj.ContainsKey("isRecipe") && obj["isRecipe"]!.Value<bool>())
+        var obj = JsonUserData.RequireObject(json, "resource definition");
+        if (obj["isRecipe"] is JValue { Type: JTokenType.Boolean } isRecipe && isRecipe.Value<bool>())
         {
             return MoonSharp.Interpreter.UserData.Create(new RecipeUserData(obj));
         }
@@ -38,6 +38,6 @@ public class ResourceConverter : IConverter
         {
             return resourceUserData.FullToken;
         }
-        throw new System.Exception($"ResourceConverter.ToJson: unsupported value type {value.UserData.Object?.GetType()}");
+        throw new ScriptRuntimeException($"ResourceConverter.ToJson: unsupported value type {value.UserData.Object?.GetType()}");
     }
 }

@@ -13,16 +13,11 @@
 ---@class ResourcesLuaModule
 local ResourcesLuaModule = {}
 
----Registers a patch that runs against every resource definition.
----@param callback fun(data: RecipeUserData|ResourceUserData): string? The patch callback. Returns `"remove"` to delete the resource, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function ResourcesLuaModule:PatchAll(callback) end
-
----Registers a patch that runs against the resource matching name.
----@param name string                                                  The resource name pattern (supports `*` and `?` wildcards).
----@param callback fun(data: RecipeUserData|ResourceUserData): string? The patch callback. Returns `"remove"` to delete the resource, `nil` to keep it.
----@return LuaPatch patch                                              The registered patch.
-function ResourcesLuaModule:Patch(name, callback) end
+---Registers a resource patch with the given namespaced patch name.
+---The patch matches every resource by default; restrict it via `LuaPatch.Named`, which supports `*` and `?` wildcards.
+---@param name string                                              The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<ResourceUserData | RecipeUserData, any> patch  The registered patch.
+function ResourcesLuaModule:Patch(name) end
 
 ---Creates a new recipe-style resource definition with the given name and runs callback
 ---against it for further configuration.

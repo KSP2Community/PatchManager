@@ -33,61 +33,42 @@ public class PlanetsLuaModule
     }
 
     /// <summary>
-    /// Registers a patch that runs against every celestial body.
+    /// Registers a celestial-body patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the body, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every body by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAll(Script script, Func<CelestialBodyUserData, string> callback)
+    public LuaPatch Patch(Script script, string name)
     {
-        return _core.PatchAll(script, "Planet", "celestial_bodies", callback.ToPatchMethod());
+        return _core.Patch(script, "Planet", "celestial_bodies", name);
     }
 
     /// <summary>
-    /// Registers a patch that runs against the celestial body matching <paramref name="name" />.
+    /// Registers a patch against the default galaxy definition.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The body name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the body, <c>null</c> to keep it.</param>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name, Func<CelestialBodyUserData, string> callback)
+    public LuaPatch PatchDefaultGalaxy(Script script, string name)
     {
-        return _core.Patch(script, "Planet", "celestial_bodies", name, callback.ToPatchMethod());
+        return _core.Patch(script, "Galaxy", "GalaxyDefinition_Default", name);
     }
 
     /// <summary>
-    /// Registers a celestial-body patch that runs against a single body identified by its Addressables address.
+    /// Registers a patch against the <c>atmosphere_overrides</c> label with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="address">The Addressables address of the body to patch.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the body, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// Use <see cref="LuaPatch.Named" /> to restrict which override files the patch runs against.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAddress(Script script, string address, Func<CelestialBodyUserData, string> callback)
+    public LuaPatch PatchAtmosphereOverride(Script script, string name)
     {
-        return _core.PatchAddress(script, "Planet", address, callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a patch that runs against the default galaxy definition.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the galaxy, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchDefaultGalaxy(Script script, Func<GalaxyUserData, string> callback)
-    {
-        return _core.Patch(script, "Galaxy", "GalaxyDefinition_Default", "GalaxyDefinition_Default", callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a patch that runs against the atmosphere override for <paramref name="name" />.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The body name whose atmosphere override to patch.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the override, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAtmosphereOverride(Script script, string name, Func<JsonUserData, string> callback)
-    {
-        return _core.Patch(script, "JSON", "atmosphere_overrides", $"atmosphere_override_{name}", callback.ToPatchMethod());
+        return _core.Patch(script, "JSON", "atmosphere_overrides", name);
     }
 
     /// <summary>
@@ -108,15 +89,17 @@ public class PlanetsLuaModule
     }
 
     /// <summary>
-    /// Registers a patch that runs against the volume-cloud override for <paramref name="name" />.
+    /// Registers a patch against the <c>volume_cloud_overrides</c> label with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The body name whose cloud override to patch.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the override, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// Use <see cref="LuaPatch.Named" /> to restrict which override files the patch runs against.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchCloudOverride(Script script, string name, Func<VolumeCloudUserData, string> callback)
+    public LuaPatch PatchCloudOverride(Script script, string name)
     {
-        return _core.Patch(script, "Cloud", "volume_cloud_overrides", $"volume_cloud_override_{name}", callback.ToPatchMethod());
+        return _core.Patch(script, "Cloud", "volume_cloud_overrides", name);
     }
 
     /// <summary>

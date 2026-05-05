@@ -120,10 +120,61 @@ public class JsonUserData
                     return jsonUserData.Token;
                 }
 
-                throw new Exception($"Unexpected user data type {value.UserData.Object.GetType()}");
+                throw new ScriptRuntimeException($"Unexpected user data type {value.UserData.Object.GetType()}");
             default:
-                throw new Exception($"Unexpected value type {value.Type}");
+                throw new ScriptRuntimeException($"Unexpected value type {value.Type}");
         }
+    }
+
+    /// <summary>
+    /// Casts <paramref name="token" /> to <see cref="JArray" />, throwing a Lua-decorated error when the cast fails.
+    /// </summary>
+    /// <param name="token">The token to cast.</param>
+    /// <param name="what">A label describing what the token represents, used in the error message.</param>
+    /// <returns>The token as a <see cref="JArray" />.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="token" /> is missing or not a JSON array.</exception>
+    public static JArray RequireArray(JToken token, string what)
+    {
+        if (token is not JArray arr)
+        {
+            throw new ScriptRuntimeException(
+                $"Expected {what} to be a JSON array, got {(token == null ? "missing" : token.Type.ToString())}.");
+        }
+        return arr;
+    }
+
+    /// <summary>
+    /// Casts <paramref name="token" /> to <see cref="JObject" />, throwing a Lua-decorated error when the cast fails.
+    /// </summary>
+    /// <param name="token">The token to cast.</param>
+    /// <param name="what">A label describing what the token represents, used in the error message.</param>
+    /// <returns>The token as a <see cref="JObject" />.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="token" /> is missing or not a JSON object.</exception>
+    public static JObject RequireObject(JToken token, string what)
+    {
+        if (token is not JObject obj)
+        {
+            throw new ScriptRuntimeException(
+                $"Expected {what} to be a JSON object, got {(token == null ? "missing" : token.Type.ToString())}.");
+        }
+        return obj;
+    }
+
+    /// <summary>
+    /// Reads <paramref name="token" /> as a JSON string, throwing a Lua-decorated error when it is missing or non-string.
+    /// </summary>
+    /// <param name="token">The token to read.</param>
+    /// <param name="what">A label describing what the token represents, used in the error message.</param>
+    /// <returns>The token's string value.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="token" /> is missing or not a JSON string.</exception>
+    public static string RequireString(JToken token, string what)
+    {
+        if (token is not JValue { Type: JTokenType.String } v || v.Value<string>() is not { } s)
+        {
+            throw new ScriptRuntimeException(
+                $"Expected {what} to be a JSON string, got {(token == null ? "missing" : token.Type.ToString())}.");
+        }
+        return s;
     }
 
     /// <summary>
@@ -157,11 +208,15 @@ public class JsonUserData
         {
             if (Token.Type != JTokenType.Array)
             {
-                throw new Exception("JSON Object is not an array");
+                throw new ScriptRuntimeException($"Cannot write [{index}] on non-array JSON ({Token.Type}).");
             }
             var array = (JArray)Token;
+            var oneBased = index;
             index -= 1;
-            if (index < 0 || index > array.Count) throw new Exception("Invalid array index!");
+            if (index < 0 || index > array.Count)
+            {
+                throw new ScriptRuntimeException($"Array index [{oneBased}] out of range; array has {array.Count} element(s).");
+            }
             if (index == array.Count)
             {
                 array.Add(GetJTokenForDynValue(null, value));
@@ -199,7 +254,7 @@ public class JsonUserData
         {
             if (Token.Type != JTokenType.Object)
             {
-                throw new Exception("JSON Object is not an object");
+                throw new ScriptRuntimeException($"Cannot write .{index} on non-object JSON ({Token.Type}).");
             }
             var obj = (JObject)Token;
             obj[index] = GetJTokenForDynValue(obj[index], value);
@@ -211,16 +266,20 @@ public class JsonUserData
     /// </summary>
     /// <param name="index">The 1-indexed array position to remove.</param>
     /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" /> or when the index is out of range.</exception>
-    public virtual void Remove(int index)
+    public virtual void RemoveAt(int index)
     {
         if (Token.Type != JTokenType.Array)
         {
-            throw new Exception("JSON Object is not an array");
+            throw new ScriptRuntimeException($"Cannot remove [{index}] from non-array JSON ({Token.Type}).");
         }
 
         var array = (JArray)Token;
+        var oneBased = index;
         index -= 1;
-        if (index < 0 || index >= array.Count) throw new Exception("Invalid array index!");
+        if (index < 0 || index >= array.Count)
+        {
+            throw new ScriptRuntimeException($"Array index [{oneBased}] out of range for remove; array has {array.Count} element(s).");
+        }
         array.RemoveAt(index);
     }
 
@@ -233,7 +292,7 @@ public class JsonUserData
     {
         if (Token.Type != JTokenType.Object)
         {
-            throw new Exception("JSON Object is not an object");
+            throw new ScriptRuntimeException($"Cannot remove .{key} from non-object JSON ({Token.Type}).");
         }
         var obj = (JObject)Token;
         obj.Remove(key);
@@ -321,7 +380,7 @@ public class JsonUserData
         }
         else
         {
-            throw new Exception("JSON Object is not an array");
+            throw new ScriptRuntimeException($"Cannot clear non-array JSON ({Token.Type}).");
         }
     }
 
@@ -333,13 +392,22 @@ public class JsonUserData
     /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Insert(int index, DynValue value)
     {
-        if (Token.Type == JTokenType.Array)
+        if (Token.Type != JTokenType.Array)
         {
-            ((JArray)Token).Insert(index - 1, GetJTokenForDynValue(value));
+            throw new ScriptRuntimeException($"Cannot insert at [{index}] on non-array JSON ({Token.Type}).");
         }
-        else
+        var array = (JArray)Token;
+        if (index < 1 || index > array.Count + 1)
         {
-            throw new Exception("JSON Object is not an array");
+            throw new ScriptRuntimeException($"Insert index [{index}] out of range; array has {array.Count} element(s) (valid range: 1..{array.Count + 1}).");
+        }
+        try
+        {
+            array.Insert(index - 1, GetJTokenForDynValue(value));
+        }
+        catch (Exception e) when (e is not ScriptRuntimeException)
+        {
+            throw new ScriptRuntimeException($"Failed to insert at [{index}]: {e.Message}");
         }
     }
 
@@ -350,13 +418,17 @@ public class JsonUserData
     /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Append(DynValue value)
     {
-        if (Token.Type == JTokenType.Array)
+        if (Token.Type != JTokenType.Array)
+        {
+            throw new ScriptRuntimeException($"Cannot append to non-array JSON ({Token.Type}).");
+        }
+        try
         {
             ((JArray)Token).Add(GetJTokenForDynValue(value));
         }
-        else
+        catch (Exception e) when (e is not ScriptRuntimeException)
         {
-            throw new Exception("JSON Object is not an array");
+            throw new ScriptRuntimeException($"Failed to append to array: {e.Message}");
         }
     }
 
@@ -402,6 +474,22 @@ public class JsonUserData
     }
 
     /// <summary>
+    /// Remove all items that match a passed predicate
+    /// </summary>
+    /// <param name="callback">The predicate to check against</param>
+    public virtual void RemoveWhere(Func<DynValue,bool> callback)
+    {
+        var array = RequireArray(Token, "self");
+        for (var i = array.Count - 1; i >= 0; i--)
+        {
+            if (callback(GetFromJToken(array[i])))
+            {
+                array.RemoveAt(i);
+            }
+        }
+    }
+
+    /// <summary>
     /// Lifts a JSON token into the corresponding Lua-facing <see cref="DynValue" />.
     /// </summary>
     /// <remarks>
@@ -427,7 +515,7 @@ public class JsonUserData
             JTokenType.Float => DynValue.NewNumber(token.Value<double>()),
             JTokenType.String => DynValue.NewString(token.Value<string>()),
             JTokenType.Boolean => DynValue.NewBoolean(token.Value<bool>()),
-            _ => throw new Exception($"Unexpected token type {token.Type}")
+            _ => throw new ScriptRuntimeException($"Unexpected token type {token.Type}")
         };
     }
 }

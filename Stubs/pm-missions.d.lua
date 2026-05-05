@@ -27,7 +27,6 @@
 -- Source: ksp2redux/Assets/Code/KSP/game/Missions/ScriptCondition.cs
 -- Source: ksp2redux/Assets/Code/KSP/game/Missions/LogicalOperator.cs
 -- Source: ksp2redux/Assets/Code/KSP/game/Missions/PropertyOperator.cs
--- Source: ksp2redux/Assets/Code/KSP/game/Missions/MissionActionBase.cs
 -- Source: ksp2redux/Assets/Code/Root/IMissionAction.cs
 
 --#region UserData wrappers
@@ -70,16 +69,10 @@
 ---@class MissionsLuaModule
 local MissionsLuaModule = {}
 
----Registers a patch that runs against every mission definition.
----@param callback fun(mission: MissionUserData): string?  The patch callback. Returns `"remove"` to delete the mission, `nil` to keep it.
----@return LuaPatch patch  The registered patch.
-function MissionsLuaModule:PatchAll(callback) end
-
----Registers a patch that runs against the mission matching name.
----@param name string  The mission name pattern (supports `*` and `?` wildcards).
----@param callback fun(mission: MissionUserData): string?  The patch callback. Returns `"remove"` to delete the mission, `nil` to keep it.
----@return LuaPatch patch  The registered patch.
-function MissionsLuaModule:Patch(name, callback) end
+---Registers a mission patch with the given namespaced patch name.
+---@param name string  The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<MissionUserData, any> patch  The registered patch.
+function MissionsLuaModule:Patch(name) end
 
 ---Returns the assembly-qualified type name of the property watcher registered under name.
 ---@param name string  The watcher's short name as registered in `MissionsTypes.PropertyWatchers`.
@@ -119,8 +112,9 @@ function MissionsLuaModule:Not(condition) end
 ---Creates a new mission action of the given short type name and runs callback against
 ---the underlying JSON for further configuration.
 ---@param type string  The action's short name as registered in `MissionsTypes.Actions`.
----@param callback fun(action: JsonUserData)  Callback that receives the action's JSON for further configuration. Action shape is polymorphic across registered types; access fields generically through the JsonUserData surface.
+---@param callback fun(action: JsonUserData)  Callback that receives the action's JSON for further configuration.
 ---@return JsonUserData  A wrapper around the configured action JSON.
+---@error Thrown when type resolves to a class without a parameterless constructor.
 function MissionsLuaModule:Action(type, callback) end
 
 --#endregion

@@ -26,7 +26,7 @@ public class ModuleUserData
     /// <param name="token">The module's serialized JSON.</param>
     public ModuleUserData(JToken token)
     {
-        _jObject = (JObject)token;
+        _jObject = JsonUserData.RequireObject(token, "module");
         RefreshData();
     }
 
@@ -40,21 +40,29 @@ public class ModuleUserData
     {
         _dataValues.Clear();
         _dataIndices.Clear();
-        var data = (JArray)_jObject["ModuleData"];
+        var data = JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData");
         var index = 0;
         foreach (var moduleData in data)
         {
-            _dataIndices[moduleData["Name"].Value<string>()] = index++;
-            _dataValues.Add(GetUserData((JObject)moduleData));
+            _dataIndices[JsonUserData.RequireString(moduleData["Name"], "ModuleData[].Name")] = index++;
+            _dataValues.Add(GetUserData(JsonUserData.RequireObject(moduleData, "ModuleData entry")));
         }
     }
 
     private DynValue GetUserData(JObject moduleData)
     {
-        var type = Type.GetType(moduleData["DataType"].Value<string>());
+        var dataTypeName = JsonUserData.RequireString(moduleData["DataType"], "ModuleData entry's DataType");
+        var type = Type.GetType(dataTypeName);
         if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
         {
-            return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, moduleData));
+            try
+            {
+                return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, moduleData));
+            }
+            catch (Exception e) when (e is not ScriptRuntimeException)
+            {
+                throw new ScriptRuntimeException($"Failed to construct module-data adapter '{adapterType.FullName}' for type '{dataTypeName}': {e.Message}");
+            }
         }
         return JsonUserData.GetFromJToken(moduleData["DataObject"]);
     }
@@ -80,7 +88,7 @@ public class ModuleUserData
         {
             if (!_dataIndices.TryGetValue(idx, out var index))
             {
-                throw new Exception($"Module Data not found in module {idx}!");
+                throw new ScriptRuntimeException($"Module Data not found in module {idx}!");
             }
 
             _jObject["ModuleData"][index] = JsonUserData.GetJTokenForDynValue(value);
@@ -114,7 +122,7 @@ public class ModuleUserData
             }
             else
             {
-                throw new Exception("Index out of range for module data!");
+                throw new ScriptRuntimeException("Index out of range for module data!");
             }
         }
     }
@@ -152,14 +160,32 @@ public class ModuleUserData
     {
         if (!PartsUtilities.DataModules.TryGetValue(type, out var dataModuleType))
         {
-            throw new Exception($"Unknown data module {type}");
+            throw new ScriptRuntimeException($"Unknown data module {type}");
         }
-        var instance = (ModuleData)Activator.CreateInstance(dataModuleType);
+
+        ModuleData instance;
+        try
+        {
+            instance = (ModuleData)Activator.CreateInstance(dataModuleType);
+        }
+        catch (Exception e) when (e is not ScriptRuntimeException)
+        {
+            throw new ScriptRuntimeException($"Failed to construct data module '{type}' ({dataModuleType.FullName}): {e.Message}");
+        }
+
         var dataObject = new JObject
         {
             ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"
         };
-        var otherObject = JObject.Parse(IOProvider.ToJson(instance));
+        JObject otherObject;
+        try
+        {
+            otherObject = JObject.Parse(IOProvider.ToJson(instance));
+        }
+        catch (Exception e) when (e is not ScriptRuntimeException)
+        {
+            throw new ScriptRuntimeException($"Failed to serialize default data for module '{type}' ({dataModuleType.FullName}): {e.Message}");
+        }
         foreach (var prop in otherObject)
         {
             dataObject[prop.Key] = prop.Value;
@@ -172,7 +198,7 @@ public class ModuleUserData
             ["Data"] = null,
             ["DataObject"] = dataObject
         };
-        (_jObject["ModuleData"] as JArray)?.Add(trueType);
+        JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData").Add(trueType);
         var userData = GetUserData(trueType);
         _dataIndices[type] = _dataValues.Count;
         _dataValues.Add(userData);
@@ -216,7 +242,7 @@ public class ModuleUserData
     public void RemoveData(string type)
     {
         if (!_dataIndices.TryGetValue(type, out var index)) return;
-        ((JArray)_jObject["ModuleData"]).RemoveAt(index);
+        JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData").RemoveAt(index);
         RefreshData();
     }
 

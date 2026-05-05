@@ -156,5 +156,10 @@ namespace PatchManager.Core.Cache
         {
             Inventory.Save(InventoryPath);
         }
+
+        public static void SaveSummary(Summary universeSummary)
+        {
+            File.WriteAllText("./pm_summary.log", universeSummary.Dump());
+        }
     }
 }

@@ -20,7 +20,7 @@ public class DiscoverablesUserData : IndexedListUserData
     /// Creates a wrapper for the discoverables envelope, exposing its <c>Discoverables</c> array.
     /// </summary>
     /// <param name="token">The discoverables JSON envelope (containing a <c>Discoverables</c> array).</param>
-    public DiscoverablesUserData(JToken token) : base((JArray)token["Discoverables"])
+    public DiscoverablesUserData(JToken token) : base(RequireArray(token["Discoverables"], "Discoverables"))
     {
         FullToken = token;
     }
@@ -29,11 +29,11 @@ public class DiscoverablesUserData : IndexedListUserData
     /// <summary>
     /// Gets the celestial body's name from the envelope's <c>BodyName</c> field.
     /// </summary>
-    public string BodyName { get => FullToken["BodyName"].Value<string>(); }
+    public string BodyName { get => RequireString(FullToken["BodyName"], "BodyName"); }
 
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["ScienceRegionId"].Value<string>();
+        return RequireString(source["ScienceRegionId"], "Discoverables[].ScienceRegionId");
     }
 }

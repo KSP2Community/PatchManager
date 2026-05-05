@@ -30,25 +30,16 @@ public class PartsLuaModule
     }
 
     /// <summary>
-    /// Registers a patch that runs against every part definition.
+    /// Registers a part patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the part, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every part by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAll(Script script, Func<PartUserData, string> callback)
+    public LuaPatch Patch(Script script, string name)
     {
-        return _core.PatchAll(script, "Part", "parts_data", callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a patch that runs against the part matching <paramref name="name" />.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The part name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the part, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name, Func<PartUserData, string> callback)
-    {
-        return _core.Patch(script, "Part", "parts_data", name, callback.ToPatchMethod());
+        return _core.Patch(script, "Part", "parts_data", name);
     }
 }

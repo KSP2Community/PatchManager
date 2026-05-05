@@ -21,6 +21,6 @@ public class CloudUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["layerName"].Value<string>();
+        return RequireString(source["layerName"], "cumulusList[].layerName");
     }
 }

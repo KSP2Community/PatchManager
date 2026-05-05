@@ -23,13 +23,13 @@ public class MissionUserData : ExtensibleJsonUserData
     /// <param name="token">The mission definition JSON.</param>
     public MissionUserData(JToken token) : base(token)
     {
-        _stages = MoonSharp.Interpreter.UserData.Create(new StagesUserData((JArray)token["missionStages"]));
+        _stages = MoonSharp.Interpreter.UserData.Create(new StagesUserData(RequireArray(token["missionStages"], "missionStages")));
         RefreshContentBranches();
     }
 
     private void RefreshContentBranches()
     {
-        if (((JObject)Token).TryGetValue("ContentBranches", out var branches))
+        if (RequireObject(Token, "mission").TryGetValue("ContentBranches", out var branches))
         {
             if (branches.Type != JTokenType.Array)
             {
@@ -66,7 +66,7 @@ public class MissionUserData : ExtensibleJsonUserData
     /// <inheritdoc />
     public override bool TryToSet(string property, DynValue value)
     {
-        if (property is "missionStages") throw new Exception("You cannot set this property.");
+        if (property is "missionStages") throw new ScriptRuntimeException("You cannot set this property.");
         if (property == "ContentBranches")
         {
             Token["ContentBranches"] = GetJTokenForDynValue(new JArray(), value);
@@ -82,11 +82,11 @@ public class MissionUserData : ExtensibleJsonUserData
     {
         if (property == "ContentBranches")
         {
-            ((JObject)Token).Remove("ContentBranches");
+            RequireObject(Token, "mission").Remove("ContentBranches");
             RefreshContentBranches();
             return true;
         }
 
-        throw new Exception("You cannot remove this property.");
+        throw new ScriptRuntimeException("You cannot remove this property.");
     }
 }

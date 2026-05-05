@@ -15,6 +15,7 @@
 -- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/CelestialBodyProperties.cs
 -- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/CelestialBodyRingData.cs
 -- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedCelestialBody.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedGalaxyDefinition.cs
 -- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedOrbitProperties.cs
 -- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedOribiterDefinition.cs
 
@@ -28,33 +29,20 @@
 ---@class PlanetsLuaModule
 local PlanetsLuaModule = {}
 
----Registers a patch that runs against every celestial body.
----@param callback fun(body: CelestialBodyUserData): string? The patch callback. Returns `"remove"` to delete the body, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PlanetsLuaModule:PatchAll(callback) end
+---Registers a celestial-body patch with the given namespaced patch name.
+---@param name string The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<CelestialBodyUserData, any> patch The registered patch.
+function PlanetsLuaModule:Patch(name) end
 
----Registers a patch that runs against the celestial body matching name.
----@param name string The body name pattern (supports `*` and `?` wildcards).
----@param callback fun(body: CelestialBodyUserData): string? The patch callback. Returns `"remove"` to delete the body, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PlanetsLuaModule:Patch(name, callback) end
+---Registers a patch against the default galaxy definition.
+---@param name string The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<GalaxyUserData, JsonUserData> patch The registered patch.
+function PlanetsLuaModule:PatchDefaultGalaxy(name) end
 
----Registers a celestial-body patch that runs against a single body identified by its Addressables address.
----@param address string The Addressables address of the body to patch.
----@param callback fun(body: CelestialBodyUserData): string? The patch callback. Returns `"remove"` to delete the body, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PlanetsLuaModule:PatchAddress(address, callback) end
-
----Registers a patch that runs against the default galaxy definition.
----@param callback fun(galaxy: GalaxyUserData): string? The patch callback. Returns `"remove"` to delete the galaxy, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PlanetsLuaModule:PatchDefaultGalaxy(callback) end
-
----Registers a patch that runs against the atmosphere override for name.
----@param name string The body name whose atmosphere override to patch.
----@param callback fun(override: AtmosphereOverrideUserData): string? The patch callback. Returns `"remove"` to delete the override, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PlanetsLuaModule:PatchAtmosphereOverride(name, callback) end
+---Registers a patch against the `atmosphere_overrides` label with the given namespaced patch name.
+---@param name string The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<AtmosphereOverrideUserData, any> patch The registered patch.
+function PlanetsLuaModule:PatchAtmosphereOverride(name) end
 
 ---Creates a new atmosphere override for the given body and runs callback against it
 ---for further configuration.
@@ -62,11 +50,10 @@ function PlanetsLuaModule:PatchAtmosphereOverride(name, callback) end
 ---@param callback fun(override: AtmosphereOverrideUserData) Callback that receives the new override for further configuration.
 function PlanetsLuaModule:CreateAtmosphereOverride(name, callback) end
 
----Registers a patch that runs against the volume-cloud override for name.
----@param name string The body name whose cloud override to patch.
----@param callback fun(override: VolumeCloudUserData): string? The patch callback. Returns `"remove"` to delete the override, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PlanetsLuaModule:PatchCloudOverride(name, callback) end
+---Registers a patch against the `volume_cloud_overrides` label with the given namespaced patch name.
+---@param name string The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<VolumeCloudUserData, any> patch The registered patch.
+function PlanetsLuaModule:PatchCloudOverride(name) end
 
 ---Creates a new volume-cloud override for the given body and runs callback against it
 ---for further configuration.
@@ -84,15 +71,15 @@ function PlanetsLuaModule:CreateCloudOverride(name, callback) end
 ---internally for serialization round-trip.
 ---@class CelestialBodyUserData : _CelestialBodyProperties, JsonUserData
 
----Galaxy definition wrapper that exposes each celestial body in the galaxy's `CelestialBodies` array as a
----virtual property keyed by GUID.
----Synthetic wrapper around a `SerializedCelestialBody` JSON entry within a `GalaxyDefinition`.
+---Synthetic wrapper around a `SerializedCelestialBody` JSON entry within a galaxy definition.
 ---@class SerializedCelestialBodyUserData : _SerializedCelestialBody, JsonUserData
 
 ---@class _GalaxyUserDataBodyIndexer
----@field [string] SerializedCelestialBodyUserData
+---@field [string] JsonUserData
 
----@class GalaxyUserData : _GalaxyDefinition, _GalaxyUserDataBodyIndexer, ExtensibleJsonUserData
+---Galaxy definition wrapper that exposes each celestial body in the galaxy's `CelestialBodies` array as a
+---virtual property keyed by GUID.
+---@class GalaxyUserData : _SerializedGalaxyDefinition, _GalaxyUserDataBodyIndexer, ExtensibleJsonUserData
 local GalaxyUserData = {}
 
 ---Adds a new celestial body with the given GUID to the galaxy and runs callback against
@@ -112,7 +99,8 @@ function GalaxyUserData:Add(planetName, callback) end
 ---Indexed-list wrapper for a volume cloud's `cumulusList`, keyed by each layer's `layerName`.
 ---@class CloudUserData : IndexedListUserData<CloudLayerUserData>
 
----Atmosphere override wrapped as a generic JsonUserData for patching.
+---Synthetic wrapper around an `AtmosphereOverride` JSON entry, used by `PM.Planets:PatchAtmosphereOverride`
+---and `PM.Planets:CreateAtmosphereOverride`.
 ---@class AtmosphereOverrideUserData : _AtmosphereOverride, JsonUserData
 
 
@@ -144,7 +132,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field RayleighExponentialDistribution? number
 ---@field MieScattering? Vector3
 ---@field MieScatteringScale? number
----@field MieAnistropy? number
+---@field MieAnisotropy? number
 ---@field MieExponentialDistribution? number
 ---@field AbsorptionScale? number
 ---@field Absorption? Vector3
@@ -154,7 +142,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field IrradianceTexture? string Addressables key of the replacement irradiance Texture2D.
 ---@field ScatteringTexture? string Addressables key of the replacement scattering Texture3D.
 
----@alias AtmosphereOverride _AtmosphereOverride | { PlanetName: string, IsGasGiant?: boolean, Exposure?: Vector2, SunAngleRadius?: number, SunZenithAngle?: number, SolarIrradiance?: Vector3, SunDirectionExposureModifier?: number, TransmittanceTint?: number, NoonColorStrength?: number, SunsetColorStrength?: number, ColorTransitionScale?: number, BottomRadius?: number, AtmosphereHeight?: number, GroundAlbedo?: Color, RayleighScattering?: Vector3, RayleighScatteringScale?: number, RayleighExponentialDistribution?: number, MieScattering?: Vector3, MieScatteringScale?: number, MieAnistropy?: number, MieExponentialDistribution?: number, AbsorptionScale?: number, Absorption?: Vector3, AbsorptionMaxDensity?: number, AbsorptionHeightMinMax?: Vector2, TransmittanceTexture?: string, IrradianceTexture?: string, ScatteringTexture?: string }
+---@alias AtmosphereOverride _AtmosphereOverride | { PlanetName: string, IsGasGiant?: boolean, Exposure?: Vector2, SunAngleRadius?: number, SunZenithAngle?: number, SolarIrradiance?: Vector3, SunDirectionExposureModifier?: number, TransmittanceTint?: number, NoonColorStrength?: number, SunsetColorStrength?: number, ColorTransitionScale?: number, BottomRadius?: number, AtmosphereHeight?: number, GroundAlbedo?: Color, RayleighScattering?: Vector3, RayleighScatteringScale?: number, RayleighExponentialDistribution?: number, MieScattering?: Vector3, MieScatteringScale?: number, MieAnisotropy?: number, MieExponentialDistribution?: number, AbsorptionScale?: number, Absorption?: Vector3, AbsorptionMaxDensity?: number, AbsorptionHeightMinMax?: Vector2, TransmittanceTexture?: string, IrradianceTexture?: string, ScatteringTexture?: string }
 
 ---Override applied to a `VolumeCloudConfiguration`. Every field except `bodyName` is optional;
 ---only fields with a value are written through on apply.
@@ -358,7 +346,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field atmospherePressureCurve FloatCurve
 ---@field hasSolidSurface boolean
 ---@field ringGroupData JsonList<CelestialBodyRingData>
----@field scaledElipRadMult Vector3
+---@field scaledElipRadMult Vector3d
 ---@field scaledRadiusHorizMultiplier number
 ---@field rotates boolean
 ---@field isRotating? boolean Legacy JSON field name for `rotates` (present in stock `Kerbin.bytes`); current converters read `rotates`.
@@ -373,10 +361,10 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field inverseRotThresholdAltitude number
 ---@field scaledShaderFadeFar number
 ---@field scaledShaderFadeNear number
----@field MineDustColor Color
----@field isStar boolean JSON field name for the C# `IsStar` flag, mapped via `CelestialBodyPropertiesConverter`.
+---@field MineDustColor Vector4
+---@field IsStar boolean
 
----@alias CelestialBodyProperties _CelestialBodyProperties | { assetKeySimulation: string, assetKeyScaled: string, bodyName: string, bodyDisplayName: string, bodyDescription: string, gravityASL: number, radius: number, isHomeWorld: boolean, oceanAltitude: number, oceanDensity: number, MinTerrainHeight: number, MaxTerrainHeight: number, TerrainHeightScale: number, TimeWarpAltitudeOffset: number, SphereOfInfluenceCalculationType: integer, navballSwitchAltitudeHigh: number, navballSwitchAltitudeLow: number, hasOcean: boolean, HasLocalSpace: boolean, oceanUseFog: boolean, oceanFogPQSDepth: number, oceanFogPQSDepthRecip: number, oceanFogDensityStart: number, oceanFogDensityEnd: number, oceanFogDensityPQSMult: number, oceanFogDensityAltScalar: number, oceanFogDensityExponent: number, oceanFogColorStart: Color, oceanFogColorEnd: Color, oceanFogDawnFactor: number, oceanSkyColorMult: number, oceanSkyColorOpacityBase: number, oceanSkyColorOpacityAltMult: number, oceanAFGBase: number, oceanAFGAltMult: number, oceanAFGMin: number, oceanSunBase: number, oceanSunAltMult: number, oceanSunMin: number, oceanAFGLerp: boolean, oceanMinAlphaFogDistance: number, oceanMaxAlbedoFog: number, oceanMaxAlphaFog: number, oceanAlbedoDistanceScalar: number, oceanAlphaDistanceScalar: number, minOrbitalDistance: number, hasAtmosphere: boolean, atmosphereContainsOxygen: boolean, atmosphereDepth: number, atmosphereTemperatureSeaLevel: number, atmospherePressureSeaLevel: number, atmosphereMolarMass: number, atmosphereAdiabaticIndex: number, atmosphericReentryVFXGradient: string, atmosphereTemperatureLapseRate: number, atmosphereGasMassLapseRate: number, useAtmosphereTemperatureCurve: boolean, isAtmosphereTemperatureCurveNormalized: boolean, useAtmosphereHumidityCurve: boolean, BodyAltitudeTemperatureCurve: FloatCurve, BodyAltitudeSurfaceFluxCurve: FloatCurve, BodyAltitudeFluxCurve: FloatCurve, BodyAltitudeRelativeHumidityCurve: FloatCurve, BodySurfaceFluxScale: number, BodySurfaceFluxMapPath: string, StarLuminosity: number, albedo: number, emissivity: number, coreTemperatureOffset: number, convectionMultiplier: number, shockTemperatureMultiplier: number, useAtmospherePressureCurve: boolean, isAtmospherePressureCurveNormalized: boolean, atmospherePressureCurve: FloatCurve, hasSolidSurface: boolean, ringGroupData: JsonList<CelestialBodyRingData>, scaledElipRadMult: Vector3, scaledRadiusHorizMultiplier: number, rotates: boolean, isRotating?: boolean, rotationPeriod: number, hasSolarRotationPeriod: boolean, initialRotation: number, axialTilt: Quaternion, isTidallyLocked: boolean, clampInverseRotThreshold: boolean, hasInverseRotationThresholdClamp?: boolean, hasInverseRotation: boolean, inverseRotThresholdAltitude: number, scaledShaderFadeFar: number, scaledShaderFadeNear: number, MineDustColor: Color, isStar: boolean }
+---@alias CelestialBodyProperties _CelestialBodyProperties | { assetKeySimulation: string, assetKeyScaled: string, bodyName: string, bodyDisplayName: string, bodyDescription: string, gravityASL: number, radius: number, isHomeWorld: boolean, oceanAltitude: number, oceanDensity: number, MinTerrainHeight: number, MaxTerrainHeight: number, TerrainHeightScale: number, TimeWarpAltitudeOffset: number, SphereOfInfluenceCalculationType: integer, navballSwitchAltitudeHigh: number, navballSwitchAltitudeLow: number, hasOcean: boolean, HasLocalSpace: boolean, oceanUseFog: boolean, oceanFogPQSDepth: number, oceanFogPQSDepthRecip: number, oceanFogDensityStart: number, oceanFogDensityEnd: number, oceanFogDensityPQSMult: number, oceanFogDensityAltScalar: number, oceanFogDensityExponent: number, oceanFogColorStart: Color, oceanFogColorEnd: Color, oceanFogDawnFactor: number, oceanSkyColorMult: number, oceanSkyColorOpacityBase: number, oceanSkyColorOpacityAltMult: number, oceanAFGBase: number, oceanAFGAltMult: number, oceanAFGMin: number, oceanSunBase: number, oceanSunAltMult: number, oceanSunMin: number, oceanAFGLerp: boolean, oceanMinAlphaFogDistance: number, oceanMaxAlbedoFog: number, oceanMaxAlphaFog: number, oceanAlbedoDistanceScalar: number, oceanAlphaDistanceScalar: number, minOrbitalDistance: number, hasAtmosphere: boolean, atmosphereContainsOxygen: boolean, atmosphereDepth: number, atmosphereTemperatureSeaLevel: number, atmospherePressureSeaLevel: number, atmosphereMolarMass: number, atmosphereAdiabaticIndex: number, atmosphericReentryVFXGradient: string, atmosphereTemperatureLapseRate: number, atmosphereGasMassLapseRate: number, useAtmosphereTemperatureCurve: boolean, isAtmosphereTemperatureCurveNormalized: boolean, useAtmosphereHumidityCurve: boolean, BodyAltitudeTemperatureCurve: FloatCurve, BodyAltitudeSurfaceFluxCurve: FloatCurve, BodyAltitudeFluxCurve: FloatCurve, BodyAltitudeRelativeHumidityCurve: FloatCurve, BodySurfaceFluxScale: number, BodySurfaceFluxMapPath: string, StarLuminosity: number, albedo: number, emissivity: number, coreTemperatureOffset: number, convectionMultiplier: number, shockTemperatureMultiplier: number, useAtmospherePressureCurve: boolean, isAtmospherePressureCurveNormalized: boolean, atmospherePressureCurve: FloatCurve, hasSolidSurface: boolean, ringGroupData: JsonList<CelestialBodyRingData>, scaledElipRadMult: Vector3d, scaledRadiusHorizMultiplier: number, rotates: boolean, isRotating?: boolean, rotationPeriod: number, hasSolarRotationPeriod: boolean, initialRotation: number, axialTilt: Quaternion, isTidallyLocked: boolean, clampInverseRotThreshold: boolean, hasInverseRotationThresholdClamp?: boolean, hasInverseRotation: boolean, inverseRotThresholdAltitude: number, scaledShaderFadeFar: number, scaledShaderFadeNear: number, MineDustColor: Vector4, IsStar: boolean }
 
 ---Represents the science data multipliers and altitude thresholds for a celestial body.
 ---@class _CelestialBodyProperties_ScienceParams : _JsonUserDataBase
@@ -405,13 +393,14 @@ function GalaxyUserData:Add(planetName, callback) end
 -- Galaxy schema (wrapped by GalaxyUserData)
 -- =====================================================================
 
----Represents the JSON shape of a galaxy definition (addressables label `GalaxyDefinition_*`).
----@class _GalaxyDefinition : _JsonUserDataBase
+---Represents a serialized galaxy definition, including its name, version, and celestial bodies.
+---This is the on-disk JSON shape stored under the `Galaxy` converter (file naming `GalaxyDefinition_*`).
+---@class _SerializedGalaxyDefinition : _JsonUserDataBase
 ---@field Name string
 ---@field Version string
 ---@field CelestialBodies JsonList<SerializedCelestialBody>
 
----@alias GalaxyDefinition _GalaxyDefinition | { Name: string, Version: string, CelestialBodies: JsonList<SerializedCelestialBody> }
+---@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, CelestialBodies: JsonList<SerializedCelestialBody> }
 
 ---Represents the serialized form of a celestial body, including its identity and orbital configuration.
 ---@class _SerializedCelestialBody : _JsonUserDataBase

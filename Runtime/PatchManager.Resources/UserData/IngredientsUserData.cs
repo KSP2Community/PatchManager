@@ -21,7 +21,7 @@ public class IngredientsUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["name"].Value<string>();
+        return RequireString(source["name"], "ingredients[].name");
     }
 
     /// <summary>

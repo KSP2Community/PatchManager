@@ -38,7 +38,7 @@ public class RecipeUserData : ExtensibleJsonUserData
     {
         if (property == "ingredients")
         {
-            return MoonSharp.Interpreter.UserData.Create(new IngredientsUserData((JArray)Token["ingredients"]));
+            return MoonSharp.Interpreter.UserData.Create(new IngredientsUserData(RequireArray(Token["ingredients"], "ingredients")));
         }
         return null;
     }
@@ -47,13 +47,13 @@ public class RecipeUserData : ExtensibleJsonUserData
     public override bool TryToSet(string property, DynValue value)
     {
         if (property == "ingredients")
-            throw new Exception("You must instead use the methods on the Ingredients array.");
+            throw new ScriptRuntimeException("You must instead use the methods on the Ingredients array.");
         return false;
     }
 
     /// <inheritdoc />
     public override bool TryToRemove(string property)
     {
-        throw new Exception("You cannot remove this property.");
+        throw new ScriptRuntimeException("You cannot remove this property.");
     }
 }

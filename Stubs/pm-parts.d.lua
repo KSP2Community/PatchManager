@@ -3,6 +3,7 @@
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/PartsLuaModule.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/PartsUtilities.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/Converters/PartConverter.cs
+-- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/Attributes/ModuleDataAdapterAttribute.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/UserData/PartUserData.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/UserData/ModuleUserData.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Parts/UserData/ModesUserData.cs
@@ -145,16 +146,11 @@ function ResourceContainersUserData:Has(type) end
 ---@class PartsLuaModule
 local PartsLuaModule = {}
 
----Registers a patch that runs against every part definition.
----@param callback fun(part: PartUserData): string? The patch callback. Returns `"remove"` to delete the part, `nil` to keep it.
----@return LuaPatch patch The registered patch.
-function PartsLuaModule:PatchAll(callback) end
-
----Registers a patch that runs against the part matching name.
----@param name string                                The part name pattern (supports `*` and `?` wildcards).
----@param callback fun(part: PartUserData): string?  The patch callback. Returns `"remove"` to delete the part, `nil` to keep it.
----@return LuaPatch patch                            The registered patch.
-function PartsLuaModule:Patch(name, callback) end
+---Registers a part patch with the given namespaced patch name.
+---The patch matches every part by default; restrict it via `LuaPatch.Named`, which supports `*` and `?` wildcards.
+---@param name string                                  The patch's local name; namespaced with the host mod's ID.
+---@return LuaPatch<PartUserData, ModuleUserData> patch The registered patch.
+function PartsLuaModule:Patch(name) end
 
 -- ============================================================================
 -- Asset JSON schemas (the on-disk PartCore tree)
@@ -309,7 +305,6 @@ function PartsLuaModule:Patch(name, callback) end
 ---@field DataObject ModuleDataPayload
 
 ---@alias SerializedModuleData _SerializedModuleData | { Name: string, DataType: string, DataObject: ModuleDataPayload }
-
 
 ---Represents the serialized resource relationship data for a part, describing the resources it consumes, generates, and contains.
 ---@class _SerializedResourceInfo : _JsonUserDataBase

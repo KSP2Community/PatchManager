@@ -32,28 +32,19 @@ public class MissionsLuaModule
         _core = pmc;
         _universe = universe;
     }
-
+    
     /// <summary>
-    /// Registers a patch that runs against every mission definition.
+    /// Registers a mission patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the mission, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every mission by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAll(Script script, Func<MissionUserData, string> callback)
+    public LuaPatch Patch(Script script, string name)
     {
-        return _core.PatchAll(script, "Mission", "missions", callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a patch that runs against the mission matching <paramref name="name" />.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The mission name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the mission, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name, Func<MissionUserData, string> callback)
-    {
-        return _core.Patch(script, "Mission", "missions", name, callback.ToPatchMethod());
+        return _core.Patch(script, "Mission", "missions", name);
     }
 
     #region Utility Methods
@@ -112,9 +103,10 @@ public class MissionsLuaModule
             ConditionMode = LogicalOperator.AND
         };
         var obj = JObject.FromObject(conditionSet);
+        var children = JsonUserData.RequireArray(obj["Children"], "ConditionSet.Children");
         foreach (var arg in arguments.GetArray())
         {
-            ((JArray)obj["Children"]).Add(JsonUserData.GetJTokenForDynValue(arg));
+            children.Add(JsonUserData.GetJTokenForDynValue(arg));
         }
         return JsonUserData.GetFromJToken(obj);
     }
@@ -131,9 +123,10 @@ public class MissionsLuaModule
             ConditionMode = LogicalOperator.OR
         };
         var obj = JObject.FromObject(conditionSet);
+        var children = JsonUserData.RequireArray(obj["Children"], "ConditionSet.Children");
         foreach (var arg in arguments.GetArray())
         {
-            ((JArray)obj["Children"]).Add(JsonUserData.GetJTokenForDynValue(arg));
+            children.Add(JsonUserData.GetJTokenForDynValue(arg));
         }
         return JsonUserData.GetFromJToken(obj);
     }
@@ -150,7 +143,7 @@ public class MissionsLuaModule
             ConditionMode = LogicalOperator.NOT
         };
         var obj = JObject.FromObject(conditionSet);
-        ((JArray)obj["Children"]).Add(JsonUserData.GetJTokenForDynValue(condition));
+        JsonUserData.RequireArray(obj["Children"], "ConditionSet.Children").Add(JsonUserData.GetJTokenForDynValue(condition));
         return JsonUserData.GetFromJToken(obj);
     }
 
@@ -161,9 +154,14 @@ public class MissionsLuaModule
     /// <param name="type">The action's short name as registered in <c>MissionsTypes.Actions</c>.</param>
     /// <param name="callback">Callback that receives the action's JSON for further configuration.</param>
     /// <returns>A wrapper around the configured action JSON.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="type" /> resolves to a class without a parameterless constructor.</exception>
     public DynValue Action(string type, Action<JsonUserData> callback)
     {
-        var actualType = MissionsTypes.Actions[type];
+        if (!MissionsTypes.Actions.TryGetValue(type, out var actualType))
+        {
+            throw new ScriptRuntimeException($"Unknown mission action type '{type}'.");
+        }
+
         object instance;
         try
         {
@@ -171,8 +169,13 @@ public class MissionsLuaModule
         }
         catch (MissingMethodException e)
         {
-            throw new Exception($"Mission action type {actualType.FullName} (registered as \"{type}\") must declare a parameterless constructor to be instantiable by PM.Missions:Action.", e);
+            throw new ScriptRuntimeException($"Mission action type {actualType.FullName} (registered as \"{type}\") must declare a parameterless constructor to be instantiable by PM.Missions:Action ({e.Message})");
         }
+        catch (Exception e) when (e is not ScriptRuntimeException)
+        {
+            throw new ScriptRuntimeException($"Failed to construct mission action '{type}' ({actualType.FullName}): {e.Message}");
+        }
+
         var elementObject = new JObject
         {
             ["$type"] = actualType.AssemblyQualifiedName

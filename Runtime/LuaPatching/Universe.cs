@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop.RegistrationPolicies;
 using Newtonsoft.Json.Linq;
 using PatchManager.LuaPatching.Attributes;
 using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
+using PatchManager.Shared;
 using ReduxLib.Logging;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -46,6 +47,8 @@ namespace PatchManager.LuaPatching
         /// </summary>
         public readonly HashSet<string> AllMods;
 
+        public Summary Summary = new();
+        
         /// <summary>
         /// Creates a new universe, instantiates each registered submodule, and seeds the per-mod stage priorities.
         /// </summary>
@@ -56,15 +59,13 @@ namespace PatchManager.LuaPatching
         {
             ErrorLogger = errorLogger;
             MessageLogger = messageLogger;
-            AllMods = allMods.ToHashSet();
+            AllMods = Enumerable.ToHashSet(allMods);
             var pmc = new PatchManagerCore(this);
             PatchManagerLibraryInstance = UserData.Create(pmc);
             foreach (var (k, v) in SubmoduleTypes)
             {
                 Submodules[k] = UserData.Create(Activator.CreateInstance(v, pmc, this));
             }
-
-            SetupBasePriorities(allMods);
         }
 
         /// <summary>
@@ -101,32 +102,8 @@ namespace PatchManager.LuaPatching
         /// </summary>
         public string LastImplicitGlobal = "";
 
-        private void SetupBasePriorities(List<string> modLoadOrder)
-        {
-            MessageLogger($"Setting up base priorities with mod load order: {string.Join(", ", modLoadOrder)}");
-            var lastPost = "";
-            foreach (var mod in modLoadOrder)
-            {
-                var stage = new Stage();
-                if (lastPost.Length > 0)
-                    stage.RunsAfter.Add(lastPost);
-                AllStages[mod] = stage;
-                MessageLogger($"Adding stage: {mod}");
-                var post = new Stage();
-                post.RunsAfter.Add(mod);
-                lastPost = $"{mod}:__post";
-                AllStages[lastPost] = post;
-                MessageLogger($"Adding stage: {lastPost}");
-                LastImplicitWithinMod[mod] = mod;
-            }
-
-            LastImplicitGlobal = lastPost;
-            MessageLogger($"Last implicit global: {lastPost}");
-        }
-
         static Universe()
         {
-            MoonSharpExceptionWrapPatch.Install();
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
         }
 
@@ -144,6 +121,7 @@ namespace PatchManager.LuaPatching
         /// </summary>
         /// <param name="file">The patch file to load.</param>
         /// <param name="directoryInfo">The directory the patch was discovered in; exposed to the script as the <c>Location</c> global.</param>
+        /// <param name="summary">The summary instance to log errors to</param>
         public void LoadSinglePatchFile(FileInfo file, DirectoryInfo directoryInfo)
         {
             var patchScript = new Script(CoreModules.Preset_SoftSandbox)
@@ -159,21 +137,28 @@ namespace PatchManager.LuaPatching
                     ["PM"] = PatchManagerLibraryInstance
                 }
             };
+            
             patchScript.Globals.RegisterModuleType<JsonModule>();
+            var relativeName = file.FullName.MakeRelativePathTo(Directory.GetCurrentDirectory());
             try
             {
-                patchScript.DoString(File.ReadAllText(file.FullName));
+                patchScript.DoString(File.ReadAllText(file.FullName),
+                    codeFriendlyName: relativeName);
             }
             catch (InterpreterException e)
             {
+                Summary.ErrorFile(relativeName, e);
                 ErrorLogger($"{file.FullName} failed to load: {e.DecoratedMessage}");
                 ErrorLogger(e.ToString());
             }
             catch (Exception e)
             {
+                Summary.ErrorFile(relativeName, e);
                 ErrorLogger($"{file.FullName} failed to load: {e.Message}");
                 ErrorLogger(e.ToString());
             }
+
+            AllMods.Add(Path.GetFileNameWithoutExtension(file.Name));
         }
 
         /// <summary>
@@ -186,6 +171,7 @@ namespace PatchManager.LuaPatching
         /// </remarks>
         /// <param name="directory">The directory containing the patch files.</param>
         /// <param name="modId">The mod ID; exposed to scripts as the <c>ModId</c> global and used as their default stage.</param>
+        /// <param name="summary">The summary for logging errors</param>
         public void LoadPatchesInDirectory(DirectoryInfo directory, string modId)
         {
             var patchScript = new Script(CoreModules.Preset_SoftSandbox)
@@ -201,22 +187,26 @@ namespace PatchManager.LuaPatching
                     ["PM"] = PatchManagerLibraryInstance
                 }
             };
+            AllMods.Add(modId);
             patchScript.Globals.RegisterModuleType<JsonModule>();
 
             foreach (var file in directory.EnumerateFiles("*.lua", SearchOption.AllDirectories)
                          .Where(f => !f.Name.StartsWith("_")))
             {
+                var relativeName = file.FullName.MakeRelativePathTo(Directory.GetCurrentDirectory());
                 try
                 {
                     patchScript.DoString(File.ReadAllText(file.FullName));
                 }
                 catch (InterpreterException e)
                 {
+                    Summary.ErrorFile(relativeName, e);
                     ErrorLogger($"{file.FullName} failed to load: {e.DecoratedMessage}");
                     ErrorLogger(e.ToString());
                 }
                 catch (Exception e)
                 {
+                    Summary.ErrorFile(relativeName, e);
                     ErrorLogger($"{file.FullName} failed to load: {e.Message}");
                     ErrorLogger(e.ToString());
                 }
@@ -230,6 +220,7 @@ namespace PatchManager.LuaPatching
         /// </summary>
         /// <param name="textAsset">The text asset whose contents are the patch script.</param>
         /// <param name="modId">The mod ID; exposed to the script as the <c>ModId</c> global.</param>
+        /// <param name="summary">The summary to log errors to</param>
         public void LoadPatchAsset(TextAsset textAsset, string modId)
         {
             var patchScript = new Script(CoreModules.Preset_SoftSandbox)
@@ -244,6 +235,7 @@ namespace PatchManager.LuaPatching
                     ["PM"] = PatchManagerLibraryInstance
                 }
             };
+            AllMods.Add(modId);
             patchScript.Globals.RegisterModuleType<JsonModule>();
             try
             {
@@ -251,11 +243,13 @@ namespace PatchManager.LuaPatching
             }
             catch (InterpreterException e)
             {
+                Summary.ErrorFile(textAsset.name, e);
                 ErrorLogger($"{textAsset.name} failed to load: {e.DecoratedMessage}");
                 ErrorLogger(e.ToString());
             }
             catch (Exception e)
             {
+                Summary.ErrorFile(textAsset.name, e);
                 ErrorLogger($"{textAsset.name} failed to load: {e.Message}");
                 ErrorLogger(e.ToString());
             }
@@ -266,11 +260,6 @@ namespace PatchManager.LuaPatching
         #region Patch/Stage Registering
 
         /// <summary>
-        /// Every known stage keyed by name, including the implicit per-mod and per-mod-post stages set up at construction.
-        /// </summary>
-        public Dictionary<string, Stage> AllStages = new();
-
-        /// <summary>
         /// Assets queued for creation via <see cref="PatchManagerCore.New" />.
         /// </summary>
         public List<LuaAsset> AllNewAssets = new();
@@ -279,17 +268,6 @@ namespace PatchManager.LuaPatching
         /// Registered patches keyed by addressables label. Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
         /// </summary>
         public Dictionary<string, List<LuaPatch>> AllPatches = new();
-
-        /// <summary>
-        /// Registered patches keyed by addressables address, for assets that are not under any label.
-        /// Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
-        /// </summary>
-        public Dictionary<string, List<LuaPatch>> AllAddressPatches = new();
-
-        /// <summary>
-        /// Assets queued for creation via <see cref="PatchManagerCore.NewAddress" />.
-        /// </summary>
-        public List<LuaAsset> AllNewAddressAssets = new();
 
         /// <summary>
         /// Registers a patch and records its label in <see cref="PatchedLabels" />.
@@ -311,25 +289,6 @@ namespace PatchManager.LuaPatching
         }
 
         /// <summary>
-        /// Registers an address-keyed patch and records its address in <see cref="PatchedAddresses" />.
-        /// </summary>
-        /// <param name="patch">The patch to register.</param>
-        public void AddAddressPatch(LuaPatch patch)
-        {
-            if (AllAddressPatches.TryGetValue(patch.Label, out var l))
-            {
-                l.Add(patch);
-            }
-            else
-            {
-                AllAddressPatches[patch.Label] = new List<LuaPatch> { patch };
-            }
-
-            PatchedAddresses.Add(patch.Label);
-            TotalPatchCount++;
-        }
-
-        /// <summary>
         /// Queues a new asset for creation and records its label in <see cref="PatchedLabels" />.
         /// </summary>
         /// <param name="asset">The asset to queue.</param>
@@ -337,103 +296,6 @@ namespace PatchManager.LuaPatching
         {
             AllNewAssets.Add(asset);
             PatchedLabels.Add(asset.Label);
-        }
-
-        /// <summary>
-        /// Queues a new address-keyed asset for creation and records its address in <see cref="PatchedAddresses" />.
-        /// </summary>
-        /// <param name="asset">The asset to queue.</param>
-        public void AddAddressAsset(LuaAsset asset)
-        {
-            AllNewAddressAssets.Add(asset);
-            PatchedAddresses.Add(asset.Label);
-        }
-
-        /// <summary>
-        /// Adds a stage to <see cref="AllStages" /> under the given name.
-        /// </summary>
-        /// <param name="name">The stage name.</param>
-        /// <param name="stage">The stage to register.</param>
-        public void AddStage(string name, Stage stage)
-        {
-            AllStages.Add(name, stage);
-        }
-
-        #endregion
-
-        #region Stage Sorting
-
-        /// <summary>
-        /// Topologically sorted stages, mapped to their ordering priority. Populated by the internal sort step.
-        /// </summary>
-        public Dictionary<string, ulong> SortedStages = new();
-
-        
-        // Reimplemented using Kahn's algorithm for dependency sorting
-        private void SortStages()
-        {
-            MessageLogger($"Sorting {AllStages.Count} stages");
-            var hs = AllStages.Keys.ToHashSet();
-            foreach (var (k, v) in AllStages)
-            {
-                v.UpdateRequirements(hs);
-            }
-
-            var n = AllStages.Count;
-            var inDegree = new Dictionary<string, int>(n);
-            var outEdges = new Dictionary<string, HashSet<string>>(n);
-            foreach (var name in AllStages.Keys)
-            {
-                inDegree[name] = 0;
-                outEdges[name] = new HashSet<string>();
-            }
-
-            foreach (var (name, stage) in AllStages)
-            {
-                foreach (var pre in stage.RunsAfter)
-                {
-                    if (pre == name) continue;
-                    if (outEdges[pre].Add(name)) inDegree[name]++;
-                }
-
-                foreach (var suc in stage.RunsBefore)
-                {
-                    if (suc == name) continue;
-                    if (outEdges[name].Add(suc)) inDegree[suc]++;
-                }
-            }
-
-            var queue = new Queue<string>();
-            foreach (var (name, d) in inDegree)
-            {
-                if (d == 0) queue.Enqueue(name);
-            }
-
-            var sortedStages = new List<string>();
-            while (queue.Count > 0)
-            {
-                var name = queue.Dequeue();
-                sortedStages.Add(name);
-                foreach (var suc in outEdges[name])
-                {
-                    if (--inDegree[suc] == 0) queue.Enqueue(suc);
-                }
-            }
-            
-            if (sortedStages.Count != n)
-            {
-                var unsorted = AllStages.Keys.Where(k => !sortedStages.Contains(k));
-                throw new Exception(
-                    $"Unable to sort stages to define patch order, the following stages cause a circular dependency: {string.Join(", ", unsorted)}");
-            }
-            
-            MessageLogger("Sorted stages!");
-            ulong p = 0;
-            foreach (var stage in sortedStages)
-            {
-                MessageLogger($"{stage}: {p}");
-                SortedStages[stage] = p++;
-            }
         }
 
         #endregion
@@ -452,13 +314,6 @@ namespace PatchManager.LuaPatching
         public HashSet<string> PatchedLabels = new();
 
         /// <summary>
-        /// The set of addressables addresses with at least one address patch or new-address asset registered.
-        /// Replaced by <see cref="SetupPatchesForRun" /> with the keys of <see cref="AllAddressPatches" /> unioned
-        /// with the labels of <see cref="AllNewAddressAssets" />.
-        /// </summary>
-        public HashSet<string> PatchedAddresses = new();
-
-        /// <summary>
         /// All buckets for each patch type
         /// </summary>
         public Dictionary<string, LabelPatchBuckets> AllPatchesBuckets = new();
@@ -474,72 +329,209 @@ namespace PatchManager.LuaPatching
         /// </remarks>
         public void SetupPatchesForRun()
         {
-            // We have to sort our stages first, stuff wasn't running in any order prior...
-            SortStages();
-            PatchedLabels = AllPatches.Keys.ToHashSet();
-            foreach (var (label, patches) in AllPatches)
+            foreach (var (label, patch) in AllPatches)
             {
-                foreach (var p in patches)
+                SetupLabelForRun(label, patch);
+            }
+        }
+
+        private void SetupLabelForRun(string label, List<LuaPatch> patches)
+        {
+            // First we do mod constraint filtering
+            List<LuaPatch> modConstrained = new(patches.Count);
+            foreach (var patch in patches)
+            {
+                foreach (var mod in patch.NeedsMods)
                 {
-                    p.StagePriority = SortedStages.GetValueOrDefault(p.Stage, ulong.MaxValue);
+                    if (!AllMods.Contains(mod))
+                    {
+                        Summary.Remove(patch.Name, "MISSING", $"mod - {mod}");
+                        goto continue_outer;
+                    }
                 }
 
-                patches.Sort((x, y) => x.StagePriority.CompareTo(y.StagePriority));
-
-                var exactGroups = new Dictionary<string, List<LuaPatch>>();
-                var matchAll = new List<LuaPatch>();
-                var wildcard = new List<WildcardEntry>();
-
-                foreach (var p in patches)
+                foreach (var mod in patch.ConflictsMods)
                 {
-                    if (string.IsNullOrEmpty(p.Name) || p.Name == "*")
+                    if (AllMods.Contains(mod))
                     {
-                        matchAll.Add(p);
+                        Summary.Remove(patch.Name, "CONFLICT", $"mod - {mod}");
+                        goto continue_outer;
                     }
-                    else if (p.Name.IndexOfAny(WildcardChars) < 0)
+                }
+                
+                modConstrained.Add(patch);
+                continue_outer:;
+            }
+            // Second we do patch constraint filter
+            var allPatches = Enumerable.ToHashSet(modConstrained.Select(x => x.Name));
+            var patchConstrained = new List<LuaPatch>(modConstrained.Count);
+            
+            foreach (var patch in patches)
+            {
+                foreach (var id in patch.NeedsPatches)
+                {
+                    if (!allPatches.Contains(id))
                     {
-                        if (!exactGroups.TryGetValue(p.Name, out var groups))
+                        Summary.Remove(patch.Name, "MISSING", $"patch - {id}");
+                        goto continue_outer;
+                    }
+                }
+
+                foreach (var id in patch.ConflictsPatches)
+                {
+                    if (allPatches.Contains(id))
+                    {
+                        Summary.Remove(patch.Name, "CONFLICT", $"patch - {id}");
+                        goto continue_outer;
+                    }
+                }
+                
+                patchConstrained.Add(patch);
+                continue_outer:;
+            }
+            
+            // Third we explode out all after/before mod dependencies
+            Dictionary<string, List<string>> explosion = new();
+
+            // Setup the explosion array
+            foreach (var patch in patchConstrained)
+            {
+                if (!explosion.TryGetValue(patch.PatchModId, out var list))
+                {
+                    explosion[patch.PatchModId] = list = new();
+                }
+                list.Add(patch.Name);
+            }
+
+            // And explode
+            foreach (var patch in patchConstrained)
+            {
+                foreach (var beforeMod in patch.BeforeMods)
+                {
+                    if (explosion.TryGetValue(beforeMod, out var list))
+                    {
+                        patch.BeforePatches.UnionWith(list);
+                    }
+                }
+
+                foreach (var afterMod in patch.AfterMods)
+                {
+                    
+                    if (explosion.TryGetValue(afterMod, out var list))
+                    {
+                        patch.AfterPatches.UnionWith(list);
+                    }
+                }
+                
+                patch.BeforePatches.IntersectWith(allPatches);
+                patch.AfterPatches.IntersectWith(allPatches);
+            }
+            
+
+            // Then we do a topological sort on the patches for this label using kahn's algorithm
+            var n = patchConstrained.Count;
+
+            var inDegree = new Dictionary<string, int>(n);
+            var outEdges = new Dictionary<string, HashSet<string>>(n);
+            var namePatchMap = new Dictionary<string, LuaPatch>(n);
+
+            foreach (var patch in patchConstrained)
+            {
+                inDegree[patch.Name] = 0;
+                outEdges[patch.Name] = new();
+                namePatchMap[patch.Name] = patch;
+            }
+
+            foreach (var patch in patchConstrained)
+            {
+                foreach (var pre in patch.AfterPatches)
+                {
+                    if (pre == patch.Name) continue;
+                    if (outEdges[pre].Add(patch.Name)) inDegree[patch.Name]++;
+                }
+
+                foreach (var suc in patch.BeforePatches)
+                {
+                    if (suc == patch.Name) continue;
+                    if (outEdges[patch.Name].Add(suc)) inDegree[suc]++;
+                }
+            }
+            
+            var queue = new Queue<string>();
+            foreach (var (name, d) in inDegree)
+            {
+                if (d == 0) queue.Enqueue(name);
+            }
+
+            var sortedPatches = new List<LuaPatch>();
+            while (queue.Count > 0)
+            {
+                var name = queue.Dequeue();
+                sortedPatches.Add(namePatchMap[name]);
+                foreach (var suc in outEdges[name])
+                {
+                    if (--inDegree[suc] == 0) queue.Enqueue(suc);
+                }
+            }
+
+            if (sortedPatches.Count != patchConstrained.Count)
+            {
+                var unsorted = patchConstrained.Where(k => !sortedPatches.Contains(k));
+                foreach (var patch in unsorted)
+                {
+                    Summary.Remove(patch.Name, "CYCLE", "patch was caught in a dependency cycle");
+                }
+            }
+
+            for (var i = 0; i < sortedPatches.Count; i++)
+            {
+                sortedPatches[i].Order = i;
+            }
+
+            // Finally we bucket out the patches
+            
+            var exactGroups = new Dictionary<string, List<LuaPatch>>();
+            var matchAll = new List<LuaPatch>();
+            var wildcard = new List<WildcardEntry>();
+
+            foreach (var p in patches)
+            {
+                if (p.Names.Count == 0 || p.Names.Any(x => x == "*"))
+                {
+                    matchAll.Add(p);
+                }
+                else
+                {
+                    foreach (var pattern in p.Names)
+                    {
+                        if (pattern.IndexOfAny(WildcardChars) < 0)
                         {
-                            exactGroups[p.Name] = groups = new List<LuaPatch>();
+                            if (!exactGroups.TryGetValue(pattern, out var groups))
+                            {
+                                exactGroups[pattern] = groups = new List<LuaPatch>();
+                            }
+                            groups.Add(p);
                         }
-
-                        groups.Add(p);
-                    }
-                    else
-                    {
-                        wildcard.Add(new WildcardEntry(NamePattern.Get(p.Name), p));
+                        else
+                        {
+                            wildcard.Add(new WildcardEntry(NamePattern.Get(p.Name), p));
+                        }
                     }
                 }
-
-                var buckets = new LabelPatchBuckets
-                {
-                    MatchAll = matchAll.ToArray(),
-                    Wildcard = wildcard.ToArray(),
-                };
-
-                foreach (var (n, i) in exactGroups)
-                {
-                    buckets.Exact[n] = i.ToArray();
-                }
-
-                AllPatchesBuckets[label] = buckets;
             }
-
-            PatchedAddresses = AllAddressPatches.Keys.ToHashSet();
-            foreach (var asset in AllNewAddressAssets)
+            
+            var buckets = new LabelPatchBuckets
             {
-                PatchedAddresses.Add(asset.Label);
-            }
+                MatchAll = matchAll.ToArray(),
+                Wildcard = wildcard.ToArray(),
+            };
 
-            foreach (var (_, patches) in AllAddressPatches)
+            foreach (var (p, i) in exactGroups)
             {
-                foreach (var p in patches)
-                {
-                    p.StagePriority = SortedStages.GetValueOrDefault(p.Stage, ulong.MaxValue);
-                }
-
-                patches.Sort((x, y) => x.StagePriority.CompareTo(y.StagePriority));
+                buckets.Exact[p] = i.ToArray();
             }
+
+            AllPatchesBuckets[label] = buckets;
         }
 
         /// <summary>
@@ -564,45 +556,34 @@ namespace PatchManager.LuaPatching
             errorCount = 0;
             IConverter? previousConverter = null;
             DynValue? previousInstance = null;
-            bool anyApplied = false;
             foreach (var patch in GetAllSortedPatchesFor(label, name))
             {
-                try
+                if (previousInstance == null)
                 {
-                    if (previousInstance == null)
-                    {
-                        previousConverter = patch.ConverterInstance;
-                        previousInstance = patch.ApplyFirst(data);
-                    }
-                    else if (ReferenceEquals(previousConverter, patch.ConverterInstance))
-                    {
-                        previousInstance = patch.ApplyInChain(previousInstance);
-                    }
-                    else
-                    {
-                        var stringValue = previousConverter.ToJson(previousInstance);
-                        previousConverter = patch.ConverterInstance;
-                        previousInstance = patch.ApplyFirst(stringValue);
-                    }
+                    previousConverter = patch.ConverterInstance;
+                    previousInstance = previousConverter.FromJson(data);
+                }
 
-                    anyApplied = true;
+                if (!ReferenceEquals(previousConverter, patch.ConverterInstance))
+                {
+                    var jValue = previousConverter.ToJson(previousInstance);
+                    previousConverter = patch.ConverterInstance;
+                    previousInstance = previousConverter.FromJson(jValue);
+                }
+
+                if (patch.Apply(previousInstance, Summary, out var removed, out var errored))
+                {
                     patchCount++;
+                    if (removed)
+                    {
+                        return null;
+                    }
                 }
-                catch (InterpreterException e)
-                {
-                    errorCount++;
-                    ErrorLogger($"Patching {label}:{name} failed due to: {e.DecoratedMessage}");
-                    ErrorLogger(e.ToString());
-                }
-                catch (Exception e)
-                {
-                    errorCount++;
-                    ErrorLogger($"Patching {label}:{name} failed due to {e.Message}");
-                    ErrorLogger(e.ToString());
-                }
+
+                if (errored) errorCount++;
             }
 
-            return anyApplied ? previousConverter!.ToJson(previousInstance) : data;
+            return previousConverter?.ToJson(previousInstance) ?? data;
         }
 
         /// <summary>
@@ -619,33 +600,24 @@ namespace PatchManager.LuaPatching
             errorCount = 0;
             foreach (var patch in GetAllSortedPatchesFor(asset.Label, asset.Name))
             {
-                try
-                {
-                    if (ReferenceEquals(asset.ConverterInstance, patch.ConverterInstance))
-                    {
-                        asset.CurrentValue = patch.ApplyInChain(asset.CurrentValue);
-                    }
-                    else
-                    {
-                        var stringValue = asset.ConverterInstance.ToJson(asset.CurrentValue);
-                        asset.ConverterInstance = patch.ConverterInstance;
-                        asset.CurrentValue = patch.ApplyFirst(stringValue);
-                    }
 
+                if (!ReferenceEquals(asset.ConverterInstance, patch.ConverterInstance))
+                {
+                    var jValue = asset.ConverterInstance.ToJson(asset.CurrentValue);
+                    asset.ConverterInstance = patch.ConverterInstance;
+                    asset.CurrentValue = asset.ConverterInstance.FromJson(jValue);
+                }
+
+                if (patch.Apply(asset.CurrentValue, Summary, out var removed, out var errored))
+                {
                     patchCount++;
+                    if (removed)
+                    {
+                        return null;
+                    }
                 }
-                catch (InterpreterException e)
-                {
-                    errorCount++;
-                    ErrorLogger($"Patching {asset.Label}:{asset.Name} failed due to: {e.DecoratedMessage}");
-                    ErrorLogger(e.ToString());
-                }
-                catch (Exception e)
-                {
-                    errorCount++;
-                    ErrorLogger($"Patching {asset.Label}:{asset.Name} failed due to {e.Message}");
-                    ErrorLogger(e.ToString());
-                }
+
+                if (errored) errorCount++;
             }
 
             return asset.ConverterInstance.ToJson(asset.CurrentValue);
@@ -661,13 +633,15 @@ namespace PatchManager.LuaPatching
         public IEnumerable<LuaPatch> GetAllSortedPatchesFor(string label, string name)
         {
             if (!AllPatchesBuckets.TryGetValue(label, out var buckets)) yield break;
-
+            
             var exact = buckets.Exact.TryGetValue(name, out var e) ? e : Array.Empty<LuaPatch>();
             var matchAll = buckets.MatchAll;
             var wildcard = buckets.Wildcard;
             var exactI = 0;
             var matchAllI = 0;
             var wildCardI = 0;
+
+            HashSet<LuaPatch> alreadyYielded = new(exact.Length+matchAll.Length+wildcard.Length);
 
             while (true)
             {
@@ -680,16 +654,16 @@ namespace PatchManager.LuaPatching
                 if (exactPatch == null && matchAllPatch == null && wildcardPatch == null) yield break;
 
                 var best = exactPatch;
-                if (matchAllPatch != null && (best == null || matchAllPatch.StagePriority < best.StagePriority))
+                if (matchAllPatch != null && (best == null || matchAllPatch.Order < best.Order))
                     best = matchAllPatch;
-                if (wildcardPatch != null && (best == null || wildcardPatch.StagePriority < best.StagePriority))
+                if (wildcardPatch != null && (best == null || wildcardPatch.Order < best.Order))
                     best = wildcardPatch;
 
                 if (ReferenceEquals(best, exactPatch)) exactI++;
                 else if (ReferenceEquals(best, matchAllPatch)) matchAllI++;
                 else wildCardI++;
-
-                yield return best;
+                
+                if (alreadyYielded.Add(best)) yield return best;
             }
         }
 
@@ -705,32 +679,6 @@ namespace PatchManager.LuaPatching
             if (buckets.MatchAll.Length > 0) return true;
             if (buckets.Exact.ContainsKey(name)) return true;
             return buckets.Wildcard.Any(w => w.Pattern.Matches(name));
-        }
-
-        /// <summary>
-        /// Returns whether any address-keyed patch is registered for the given address.
-        /// </summary>
-        /// <param name="address">The Addressables address to test.</param>
-        /// <returns>True if any address patch targets the address, false otherwise.</returns>
-        public bool HasAnyPatchForAddress(string address) => AllAddressPatches.ContainsKey(address);
-
-        /// <summary>
-        /// Returns the primary Addressables address for <paramref name="key" />, or <c>nil</c> when the key
-        /// resolves to nothing.
-        /// </summary>
-        /// <param name="key">An Addressables key (address, label, or alias).</param>
-        /// <returns>The primary key of the first resolved location, or <c>nil</c>.</returns>
-        public string ResolvePrimaryKey(string key)
-        {
-            foreach (var locator in Addressables.ResourceLocators)
-            {
-                if (locator.Locate(key, null, out var locs)
-                    && locs != null && locs.Count > 0)
-                {
-                    return locs[0].PrimaryKey;
-                }
-            }
-            return null;
         }
 
         /// <summary>
@@ -757,131 +705,8 @@ namespace PatchManager.LuaPatching
                     }
                 }
             }
+
             return map;
-        }
-
-        private static readonly Regex _addressablesGuidPattern = new(@"^[0-9a-f]{32}$", RegexOptions.Compiled);
-
-        /// <summary>
-        /// Returns every Addressables label that includes the asset at <paramref name="address" />.
-        /// </summary>
-        /// <param name="address">The Addressables address to look up labels for.</param>
-        /// <returns>The discovered label keys; empty when the asset has no labels or does not exist.</returns>
-        public IEnumerable<string> DiscoverLabelsForAddress(string address)
-        {
-            string targetPrimary = null;
-            foreach (var locator in Addressables.ResourceLocators)
-            {
-                if (locator.Locate(address, null, out var locs)
-                    && locs != null && locs.Count > 0)
-                {
-                    targetPrimary = locs[0].PrimaryKey;
-                    MessageLogger($"DiscoverLabelsForAddress: '{address}' resolves to primary '{targetPrimary}' via locator '{locator.LocatorId}'");
-                    break;
-                }
-            }
-
-            if (targetPrimary == null)
-            {
-                MessageLogger($"DiscoverLabelsForAddress: could not resolve '{address}' to any location");
-                yield break;
-            }
-
-            var any = false;
-            foreach (var locator in Addressables.ResourceLocators)
-            {
-                foreach (var key in locator.Keys)
-                {
-                    if (key is not string keyStr || keyStr == address) continue;
-                    if (_addressablesGuidPattern.IsMatch(keyStr)) continue;
-                    if (locator.Locate(key, null, out var locsForKey)
-                        && locsForKey != null
-                        && locsForKey.Any(l => l.PrimaryKey == targetPrimary))
-                    {
-                        MessageLogger($"DiscoverLabelsForAddress: '{address}' shares primary with key '{keyStr}'");
-                        any = true;
-                        yield return keyStr;
-                    }
-                }
-            }
-
-            if (!any)
-            {
-                MessageLogger($"DiscoverLabelsForAddress: '{address}' had no matching labels (primary '{targetPrimary}')");
-            }
-        }
-
-        /// <summary>
-        /// For every entry in <see cref="PatchedAddresses" />, discovers the labels that contain the address
-        /// and adds each one to <see cref="PatchedLabels" /> so a label-flow rebuild gets scheduled.
-        /// </summary>
-        public void PromoteAddressLabelsToPatchedLabels()
-        {
-            foreach (var address in PatchedAddresses.ToList())
-            {
-                foreach (var label in DiscoverLabelsForAddress(address))
-                {
-                    PatchedLabels.Add(label);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Runs every address-keyed patch registered for <paramref name="address" /> against the given JSON,
-        /// returning the final result.
-        /// </summary>
-        /// <param name="address">The asset's Addressables address.</param>
-        /// <param name="data">The asset's parsed JSON.</param>
-        /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
-        /// <param name="errorCount">Set to the number of patches that threw.</param>
-        /// <returns>The patched JSON, or <c>null</c> when the asset was removed.</returns>
-        public JToken RunAllPatchesForAddress(string address, JToken data, out int patchCount, out int errorCount)
-        {
-            patchCount = 0;
-            errorCount = 0;
-            if (!AllAddressPatches.TryGetValue(address, out var patches)) return data;
-
-            IConverter? previousConverter = null;
-            DynValue? previousInstance = null;
-            var anyApplied = false;
-            foreach (var patch in patches)
-            {
-                try
-                {
-                    if (previousInstance == null)
-                    {
-                        previousConverter = patch.ConverterInstance;
-                        previousInstance = patch.ApplyFirst(data);
-                    }
-                    else if (ReferenceEquals(previousConverter, patch.ConverterInstance))
-                    {
-                        previousInstance = patch.ApplyInChain(previousInstance);
-                    }
-                    else
-                    {
-                        var stringValue = previousConverter.ToJson(previousInstance);
-                        previousConverter = patch.ConverterInstance;
-                        previousInstance = patch.ApplyFirst(stringValue);
-                    }
-
-                    anyApplied = true;
-                    patchCount++;
-                }
-                catch (InterpreterException e)
-                {
-                    errorCount++;
-                    ErrorLogger($"Patching address {address} failed due to: {e.DecoratedMessage}");
-                    ErrorLogger(e.ToString());
-                }
-                catch (Exception e)
-                {
-                    errorCount++;
-                    ErrorLogger($"Patching address {address} failed due to {e.Message}");
-                    ErrorLogger(e.ToString());
-                }
-            }
-
-            return anyApplied ? previousConverter!.ToJson(previousInstance) : data;
         }
 
         #endregion
@@ -935,6 +760,7 @@ namespace PatchManager.LuaPatching
             /// </summary>
             public WildcardEntry[] Wildcard = Array.Empty<WildcardEntry>();
         }
+
         #endregion
     }
 }

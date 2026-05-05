@@ -23,7 +23,7 @@ public class MissionRewardUserData : IndexedListUserData
     {
         if (token["MissionRewardDefinitions"] is not JArray array)
         {
-            throw new Exception("Mission reward JSON is missing the required `MissionRewardDefinitions` array.");
+            throw new ScriptRuntimeException("Mission reward JSON is missing the required `MissionRewardDefinitions` array.");
         }
         return array;
     }
@@ -31,6 +31,6 @@ public class MissionRewardUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["MissionRewardType"].Value<string>();
+        return RequireString(source["MissionRewardType"], "MissionRewardDefinitions[].MissionRewardType");
     }
 }

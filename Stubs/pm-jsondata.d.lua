@@ -11,8 +11,16 @@ local _JsonUserDataBase = {}
 ---Removes the array element at the given 1-indexed position.
 ---@param index integer The 1-indexed array position to remove.
 ---@error Thrown when the token is not `JTokenType.Array` or when the index is out of range.
----@overload fun(self: _JsonUserDataBase, key: string)
-function _JsonUserDataBase:Remove(index) end
+function _JsonUserDataBase:RemoveAt(index) end
+
+---Remove all items that match a passed predicate.
+---@param callback fun(value: any): boolean The predicate to check against.
+function _JsonUserDataBase:RemoveWhere(callback) end
+
+---Removes the object property with the given key.
+---@param key string The property name to remove.
+---@error Thrown when the token is not `JTokenType.Object`.
+function _JsonUserDataBase:Remove(key) end
 
 ---Returns an iterator suitable for Lua's `__pairs` / `__ipairs` metamethods.
 ---Bound to both `__pairs` and `__ipairs`, so `pairs` and `ipairs` in Lua produce the same iterator.
@@ -56,13 +64,13 @@ function _JsonUserDataBase:Patch(key, callback) end
 ---@field [integer] any
 ---@field [string] any
 
----A `JsonUserData` known to wrap a JSON array of `T`. Has all `JsonUserData` methods, but the array-shaped ones (`[integer]`, `Insert`, `Append`, `Clear`, `Count`, `Remove(integer)`) are the appropriate surface. Element accesses through `[integer]`, `Insert`, and `Append` are typed as `T`.
+---A `JsonUserData` known to wrap a JSON array of `T`. Has all `JsonUserData` methods, but the array-shaped ones (`[integer]`, `Insert`, `Append`, `Clear`, `Count`, `RemoveAt`) are the appropriate surface. Element accesses through `[integer]`, `Insert`, and `Append` are typed as `T`.
 ---@class _JsonList<T> : JsonUserData
 ---@field [integer] T
 
 ---@alias JsonList<T> _JsonList<T> | T[]
 
----A `JsonUserData` known to wrap a JSON object of `T`-valued string keys. Has all `JsonUserData` methods, but the object-shaped ones (`[string]`, `Remove(string)`, `Keys`, `HasKey`, `Patch`, `Pairs`) are the appropriate surface. Value accesses through `[string]` are typed as `T`.
+---A `JsonUserData` known to wrap a JSON object of `T`-valued string keys. Has all `JsonUserData` methods, but the object-shaped ones (`[string]`, `Remove`, `Keys`, `HasKey`, `Patch`, `Pairs`) are the appropriate surface. Value accesses through `[string]` are typed as `T`.
 ---@class _JsonTable<T> : JsonUserData
 ---@field [string] T
 

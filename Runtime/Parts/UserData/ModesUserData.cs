@@ -24,7 +24,7 @@ public class ModesUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return source["engineID"].Value<string>();
+        return RequireString(source["engineID"], "engineModes[].engineID");
     }
 
     /// <summary>

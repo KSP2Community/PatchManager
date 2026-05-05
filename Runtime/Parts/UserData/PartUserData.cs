@@ -37,13 +37,16 @@ public class PartUserData : ExtensibleJsonUserData
     public PartUserData(JToken token) : base(token["data"])
     {
         FullToken = token;
+        var data = RequireObject(token["data"], "part envelope's data");
         _resourceUserData =
-            MoonSharp.Interpreter.UserData.Create(new ResourceContainersUserData((JArray)token["data"]["resourceContainers"]));
+            MoonSharp.Interpreter.UserData.Create(new ResourceContainersUserData(RequireArray(data["resourceContainers"], "data.resourceContainers")));
+        var modules = RequireArray(Token["serializedPartModules"], "serializedPartModules");
         var index = 0;
-        foreach (var module in Token["serializedPartModules"])
+        foreach (var module in modules)
         {
-            _moduleIndices[module["Name"].Value<string>().Replace("PartComponent", "")] = index++;
-            _partModules[module["Name"].Value<string>().Replace("PartComponent", "")] = MoonSharp.Interpreter.UserData.Create(new ModuleUserData(module));
+            var moduleName = RequireString(module["Name"], "serializedPartModules[].Name").Replace("PartComponent", "");
+            _moduleIndices[moduleName] = index++;
+            _partModules[moduleName] = MoonSharp.Interpreter.UserData.Create(new ModuleUserData(module));
         }
     }
 
@@ -78,17 +81,17 @@ public class PartUserData : ExtensibleJsonUserData
     {
         if (property == "serializedPartModules")
         {
-            throw new Exception("Use the part methods to access part modules!");
+            throw new ScriptRuntimeException("Use the part methods to access part modules!");
         }
 
         if (property == "resourceContainers")
         {
-            throw new Exception("Use the resource methods to access resource containers!");
+            throw new ScriptRuntimeException("Use the resource methods to access resource containers!");
         }
 
         if (_partModules.ContainsKey(property) || _partModules.ContainsKey(property.Replace("PartComponent","")))
         {
-            throw new Exception("Use the module patching methods to update part modules!");
+            throw new ScriptRuntimeException("Use the module patching methods to update part modules!");
         }
 
         return false;
@@ -97,7 +100,7 @@ public class PartUserData : ExtensibleJsonUserData
     /// <inheritdoc />
     public override bool TryToRemove(string property)
     {
-        throw new Exception("Use the relevant methods to add or remove properties/modules!");
+        throw new ScriptRuntimeException("Use the relevant methods to add or remove properties/modules!");
     }
 
     /// <summary>
@@ -110,7 +113,7 @@ public class PartUserData : ExtensibleJsonUserData
     {
         if (!PartsUtilities.ComponentModules.TryGetValue(moduleType, out var mod))
         {
-            throw new Exception($"Unknown part module {moduleType}");
+            throw new ScriptRuntimeException($"Unknown part module {moduleType}");
         }
 
         var moduleObject = new JObject()
@@ -120,7 +123,7 @@ public class PartUserData : ExtensibleJsonUserData
             ["BehaviourType"] =  mod.behaviour.AssemblyQualifiedName,
             ["ModuleData"] = new JArray()
         };
-        var array = (Token["serializedPartModules"] as JArray)!;
+        var array = RequireArray(Token["serializedPartModules"], "serializedPartModules");
         array.Add(moduleObject);
         _moduleIndices[moduleType.Replace("PartComponent", "")] = array.Count - 1;
 
@@ -168,13 +171,14 @@ public class PartUserData : ExtensibleJsonUserData
     {
         var normalized = moduleType.Replace("PartComponent", "");
         if (!_moduleIndices.TryGetValue(normalized, out var index)) return;
-        ((JArray)Token["serializedPartModules"]).RemoveAt(index);
+        var modules = RequireArray(Token["serializedPartModules"], "serializedPartModules");
+        modules.RemoveAt(index);
         _partModules.Remove(normalized);
         _moduleIndices.Clear();
         var i = 0;
-        foreach (var module in Token["serializedPartModules"])
+        foreach (var module in modules)
         {
-            _moduleIndices[module["Name"].Value<string>().Replace("PartComponent", "")] = i++;
+            _moduleIndices[RequireString(module["Name"], "serializedPartModules[].Name").Replace("PartComponent", "")] = i++;
         }
     }
 

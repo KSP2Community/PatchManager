@@ -142,13 +142,13 @@ public abstract class IndexedListUserData : JsonUserData
             }
             return DynValue.Nil;
         }
-        set => throw new Exception("Indexed lists are read only, except when using the methods for them");
+        set => throw new ScriptRuntimeException("Indexed lists are read only, except when using the methods for them");
     }
 
     /// <inheritdoc />
     public override void Remove(string key)
     {
-        if (!Indices.TryGetValue(key, out var idx)) throw new KeyNotFoundException();
+        if (!Indices.TryGetValue(key, out var idx)) throw new ScriptRuntimeException($"Key '{key}' not found in indexed list");
         List.RemoveAt(idx);
         Indices.Remove(key);
         Conversions.RemoveAt(idx);
@@ -156,13 +156,20 @@ public abstract class IndexedListUserData : JsonUserData
     }
 
     /// <inheritdoc />
-    public override void Remove(int index)
+    public override void RemoveAt(int index)
     {
         if (index <= 0 || index > Indices.Count) throw new IndexOutOfRangeException();
         Indices.Remove(Name(List[index-1]));
         List.RemoveAt(index-1);
         Conversions.RemoveAt(index-1);
         SoftRefresh();
+    }
+
+    /// <inheritdoc />
+    public override void RemoveWhere(Func<DynValue, bool> callback)
+    {
+        base.RemoveWhere(callback);
+        HardRefresh();
     }
 
 

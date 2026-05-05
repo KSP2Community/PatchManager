@@ -23,21 +23,23 @@ public class GalaxyUserData : ExtensibleJsonUserData
     {
     }
 
+    private JArray Bodies => RequireArray(Token["CelestialBodies"], "CelestialBodies");
+
     /// <inheritdoc />
     public override IEnumerable<string> GetExtraAndOverriddenKeys()
     {
-        foreach (var body in (JArray)Token["CelestialBodies"])
+        foreach (var body in Bodies)
         {
-            yield return body["GUID"].Value<string>();
+            yield return RequireString(body["GUID"], "CelestialBodies[].GUID");
         }
     }
 
     /// <inheritdoc />
     public override DynValue TryToGet(string property)
     {
-        foreach (var body in (JArray)Token["CelestialBodies"])
+        foreach (var body in Bodies)
         {
-            if (body["GUID"].Value<string>() == property)
+            if (RequireString(body["GUID"], "CelestialBodies[].GUID") == property)
             {
                 return GetFromJToken(body);
             }
@@ -49,11 +51,11 @@ public class GalaxyUserData : ExtensibleJsonUserData
     /// <inheritdoc />
     public override bool TryToSet(string property, DynValue value)
     {
-        foreach (var body in (JArray)Token["CelestialBodies"])
+        foreach (var body in Bodies)
         {
-            if (body["GUID"].Value<string>() == property)
+            if (RequireString(body["GUID"], "CelestialBodies[].GUID") == property)
             {
-                throw new Exception("Cannot set this property, use the methods for patching/removing");
+                throw new ScriptRuntimeException("Cannot set this property, use the methods for patching/removing");
             }
         }
         return false;
@@ -62,11 +64,12 @@ public class GalaxyUserData : ExtensibleJsonUserData
     /// <inheritdoc />
     public override bool TryToRemove(string property)
     {
+        var bodies = Bodies;
         var index = 0;
         var found = false;
-        foreach (var body in (JArray)Token["CelestialBodies"])
+        foreach (var body in bodies)
         {
-            if (body["GUID"].Value<string>() == property)
+            if (RequireString(body["GUID"], "CelestialBodies[].GUID") == property)
             {
                 found = true;
                 break;
@@ -76,10 +79,10 @@ public class GalaxyUserData : ExtensibleJsonUserData
 
         if (found)
         {
-            ((JArray)Token["CelestialBodies"]).RemoveAt(index);
+            bodies.RemoveAt(index);
             return true;
         }
-        throw new Exception("Cannot remove this property.");
+        throw new ScriptRuntimeException("Cannot remove this property.");
     }
 
     /// <summary>
@@ -98,7 +101,7 @@ public class GalaxyUserData : ExtensibleJsonUserData
         };
         var jToken = JObject.FromObject(obj);
         var ud = GetFromJToken(jToken);
-        ((JArray)Token["CelestialBodies"]).Add(jToken);
+        Bodies.Add(jToken);
         callback((JsonUserData)ud.UserData.Object);
     }
 }

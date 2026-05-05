@@ -33,53 +33,36 @@ public class ScienceLuaModule
     }
 
     #region Discoverables
-    /// <summary>
-    /// Registers a patch that runs against every science region's discoverables list.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAllDiscoverables(Script script, Func<DiscoverablesUserData, string> callback)
-    {
-        return _core.PatchAll(script, "Discoverables", "science_region_discoverables", callback.ToPatchMethod());
-    }
 
     /// <summary>
-    /// Registers a patch that runs against the discoverables list matching <paramref name="name" />.
+    /// Registers a discoverables-list patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The discoverables-asset name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every discoverables asset by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchDiscoverables(Script script, string name, Func<DiscoverablesUserData, string> callback)
+    public LuaPatch PatchDiscoverables(Script script, string name)
     {
-        return _core.Patch(script, "Discoverables", "science_region_discoverables", name, callback.ToPatchMethod());
+        return _core.Patch(script, "Discoverables", "science_region_discoverables", name);
     }
     #endregion
 
     #region Experiments
 
     /// <summary>
-    /// Registers a patch that runs against every science experiment.
+    /// Registers a science-experiment patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the experiment, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every experiment by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAllExperiments(Script script, Func<ExperimentUserData, string> callback)
+    public LuaPatch PatchExperiments(Script script, string name)
     {
-        return _core.PatchAll(script, "Experiment", "scienceExperiment", callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a patch that runs against the science experiment matching <paramref name="name" />.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The experiment name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the experiment, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchExperiment(Script script, string name, Func<ExperimentUserData, string> callback)
-    {
-        return _core.Patch(script, "Experiment", "scienceExperiment", name, callback.ToPatchMethod());
+        return _core.Patch(script, "Experiment", "scienceExperiment", name);
     }
 
     /// <summary>
@@ -106,53 +89,37 @@ public class ScienceLuaModule
     #endregion
 
     #region Science Regions
-    /// <summary>
-    /// Registers a patch that runs against every science-region asset.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAllRegions(Script script, Func<ScienceRegionsUserData, string> callback)
-    {
-        return _core.PatchAll(script, "ScienceRegions", "science_region", callback.ToPatchMethod());
-    }
 
     /// <summary>
-    /// Registers a patch that runs against the science-region asset matching <paramref name="name" />.
+    /// Registers a science-region patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The region-asset name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every region asset by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchRegions(Script script, string name, Func<ScienceRegionsUserData, string> callback)
+    public LuaPatch PatchRegions(Script script, string name)
     {
-        return _core.Patch(script, "ScienceRegions", "science_region", name, callback.ToPatchMethod());
+        return _core.Patch(script, "ScienceRegions", "science_region", name);
     }
     #endregion
 
     #region Tech Nodes
 
-    /// <summary>
-    /// Registers a JSON patch that runs against every tech-tree node.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the node, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAllTechNodes(Script script, Func<JsonUserData, string> callback)
-    {
-        return _core.PatchAll(script, "JSON", "techNodeData", callback.ToPatchMethod());
-    }
 
     /// <summary>
-    /// Registers a JSON patch that runs against the tech-tree node matching <paramref name="name" />.
+    /// Registers a tech-tree-node patch with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="name">The tech node name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the node, <c>null</c> to keep it.</param>
+    /// <remarks>
+    /// The patch matches every tech-tree node by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchTechNode(Script script, string name, Func<JsonUserData, string> callback)
+    public LuaPatch PatchTechNodes(Script script, string name)
     {
-        return _core.Patch(script, "JSON", "techNodeData", name, callback.ToPatchMethod());
+        return _core.Patch(script, "JSON", "techNodeData", name);
     }
 
     /// <summary>
@@ -163,9 +130,11 @@ public class ScienceLuaModule
     /// <param name="parts">The part IDs to append.</param>
     public void AddPartsToTechNode(Script script, string nodeName, params string[] parts)
     {
-        PatchTechNode(script, nodeName, node =>
+        PatchTechNodes(script, $"add_{Guid.NewGuid()}").Named(nodeName).Do(node =>
         {
-            var array = (JArray)node.Token["UnlockedPartsIDs"];
+            if (node.IsNil()) return null;
+
+            var array = JsonUserData.RequireArray(((JsonUserData)node.UserData.Object).Token["UnlockedPartsIDs"], "UnlockedPartsIDs");
             foreach (var part in parts)
             {
                 array.Add(part);

@@ -32,31 +32,20 @@ public class GenericLuaModule
         _core = pmc;
         _universe = universe;
     }
-
+    
     /// <summary>
-    /// Registers a JSON patch that runs against every asset under <paramref name="label" />.
+    /// Registers a JSON patch under <paramref name="label" /> with the given namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
+    /// <remarks>
+    /// The patch matches every asset under <paramref name="label" /> by default; restrict it via <see cref="LuaPatch.Named" />.
+    /// </remarks>
+    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="label">The addressables label to patch.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
+    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAll(Script script, string label, Func<JsonUserData, string> callback)
+    public LuaPatch Patch(Script script, string label, string name)
     {
-        return _core.PatchAll(script, "JSON", label, callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Registers a JSON patch that runs against assets under <paramref name="label" /> whose name matches
-    /// <paramref name="name" />.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="label">The addressables label to patch.</param>
-    /// <param name="name">The asset name pattern (supports <c>*</c> and <c>?</c> wildcards).</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string label, string name, Func<JsonUserData, string> callback)
-    {
-        return _core.Patch(script, "JSON", label, name, callback.ToPatchMethod());
+        return _core.Patch(script, "JSON", label, name);
     }
 
     /// <summary>
@@ -68,27 +57,5 @@ public class GenericLuaModule
     public void New(string label, string name, DynValue value)
     {
         _core.New("JSON", label, name, value);
-    }
-
-    /// <summary>
-    /// Registers a JSON patch that runs against a single asset identified by its Addressables address.
-    /// </summary>
-    /// <param name="script">The host Lua script.</param>
-    /// <param name="address">The Addressables address of the asset to patch.</param>
-    /// <param name="callback">The patch callback. Returns <c>"remove"</c> to delete the asset, <c>null</c> to keep it.</param>
-    /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAddress(Script script, string address, Func<JsonUserData, string> callback)
-    {
-        return _core.PatchAddress(script, "JSON", address, callback.ToPatchMethod());
-    }
-
-    /// <summary>
-    /// Queues a brand-new JSON asset for creation at the given Addressables address, with no label.
-    /// </summary>
-    /// <param name="address">The Addressables address for the new asset.</param>
-    /// <param name="value">The asset's Lua-facing value (typically a <see cref="JsonUserData" /> wrapping a <c>JObject</c> or <c>JArray</c>).</param>
-    public void NewAddress(string address, DynValue value)
-    {
-        _core.NewAddress("JSON", address, value);
     }
 }
