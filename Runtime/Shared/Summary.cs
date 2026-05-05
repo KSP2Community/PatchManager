@@ -235,7 +235,7 @@ public class Summary
         var sb = new StringBuilder();
 
         var allEntries = Summaries.SelectMany(s => s.Item2).SelectMany(a => a.entries).ToList();
-        var totalPatches = allEntries.Count + RemovedPatches.Count;
+        var totalPatches = allEntries.Count(p => p.State == ApplicationState.Applied || p.State == ApplicationState.Removed);
         var patchedAssets = Summaries
             .SelectMany(s => s.Item2)
             .Count(a => a.entries.Any(p => p.State == ApplicationState.Applied || p.State == ApplicationState.Removed));
