@@ -14,6 +14,7 @@
 ---@field Planets PlanetsLuaModule
 ---@field Resources ResourcesLuaModule
 ---@field Science ScienceLuaModule
+---@field VSwift VSwiftLuaModule
 PatchManagerCore = {}
 
 ---Registers a patch keyed by the given addressables label and namespaced patch name.
