@@ -662,8 +662,8 @@ namespace PatchManager.LuaPatching
                 if (ReferenceEquals(best, exactPatch)) exactI++;
                 else if (ReferenceEquals(best, matchAllPatch)) matchAllI++;
                 else wildCardI++;
-                
-                if (alreadyYielded.Add(best)) yield return best;
+
+                if (alreadyYielded.Add(best) && !best.DisallowedNames.Any(x => x.Matches(name))) yield return best;
             }
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using MoonSharp.Interpreter;
 using Newtonsoft.Json.Linq;
+using PatchManager.LuaPatching.Utility;
 using PatchManager.Shared;
 
 namespace PatchManager.LuaPatching;
@@ -84,6 +85,29 @@ public class LuaPatch
         {
             Names.Add(name);
         }
+        return this;
+    }
+
+    /// <summary>
+    /// The asset names this patch rejects.
+    /// </summary>
+    /// <remarks>
+    /// Supports <c>*</c> and <c>?</c> wildcards.
+    /// </remarks>
+    [MoonSharpHidden] public HashSet<NamePattern> DisallowedNames = new();
+
+    /// <summary>
+    /// Makes the patch reject the assets with these names.
+    /// </summary>
+    /// <param name="names">The asset names to reject.</param>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch NotNamed(params string[] names)
+    {
+        foreach (var name in names)
+        {
+            DisallowedNames.Add(NamePattern.Get(name));
+        }
+
         return this;
     }
     
@@ -247,6 +271,7 @@ public class LuaPatch
         [CanBeNull] public string Key;
         [CanBeNull] public Func<DynValue, bool> Method;
         [CanBeNull] public string AssertionMessage;
+        public bool Invert;
         
         // Returns false if the predicate fails
         public bool Evaluate(string name, DynValue value, Summary summary)
@@ -265,7 +290,15 @@ public class LuaPatch
             var index = Index(value);
             if (index.Type == DataType.Nil)
             {
+                if (Invert) return true;
                 summary.Skip(name, $"asset did not have {Key.ToLiteral()}");
+                return false;
+            }
+
+            if (Invert)
+            {
+                summary.Skip(name, AssertionMessage ?? $"asset had {Key.ToLiteral()}");
+                return false;
             }
 
             if (Method == null) return true;
@@ -335,6 +368,23 @@ public class LuaPatch
             Method = predicate,
             AssertionMessage = message
         });
+        return this;
+    }
+    /// <summary>
+    /// Adds a requirement that the asset does not expose <paramref name="key" />
+    /// </summary>
+    /// <param name="key">The key the asset must not expose.</param>
+    /// <param name="message">Optional assertion message logged when the key is present.</param>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch HasNo(string key, [CanBeNull] string message = null)
+    {
+        _predicates.Add(new Predicate
+            {
+                Key = key,
+                Invert = true,
+                AssertionMessage = message
+            }
+        );
         return this;
     }
     

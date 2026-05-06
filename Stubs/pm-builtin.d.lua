@@ -82,6 +82,13 @@ function LuaPatch:Do(patchMethod) end
 ---@return LuaPatch<T, V> self The patch instance for chaining.
 function LuaPatch:Named(...) end
 
+---Makes the patch reject the assets with these names.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param ... string The asset names to reject.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:NotNamed(...) end
+
 ---Makes the patch require these mod IDs to run.
 ---@generic T, V
 ---@param self LuaPatch<T, V>
@@ -154,6 +161,14 @@ function LuaPatch:Requires(predicate, message) end
 ---@param message? string Optional assertion message logged when the key is present but the predicate fails.
 ---@return LuaPatch<T, V> self The patch instance for chaining.
 function LuaPatch:Has(key, predicate, message) end
+
+---Adds a requirement that the asset does not expose key.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@param key string The key the asset must not expose.
+---@param message? string Optional assertion message logged when the key is present.
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:HasNo(key, message) end
 
 ---A new asset queued for creation by a Lua patch script.
 ---@class LuaAsset
