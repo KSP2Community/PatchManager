@@ -54,18 +54,20 @@ public class ModuleUserData
     {
         var dataTypeName = JsonUserData.RequireString(moduleData["DataType"], "ModuleData entry's DataType");
         var type = Type.GetType(dataTypeName);
+        var dataObject = JsonUserData.RequireObject(moduleData["DataObject"], "ModuleData entry's DataObject");
         if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
         {
             try
             {
-                return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, moduleData));
+                return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, dataObject));
             }
             catch (Exception e) when (e is not ScriptRuntimeException)
             {
-                throw new ScriptRuntimeException($"Failed to construct module-data adapter '{adapterType.FullName}' for type '{dataTypeName}': {e.Message}");
+                var inner = (e as System.Reflection.TargetInvocationException)?.InnerException ?? e;
+                throw new ScriptRuntimeException($"Failed to construct module-data adapter '{adapterType.FullName}' for type '{dataTypeName}': {inner.Message}");
             }
         }
-        return JsonUserData.GetFromJToken(moduleData["DataObject"]);
+        return JsonUserData.GetFromJToken(dataObject);
     }
 
     /// <summary>
