@@ -255,7 +255,7 @@ namespace PatchManager.Core.Assets
                     if (Universe.HasAnyPatchFor(label, asset.name))
                     {
                         patchedText = PatchJson(label, asset.name, asset.text, out var changed);
-                        unchanged = unchanged || !changed;
+                        unchanged = unchanged && !changed;
                     }
                     else
                     {
