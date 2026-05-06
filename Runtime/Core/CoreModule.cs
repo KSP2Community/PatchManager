@@ -10,6 +10,7 @@ using PatchManager.LuaPatching;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using ReduxLib.Configuration;
+using ReduxLib.Configuration.Attributes;
 using SpaceWarp2.API.Mods.JSON;
 using UniLinq;
 using Unity.VisualScripting;
@@ -30,8 +31,18 @@ namespace PatchManager.Core
         private const string PATCH_LABEL = "redux_patches";
         private const string REDUX_MOD_ID = "Redux";
 
-        private ConfigValue<bool> _shouldAlwaysInvalidate;
-        private ConfigValue<bool> _indentedPatchOutput;
+        [ConfigSection("Advanced", loc: "Menu/Settings/Sections/Advanced")]
+        [ConfigValue("Always Invalidate Patch Manager Cache",
+            "Should patch manager always invalidate its cache upon load",
+            nameLoc: "Menu/Settings/AlwaysInvalidatePmCache",
+            descLoc: "Menu/Settings/Description/AlwaysInvalidatePmCache")]
+        private bool _shouldAlwaysInvalidate;
+
+        [ConfigValue("Indent Patched JSON",
+            "Format patched JSON output with indentation in the cache. Useful for inspection but is slightly slower. Always enabled in the unity editor",
+            nameLoc: "Menu/Settings/IndentPatchedJson",
+            descLoc: "Menu/Settings/Description/IndentPatchedJson")]
+        private bool _indentedPatchOutput;
 
         private bool _wasCacheInvalidated;
 
@@ -67,7 +78,7 @@ namespace PatchManager.Core
         /// </summary>
         public override void Init()
         {
-            if (Application.isEditor || _shouldAlwaysInvalidate.Value ||
+            if (Application.isEditor || _shouldAlwaysInvalidate ||
                 SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
             {
                 CacheManager.CreateCacheFolderIfNotExists();
@@ -235,15 +246,8 @@ namespace PatchManager.Core
         /// <inheritdoc />
         public override void BindConfiguration(IConfigFile modConfiguration)
         {
-            _shouldAlwaysInvalidate = new(modConfiguration.Bind("Advanced", "Always Invalidate Patch Manager Cache",
-                false,
-                "Should patch manager always invalidate its cache upon load"));
-
-            _indentedPatchOutput = new(modConfiguration.Bind("Advanced", "Indent Patched JSON", false,
-                    "Format patched JSON output with indentation in the cache. Useful for inspection but is slightly slower. Always enabled in the unity editor"
-                ));
-
-            PatchingManager.UseIndentedOutput = Application.isEditor || _indentedPatchOutput.Value;
+            modConfiguration.Bind(this);
+            PatchingManager.UseIndentedOutput = Application.isEditor || _indentedPatchOutput;
         }
 
         /// <summary>
