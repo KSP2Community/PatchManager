@@ -9,6 +9,7 @@ using PatchManager.Core.Cache;
 using PatchManager.LuaPatching;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using Redux.UI.Settings.Submenus;
 using ReduxLib.Configuration;
 using ReduxLib.Configuration.Attributes;
 using SpaceWarp2.API.Mods.JSON;
@@ -29,7 +30,7 @@ namespace PatchManager.Core
     public class CoreModule : BaseModule
     {
         private const string PATCH_LABEL = "redux_patches";
-        private const string REDUX_MOD_ID = "Redux";
+        private const string REDUX_MOD_ID = "Ksp2Redux";
 
         [ConfigSection("Advanced", loc: "Menu/Settings/Sections/Advanced")]
         [ConfigValue("Always Invalidate Patch Manager Cache",
@@ -78,8 +79,11 @@ namespace PatchManager.Core
         /// </summary>
         public override void Init()
         {
+            ConfigReplay.ReplayAll();
+
             if (Application.isEditor || _shouldAlwaysInvalidate ||
-                SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun)
+                SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun ||
+                ConfigReplay.HasStaleConfigs)
             {
                 CacheManager.CreateCacheFolderIfNotExists();
                 CacheManager.InvalidateCache();
@@ -103,12 +107,37 @@ namespace PatchManager.Core
                     () => new FlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(5,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(6,
+                    () => new FlowAction("Patch Manager: Registering Standalone Configs", RegisterStandaloneConfigs));
             }
             else
             {
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                     () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
+                    () => new FlowAction("Patch Manager: Registering Standalone Configs", RegisterStandaloneConfigs));
             }
+        }
+
+        private void RegisterStandaloneConfigs(Action resolve, Action<string> reject)
+        {
+            var menuManager = GameManager.Instance.Game.SettingsMenuManager;
+            if (menuManager == null)
+            {
+                resolve();
+                return;
+            }
+
+            foreach (var standalone in ConfigReplay.StandaloneConfigs.OrderBy(o => o.ModId, StringComparer.Ordinal))
+            {
+                if (standalone.ConfigFile is { Sections.Count: > 0 } file
+                    && file.Sections.Any(s => s.Keys.Count > 0))
+                {
+                    menuManager.RegisterMenu(new UitkConfigFileSettingsMenu(standalone.ModId, file));
+                }
+            }
+
+            resolve();
         }
 
         private void SavePatchSummary(Action resolve, Action<string> reject)
@@ -157,7 +186,7 @@ namespace PatchManager.Core
 
             var standalonePatches = Directory.EnumerateFiles(
                     SpaceWarp2.API.CommonPaths.ModsFolder,
-                    "*.patch",
+                    "*.lua",
                     SearchOption.AllDirectories
                 )
                 .Where(x => NoSwinfo(new FileInfo(x).Directory, gameRoot))
@@ -165,11 +194,7 @@ namespace PatchManager.Core
                 .ToList();
 
 
-            PatchingManager.GenerateUniverse(standalonePatches.Select(x =>
-                x.Directory!.FullName
-                    .MakeRelativePathTo(gameRoot.FullName)
-                    .Replace("\\", "-")
-            ).ToHashSet());
+            PatchingManager.GenerateUniverse(new HashSet<string>());
 
             foreach (var modFolder in modFolders)
             {

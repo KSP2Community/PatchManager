@@ -90,76 +90,6 @@ public class PatchManagerCore
 
         _universe.AddAsset(newPatch);
     }
-
-    // /// <summary>
-    // /// Creates a named stage that runs after the most recent implicit stage from the same host mod.
-    // /// </summary>
-    // /// <remarks>
-    // /// Use this when stages within a mod should run in declaration order. The first <c>ImplicitStage</c> in a mod
-    // /// runs after the mod's own base stage, and each subsequent one runs after its predecessor. The mod's
-    // /// <c>__post</c> stage is also updated to run after the new stage so the mod's post stage stays at the tail
-    // /// of the mod's chain. The stage is registered under <c>"modId:name"</c>; references via
-    // /// <see cref="LuaPatch.OnStage" />, <see cref="Stage.Before" />, and <see cref="Stage.After" /> use that
-    // /// fully-qualified name.
-    // /// </remarks>
-    // /// <param name="context">The host Lua script; its <c>ModId</c> global is used to scope the implicit chain.</param>
-    // /// <param name="name">The stage name (registered as <c>"modId:name"</c>).</param>
-    // /// <returns>The created stage, suitable for chaining (for example <see cref="Stage.Before" /> / <see cref="Stage.After" />).</returns>
-    // public Stage ImplicitStage(Script context, string name)
-    // {
-    //     var modId = context.Globals.Get("ModId").CastToString();
-    //     var prefixed = $"{modId}:{name}";
-    //     var stage = new Stage();
-    //     _universe.AddStage(prefixed, stage);
-    //     stage.RunsAfter.Add(_universe.LastImplicitWithinMod.GetValueOrDefault(modId, _universe.LastImplicitGlobal));
-    //     _universe.LastImplicitWithinMod[modId] = prefixed;
-    //     if (_universe.AllStages.TryGetValue($"{modId}:__post", out var postStage))
-    //     {
-    //         postStage.RunsAfter.Add(prefixed);
-    //     }
-    //     return stage;
-    // }
-    //
-    // /// <summary>
-    // /// Creates a named stage that runs after the last implicit stage of the entire mod load order.
-    // /// </summary>
-    // /// <remarks>
-    // /// The stage is registered under <c>"modId:name"</c>; references via <see cref="LuaPatch.OnStage" />,
-    // /// <see cref="Stage.Before" />, and <see cref="Stage.After" /> use that fully-qualified name.
-    // /// </remarks>
-    // /// <param name="context">The host Lua script; its <c>ModId</c> global is used to namespace the stage.</param>
-    // /// <param name="name">The stage name (registered as <c>"modId:name"</c>).</param>
-    // /// <returns>The created stage, suitable for chaining (for example <see cref="Stage.Before" /> / <see cref="Stage.After" />).</returns>
-    // public Stage GlobalStage(Script context, string name)
-    // {
-    //     var modId = context.Globals.Get("ModId").CastToString();
-    //     var prefixed = $"{modId}:{name}";
-    //     var stage = new Stage();
-    //     _universe.AddStage(prefixed, stage);
-    //     stage.RunsAfter.Add(_universe.LastImplicitGlobal);
-    //     _universe.LastImplicitGlobal = prefixed;
-    //     return stage;
-    // }
-    //
-    // /// <summary>
-    // /// Creates a named stage with no implicit ordering; callers must declare any required relations explicitly.
-    // /// </summary>
-    // /// <remarks>
-    // /// The stage is registered under <c>"modId:name"</c>; references via <see cref="LuaPatch.OnStage" />,
-    // /// <see cref="Stage.Before" />, and <see cref="Stage.After" /> use that fully-qualified name.
-    // /// </remarks>
-    // /// <param name="context">The host Lua script; its <c>ModId</c> global is used to namespace the stage.</param>
-    // /// <param name="name">The stage name (registered as <c>"modId:name"</c>).</param>
-    // /// <returns>The created stage, suitable for chaining (for example <see cref="Stage.Before" /> / <see cref="Stage.After" />).</returns>
-    // public Stage Stage(Script context, string name)
-    // {
-    //     var modId = context.Globals.Get("ModId").CastToString();
-    //     var prefixed = $"{modId}:{name}";
-    //     var stage = new Stage();
-    //     _universe.AddStage(prefixed, stage);
-    //     return stage;
-    // }
-
     #endregion
 
     #region Other Methods
@@ -173,5 +103,6 @@ public class PatchManagerCore
     {
         return _universe.AllMods.Contains(modId);
     }
+    
     #endregion
 }

@@ -493,16 +493,19 @@ public class JsonUserData
     /// Lifts a JSON token into the corresponding Lua-facing <see cref="DynValue" />.
     /// </summary>
     /// <remarks>
-    /// Objects and arrays are wrapped in a fresh <see cref="JsonUserData" />; primitives become the matching
-    /// <see cref="DynValue" /> kind; <see cref="JTokenType.None" />, <see cref="JTokenType.Null" />, and
-    /// <see cref="JTokenType.Undefined" /> all map to <see cref="DynValue.Nil" />.
+    /// A null token (missing JSON key) maps to <see cref="DynValue.Nil" />. Objects and arrays are wrapped in
+    /// a fresh <see cref="JsonUserData" />; primitives become the matching <see cref="DynValue" /> kind;
+    /// <see cref="JTokenType.None" />, <see cref="JTokenType.Null" />, and <see cref="JTokenType.Undefined" />
+    /// all map to <see cref="DynValue.Nil" />.
     /// </remarks>
-    /// <param name="token">The token to lift.</param>
+    /// <param name="token">The token to lift, or <c>null</c> for a missing key.</param>
     /// <returns>The Lua value for the given token.</returns>
     /// <exception cref="Exception">Thrown when <paramref name="token" />'s type is not one of the handled token types.</exception>
     [MoonSharpHidden]
     public static DynValue GetFromJToken(JToken token)
     {
+        if (token == null) return DynValue.Nil;
+
         if (token.Type is JTokenType.Array or JTokenType.Object)
         {
             return UserData.Create(new JsonUserData(token));

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop;
 using PatchManager.LuaPatching;
@@ -41,17 +42,25 @@ public class IndexerFallbackDescriptor : IUserDataDescriptor
     /// <param name="index">The index value (member name for direct indexing).</param>
     /// <param name="isDirectIndexing">True when MoonSharp is performing member-style access.</param>
     /// <returns>The resolved value, or <see cref="DynValue.Nil" /> when neither lookup matches.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when the wrapped descriptor surfaces a CLR exception; rewrapped so MoonSharp decorates the error with the Lua call site.</exception>
     public DynValue Index(Script script, object obj, DynValue index, bool isDirectIndexing)
     {
-        var result = _inner.Index(script, obj, index, isDirectIndexing);
-
-        // 2. If it's nil/void and we are using a string index (like .Planets)
-        if ((result == null || result.IsNil()) && index.Type == DataType.String)
+        try
         {
-            return _inner.Index(script, obj, index, false);
-        }
+            var result = _inner.Index(script, obj, index, isDirectIndexing);
 
-        return result;
+            // 2. If it's nil/void and we are using a string index (like .Planets)
+            if ((result == null || result.IsNil()) && index.Type == DataType.String)
+            {
+                return _inner.Index(script, obj, index, false);
+            }
+
+            return result;
+        }
+        catch (Exception e) when (ShouldWrap(e))
+        {
+            throw Wrap(e, obj, index, isWrite: false);
+        }
     }
 
     /// <summary>
@@ -64,16 +73,36 @@ public class IndexerFallbackDescriptor : IUserDataDescriptor
     /// <param name="value">The value being assigned.</param>
     /// <param name="isDirectIndexing">True when MoonSharp is performing member-style access.</param>
     /// <returns>True if the assignment was handled, false if neither lookup accepts it.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when the wrapped descriptor surfaces a CLR exception; rewrapped so MoonSharp decorates the error with the Lua call site.</exception>
     public bool SetIndex(Script script, object obj, DynValue index, DynValue value, bool isDirectIndexing)
     {
-        var handled = _inner.SetIndex(script, obj, index, value, isDirectIndexing);
-
-        if (!handled && isDirectIndexing && index.Type == DataType.String)
+        try
         {
-            return _inner.SetIndex(script, obj, index, value, false);
-        }
+            var handled = _inner.SetIndex(script, obj, index, value, isDirectIndexing);
 
-        return handled;
+            if (!handled && isDirectIndexing && index.Type == DataType.String)
+            {
+                return _inner.SetIndex(script, obj, index, value, false);
+            }
+
+            return handled;
+        }
+        catch (Exception e) when (ShouldWrap(e))
+        {
+            throw Wrap(e, obj, index, isWrite: true);
+        }
+    }
+
+    private static bool ShouldWrap(Exception e) =>
+        e is not ScriptRuntimeException && e is not InterpreterException;
+
+    private ScriptRuntimeException Wrap(Exception e, object obj, DynValue index, bool isWrite)
+    {
+        var inner = e is TargetInvocationException tie && tie.InnerException != null ? tie.InnerException : e;
+        var typeName = obj?.GetType().Name ?? Type?.Name ?? "<unknown>";
+        var key = index.Type == DataType.String ? index.String : index.ToPrintString();
+        var op = isWrite ? "writing" : "reading";
+        return new ScriptRuntimeException($"{inner.GetType().Name} {op} {typeName}.{key}: {inner.Message}");
     }
 
     /// <inheritdoc />

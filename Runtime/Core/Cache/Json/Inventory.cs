@@ -54,10 +54,14 @@ namespace PatchManager.Core.Cache.Json
         [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; } = 0;
 
         /// <summary>
-        /// Per-mod serialized configuration values, keyed by mod ID and then by config-entry name.
+        /// Per-mod replay slices for <c>Config:</c> bindings, keyed by mod ID. Each slice carries identity
+        /// (descriptor vs standalone + .lua path) and the bindings the mod's patches declared. Lets the settings
+        /// UI surface bindings on hot-cache launches when the patch scripts don't run, and lets
+        /// <see cref="ConfigReplay" /> compare current values against the value the patch ran with to decide
+        /// whether to invalidate.
         /// </summary>
         [JsonProperty("serialized_configs")]
-        public Dictionary<string, Dictionary<string, JToken>> SerializedConfigs { get; internal set; } = new();
+        public Dictionary<string, ConfigReplaySlice> SerializedConfigs { get; internal set; } = new();
 
         /// <summary>
         /// Get a <see cref="CacheEntry" /> by its label.

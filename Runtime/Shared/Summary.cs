@@ -4,120 +4,173 @@ using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
 using MoonSharp.Interpreter;
-using Unity.VisualScripting;
-using VehiclePhysics;
+using PatchManager.LuaPatching;
 
 namespace PatchManager.Shared;
 
 /// <summary>
-/// This is a class that holds the summary state for patches
+/// Per-run summary of patch loading and application across the Early, Default, and Late passes.
 /// </summary>
 public class Summary
 {
     /// <summary>
-    /// A list of recognized mod names in the patching system
+    /// Mod IDs the patching system has registered.
     /// </summary>
     public HashSet<string> RecognizedModIds = new();
-    
+
     /// <summary>
-    /// The files that failed even loading
+    /// Lua files that failed to load.
     /// </summary>
     public List<(string filename, string reason)> ErroredFiles = new();
 
     /// <summary>
-    /// What was the state of the application
+    /// Result of a single application of a patch to an asset.
     /// </summary>
     public enum ApplicationState
     {
-        /// <summary>
-        /// This patch was applied
-        /// </summary>
+        /// <summary>The patch was applied.</summary>
         Applied,
 
-        /// <summary>
-        /// This patch removed the given asset from the result
-        /// </summary>
+        /// <summary>The patch removed the target asset from the result.</summary>
         Removed,
 
-        /// <summary>
-        /// This patch skipped running
-        /// </summary>
+        /// <summary>The patch was skipped.</summary>
         Skipped,
 
-        /// <summary>
-        /// This patch had an error while running
-        /// </summary>
+        /// <summary>The patch errored while running.</summary>
         Errored,
     }
 
     /// <summary>
-    /// This is an entry into the patch summary
+    /// One record of an apply, skip, error, or remove for a single patch against a single asset within
+    /// a specific pass.
     /// </summary>
     public class SummaryEntry
     {
-        /// <summary>
-        /// The name of the patch that is this summary entry
-        /// </summary>
+        /// <summary>The name of the patch the entry corresponds to.</summary>
         public string Name;
 
-        /// <summary>
-        /// What was the result of this patch
-        /// </summary>
+        /// <summary>The pass the patch ran in.</summary>
+        public LuaPatch.PatchPass Pass;
+
+        /// <summary>The application state of the patch.</summary>
         public ApplicationState State;
 
-        /// <summary>
-        /// Why was the patch skipped, or why did it error
-        /// </summary>
+        /// <summary>Reason the patch was skipped, or the error context if it errored.</summary>
         [CanBeNull] public string Context;
     }
 
     /// <summary>
-    /// This is all the patches that were removed during the setup phase
+    /// Address and per-pass patch entries recorded for a single asset.
+    /// </summary>
+    public class AssetSummary
+    {
+        /// <summary>
+        /// The asset's name as targeted via <c>:Named</c>.
+        /// </summary>
+        public string AssetName;
+
+        /// <summary>
+        /// The asset's addressables address.
+        /// </summary>
+        public string Address;
+
+        /// <summary>
+        /// Patch entries recorded for this asset, keyed by the pass they ran in.
+        /// </summary>
+        public Dictionary<LuaPatch.PatchPass, List<SummaryEntry>> EntriesByPass = new();
+
+        /// <summary>
+        /// True if any pass recorded at least one entry for this asset, false otherwise.
+        /// </summary>
+        public bool HasEntries => EntriesByPass.Values.Any(l => l.Count > 0);
+
+        /// <summary>
+        /// Total number of entries across every pass.
+        /// </summary>
+        public int EntryCount => EntriesByPass.Values.Sum(l => l.Count);
+    }
+
+    /// <summary>
+    /// Patches that were removed during the setup phase before any pass ran.
     /// </summary>
     public List<(string patchName, string status, string context)> RemovedPatches = new();
 
+    /// <summary>
+    /// Per-label asset summaries, in the order labels were first touched.
+    /// </summary>
+    public List<(string labelName, List<AssetSummary> assets)> Summaries = new();
+
+    [CanBeNull] private List<AssetSummary> _currentLabel;
+    [CanBeNull] private AssetSummary _currentAsset;
+    private LuaPatch.PatchPass _currentPass = LuaPatch.PatchPass.Default;
 
     /// <summary>
-    /// All of the current summaries
+    /// Marks a patch as removed during setup (failed mod or patch constraint, or caught in a cycle).
     /// </summary>
-    public List<(string labelName, List<(string assetName, string address, List<SummaryEntry> entries)>)> Summaries =
-        new();
-
-    [CanBeNull] private List<(string assetName, string address, List<SummaryEntry> entries)> _currentLabel;
-    [CanBeNull] private List<SummaryEntry> _currentEntries;
-
-    /// <summary>
-    /// Mark a patch as removed
-    /// </summary>
-    /// <param name="name">The patch name</param>
-    /// <param name="status">The short status reason (e.g. <c>MISSING</c>, <c>CONFLICT</c>, <c>CYCLE</c>).</param>
-    /// <param name="context">Optional detail describing the status (e.g. the missing mod or conflicting patch).</param>
+    /// <param name="name">The patch name.</param>
+    /// <param name="status">Short status reason (<c>MISSING</c>, <c>CONFLICT</c>, <c>CYCLE</c>).</param>
+    /// <param name="context">Optional detail describing the status.</param>
     public void Remove(string name, string status, [CanBeNull] string context = null)
     {
         RemovedPatches.Add((name, status, context));
     }
 
     /// <summary>
-    /// Note that we are beginning the given label in the summary
+    /// Sets the pass that subsequent <see cref="Apply" />, <see cref="Skip" />,
+    /// <see cref="Error(string, string)" />, and <see cref="RemovedAsset" /> calls are stamped with.
     /// </summary>
-    /// <param name="labelName">The label name</param>
+    /// <param name="pass">The pass currently being run.</param>
+    public void BeginPass(LuaPatch.PatchPass pass)
+    {
+        _currentPass = pass;
+    }
+
+    /// <summary>
+    /// Begins or resumes the given label.
+    /// </summary>
+    /// <remarks>
+    /// Reuses the existing asset list when the label has already been started so multi-pass entries
+    /// accumulate under one heading.
+    /// </remarks>
+    /// <param name="labelName">The label name.</param>
     public void BeginLabel(string labelName)
     {
-        var result = new List<(string assetName, string address, List<SummaryEntry> entries)>();
+        for (var i = 0; i < Summaries.Count; i++)
+        {
+            if (Summaries[i].labelName == labelName)
+            {
+                _currentLabel = Summaries[i].assets;
+                return;
+            }
+        }
+
+        var result = new List<AssetSummary>();
         Summaries.Add((labelName, result));
         _currentLabel = result;
     }
 
     /// <summary>
-    /// Note that we are starting to patch the given asset in the summary
+    /// Begins or resumes the given asset under the current label. Reuses the existing
+    /// <see cref="AssetSummary" /> when the asset has been started before so multi-pass entries
+    /// accumulate under one asset heading.
     /// </summary>
-    /// <param name="assetName">The name of the asset as targeted via :Named</param>
-    /// <param name="address">The address of the label</param>
+    /// <param name="assetName">The asset's name.</param>
+    /// <param name="address">The addressables address.</param>
     public void BeginAsset(string assetName, string address)
     {
-        var result = new List<SummaryEntry>();
-        _currentLabel!.Add((assetName, address, result));
-        _currentEntries = result;
+        foreach (var asset in _currentLabel!)
+        {
+            if (asset.AssetName == assetName)
+            {
+                _currentAsset = asset;
+                return;
+            }
+        }
+
+        var fresh = new AssetSummary { AssetName = assetName, Address = address };
+        _currentLabel.Add(fresh);
+        _currentAsset = fresh;
     }
 
     /// <summary>
@@ -126,7 +179,7 @@ public class Summary
     public int NewAssetCount;
 
     /// <summary>
-    /// Like <see cref="BeginAsset" />, but flags this asset as a brand-new one created during patching so it counts in <see cref="NewAssetCount" />.
+    /// Like <see cref="BeginAsset" /> but counts the asset as a brand-new creation.
     /// </summary>
     /// <param name="assetName">The new asset's name.</param>
     /// <param name="address">The asset's addressables address.</param>
@@ -137,84 +190,100 @@ public class Summary
     }
 
     /// <summary>
-    /// Mark a patch as applied
+    /// Marks a patch as applied in the current pass.
     /// </summary>
-    /// <param name="patchName">The patch to mark as applied</param>
+    /// <param name="patchName">The patch to mark.</param>
     public void Apply(string patchName)
     {
-        _currentEntries!.Add(new SummaryEntry
+        AddEntry(new SummaryEntry
         {
             Name = patchName,
+            Pass = _currentPass,
             State = ApplicationState.Applied,
         });
     }
 
     /// <summary>
-    /// Mark a patch as having removed an asset
+    /// Marks a patch as having removed an asset in the current pass.
     /// </summary>
-    /// <param name="patchName">The patch that removed the asset</param>
+    /// <param name="patchName">The patch that removed the asset.</param>
     public void RemovedAsset(string patchName)
     {
-        _currentEntries!.Add(new SummaryEntry
+        AddEntry(new SummaryEntry
         {
             Name = patchName,
+            Pass = _currentPass,
             State = ApplicationState.Removed,
         });
     }
 
     /// <summary>
-    /// Mark a patch as having been skipped
+    /// Marks a patch as skipped in the current pass.
     /// </summary>
-    /// <param name="patchName">The patch that was skipped</param>
-    /// <param name="reason">The reason that the patch was skipped</param>
+    /// <param name="patchName">The patch.</param>
+    /// <param name="reason">Skip reason.</param>
     public void Skip(string patchName, string reason)
     {
-        _currentEntries!.Add(new SummaryEntry
+        AddEntry(new SummaryEntry
         {
             Name = patchName,
+            Pass = _currentPass,
             State = ApplicationState.Skipped,
             Context = reason,
         });
     }
 
     /// <summary>
-    /// Mark a patch as having errored out
+    /// Marks a patch as errored in the current pass.
     /// </summary>
-    /// <param name="patchName">The patch that errored out</param>
-    /// <param name="reason">The error message</param>
+    /// <param name="patchName">The patch.</param>
+    /// <param name="reason">Error message.</param>
     public void Error(string patchName, string reason)
     {
-        _currentEntries!.Add(new SummaryEntry
+        AddEntry(new SummaryEntry
         {
             Name = patchName,
+            Pass = _currentPass,
             State = ApplicationState.Errored,
             Context = reason,
         });
     }
-    
+
     /// <summary>
-    /// Mark a patch as having errored out
+    /// Marks a patch as errored in the current pass.
     /// </summary>
-    /// <param name="patchName">The patch that errored out</param>
-    /// <param name="reason">The actual exception</param>
+    /// <param name="patchName">The patch.</param>
+    /// <param name="reason">The actual exception.</param>
     public void Error(string patchName, Exception reason)
     {
-        _currentEntries!.Add(new SummaryEntry
+        AddEntry(new SummaryEntry
         {
             Name = patchName,
+            Pass = _currentPass,
             State = ApplicationState.Errored,
             Context = ContextFromException(reason),
         });
     }
 
     /// <summary>
-    /// Mark a file as having failed to load
+    /// Marks a Lua file as having failed to load.
     /// </summary>
-    /// <param name="filename">The file that failed to load</param>
-    /// <param name="reason">The actual exception</param>
+    /// <param name="filename">The file.</param>
+    /// <param name="reason">The actual exception.</param>
     public void ErrorFile(string filename, Exception reason)
     {
         ErroredFiles.Add((filename, ContextFromException(reason)));
+    }
+
+    private void AddEntry(SummaryEntry entry)
+    {
+        if (_currentAsset == null) return;
+        if (!_currentAsset.EntriesByPass.TryGetValue(_currentPass, out var list))
+        {
+            list = new List<SummaryEntry>();
+            _currentAsset.EntriesByPass[_currentPass] = list;
+        }
+        list.Add(entry);
     }
 
     private static string ContextFromException(Exception reason)
@@ -223,22 +292,28 @@ public class Summary
         {
             return e.DecoratedMessage ?? e.Message ?? "<no message>";
         }
-        return string.IsNullOrEmpty(reason.StackTrace) ? reason.Message.Trim() : reason.Message.Trim() + "\n" + reason.StackTrace;
+        return string.IsNullOrEmpty(reason.StackTrace)
+            ? reason.Message.Trim()
+            : reason.Message.Trim() + "\n" + reason.StackTrace;
     }
 
+    private IEnumerable<SummaryEntry> AllEntries =>
+        Summaries.SelectMany(s => s.assets).SelectMany(a => a.EntriesByPass.Values).SelectMany(l => l);
+
     /// <summary>
-    /// Dumps the entire summary to a string
+    /// Renders the summary as a string for the patch summary log.
     /// </summary>
-    /// <returns>a string form of the summary</returns>
+    /// <returns>The rendered summary.</returns>
     public string Dump()
     {
         var sb = new StringBuilder();
 
-        var allEntries = Summaries.SelectMany(s => s.Item2).SelectMany(a => a.entries).ToList();
+        var allEntries = AllEntries.ToList();
         var totalPatches = allEntries.Count(p => p.State == ApplicationState.Applied || p.State == ApplicationState.Removed);
         var patchedAssets = Summaries
-            .SelectMany(s => s.Item2)
-            .Count(a => a.entries.Any(p => p.State == ApplicationState.Applied || p.State == ApplicationState.Removed));
+            .SelectMany(s => s.assets)
+            .Count(a => a.EntriesByPass.Values.Any(l =>
+                l.Any(p => p.State == ApplicationState.Applied || p.State == ApplicationState.Removed)));
         var errors = allEntries.Count(p => p.State == ApplicationState.Errored) + ErroredFiles.Count;
 
         sb.AppendLine("Statistics:");
@@ -254,12 +329,25 @@ public class Summary
         }
         sb.AppendLine("");
 
+        sb.AppendLine("Per-Pass Statistics:");
+        foreach (LuaPatch.PatchPass pass in Enum.GetValues(typeof(LuaPatch.PatchPass)))
+        {
+            var passEntries = allEntries.Where(p => p.Pass == pass).ToList();
+            if (passEntries.Count == 0) continue;
+            var applied = passEntries.Count(p => p.State == ApplicationState.Applied || p.State == ApplicationState.Removed);
+            var skipped = passEntries.Count(p => p.State == ApplicationState.Skipped);
+            var errored = passEntries.Count(p => p.State == ApplicationState.Errored);
+            sb.AppendLine($"    {pass,-7}    Applied: {applied}    Skipped: {skipped}    Errored: {errored}");
+        }
+        sb.AppendLine("");
+
         sb.AppendLine("Recognized Mod IDs:");
         foreach (var id in RecognizedModIds)
         {
             sb.AppendLine($"    {id}");
         }
         sb.AppendLine("");
+
         if (ErroredFiles.Count > 0)
         {
             sb.AppendLine("Errored Lua Files:");
@@ -296,48 +384,51 @@ public class Summary
             sb.AppendLine("");
         }
 
-        foreach (var (label, entries) in Summaries
-                     .Where(x => x.Item2
-                         .Any(y => y.entries.Count > 0)))
+        foreach (var (label, assets) in Summaries.Where(x => x.assets.Any(a => a.HasEntries)))
         {
             sb.AppendLine($"Label - {label}:");
-            var labelNameWidth = entries
-                .Where(e => e.entries.Count > 0)
-                .SelectMany(e => e.entries)
+            var nameWidth = assets
+                .Where(a => a.HasEntries)
+                .SelectMany(a => a.EntriesByPass.Values).SelectMany(l => l)
                 .Max(p => p.Name.Length);
-            foreach (var (name, address, patches) in entries.Where(e => e.entries.Count > 0))
+            foreach (var asset in assets.Where(a => a.HasEntries))
             {
-                sb.AppendLine($"    Asset - {name}:");
-                var nameWidth = labelNameWidth;
-                foreach (var patch in patches)
+                sb.AppendLine($"    Asset - {asset.AssetName}:");
+                foreach (var pass in asset.EntriesByPass.Keys.OrderBy(p => (int)p))
                 {
-                    sb.Append("        ");
-                    sb.Append(patch.Name.PadRight(nameWidth));
-                    sb.Append("    ");
-                    switch (patch.State)
+                    var entries = asset.EntriesByPass[pass];
+                    if (entries.Count == 0) continue;
+                    sb.AppendLine($"        Pass - {pass}:");
+                    foreach (var entry in entries)
                     {
-                        case ApplicationState.Applied:
-                            sb.AppendLine("APPLIED");
-                            break;
-                        case ApplicationState.Removed:
-                            sb.AppendLine("REMOVED TARGET");
-                            break;
-                        case ApplicationState.Skipped:
-                            sb.AppendLine("SKIPPED");
-                            if (!string.IsNullOrEmpty(patch.Context))
-                            {
-                                AppendContext(sb, patch.Context, "            ");
-                            }
-                            break;
-                        case ApplicationState.Errored:
-                            sb.AppendLine("ERRORED");
-                            if (!string.IsNullOrEmpty(patch.Context))
-                            {
-                                AppendContext(sb, patch.Context, "            ");
-                            }
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        sb.Append("            ");
+                        sb.Append(entry.Name.PadRight(nameWidth));
+                        sb.Append("    ");
+                        switch (entry.State)
+                        {
+                            case ApplicationState.Applied:
+                                sb.AppendLine("APPLIED");
+                                break;
+                            case ApplicationState.Removed:
+                                sb.AppendLine("REMOVED TARGET");
+                                break;
+                            case ApplicationState.Skipped:
+                                sb.AppendLine("SKIPPED");
+                                if (!string.IsNullOrEmpty(entry.Context))
+                                {
+                                    AppendContext(sb, entry.Context, "                ");
+                                }
+                                break;
+                            case ApplicationState.Errored:
+                                sb.AppendLine("ERRORED");
+                                if (!string.IsNullOrEmpty(entry.Context))
+                                {
+                                    AppendContext(sb, entry.Context, "                ");
+                                }
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
                     }
                 }
             }
@@ -356,6 +447,4 @@ public class Summary
             sb.AppendLine(line);
         }
     }
-
-    
 }

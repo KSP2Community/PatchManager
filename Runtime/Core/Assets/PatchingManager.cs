@@ -71,48 +71,11 @@ namespace PatchManager.Core.Assets
             _initialLibraryCount = Universe.LibraryCount;
         }
 
-        private static string PatchJson(string label, string assetName, string text, out bool changed)
-        {
-            Logging.LogDebug($"Patching {label}:{assetName}");
-            var patchCount = 0;
-            if (text != "")
-            {
-                var result = Universe.RunAllPatchesFor(label, assetName, JToken.Parse(text), out patchCount, out var errorCount);
-                text = result == null ? "" : result.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
-                TotalErrorCount += errorCount;
-                TotalPatchCount += patchCount;
-            }
-            if (patchCount > 0)
-            {
-                Logging.LogDebug($"Patched {label}:{assetName} with {patchCount} patches. Total: {TotalPatchCount}");
-                TotalDefinitionPatchCount += 1;
-            }
-
-            changed = patchCount > 0;
-
-            return text;
-        }
-
-        private static string PatchJson(LuaAsset data)
-        {
-            Logging.LogDebug($"Patching {data.Label}:{data.Name}");
-
-            var t = Universe.RunAllPatchesFor(data, out var patchCount, out var errorCount);
-            TotalErrorCount += errorCount;
-            TotalPatchCount += patchCount;
-            if (patchCount > 0)
-            {
-                Logging.LogDebug($"Patched {data.Label}:{data.Name} with {patchCount} patches. Total: {TotalPatchCount}");
-            }
-
-            return t == null ? "" : t.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
-        }
-
         private static int _previousLibraryCount = -1;
 
         /// <summary>
-        /// Loads every <c>.lua</c> patch file under <paramref name="modFolder" /> and records each <c>.patch</c>
-        /// file's hash in the cache checksum.
+        /// Loads every <c>.lua</c> patch file under <paramref name="modFolder" /> and records each one's hash in
+        /// the cache checksum.
         /// </summary>
         /// <param name="modName">The mod ID; used as the script's <c>ModId</c> global.</param>
         /// <param name="modFolder">The directory containing the mod's patches.</param>
@@ -128,7 +91,7 @@ namespace PatchManager.Core.Assets
                 _previousLibraryCount++;
             }
 
-            var patchFiles = Directory.GetFiles(modFolder, "*.patch", SearchOption.AllDirectories);
+            var patchFiles = Directory.GetFiles(modFolder, "*.lua", SearchOption.AllDirectories);
             foreach (var patchFile in patchFiles)
             {
                 var patchHash = Hash.FromFile(patchFile);
@@ -137,7 +100,7 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Loads a single <c>.patch</c> file and records its hash in the cache checksum.
+        /// Loads a single <c>.lua</c> patch file and records its hash in the cache checksum.
         /// </summary>
         /// <param name="fileInfo">The patch file to load.</param>
         public static void ImportSinglePatch(FileInfo fileInfo)
@@ -192,148 +155,6 @@ namespace PatchManager.Core.Assets
             return false;
         }
 
-        private static AsyncOperationHandle<IList<TextAsset>> RebuildCache(string label)
-        {
-            Logging.LogInfo($"Patching: {label}");
-            Universe.Summary.BeginLabel(label);
-            var archiveFilename = $"{label.Replace("/", "")}.zip";
-
-            var archiveFiles = new Dictionary<string, string>();
-
-            var labelCacheEntry = new CacheEntry
-            {
-                Label = label,
-                ArchiveFilename = archiveFilename,
-                Assets = new List<string>()
-            };
-            var assetsCacheEntries = new Dictionary<string, CacheEntry>();
-            var unchanged = !_createdAssets.ContainsKey(label);
-
-
-            if (_createdAssets.TryGetValue(label, out var createdAsset))
-            {
-                foreach (var (name, text) in createdAsset)
-                {
-                    var addressAlias = name.EndsWith(".json") ? null : name + ".json";
-                    Universe.Summary.BeginNewAsset(name, addressAlias);
-                    var patchedText = PatchJson(text);
-                    if (string.IsNullOrEmpty(patchedText)) continue;
-                    archiveFiles[name] = patchedText;
-                    labelCacheEntry.Assets.Add(name);
-                    assetsCacheEntries[name] = new CacheEntry
-                    {
-                        Label = name,
-                        ArchiveFilename = archiveFilename,
-                        Assets = new List<string> { name }
-                    };
-
-                    if (addressAlias != null)
-                    {
-                        assetsCacheEntries[addressAlias] = new CacheEntry
-                        {
-                            Label = addressAlias,
-                            ArchiveFilename = archiveFilename,
-                            Assets = new List<string> { name }
-                        };
-                    }
-                }
-
-                createdAsset.Clear();
-                _createdAssets.Remove(label);
-            }
-
-            var primaryKeyMap = Universe.BuildPrimaryKeyMapForLabel(label);
-
-            var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
-            {
-                try
-                {
-                    var address = primaryKeyMap.GetValueOrDefault(asset.name);
-                    Universe.Summary.BeginAsset(asset.name, address ?? "<unknown>");
-
-                    string patchedText;
-                    if (Universe.HasAnyPatchFor(label, asset.name))
-                    {
-                        patchedText = PatchJson(label, asset.name, asset.text, out var changed);
-                        unchanged = unchanged && !changed;
-                    }
-                    else
-                    {
-                        patchedText = asset.text;
-                    }
-
-                    if (string.IsNullOrEmpty(patchedText))
-                    {
-                        return;
-                    }
-
-                    archiveFiles[asset.name] = patchedText;
-                    labelCacheEntry.Assets.Add(asset.name);
-                    assetsCacheEntries[asset.name] = new CacheEntry
-                    {
-                        Label = asset.name,
-                        ArchiveFilename = archiveFilename,
-                        Assets = new List<string> { asset.name }
-                    };
-
-                    if (address != null && address != asset.name)
-                    {
-                        assetsCacheEntries[address] = new CacheEntry
-                        {
-                            Label = address,
-                            ArchiveFilename = archiveFilename,
-                            Assets = new List<string> { asset.name }
-                        };
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logging.LogError($"Unable to patch {asset.name} due to: {e.Message}, {e.StackTrace}");
-                }
-            });
-
-
-            void SaveArchive()
-            {
-                var archive = CacheManager.CreateArchive(archiveFilename);
-                foreach (var archiveFile in archiveFiles)
-                {
-                    archive.AddFile(archiveFile.Key, archiveFile.Value);
-                }
-
-                archive.Save();
-
-                CacheManager.CacheValidLabels.Add(label);
-                CacheManager.Inventory.CacheEntries.Add(label, labelCacheEntry);
-                CacheManager.Inventory.CacheEntries.AddRangeUnique(assetsCacheEntries);
-                CacheManager.SaveInventory();
-
-                Logging.LogInfo($"Cache for label '{label}' rebuilt.");
-            }
-
-            handle.Completed += results =>
-            {
-                try
-                {
-                    if (unchanged)
-                    {
-                        return;
-                    }
-
-                    SaveArchive();
-                }
-                finally
-                {
-                    if (results.Status == AsyncOperationStatus.Succeeded)
-                    {
-                        Addressables.Release(results);
-                    }
-                }
-            };
-
-            return handle;
-        }
-
         /// <summary>
         /// Collects every queued new asset from the universe into the per-label staging dictionary, then resolves
         /// the supplied callback.
@@ -373,62 +194,397 @@ namespace PatchManager.Core.Assets
         }
 
 
+        private static Dictionary<string, LabelRebuildState> _rebuildStates;
+
+        private static readonly LuaPatch.PatchPass[] OrderedPasses =
+        {
+            LuaPatch.PatchPass.Early,
+            LuaPatch.PatchPass.Default,
+            LuaPatch.PatchPass.Late
+        };
+
         /// <summary>
-        /// Schedules a per-label cache-rebuild flow action for every label that has either patches or queued new
-        /// assets, then resolves the supplied callback.
+        /// Schedules per-(pass, label) flow actions in pass-major order (every label's Early before any
+        /// Default, every label's Default before any Late). A label only receives an action for a pass
+        /// if it has a patch in that pass. The first action a label receives lazily loads its
+        /// addressables; the last action writes the label's archive and releases its load handle. A
+        /// final action persists totals and inventory.
         /// </summary>
         /// <param name="resolve">Callback invoked once scheduling finishes.</param>
         /// <param name="reject">Reject callback (currently unused).</param>
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
-            var distinctKeys = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
+            var labels = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
-            GenericFlowAction CreateIndexedFlowAction(int idx)
+            if (labels.Count == 0)
             {
-                return new GenericFlowAction(
-                    $"Patch Manager: {distinctKeys[idx]}",
-                    (resolve2, _) =>
-                    {
-                        var handle = RebuildCache(distinctKeys[idx]);
-                        CoroutineUtil.Instance.DoCoroutine(WaitForCacheRebuildSingleHandle(handle, resolve2, idx + 1 == distinctKeys.Count));
-                    });
+                resolve();
+                return;
             }
 
-            if (distinctKeys.Count > 0)
+            InitRebuildStates(labels);
+
+            var activePassesPerLabel = new Dictionary<string, List<LuaPatch.PatchPass>>(labels.Count);
+            foreach (var label in labels)
             {
-                for (var i = distinctKeys.Count - 1; i >= 0; i--)
+                activePassesPerLabel[label] = ActivePassesFor(label);
+            }
+
+            var insertIdx = GameManager.Instance.LoadingFlow.flowIndex + 1;
+            var actions = new List<GenericFlowAction>();
+
+            foreach (var pass in OrderedPasses)
+            {
+                foreach (var label in labels)
                 {
-                    GameManager.Instance.LoadingFlow.FlowActions.Insert(
-                        GameManager.Instance.LoadingFlow.flowIndex + 1,
-                        CreateIndexedFlowAction(i)
-                    );
+                    var active = activePassesPerLabel[label];
+                    if (!active.Contains(pass)) continue;
+
+                    var isFirst = active[0] == pass;
+                    var isLast = active[active.Count - 1] == pass;
+                    actions.Add(MakePassAction(label, pass, isFirst, isLast));
                 }
+            }
+
+            actions.Add(new GenericFlowAction(
+                "Patching: Finalize",
+                (r, _) =>
+                {
+                    FinalizeRebuild();
+                    r();
+                }
+            ));
+
+            for (var i = actions.Count - 1; i >= 0; i--)
+            {
+                GameManager.Instance.LoadingFlow.FlowActions.Insert(insertIdx, actions[i]);
             }
 
             resolve();
         }
 
-        private static IEnumerator WaitForCacheRebuildSingleHandle(
-            AsyncOperationHandle<IList<TextAsset>> handle,
-            Action resolve,
-            bool isFinalHandle
+        private static void InitRebuildStates(List<string> labels)
+        {
+            _rebuildStates = new Dictionary<string, LabelRebuildState>(labels.Count);
+            foreach (var label in labels)
+            {
+                var state = new LabelRebuildState
+                {
+                    Label = label,
+                    ArchiveFilename = $"{label.Replace("/", "")}.zip",
+                    PrimaryKeyMap = Universe.BuildPrimaryKeyMapForLabel(label)
+                };
+                _rebuildStates[label] = state;
+
+                if (_createdAssets.TryGetValue(label, out var created))
+                {
+                    foreach (var (name, luaAsset) in created)
+                    {
+                        state.CreatedAssets.Add((name, luaAsset));
+                        state.Unchanged = false;
+                        var addressAlias = name.EndsWith(".json") ? null : name + ".json";
+                        if (addressAlias != null) state.AddressAliases[name] = addressAlias;
+                    }
+                    created.Clear();
+                    _createdAssets.Remove(label);
+                }
+            }
+        }
+
+        private static List<LuaPatch.PatchPass> ActivePassesFor(string label)
+        {
+            var result = new List<LuaPatch.PatchPass>();
+            foreach (var pass in OrderedPasses)
+            {
+                if (HasPatchesInPass(label, pass)) result.Add(pass);
+            }
+            if (result.Count == 0
+                && _rebuildStates.TryGetValue(label, out var state)
+                && state.CreatedAssets.Count > 0)
+            {
+                result.Add(LuaPatch.PatchPass.Default);
+            }
+            return result;
+        }
+
+        private static bool HasPatchesInPass(string label, LuaPatch.PatchPass pass)
+        {
+            if (!Universe.AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
+            if (!perPass.TryGetValue(pass, out var buckets)) return false;
+            return buckets.MatchAll.Length > 0
+                || buckets.Wildcard.Length > 0
+                || buckets.Exact.Count > 0;
+        }
+
+        private static GenericFlowAction MakePassAction(string label, LuaPatch.PatchPass pass, bool loadFirst, bool writeLast)
+        {
+            var labelCopy = label;
+            var passCopy = pass;
+            var loadCopy = loadFirst;
+            var writeCopy = writeLast;
+
+            var passSuffix = pass switch
+            {
+                LuaPatch.PatchPass.Default => "",
+                _ => $" [{pass.ToString().ToUpperInvariant()}]"
+            };
+
+            return new GenericFlowAction(
+                $"Patching: {label}{passSuffix}",
+                (resolve, _) => CoroutineUtil.Instance.DoCoroutine(
+                    RunPassActionCoroutine(labelCopy, passCopy, loadCopy, writeCopy, resolve))
+            );
+        }
+
+        private static IEnumerator RunPassActionCoroutine(
+            string label,
+            LuaPatch.PatchPass pass,
+            bool loadFirst,
+            bool writeLast,
+            Action resolve
         )
         {
+            if (loadFirst) yield return LoadLabel(label);
+            RunPassForLabel(label, pass);
+            if (writeLast) WriteAndReleaseLabel(label);
+            resolve();
+        }
+
+        private static IEnumerator LoadLabel(string label)
+        {
+            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) yield break;
+
+            var stateRef = state;
+            var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
+            {
+                if (string.IsNullOrEmpty(asset.text)) return;
+                stateRef.RawTexts[asset.name] = asset.text;
+            });
+            state.LoadHandle = handle;
+
             while (!handle.IsDone)
             {
-                // "Shuffle" it
                 UpdateLoadingBarData();
                 yield return null;
             }
 
-            if (isFinalHandle)
+            if (state.CreatedAssets.Count > 0)
             {
-                CacheManager.SetTotalPatchCount(TotalPatchCount);
-                CacheManager.SetTotalErrorCount(TotalErrorCount);
-                CacheManager.SetTotalDefinitionCount(TotalDefinitionPatchCount);
-                CacheManager.SetTotalAssetCount(TotalNewAssetCount);
+                Universe.Summary.BeginLabel(label);
+                foreach (var (name, _) in state.CreatedAssets)
+                {
+                    state.AddressAliases.TryGetValue(name, out var alias);
+                    Universe.Summary.BeginNewAsset(name, alias);
+                }
             }
-            resolve();
+        }
+
+        private static void RunPassForLabel(string label, LuaPatch.PatchPass pass)
+        {
+            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
+
+            Universe.Summary.BeginPass(pass);
+            Universe.Summary.BeginLabel(label);
+
+            var assetNames = state.RawTexts.Keys.Concat(state.Tokens.Keys).Distinct().ToList();
+            foreach (var assetName in assetNames)
+            {
+                if (!Universe.HasAnyPatchInPass(label, assetName, pass)) continue;
+
+                var token = EnsureParsed(state, assetName);
+                if (token == null) continue;
+
+                var address = state.PrimaryKeyMap.TryGetValue(assetName, out var a) ? a : "<unknown>";
+                Universe.Summary.BeginAsset(assetName, address);
+
+                var result = Universe.RunAllPatchesFor(label, assetName, token, pass, out var pc, out var ec);
+                TotalPatchCount += pc;
+                TotalErrorCount += ec;
+                if (pc > 0)
+                {
+                    state.Unchanged = false;
+                    if (state.PatchedAssetNames.Add(assetName))
+                    {
+                        TotalDefinitionPatchCount++;
+                    }
+                }
+                if (result == null)
+                {
+                    state.Tokens.Remove(assetName);
+                }
+                else
+                {
+                    state.Tokens[assetName] = result;
+                }
+            }
+
+            foreach (var (name, luaAsset) in state.CreatedAssets)
+            {
+                state.AddressAliases.TryGetValue(name, out var alias);
+                Universe.Summary.BeginAsset(name, alias);
+                Universe.RunAllPatchesFor(luaAsset, pass, out var pc, out var ec);
+                TotalPatchCount += pc;
+                TotalErrorCount += ec;
+            }
+
+            UpdateLoadingBarData();
+        }
+
+        private static JToken EnsureParsed(LabelRebuildState state, string assetName)
+        {
+            if (state.Tokens.TryGetValue(assetName, out var token)) return token;
+            if (!state.RawTexts.TryGetValue(assetName, out var rawText)) return null;
+            try
+            {
+                token = JToken.Parse(rawText);
+            }
+            catch (Exception e)
+            {
+                Logging.LogError($"Failed to parse {state.Label}:{assetName}: {e.Message}");
+                state.RawTexts.Remove(assetName);
+                return null;
+            }
+            state.Tokens[assetName] = token;
+            state.RawTexts.Remove(assetName);
+            return token;
+        }
+
+        private static void WriteAndReleaseLabel(string label)
+        {
+            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
+
+            if (!state.Unchanged) WriteArchive(state);
+
+            if (state.LoadHandle.IsValid()
+                && state.LoadHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                Addressables.Release(state.LoadHandle);
+            }
+
+            _rebuildStates.Remove(label);
+        }
+
+        private static void FinalizeRebuild()
+        {
+            CacheManager.SetTotalPatchCount(TotalPatchCount);
+            CacheManager.SetTotalErrorCount(TotalErrorCount);
+            CacheManager.SetTotalDefinitionCount(TotalDefinitionPatchCount);
+            CacheManager.SetTotalAssetCount(TotalNewAssetCount);
+            CacheManager.SaveInventory();
+
+            if (_rebuildStates != null)
+            {
+                foreach (var (_, state) in _rebuildStates)
+                {
+                    if (state.LoadHandle.IsValid()
+                        && state.LoadHandle.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        Addressables.Release(state.LoadHandle);
+                    }
+                }
+                _rebuildStates = null;
+            }
+
+            UpdateLoadingBarData();
+        }
+
+        private static void WriteArchive(LabelRebuildState state)
+        {
+            var labelCacheEntry = new CacheEntry
+            {
+                Label = state.Label,
+                ArchiveFilename = state.ArchiveFilename,
+                Assets = new List<string>()
+            };
+            var assetsCacheEntries = new Dictionary<string, CacheEntry>();
+            var archive = CacheManager.CreateArchive(state.ArchiveFilename);
+
+            void AddAssetEntry(string assetName, string serialized)
+            {
+                archive.AddFile(assetName, serialized);
+                labelCacheEntry.Assets.Add(assetName);
+                assetsCacheEntries[assetName] = new CacheEntry
+                {
+                    Label = assetName,
+                    ArchiveFilename = state.ArchiveFilename,
+                    Assets = new List<string> { assetName }
+                };
+                if (state.PrimaryKeyMap.TryGetValue(assetName, out var address) && address != assetName)
+                {
+                    assetsCacheEntries[address] = new CacheEntry
+                    {
+                        Label = address,
+                        ArchiveFilename = state.ArchiveFilename,
+                        Assets = new List<string> { assetName }
+                    };
+                }
+            }
+
+            foreach (var (assetName, token) in state.Tokens)
+            {
+                if (token == null) continue;
+                var serialized = token.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
+                if (string.IsNullOrEmpty(serialized)) continue;
+                AddAssetEntry(assetName, serialized);
+            }
+
+            foreach (var (assetName, rawText) in state.RawTexts)
+            {
+                if (string.IsNullOrEmpty(rawText)) continue;
+                AddAssetEntry(assetName, rawText);
+            }
+
+            foreach (var (name, luaAsset) in state.CreatedAssets)
+            {
+                try
+                {
+                    var jResult = luaAsset.ConverterInstance.ToJson(luaAsset.CurrentValue);
+                    if (jResult == null) continue;
+                    var serialized = jResult.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
+                    if (string.IsNullOrEmpty(serialized)) continue;
+                    archive.AddFile(name, serialized);
+                    labelCacheEntry.Assets.Add(name);
+                    assetsCacheEntries[name] = new CacheEntry
+                    {
+                        Label = name,
+                        ArchiveFilename = state.ArchiveFilename,
+                        Assets = new List<string> { name }
+                    };
+                    if (state.AddressAliases.TryGetValue(name, out var alias))
+                    {
+                        assetsCacheEntries[alias] = new CacheEntry
+                        {
+                            Label = alias,
+                            ArchiveFilename = state.ArchiveFilename,
+                            Assets = new List<string> { name }
+                        };
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logging.LogError($"Failed to serialize {state.Label}:{name}: {e.Message}");
+                }
+            }
+
+            archive.Save();
+
+            CacheManager.CacheValidLabels.Add(state.Label);
+            CacheManager.Inventory.CacheEntries.Add(state.Label, labelCacheEntry);
+            CacheManager.Inventory.CacheEntries.AddRangeUnique(assetsCacheEntries);
+        }
+
+        private sealed class LabelRebuildState
+        {
+            public string Label;
+            public string ArchiveFilename;
+            public Dictionary<string, string> RawTexts = new();
+            public Dictionary<string, JToken> Tokens = new();
+            public Dictionary<string, string> PrimaryKeyMap;
+            public List<(string name, LuaAsset asset)> CreatedAssets = new();
+            public Dictionary<string, string> AddressAliases = new();
+            public HashSet<string> PatchedAssetNames = new();
+            public bool Unchanged = true;
+            public AsyncOperationHandle<IList<TextAsset>> LoadHandle;
         }
 
         private static void UpdateLoadingBarData()

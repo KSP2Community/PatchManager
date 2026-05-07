@@ -16,6 +16,53 @@ namespace PatchManager.LuaPatching;
 public class LuaPatch
 {
     /// <summary>
+    /// The pass a patch runs in.
+    /// </summary>
+    /// <remarks>
+    /// Passes are full sweeps over every patched label: the <see cref="Early" /> pass runs across
+    /// every label first, then <see cref="Default" />, then <see cref="Late" />. JToken state is held
+    /// in memory between passes so later passes see the output of earlier ones.
+    /// </remarks>
+    public enum PatchPass {
+        /// <summary>
+        /// Runs first; typically reserved for reading created or existing assets into shared state.
+        /// </summary>
+        Early,
+        /// <summary>
+        /// Runs second; the default pass where most patches apply their changes.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Runs third; typically reserved for final writeback from shared state.
+        /// </summary>
+        Late
+    }
+
+    /// <summary>
+    /// Ordering bucket within a single pass.
+    /// </summary>
+    /// <remarks>
+    /// Buckets sort independently. A patch's <c>:Before</c> / <c>:After</c> targets in a different
+    /// bucket are silently ignored, like references to nonexistent patches. <c>:Needs</c> and
+    /// <c>:Conflicts</c> remain global across passes and buckets.
+    /// </remarks>
+    public enum PatchOrdering
+    {
+        /// <summary>
+        /// Runs before every Default and Last patch in the same pass.
+        /// </summary>
+        First,
+        /// <summary>
+        /// Runs after every First patch and before every Last patch in the same pass.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Runs after every First and Default patch in the same pass.
+        /// </summary>
+        Last
+    }
+    
+    /// <summary>
     /// The converter that produces the Lua value the patch operates on and serializes the result back to JSON.
     /// </summary>
     [MoonSharpHidden] public IConverter ConverterInstance;
@@ -353,6 +400,30 @@ public class LuaPatch
     }
 
     /// <summary>
+    /// Adds a constant gate that disables the patch entirely when <paramref name="gate" /> is
+    /// <c>false</c>. Each candidate asset is reported as skipped through the summary.
+    /// </summary>
+    /// <remarks>
+    /// Preferred over a top-level <c>if</c> guard around <c>PM.Patch(...)</c> when the gate value comes
+    /// from <c>Config:</c>: registering the patch unconditionally lets the summary report what would
+    /// have applied, and keeps the binding visible to <see cref="Core.Cache.ConfigReplay" /> regardless
+    /// of the gate's current value.
+    /// </remarks>
+    /// <param name="gate">The constant value the predicate evaluates to.</param>
+    /// <param name="message">Optional message logged when the gate is <c>false</c>.</param>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch Requires(bool gate, [CanBeNull] string message = null)
+    {
+        _predicates.Add(new Predicate
+        {
+            Key = null,
+            Method = _ => gate,
+            AssertionMessage = message
+        });
+        return this;
+    }
+
+    /// <summary>
     /// Adds a requirement that the asset expose <paramref name="key" />, optionally with a predicate against the resolved value.
     /// </summary>
     /// <param name="key">The key the asset must expose.</param>
@@ -385,6 +456,56 @@ public class LuaPatch
                 AssertionMessage = message
             }
         );
+        return this;
+    }
+
+    /// <summary>
+    /// The ordering bucket the patch belongs to within its pass.
+    /// </summary>
+    [MoonSharpHidden] public PatchOrdering Ordering = PatchOrdering.Default;
+
+    /// <summary>
+    /// Makes the patch run before every Default and Last patch in the same pass.
+    /// </summary>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch First()
+    {
+        Ordering = PatchOrdering.First;
+        return this;
+    }
+
+    /// <summary>
+    /// Makes the patch run after every First and Default patch in the same pass.
+    /// </summary>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch Last()
+    {
+        Ordering = PatchOrdering.Last;
+        return this;
+    }
+
+    /// <summary>
+    /// The pass the patch runs in.
+    /// </summary>
+    [MoonSharpHidden] public PatchPass Pass = PatchPass.Default;
+
+    /// <summary>
+    /// Makes the patch run in the Early pass.
+    /// </summary>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch Early()
+    {
+        Pass = PatchPass.Early;
+        return this;
+    }
+
+    /// <summary>
+    /// Makes the patch run in the Late pass.
+    /// </summary>
+    /// <returns>The patch instance for chaining.</returns>
+    public LuaPatch Late()
+    {
+        Pass = PatchPass.Late;
         return this;
     }
     

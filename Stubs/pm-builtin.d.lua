@@ -2,6 +2,7 @@
 -- AUTO-GENERATED from analysis of codebase and assets - do not edit by hand.
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Builtin/PatchManagerCore.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Builtin/JsonModule.cs
+-- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Builtin/LuaPatchConfig.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/LuaPatch.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/LuaAsset.cs
 -- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/Universe.cs
@@ -39,8 +40,10 @@ function PatchManagerCore:New(converter, label, name, newObject) end
 function PatchManagerCore:Loaded(modId) end
 
 ---Lua module exposed under the global `J` namespace, providing helpers for constructing JSON literals
----that MoonSharp's auto-conversion does not produce.
+---that MoonSharp's auto-conversion does not produce. Also installed as callable: invoking `J(value)`
+---converts value to a JsonUserData.
 ---@class JsonModule
+---@operator call(any): JsonUserData
 JsonModule = {}
 
 ---Returns an empty JSON array as a JsonUserData.
@@ -51,6 +54,60 @@ function JsonModule.Empty() end
 ---@param value number The value cast to a number and truncated to a long.
 ---@return JsonUserData value A JsonUserData wrapping a `JValue` of integer type.
 function JsonModule.Int(value) end
+
+---Redux configs exposed to patch manager. Bindings declared through this object are recorded in
+---ConfigReplay so changes to their values invalidate the patch cache.
+---@class LuaPatchConfig
+LuaPatchConfig = {}
+
+---Binds a boolean config for use in the patching engine. Any changes to the value will trigger an
+---invalidation of the patch cache on the next launch.
+---@param section string The section of the config file this will be bound in.
+---@param name string The name of the value.
+---@param defaultValue? boolean The default value, `false` if not passed.
+---@param description? string The description of the config value.
+---@return boolean value The current config value.
+function LuaPatchConfig:Bool(section, name, defaultValue, description) end
+
+---Binds a floating-point config for use in the patching engine. Any changes to the value will
+---trigger an invalidation of the patch cache on the next launch.
+---@param section string The section of the config file this will be bound in.
+---@param name string The name of the value.
+---@param defaultValue? number The default value, `0` if not passed.
+---@param description? string The description of the config value.
+---@return number value The current config value.
+---@overload fun(self: LuaPatchConfig, section: string, name: string, defaultValue: number, min: number, max: number, description?: string): number
+function LuaPatchConfig:Float(section, name, defaultValue, description) end
+
+---Binds an integer config for use in the patching engine. Any changes to the value will trigger an
+---invalidation of the patch cache on the next launch.
+---@param section string The section of the config file this will be bound in.
+---@param name string The name of the value.
+---@param defaultValue? integer The default value, `0` if not passed.
+---@param description? string The description of the config value.
+---@return integer value The current config value.
+---@overload fun(self: LuaPatchConfig, section: string, name: string, defaultValue: integer, min: integer, max: integer, description?: string): integer
+function LuaPatchConfig:Integer(section, name, defaultValue, description) end
+
+---Binds a string config for use in the patching engine. Any changes to the value will trigger an
+---invalidation of the patch cache on the next launch.
+---@param section string The section of the config file this will be bound in.
+---@param name string The name of the value.
+---@param defaultValue? string The default value, empty string if not passed.
+---@param description? string The description of the config value.
+---@return string value The current config value.
+---@overload fun(self: LuaPatchConfig, section: string, name: string, defaultValue: string, acceptableValues: string[], description?: string): string
+function LuaPatchConfig:String(section, name, defaultValue, description) end
+
+---Binds a color config for use in the patching engine. Any changes to the value will trigger an
+---invalidation of the patch cache on the next launch. Colors are passed and returned as Lua tables;
+---either keyed (`{r=, g=, b=, a=}`) or indexed (`{1, 0.5, 0, 1}`) input is accepted, and output is keyed.
+---@param section string The section of the config file this will be bound in.
+---@param name string The name of the value.
+---@param defaultValue? { r: number, g: number, b: number, a: number } The default value as a Lua table, transparent black if not passed.
+---@param description? string The description of the config value.
+---@return { r: number, g: number, b: number, a: number } value The current config value as a Lua table with `r`, `g`, `b`, `a` fields.
+function LuaPatchConfig:Color(section, name, defaultValue, description) end
 
 ---A registered patch operation: which converter, which addressables target, what callback to run, and at which stage.
 ---@class LuaPatch<T, V>
@@ -66,6 +123,8 @@ function JsonModule.Int(value) end
 ---@field AfterMods table<string, true> The mod IDs whose patches this patch runs after when present.
 ---@field BeforePatches table<string, true> The patch IDs this patch runs before when they are present.
 ---@field BeforeMods table<string, true> The mod IDs whose patches this patch runs before when present.
+---@field Pass PatchPass The pass the patch runs in.
+---@field Ordering PatchOrdering The ordering bucket the patch belongs to within its pass.
 LuaPatch = {}
 
 ---Sets the patch's apply callback.
@@ -146,10 +205,12 @@ function LuaPatch:BeforePatch(...) end
 ---@return LuaPatch<T, V> self The patch instance for chaining.
 function LuaPatch:Before(...) end
 
----Adds a predicate that gates the patch and reports skips through the summary.
+---Adds a predicate that gates the patch and reports skips through the summary. Pass a function for
+---per-asset evaluation, or a constant boolean to gate the whole patch (for example to feed the
+---result of a Config check through).
 ---@generic T, V
 ---@param self LuaPatch<T, V>
----@param predicate fun(value: T): boolean The predicate evaluated against each candidate asset.
+---@param predicate (fun(value: T): boolean) | boolean The predicate evaluated against each candidate asset, or a constant gate.
 ---@param message? string Optional message logged when the predicate rejects an asset.
 ---@return LuaPatch<T, V> self The patch instance for chaining.
 function LuaPatch:Requires(predicate, message) end
@@ -171,6 +232,30 @@ function LuaPatch:Has(key, predicate, message) end
 ---@return LuaPatch<T, V> self The patch instance for chaining.
 function LuaPatch:HasNo(key, message) end
 
+---Makes the patch run before every Default and Last patch in the same pass.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:First() end
+
+---Makes the patch run after every First and Default patch in the same pass.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Last() end
+
+---Makes the patch run in the Early pass.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Early() end
+
+---Makes the patch run in the Late pass.
+---@generic T, V
+---@param self LuaPatch<T, V>
+---@return LuaPatch<T, V> self The patch instance for chaining.
+function LuaPatch:Late() end
+
 ---A new asset queued for creation by a Lua patch script.
 ---@class LuaAsset
 ---@field CurrentValue any The asset's current Lua-facing value. Initialized at creation time and replaced by each patch that runs against this asset.
@@ -183,9 +268,14 @@ LuaAsset = {}
 PM = nil
 
 ---Lua module exposed under the global `J` namespace, providing helpers for constructing JSON literals
----that MoonSharp's auto-conversion does not produce.
+---that MoonSharp's auto-conversion does not produce. Also callable: `J(value)` converts value to a JsonUserData.
 ---@type JsonModule
 J = nil
+
+---Per-script Redux config object. Bindings made through this object are recorded in ConfigReplay so
+---changes to their values invalidate the patch cache.
+---@type LuaPatchConfig
+Config = nil
 
 ---The mod ID; exposed to scripts as the `ModId` global.
 ---@type string

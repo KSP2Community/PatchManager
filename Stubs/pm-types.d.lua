@@ -20,6 +20,19 @@
 -- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceExperimentType.cs
 -- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceSitutation.cs
 -- Source: ksp2redux/Assets/Code/KSP/game/Science/ScienceReportType.cs
+-- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/LuaPatching/LuaPatch.cs
+
+---The pass a patch runs in. Passes are full sweeps over every patched label: the Early pass runs across every label first, then Default, then Late.
+---@alias PatchPass
+---| 0  # Early
+---| 1  # Default
+---| 2  # Late
+
+---Ordering bucket within a single pass. Buckets sort independently; cross-bucket :Before / :After targets are silently ignored.
+---@alias PatchOrdering
+---| 0  # First
+---| 1  # Default
+---| 2  # Last
 
 ---Categories available for classifying parts in the vehicle assembly editor.
 ---@alias PartCategories
