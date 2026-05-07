@@ -341,30 +341,42 @@ public class Summary
         }
         sb.AppendLine("");
 
+        var erroredWithContext = Summaries
+            .SelectMany(s => s.assets.SelectMany(a =>
+                a.EntriesByPass.SelectMany(kv =>
+                    kv.Value
+                        .Where(e => e.State == ApplicationState.Errored)
+                        .Select(e => (label: s.labelName, asset: a.AssetName, pass: kv.Key, entry: e)))))
+            .ToList();
+
+        if (erroredWithContext.Count > 0 || ErroredFiles.Count > 0)
+        {
+            sb.AppendLine("All Errors:");
+            foreach (var (filename, reason) in ErroredFiles)
+            {
+                sb.AppendLine($"    [Lua File] {filename}");
+                if (!string.IsNullOrEmpty(reason))
+                {
+                    AppendContext(sb, reason, "        ");
+                }
+            }
+            foreach (var (label, asset, pass, entry) in erroredWithContext)
+            {
+                sb.AppendLine($"    [{pass,-7}] {label} / {asset} / {entry.Name}");
+                if (!string.IsNullOrEmpty(entry.Context))
+                {
+                    AppendContext(sb, entry.Context, "        ");
+                }
+            }
+            sb.AppendLine("");
+        }
+
         sb.AppendLine("Recognized Mod IDs:");
         foreach (var id in RecognizedModIds)
         {
             sb.AppendLine($"    {id}");
         }
         sb.AppendLine("");
-
-        if (ErroredFiles.Count > 0)
-        {
-            sb.AppendLine("Errored Lua Files:");
-            var nameWidth = ErroredFiles.Max(x => x.filename.Length);
-            foreach (var (name, reason) in ErroredFiles)
-            {
-                sb.Append("    ");
-                sb.Append(name.PadRight(nameWidth));
-                sb.Append("    ");
-                sb.AppendLine("ERRORED");
-                if (!string.IsNullOrEmpty(reason))
-                {
-                    AppendContext(sb, reason, "        ");
-                }
-            }
-            sb.AppendLine("");
-        }
 
         if (RemovedPatches.Count > 0)
         {

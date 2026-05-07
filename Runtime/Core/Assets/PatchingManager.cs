@@ -184,6 +184,9 @@ namespace PatchManager.Core.Assets
                 {
                     TotalErrorCount += 1;
                     Logging.LogError($"Failed to generate an asset due to: {e}");
+                    Universe.Summary.BeginLabel(generator.Label);
+                    Universe.Summary.BeginAsset(generator.Name, null);
+                    Universe.Summary.Error(generator.Name, e);
                 }
             }
 
@@ -354,18 +357,32 @@ namespace PatchManager.Core.Assets
         {
             if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) yield break;
 
-            var stateRef = state;
-            var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
-            {
-                if (string.IsNullOrEmpty(asset.text)) return;
-                stateRef.RawTexts[asset.name] = asset.text;
-            });
-            state.LoadHandle = handle;
-
-            while (!handle.IsDone)
+            var locHandle = Addressables.LoadResourceLocationsAsync(label, typeof(TextAsset));
+            while (!locHandle.IsDone)
             {
                 UpdateLoadingBarData();
                 yield return null;
+            }
+            var hasLocations = locHandle.Status == AsyncOperationStatus.Succeeded
+                               && locHandle.Result != null
+                               && locHandle.Result.Count > 0;
+            Addressables.Release(locHandle);
+
+            if (hasLocations)
+            {
+                var stateRef = state;
+                var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
+                {
+                    if (string.IsNullOrEmpty(asset.text)) return;
+                    stateRef.RawTexts[asset.name] = asset.text;
+                });
+                state.LoadHandle = handle;
+
+                while (!handle.IsDone)
+                {
+                    UpdateLoadingBarData();
+                    yield return null;
+                }
             }
 
             if (state.CreatedAssets.Count > 0)
@@ -440,7 +457,11 @@ namespace PatchManager.Core.Assets
             }
             catch (Exception e)
             {
+                TotalErrorCount += 1;
                 Logging.LogError($"Failed to parse {state.Label}:{assetName}: {e.Message}");
+                Universe.Summary.BeginLabel(state.Label);
+                Universe.Summary.BeginAsset(assetName, null);
+                Universe.Summary.Error(assetName, e);
                 state.RawTexts.Remove(assetName);
                 return null;
             }
@@ -562,7 +583,11 @@ namespace PatchManager.Core.Assets
                 }
                 catch (Exception e)
                 {
+                    TotalErrorCount += 1;
                     Logging.LogError($"Failed to serialize {state.Label}:{name}: {e.Message}");
+                    Universe.Summary.BeginLabel(state.Label);
+                    Universe.Summary.BeginAsset(name, null);
+                    Universe.Summary.Error(name, e);
                 }
             }
 
