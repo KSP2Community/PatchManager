@@ -1,0 +1,261 @@
+using System;
+using System.Collections.Generic;
+using JetBrains.Annotations;
+using KSP.IO;
+using KSP.Sim.Definitions;
+using MoonSharp.Interpreter;
+using Newtonsoft.Json.Linq;
+using PatchManager.LuaPatching;
+using PatchManager.LuaPatching.Utility;
+
+namespace PatchManager.Parts.UserData;
+
+/// <summary>
+/// Standalone wrapper for a part module's serialized JSON, exposing each <c>ModuleData</c> entry by name with a
+/// typed adapter when one is registered for the data type.
+/// </summary>
+[MoonSharpUserData]
+public class ModuleUserData
+{
+    private JObject _jObject;
+    private List<DynValue> _dataValues = new();
+    private Dictionary<string, int> _dataIndices = new();
+
+    /// <summary>
+    /// Creates the wrapper around the module's serialized JSON.
+    /// </summary>
+    /// <param name="token">The module's serialized JSON.</param>
+    public ModuleUserData(JToken token)
+    {
+        _jObject = JsonUserData.RequireObject(token, "module");
+        RefreshData();
+    }
+
+    /// <summary>
+    /// Refreshes the data-name and conversion caches from the current state of the module's <c>ModuleData</c> array.
+    /// </summary>
+    /// <remarks>
+    /// Call after a Lua script clears or rewrites <c>ModuleData</c> directly. Most mutators on this type already refresh.
+    /// </remarks>
+    public void RefreshData()
+    {
+        _dataValues.Clear();
+        _dataIndices.Clear();
+        var data = JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData");
+        var index = 0;
+        foreach (var moduleData in data)
+        {
+            _dataIndices[JsonUserData.RequireString(moduleData["Name"], "ModuleData[].Name")] = index++;
+            _dataValues.Add(GetUserData(JsonUserData.RequireObject(moduleData, "ModuleData entry")));
+        }
+    }
+
+    private DynValue GetUserData(JObject moduleData)
+    {
+        var dataTypeName = JsonUserData.RequireString(moduleData["DataType"], "ModuleData entry's DataType");
+        var type = Type.GetType(dataTypeName);
+        var dataObject = JsonUserData.RequireObject(moduleData["DataObject"], "ModuleData entry's DataObject");
+        if (type != null && PartsUtilities.ModuleDataAdapters.TryGetValue(type, out var adapterType))
+        {
+            try
+            {
+                return MoonSharp.Interpreter.UserData.Create(Activator.CreateInstance(adapterType, dataObject));
+            }
+            catch (Exception e) when (e is not ScriptRuntimeException)
+            {
+                var inner = (e as System.Reflection.TargetInvocationException)?.InnerException ?? e;
+                throw new ScriptRuntimeException($"Failed to construct module-data adapter '{adapterType.FullName}' for type '{dataTypeName}': {inner.Message}");
+            }
+        }
+        return JsonUserData.GetFromJToken(dataObject);
+    }
+
+    /// <summary>
+    /// Gets or sets the module-data entry with the given name.
+    /// </summary>
+    /// <param name="idx">The data entry's name.</param>
+    /// <returns>The data entry's wrapper, or <see cref="DynValue.Nil" /> if absent.</returns>
+    /// <exception cref="Exception">Thrown when setting a name that does not exist; use <see cref="AddData" /> to insert.</exception>
+    public DynValue this[string idx]
+    {
+        get
+        {
+            if (_dataIndices.TryGetValue(idx, out var index))
+            {
+                return _dataValues[index];
+            }
+
+            return DynValue.Nil;
+        }
+        set
+        {
+            if (!_dataIndices.TryGetValue(idx, out var index))
+            {
+                throw new ScriptRuntimeException($"Module Data not found in module {idx}!");
+            }
+
+            _jObject["ModuleData"][index] = JsonUserData.GetJTokenForDynValue(value);
+            RefreshData();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the module-data entry at the given 1-indexed position.
+    /// </summary>
+    /// <param name="idx">The 1-indexed position.</param>
+    /// <returns>The data entry's wrapper, or <see cref="DynValue.Nil" /> if out of range.</returns>
+    /// <exception cref="Exception">Thrown when setting an out-of-range position.</exception>
+    public DynValue this[int idx]
+    {
+        get
+        {
+            if (idx > 0 && idx <= _dataValues.Count)
+            {
+                return _dataValues[idx-1];
+            }
+
+            return DynValue.Nil;
+        }
+        set
+        {
+            if (idx > 0 && idx <= _dataValues.Count)
+            {
+                _jObject["ModuleData"][idx-1] = JsonUserData.GetJTokenForDynValue(value);
+                RefreshData();
+            }
+            else
+            {
+                throw new ScriptRuntimeException("Index out of range for module data!");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Returns an iterator yielding each <c>(name, value)</c> pair in declaration order.
+    /// </summary>
+    /// <returns>The iterator callback.</returns>
+    [MoonSharpUserDataMetamethod("__pairs")]
+    public DynValue Pairs()
+    {
+        var iterator = _dataIndices.GetEnumerator();
+        return DynValue.NewCallback((sec, args) =>
+        {
+            if (iterator.MoveNext())
+            {
+                return DynValue.NewTuple(DynValue.NewString(iterator.Current.Key),_dataValues[iterator.Current.Value]);
+            }
+            return DynValue.Nil;
+        });
+    }
+
+    /// <summary>
+    /// Gets the number of data entries on this module.
+    /// </summary>
+    public int Count => _dataValues.Count;
+
+    /// <summary>
+    /// Adds a new module-data entry of the given type and runs <paramref name="callback" /> against it when supplied.
+    /// </summary>
+    /// <param name="type">The data module's short name as registered in <c>PartsUtilities.DataModules</c>.</param>
+    /// <param name="callback">Optional callback that receives the new entry for further configuration.</param>
+    /// <exception cref="Exception">Thrown when <paramref name="type" /> is not a registered data module.</exception>
+    public void AddData(string type, [CanBeNull] Action<DynValue> callback = null)
+    {
+        if (!PartsUtilities.DataModules.TryGetValue(type, out var dataModuleType))
+        {
+            throw new ScriptRuntimeException($"Unknown data module {type}");
+        }
+
+        ModuleData instance;
+        try
+        {
+            instance = (ModuleData)Activator.CreateInstance(dataModuleType);
+        }
+        catch (Exception e) when (e is not ScriptRuntimeException)
+        {
+            throw new ScriptRuntimeException($"Failed to construct data module '{type}' ({dataModuleType.FullName}): {e.Message}");
+        }
+
+        var dataObject = new JObject
+        {
+            ["$type"] = $"{dataModuleType.FullName}, {dataModuleType.Assembly.GetName().Name}"
+        };
+        JObject otherObject;
+        try
+        {
+            otherObject = JObject.Parse(IOProvider.ToJson(instance));
+        }
+        catch (Exception e) when (e is not ScriptRuntimeException)
+        {
+            throw new ScriptRuntimeException($"Failed to serialize default data for module '{type}' ({dataModuleType.FullName}): {e.Message}");
+        }
+        foreach (var prop in otherObject)
+        {
+            dataObject[prop.Key] = prop.Value;
+        }
+        var trueType = new JObject
+        {
+            ["Name"] =  dataModuleType.Name,
+            ["ModuleType"] = instance.ModuleType.AssemblyQualifiedName,
+            ["DataType"] = instance.DataType.AssemblyQualifiedName,
+            ["Data"] = null,
+            ["DataObject"] = dataObject
+        };
+        JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData").Add(trueType);
+        var userData = GetUserData(trueType);
+        _dataIndices[type] = _dataValues.Count;
+        _dataValues.Add(userData);
+        callback?.Invoke(userData);
+    }
+
+    /// <summary>
+    /// Runs <paramref name="callback" /> against the existing data entry of the given type, doing nothing if absent.
+    /// </summary>
+    /// <param name="type">The data module's short name.</param>
+    /// <param name="callback">Callback that receives the existing entry for further configuration.</param>
+    public void PatchData(string type, Action<DynValue> callback)
+    {
+        if (_dataIndices.TryGetValue(type, out var index))
+        {
+            callback(_dataValues[index]);
+        }
+    }
+
+    /// <summary>
+    /// Patches the named data entry if it exists, otherwise adds it.
+    /// </summary>
+    /// <param name="type">The data module's short name.</param>
+    /// <param name="callback">Callback that receives the entry for further configuration.</param>
+    public void EnsureData(string type, Action<DynValue> callback)
+    {
+        if (_dataIndices.ContainsKey(type))
+        {
+            PatchData(type, callback);
+        }
+        else
+        {
+            AddData(type, callback);
+        }
+    }
+
+    /// <summary>
+    /// Removes the data entry of the given type from the module.
+    /// </summary>
+    /// <param name="type">The data module's short name.</param>
+    public void RemoveData(string type)
+    {
+        if (!_dataIndices.TryGetValue(type, out var index)) return;
+        JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData").RemoveAt(index);
+        RefreshData();
+    }
+
+    /// <summary>
+    /// Returns whether the module has a data entry of the given type.
+    /// </summary>
+    /// <param name="type">The data module's short name.</param>
+    /// <returns>True if an entry exists, false otherwise.</returns>
+    public bool HasData(string type)
+    {
+        return _dataIndices.ContainsKey(type);
+    }
+}

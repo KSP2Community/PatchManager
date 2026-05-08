@@ -1,0 +1,176 @@
+using System.Collections.Generic;
+using UniLinq;
+
+namespace PatchManager.Shared
+{
+    /// <summary>
+    /// Utility extension methods for various types.
+    /// </summary>
+    public static class Extensions
+    {
+        /// <summary>
+        /// Deconstructs a <see cref="KeyValuePair" /> into its key and value.
+        /// </summary>
+        /// <param name="keyValuePair">Key-value pair to deconstruct.</param>
+        /// <param name="key">The deconstructed key.</param>
+        /// <param name="value">The deconstructed value.</param>
+        /// <typeparam name="TKey">Type of the key.</typeparam>
+        /// <typeparam name="TValue">Type of the value.</typeparam>
+        public static void Deconstruct<TKey, TValue>(
+            this KeyValuePair<TKey, TValue> keyValuePair,
+            out TKey key,
+            out TValue value
+        )
+        {
+            key = keyValuePair.Key;
+            value = keyValuePair.Value;
+        }
+
+        /// <summary>
+        /// Adds the contents of an <see cref="IEnumerable{T}" /> of type <see cref="KeyValuePair{TKey,TValue}" />
+        /// to a <see cref="Dictionary{TKey,TValue}" />.
+        /// </summary>
+        /// <param name="target">Target dictionary to add to.</param>
+        /// <param name="source">Source enumerable to add from.</param>
+        /// <typeparam name="TKey">Type of the key.</typeparam>
+        /// <typeparam name="TValue">Type of the value.</typeparam>
+        public static void AddRangeUnique<TKey, TValue>(
+            this Dictionary<TKey, TValue> target,
+            IEnumerable<KeyValuePair<TKey, TValue>> source
+        )
+        {
+            foreach (var kvp in source)
+            {
+                if (target.ContainsKey(kvp.Key))
+                {
+                    continue;
+                }
+
+                target.Add(kvp.Key, kvp.Value);
+            }
+        }
+
+        /// <summary>
+        /// Adds the contents of an <see cref="IEnumerable{T}" /> of type <see cref="KeyValuePair{TKey,IEnumerable}" />
+        /// to a <see cref="Dictionary{TKey,IEnumerable}" />. If the key already exists, the contents of the value
+        /// enumerable will be added to the existing value enumerable.
+        /// </summary>
+        /// <param name="target">Target dictionary to add to.</param>
+        /// <param name="source">Source enumerable to add from.</param>
+        /// <typeparam name="TKey">Type of the key.</typeparam>
+        /// <typeparam name="TValue">Type of the value <see cref="IEnumerable{T}" />.</typeparam>
+        public static void AddRangeMerge<TKey, TValue>(
+            this Dictionary<TKey, IEnumerable<TValue>> target,
+            IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> source
+        )
+        {
+            foreach (var kvp in source)
+            {
+                if (target.ContainsKey(kvp.Key))
+                {
+                    target[kvp.Key] = target[kvp.Key].Concat(kvp.Value);
+                    continue;
+                }
+
+                target.Add(kvp.Key, kvp.Value);
+            }
+        }
+
+        /// <summary>
+        /// Gets the relative path to a working directory with both paths expressed as strings.
+        /// </summary>
+        /// <param name="fullPath">The full path to make relative.</param>
+        /// <param name="workingDirectory">The base directory to make the path relative to.</param>
+        /// <returns>The relative path from <paramref name="workingDirectory" /> to <paramref name="fullPath" />, or <paramref name="fullPath" /> unchanged when the two paths are on different drives.</returns>
+        public static string MakeRelativePathTo(this string fullPath, string workingDirectory)
+        {
+            string result = string.Empty;
+            int offset;
+
+            // this is the easy case.  The file is inside of the working directory.
+            if( fullPath.StartsWith(workingDirectory) )
+            {
+                return fullPath.Substring(workingDirectory.Length + 1);
+            }
+
+            // the hard case has to back out of the working directory
+            string[] baseDirs = workingDirectory.Split(':', '\\', '/');
+            string[] fileDirs = fullPath.Split(':', '\\', '/');
+
+            // if we failed to split (empty strings?) or the drive letter does not match
+            if( baseDirs.Length <= 0 || fileDirs.Length <= 0 || baseDirs[0] != fileDirs[0] )
+            {
+                // can't create a relative path between separate harddrives/partitions.
+                return fullPath;
+            }
+
+            // skip all leading directories that match
+            for (offset = 1; offset < baseDirs.Length; offset++)
+            {
+                if (baseDirs[offset] != fileDirs[offset])
+                    break;
+            }
+
+            // back out of the working directory
+            for (int i = 0; i < (baseDirs.Length - offset); i++)
+            {
+                result += "..\\";
+            }
+
+            // step into the file path
+            for (int i = offset; i < fileDirs.Length-1; i++)
+            {
+                result += fileDirs[i] + "\\";
+            }
+
+            // append the file
+            result += fileDirs[fileDirs.Length - 1];
+
+            return result;
+        }
+        
+        /// <summary>
+        /// Converts a string to its literal form
+        /// </summary>
+        /// <param name="input">The string</param>
+        /// <returns>The quoted and escaped string</returns>
+        public static string ToLiteral(this string input)
+        {
+            var literal = StringBuilderCache.Acquire(input.Length + 2);
+            literal.Append("\"");
+            foreach (var c in input)
+            {
+                switch (c)
+                {
+                    case '\"': literal.Append("\\\""); break;
+                    case '\\': literal.Append(@"\\"); break;
+                    case '\0': literal.Append(@"\0"); break;
+                    case '\a': literal.Append(@"\a"); break;
+                    case '\b': literal.Append(@"\b"); break;
+                    case '\f': literal.Append(@"\f"); break;
+                    case '\n': literal.Append(@"\n"); break;
+                    case '\r': literal.Append(@"\r"); break;
+                    case '\t': literal.Append(@"\t"); break;
+                    case '\v': literal.Append(@"\v"); break;
+                    default:
+                        if (c >= 0x20 && c <= 0x7e)
+                        {
+                            literal.Append(c);
+                        }
+                        else
+                        {
+                            literal.Append(@"\u");
+                            literal.Append(((int)c).ToString("x4"));
+                        }
+
+                        break;
+                }
+            }
+
+            literal.Append("\"");
+            var result = literal.ToString();
+            literal.Release();
+            return result;
+        }
+    }
+}
