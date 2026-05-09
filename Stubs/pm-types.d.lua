@@ -61,6 +61,7 @@
 ---Size filter categories for a meta assembly in the object assembly building.
 ---@alias MetaAssemblySizeFilterType
 ---| "Auto"
+---| "XSMINUS"
 ---| "XS"
 ---| "XSPLUS"
 ---| "S"

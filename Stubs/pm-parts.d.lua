@@ -177,6 +177,7 @@ function PartsLuaModule:Patch(name) end
 ---@field crewCapacity integer
 ---@field stageOffset integer
 ---@field isCompound boolean
+---@field sizeKey string
 ---@field sizeCategory MetaAssemblySizeFilterType
 ---@field stageType AssemblyPartStageType
 ---@field resourceCosts JsonList<PartResourceCostDefinition>
@@ -233,7 +234,7 @@ function PartsLuaModule:Patch(name) end
 ---@field PickUpPointOffset Vector3 Offset at which the player cursor "grabs" the part when in OAB.
 ---@field PickupRotationPointOffset Vector3 Offset at which the part is rotated in the OAB when the player is grabbing a part.
 
----@alias PartData _PartData | { partName: string, author: string, category: PartCategories, family: string, childStageOffset: integer, cost: integer, crewCapacity: integer, stageOffset: integer, isCompound: boolean, sizeCategory: MetaAssemblySizeFilterType, stageType: AssemblyPartStageType, resourceCosts: JsonList<PartResourceCostDefinition>, tags: string, stagingIconAssetAddress: string, PartSizeDiameter: number, angularDrag: number, breakingForce: number, breakingTorque: number, buoyancy: number, buoyancyUseSine: boolean, coLiftOffset: Vector3, coMassOffset: Vector3, coPressureOffset: Vector3, coBuoyancy: Vector3, coDisplacement: Vector3, crashTolerance: number, explosionPotential: number, fuelCrossFeed: boolean, heatConductivity: number, mass: number, maxTemp: number, attachRules: AttachRules, attachNodes: JsonList<AttachNodeDefinition>, resourceContainers: JsonList<ContainedResourceDefinition>, AllowKinematicPhysicsIfIntersectTerrain: boolean, serializedPartModules: JsonList<SerializedPartModule>, resourceSummary: SerializedResourceInfo, PAMModuleSortOverride: JsonList<SerializedPartModuleDisplayOrder>, PAMModuleVisualsOverride: JsonList<SerializedPartModuleDisplayVisuals>, collisionVolumeBoundsScale: Vector3, emissiveConstant: number, maximumDrag: number, minimumDrag: number, physicsMode: PartPhysicsModes, inverseStageCarryover: boolean, skinMassPerArea: number, bodyLiftOnlyUnattachedLift: boolean, bodyLiftOnlyAttachName: string, maxLength: integer, radiatorHeadroom: number, radiatorMax: number, skinMaxTemp: number, skinInternalConductionMult: number, thermalMassModifier: number, buoyancyUseCubeNamed: string, HasReportStorage: boolean, oabEditorCategory: OABEditorPartCategory, partType: AssemblyPartTypeFilter, partHideMode: OABPartHideMode, PreferredOrientation: OABOrientation, MirrorTechnique: MirrorTechnique, CanSuggestOrientation: boolean, PickUpPointOffset: Vector3, PickupRotationPointOffset: Vector3 }
+---@alias PartData _PartData | { partName: string, author: string, category: PartCategories, family: string, childStageOffset: integer, cost: integer, crewCapacity: integer, stageOffset: integer, isCompound: boolean, sizeKey: string, sizeCategory: MetaAssemblySizeFilterType, stageType: AssemblyPartStageType, resourceCosts: JsonList<PartResourceCostDefinition>, tags: string, stagingIconAssetAddress: string, PartSizeDiameter: number, angularDrag: number, breakingForce: number, breakingTorque: number, buoyancy: number, buoyancyUseSine: boolean, coLiftOffset: Vector3, coMassOffset: Vector3, coPressureOffset: Vector3, coBuoyancy: Vector3, coDisplacement: Vector3, crashTolerance: number, explosionPotential: number, fuelCrossFeed: boolean, heatConductivity: number, mass: number, maxTemp: number, attachRules: AttachRules, attachNodes: JsonList<AttachNodeDefinition>, resourceContainers: JsonList<ContainedResourceDefinition>, AllowKinematicPhysicsIfIntersectTerrain: boolean, serializedPartModules: JsonList<SerializedPartModule>, resourceSummary: SerializedResourceInfo, PAMModuleSortOverride: JsonList<SerializedPartModuleDisplayOrder>, PAMModuleVisualsOverride: JsonList<SerializedPartModuleDisplayVisuals>, collisionVolumeBoundsScale: Vector3, emissiveConstant: number, maximumDrag: number, minimumDrag: number, physicsMode: PartPhysicsModes, inverseStageCarryover: boolean, skinMassPerArea: number, bodyLiftOnlyUnattachedLift: boolean, bodyLiftOnlyAttachName: string, maxLength: integer, radiatorHeadroom: number, radiatorMax: number, skinMaxTemp: number, skinInternalConductionMult: number, thermalMassModifier: number, buoyancyUseCubeNamed: string, HasReportStorage: boolean, oabEditorCategory: OABEditorPartCategory, partType: AssemblyPartTypeFilter, partHideMode: OABPartHideMode, PreferredOrientation: OABOrientation, MirrorTechnique: MirrorTechnique, CanSuggestOrientation: boolean, PickUpPointOffset: Vector3, PickupRotationPointOffset: Vector3 }
 
 ---Represents the resource cost of a part as a named resource and unit quantity.
 ---@class _PartResourceCostDefinition : _JsonUserDataBase
@@ -270,6 +271,7 @@ function PartsLuaModule:Patch(name) end
 ---@field position Vector3d
 ---@field orientation Vector3d
 ---@field size integer
+---@field sizeKey string
 ---@field visualSize number
 ---@field isResourceCrossfeed boolean
 ---@field isRigid boolean
@@ -278,7 +280,7 @@ function PartsLuaModule:Patch(name) end
 ---@field overrideDragArea number
 ---@field isCompoundJoint boolean
 
----@alias AttachNodeDefinition _AttachNodeDefinition | { nodeID: string, NodeSymmetryGroupID: string, nodeType: AttachNodeType, attachMethod: AttachNodeMethod, IsMultiJoint: boolean, MultiJointMaxJoint: integer, MultiJointRadiusOffset: number, MultiJointOnSingleAxis: boolean, SingleJointAxis: TransformDirAxis, MultiJointFullBreakStrength: boolean, position: Vector3d, orientation: Vector3d, size: integer, visualSize: number, isResourceCrossfeed: boolean, isRigid: boolean, angularStrengthMultiplier: number, contactArea: number, overrideDragArea: number, isCompoundJoint: boolean }
+---@alias AttachNodeDefinition _AttachNodeDefinition | { nodeID: string, NodeSymmetryGroupID: string, nodeType: AttachNodeType, attachMethod: AttachNodeMethod, IsMultiJoint: boolean, MultiJointMaxJoint: integer, MultiJointRadiusOffset: number, MultiJointOnSingleAxis: boolean, SingleJointAxis: TransformDirAxis, MultiJointFullBreakStrength: boolean, position: Vector3d, orientation: Vector3d, size: integer, sizeKey: string, visualSize: number, isResourceCrossfeed: boolean, isRigid: boolean, angularStrengthMultiplier: number, contactArea: number, overrideDragArea: number, isCompoundJoint: boolean }
 
 ---Represents the definition of a resource contained within a part, including capacity, initial amount, and staging configuration.
 ---@class _ContainedResourceDefinition : _JsonUserDataBase
