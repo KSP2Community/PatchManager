@@ -4,6 +4,7 @@ using System.Reflection;
 using KSP.Game;
 using KSP.Sim.Definitions;
 using PatchManager.Shared;
+using Redux.Audio;
 using Redux.Ksp1Import.Modules;
 using UniLinq;
 using UnityEngine;
@@ -131,6 +132,8 @@ namespace PatchManager.Parts.Patchers
                     }
                 }
             }
+
+            PartAudioPresetPatcher.Apply(obj, partData);
 
             gameObject = obj;
         }

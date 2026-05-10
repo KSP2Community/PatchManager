@@ -238,6 +238,24 @@ public class ModuleUserData
         }
     }
 
+    [MoonSharpHidden]
+    public void EnsureDataObject(string type, Action<JObject> callback)
+    {
+        EnsureData(type, _ => callback(GetDataObject(type)));
+    }
+
+    [MoonSharpHidden]
+    public JObject GetDataObject(string type)
+    {
+        if (!_dataIndices.TryGetValue(type, out var index))
+        {
+            throw new ScriptRuntimeException($"Module Data not found in module {type}!");
+        }
+
+        var moduleData = JsonUserData.RequireArray(_jObject["ModuleData"], "ModuleData")[index];
+        return JsonUserData.RequireObject(moduleData["DataObject"], "ModuleData entry's DataObject");
+    }
+
     /// <summary>
     /// Removes the data entry of the given type from the module.
     /// </summary>
