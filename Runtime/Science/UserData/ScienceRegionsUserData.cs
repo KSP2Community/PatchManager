@@ -43,6 +43,6 @@ public class ScienceRegionsUserData : IndexedListUserData
     /// <inheritdoc />
     public override string Name(JToken source)
     {
-        return RequireString(source["id"], "Regions[].id");
+        return RequireString(source["Id"], "Regions[].Id");
     }
 }
