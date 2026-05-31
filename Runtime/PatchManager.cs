@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PatchManager.CampaignPacks;
 using PatchManager.Core;
 using PatchManager.Generic;
 using PatchManager.LuaPatching;
@@ -39,6 +40,7 @@ namespace PatchManager
             ModuleManager.Register(typeof(ResourcesModule));
             ModuleManager.Register(typeof(ScienceModule));
             ModuleManager.Register(typeof(PlanetsModule));
+            ModuleManager.Register(typeof(CampaignPacksModule));
             Logging.Initialize(SWLogger);
             foreach (var module in ModuleManager.Modules)
             {
