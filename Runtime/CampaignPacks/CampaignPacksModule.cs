@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using KSP.Game;
 using Newtonsoft.Json;
 using PatchManager.Shared;
@@ -44,6 +45,55 @@ namespace PatchManager.CampaignPacks
         /// Runtime catalog populated from baked campaign pack JSON assets.
         /// </summary>
         public static CampaignPackRuntimeCatalog Catalog { get; } = new();
+
+        /// <summary>
+        /// Gets the loaded campaign pack identifiers in stable id order.
+        /// </summary>
+        /// <returns>Loaded campaign pack identifiers.</returns>
+        public static IReadOnlyList<string> GetCampaignPackIds()
+        {
+            return Catalog.GetCampaignPackIds();
+        }
+
+        /// <summary>
+        /// Checks whether a campaign pack definition is loaded.
+        /// </summary>
+        /// <param name="packId">Campaign pack identifier to check.</param>
+        /// <returns><see langword="true"/> when the catalog contains the requested campaign pack.</returns>
+        public static bool ContainsCampaignPack(string packId)
+        {
+            return Catalog.ContainsCampaignPack(packId);
+        }
+
+        /// <summary>
+        /// Resolves the effective contents for a loaded campaign pack.
+        /// </summary>
+        /// <param name="packId">Campaign pack identifier.</param>
+        /// <returns>Resolved contents, or <see langword="null"/> when the pack is unknown.</returns>
+        public static EffectiveCampaignPack Resolve(string packId)
+        {
+            return Catalog.Resolve(packId);
+        }
+
+        /// <summary>
+        /// Attempts to resolve the effective contents for a loaded campaign pack.
+        /// </summary>
+        /// <param name="packId">Campaign pack identifier.</param>
+        /// <param name="effectivePack">Resolved contents when found; otherwise <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> when the campaign pack exists and was resolved.</returns>
+        public static bool TryResolve(string packId, out EffectiveCampaignPack effectivePack)
+        {
+            return Catalog.TryResolve(packId, out effectivePack);
+        }
+
+        /// <summary>
+        /// Resolves all loaded campaign packs in stable id order.
+        /// </summary>
+        /// <returns>Resolved campaign pack previews.</returns>
+        public static IReadOnlyList<EffectiveCampaignPack> ResolveAll()
+        {
+            return Catalog.ResolveAll();
+        }
 
         private int _pendingLoads;
         private bool _loadStarted;

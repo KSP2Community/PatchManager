@@ -19,6 +19,8 @@ namespace PatchManager.CampaignPacks
 
         /// <summary>
         /// Loaded campaign pack definitions keyed by campaign pack id.
+        /// Prefer <see cref="GetCampaignPackIds"/>, <see cref="TryGetCampaignPackDefinition"/>, and
+        /// <see cref="Resolve"/> for gameplay-facing queries.
         /// </summary>
         public IReadOnlyDictionary<string, CampaignPackDefinition> Packs => _packs;
 
@@ -46,6 +48,44 @@ namespace PatchManager.CampaignPacks
         /// Load and validation issues discovered while building the catalog.
         /// </summary>
         public IReadOnlyList<string> Issues => _issues;
+
+        /// <summary>
+        /// Gets the loaded campaign pack identifiers in stable id order.
+        /// </summary>
+        /// <returns>Loaded campaign pack identifiers.</returns>
+        public IReadOnlyList<string> GetCampaignPackIds()
+        {
+            return _packs.Keys
+                .OrderBy(id => id, StringComparer.Ordinal)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Checks whether a campaign pack definition is loaded.
+        /// </summary>
+        /// <param name="packId">Campaign pack identifier to check.</param>
+        /// <returns><see langword="true"/> when the catalog contains the requested campaign pack.</returns>
+        public bool ContainsCampaignPack(string packId)
+        {
+            return !string.IsNullOrWhiteSpace(packId) && _packs.ContainsKey(packId);
+        }
+
+        /// <summary>
+        /// Attempts to fetch the raw campaign pack definition for editor/debug style inspection.
+        /// </summary>
+        /// <param name="packId">Campaign pack identifier to fetch.</param>
+        /// <param name="definition">Loaded campaign pack definition when found; otherwise <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> when the definition was found.</returns>
+        public bool TryGetCampaignPackDefinition(string packId, out CampaignPackDefinition definition)
+        {
+            if (!string.IsNullOrWhiteSpace(packId) && _packs.TryGetValue(packId, out definition))
+            {
+                return true;
+            }
+
+            definition = null;
+            return false;
+        }
 
         /// <summary>
         /// Adds a load-time issue to the catalog diagnostics.
@@ -183,6 +223,18 @@ namespace PatchManager.CampaignPacks
         }
 
         /// <summary>
+        /// Attempts to resolve the effective contents for a loaded campaign pack.
+        /// </summary>
+        /// <param name="packId">Campaign pack identifier.</param>
+        /// <param name="effectivePack">Resolved contents when found; otherwise <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> when the campaign pack exists and was resolved.</returns>
+        public bool TryResolve(string packId, out EffectiveCampaignPack effectivePack)
+        {
+            effectivePack = Resolve(packId);
+            return effectivePack != null;
+        }
+
+        /// <summary>
         /// Rebuilds runtime validation issues for all loaded definitions.
         /// </summary>
         public void Validate()
@@ -231,8 +283,7 @@ namespace PatchManager.CampaignPacks
         /// <returns>Resolved campaign pack previews.</returns>
         public IReadOnlyList<EffectiveCampaignPack> ResolveAll()
         {
-            return _packs.Keys
-                .OrderBy(id => id, StringComparer.Ordinal)
+            return GetCampaignPackIds()
                 .Select(Resolve)
                 .OfType<EffectiveCampaignPack>()
                 .ToList();
