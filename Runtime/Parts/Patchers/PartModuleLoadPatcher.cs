@@ -141,15 +141,9 @@ namespace PatchManager.Parts.Patchers
                         continue;
                     }
 
-                    // Debug.Log($"ApplyOnGameObject - {partData.partName} removing {component.GetType().FullName}");
-                    if (Application.isEditor)
-                    {
-                        Object.DestroyImmediate(component);
-                    }
-                    else
-                    {
-                        Object.Destroy(component);
-                    }
+                    // This runs while reconciling a freshly cloned/instantiated part prefab. Runtime Destroy is
+                    // deferred, which leaves DisallowMultipleComponent blockers alive until end of frame.
+                    Object.DestroyImmediate(component);
                 }
             }
         }
