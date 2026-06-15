@@ -13,7 +13,7 @@ namespace PatchManager.LuaPatching;
 /// A registered patch operation: which converter, which addressables target, what callback to run, and at which stage.
 /// </summary>
 [MoonSharpUserData]
-public class LuaPatch
+public class PatchDefinition
 {
     /// <summary>
     /// The pass a patch runs in.
@@ -86,7 +86,7 @@ public class LuaPatch
     /// <param name="patchMethod">The supplied callback.</param>
     /// <returns>The patch instance for chaining.</returns>
     /// <exception cref="ScriptRuntimeException">Thrown when a patch method has already been set.</exception>
-    public LuaPatch Do(Func<DynValue, string> patchMethod)
+    public PatchDefinition Do(Func<DynValue, string> patchMethod)
     {
         if (PatchMethod != null)
         {
@@ -126,7 +126,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="names">The asset names to target.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Named(params string[] names)
+    public PatchDefinition Named(params string[] names)
     {
         foreach (var name in names)
         {
@@ -148,7 +148,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="names">The asset names to reject.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch NotNamed(params string[] names)
+    public PatchDefinition NotNamed(params string[] names)
     {
         foreach (var name in names)
         {
@@ -168,7 +168,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The required mod IDs.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Needs(params string[] ids)
+    public PatchDefinition Needs(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -187,7 +187,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The conflicting mod IDs.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Conflicts(params string[] ids)
+    public PatchDefinition Conflicts(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -209,7 +209,7 @@ public class LuaPatch
     /// </remarks>
     /// <param name="ids">The required patch IDs; namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch NeedsPatch(params string[] ids)
+    public PatchDefinition NeedsPatch(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -228,7 +228,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The conflicting patch IDs; namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch ConflictsPatch(params string[] ids)
+    public PatchDefinition ConflictsPatch(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -247,7 +247,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The patch IDs to run after; namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch AfterPatch(params string[] ids)
+    public PatchDefinition AfterPatch(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -266,7 +266,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The mod IDs whose patches this patch should run after.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch After(params string[] ids)
+    public PatchDefinition After(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -285,7 +285,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The patch IDs to run before; namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch BeforePatch(params string[] ids)
+    public PatchDefinition BeforePatch(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -304,7 +304,7 @@ public class LuaPatch
     /// </summary>
     /// <param name="ids">The mod IDs whose patches this patch should run before.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Before(params string[] ids)
+    public PatchDefinition Before(params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -388,7 +388,7 @@ public class LuaPatch
     /// <param name="predicate">The predicate evaluated against each candidate asset.</param>
     /// <param name="message">Optional message logged when the predicate rejects an asset.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Requires(Func<DynValue, bool> predicate, [CanBeNull] string message = null)
+    public PatchDefinition Requires(Func<DynValue, bool> predicate, [CanBeNull] string message = null)
     {
         _predicates.Add(new Predicate
         {
@@ -412,7 +412,7 @@ public class LuaPatch
     /// <param name="gate">The constant value the predicate evaluates to.</param>
     /// <param name="message">Optional message logged when the gate is <c>false</c>.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Requires(bool gate, [CanBeNull] string message = null)
+    public PatchDefinition Requires(bool gate, [CanBeNull] string message = null)
     {
         _predicates.Add(new Predicate
         {
@@ -430,7 +430,7 @@ public class LuaPatch
     /// <param name="predicate">Optional predicate evaluated against the value resolved at <paramref name="key" />, not the asset itself.</param>
     /// <param name="message">Optional assertion message logged when the key is present but the predicate fails.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Has(string key, [CanBeNull] Func<DynValue, bool> predicate = null,
+    public PatchDefinition Has(string key, [CanBeNull] Func<DynValue, bool> predicate = null,
         [CanBeNull] string message = null)
     {
         _predicates.Add(new Predicate
@@ -447,7 +447,7 @@ public class LuaPatch
     /// <param name="key">The key the asset must not expose.</param>
     /// <param name="message">Optional assertion message logged when the key is present.</param>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch HasNo(string key, [CanBeNull] string message = null)
+    public PatchDefinition HasNo(string key, [CanBeNull] string message = null)
     {
         _predicates.Add(new Predicate
             {
@@ -468,7 +468,7 @@ public class LuaPatch
     /// Makes the patch run before every Default and Last patch in the same pass.
     /// </summary>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch First()
+    public PatchDefinition First()
     {
         Ordering = PatchOrdering.First;
         return this;
@@ -478,7 +478,7 @@ public class LuaPatch
     /// Makes the patch run after every First and Default patch in the same pass.
     /// </summary>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Last()
+    public PatchDefinition Last()
     {
         Ordering = PatchOrdering.Last;
         return this;
@@ -493,7 +493,7 @@ public class LuaPatch
     /// Makes the patch run in the Early pass.
     /// </summary>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Early()
+    public PatchDefinition Early()
     {
         Pass = PatchPass.Early;
         return this;
@@ -503,7 +503,7 @@ public class LuaPatch
     /// Makes the patch run in the Late pass.
     /// </summary>
     /// <returns>The patch instance for chaining.</returns>
-    public LuaPatch Late()
+    public PatchDefinition Late()
     {
         Pass = PatchPass.Late;
         return this;

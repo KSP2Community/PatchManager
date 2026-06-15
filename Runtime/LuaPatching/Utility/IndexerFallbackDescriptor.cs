@@ -34,22 +34,31 @@ public class IndexerFallbackDescriptor : IUserDataDescriptor
     public Type Type => _inner.Type;
 
     /// <summary>
-    /// Resolves a string-key access; on a member-lookup miss, retries with <c>isDirectIndexing = false</c> so the
-    /// access falls through to the wrapped type's <c>this[string]</c> indexer.
+    /// Resolves an index access. On a member-lookup miss a JsonUserData is routed to its native LuaGet path, and
+    /// any other string-indexer type retries with <c>isDirectIndexing = false</c> to reach its <c>this[string]</c>.
     /// </summary>
     /// <param name="script">The active script.</param>
     /// <param name="obj">The instance being indexed.</param>
     /// <param name="index">The index value (member name for direct indexing).</param>
     /// <param name="isDirectIndexing">True when MoonSharp is performing member-style access.</param>
     /// <returns>The resolved value, or <see cref="DynValue.Nil" /> when neither lookup matches.</returns>
-    /// <exception cref="ScriptRuntimeException">Thrown when the wrapped descriptor surfaces a CLR exception; rewrapped so MoonSharp decorates the error with the Lua call site.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the wrapped descriptor surfaces a CLR exception. Rewrapped so MoonSharp decorates the error with the Lua call site.</exception>
     public DynValue Index(Script script, object obj, DynValue index, bool isDirectIndexing)
     {
         try
         {
-            var result = _inner.Index(script, obj, index, isDirectIndexing);
+            if (obj is JsonUserData jud)
+            {
+                // Resolve declared members (methods, Count, ...) but never the CLR indexer. Forcing direct
+                // indexing keeps MoonSharp out of get_Item, whose presence would otherwise bypass the native Lua
+                // path. On a member miss, route string and number keys to LuaGet.
+                var member = _inner.Index(script, obj, index, isDirectIndexing: true);
+                if (member != null && !member.IsNil()) return member;
+                if (index.Type == DataType.String || index.Type == DataType.Number) return jud.LuaGet(index);
+                return member;
+            }
 
-            // 2. If it's nil/void and we are using a string index (like .Planets)
+            var result = _inner.Index(script, obj, index, isDirectIndexing);
             if ((result == null || result.IsNil()) && index.Type == DataType.String)
             {
                 return _inner.Index(script, obj, index, false);
@@ -73,13 +82,25 @@ public class IndexerFallbackDescriptor : IUserDataDescriptor
     /// <param name="value">The value being assigned.</param>
     /// <param name="isDirectIndexing">True when MoonSharp is performing member-style access.</param>
     /// <returns>True if the assignment was handled, false if neither lookup accepts it.</returns>
-    /// <exception cref="ScriptRuntimeException">Thrown when the wrapped descriptor surfaces a CLR exception; rewrapped so MoonSharp decorates the error with the Lua call site.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the wrapped descriptor surfaces a CLR exception. Rewrapped so MoonSharp decorates the error with the Lua call site.</exception>
     public bool SetIndex(Script script, object obj, DynValue index, DynValue value, bool isDirectIndexing)
     {
         try
         {
-            var handled = _inner.SetIndex(script, obj, index, value, isDirectIndexing);
+            if (obj is JsonUserData jud)
+            {
+                // Force direct indexing so MoonSharp never reaches set_Item. On a member miss, route to LuaSet.
+                if (_inner.SetIndex(script, obj, index, value, isDirectIndexing: true)) return true;
+                if (index.Type == DataType.String || index.Type == DataType.Number)
+                {
+                    jud.LuaSet(index, value);
+                    return true;
+                }
 
+                return false;
+            }
+
+            var handled = _inner.SetIndex(script, obj, index, value, isDirectIndexing);
             if (!handled && isDirectIndexing && index.Type == DataType.String)
             {
                 return _inner.SetIndex(script, obj, index, value, false);

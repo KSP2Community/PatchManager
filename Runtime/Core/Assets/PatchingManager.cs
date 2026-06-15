@@ -26,7 +26,7 @@ namespace PatchManager.Core.Assets
     internal static class PatchingManager
     {
         /// <summary>
-        /// The current patch universe; created by <see cref="GenerateUniverse" />.
+        /// The current patch universe, created by <see cref="GenerateUniverse" />.
         /// </summary>
         internal static Universe Universe;
 
@@ -77,7 +77,7 @@ namespace PatchManager.Core.Assets
         /// Loads every <c>.lua</c> patch file under <paramref name="modFolder" /> and records each one's hash in
         /// the cache checksum.
         /// </summary>
-        /// <param name="modName">The mod ID; used as the script's <c>ModId</c> global.</param>
+        /// <param name="modName">The mod ID, used as the script's <c>ModId</c> global.</param>
         /// <param name="modFolder">The directory containing the mod's patches.</param>
         public static void ImportModPatches(string modName, string modFolder)
         {
@@ -127,6 +127,7 @@ namespace PatchManager.Core.Assets
         public static void RegisterPatches()
         {
             Logging.LogInfo($"Registering all patches!");
+            CSharpPatching.FluentPatchRegistry.Flush(Universe);
             Universe.SetupPatchesForRun();
             Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
             Logging.LogInfo($"{Universe.AllNewAssets.Count} assets created!");
@@ -199,18 +200,18 @@ namespace PatchManager.Core.Assets
 
         private static Dictionary<string, LabelRebuildState> _rebuildStates;
 
-        private static readonly LuaPatch.PatchPass[] OrderedPasses =
+        private static readonly PatchDefinition.PatchPass[] OrderedPasses =
         {
-            LuaPatch.PatchPass.Early,
-            LuaPatch.PatchPass.Default,
-            LuaPatch.PatchPass.Late
+            PatchDefinition.PatchPass.Early,
+            PatchDefinition.PatchPass.Default,
+            PatchDefinition.PatchPass.Late
         };
 
         /// <summary>
         /// Schedules per-(pass, label) flow actions in pass-major order (every label's Early before any
         /// Default, every label's Default before any Late). A label only receives an action for a pass
         /// if it has a patch in that pass. The first action a label receives lazily loads its
-        /// addressables; the last action writes the label's archive and releases its load handle. A
+        /// addressables. The last action writes the label's archive and releases its load handle. A
         /// final action persists totals and inventory.
         /// </summary>
         /// <param name="resolve">Callback invoked once scheduling finishes.</param>
@@ -227,7 +228,7 @@ namespace PatchManager.Core.Assets
 
             InitRebuildStates(labels);
 
-            var activePassesPerLabel = new Dictionary<string, List<LuaPatch.PatchPass>>(labels.Count);
+            var activePassesPerLabel = new Dictionary<string, List<PatchDefinition.PatchPass>>(labels.Count);
             foreach (var label in labels)
             {
                 activePassesPerLabel[label] = ActivePassesFor(label);
@@ -294,9 +295,9 @@ namespace PatchManager.Core.Assets
             }
         }
 
-        private static List<LuaPatch.PatchPass> ActivePassesFor(string label)
+        private static List<PatchDefinition.PatchPass> ActivePassesFor(string label)
         {
-            var result = new List<LuaPatch.PatchPass>();
+            var result = new List<PatchDefinition.PatchPass>();
             foreach (var pass in OrderedPasses)
             {
                 if (HasPatchesInPass(label, pass)) result.Add(pass);
@@ -305,12 +306,12 @@ namespace PatchManager.Core.Assets
                 && _rebuildStates.TryGetValue(label, out var state)
                 && state.CreatedAssets.Count > 0)
             {
-                result.Add(LuaPatch.PatchPass.Default);
+                result.Add(PatchDefinition.PatchPass.Default);
             }
             return result;
         }
 
-        private static bool HasPatchesInPass(string label, LuaPatch.PatchPass pass)
+        private static bool HasPatchesInPass(string label, PatchDefinition.PatchPass pass)
         {
             if (!Universe.AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
             if (!perPass.TryGetValue(pass, out var buckets)) return false;
@@ -319,7 +320,7 @@ namespace PatchManager.Core.Assets
                 || buckets.Exact.Count > 0;
         }
 
-        private static GenericFlowAction MakePassAction(string label, LuaPatch.PatchPass pass, bool loadFirst, bool writeLast)
+        private static GenericFlowAction MakePassAction(string label, PatchDefinition.PatchPass pass, bool loadFirst, bool writeLast)
         {
             var labelCopy = label;
             var passCopy = pass;
@@ -328,7 +329,7 @@ namespace PatchManager.Core.Assets
 
             var passSuffix = pass switch
             {
-                LuaPatch.PatchPass.Default => "",
+                PatchDefinition.PatchPass.Default => "",
                 _ => $" [{pass.ToString().ToUpperInvariant()}]"
             };
 
@@ -341,7 +342,7 @@ namespace PatchManager.Core.Assets
 
         private static IEnumerator RunPassActionCoroutine(
             string label,
-            LuaPatch.PatchPass pass,
+            PatchDefinition.PatchPass pass,
             bool loadFirst,
             bool writeLast,
             Action resolve
@@ -396,7 +397,7 @@ namespace PatchManager.Core.Assets
             }
         }
 
-        private static void RunPassForLabel(string label, LuaPatch.PatchPass pass)
+        private static void RunPassForLabel(string label, PatchDefinition.PatchPass pass)
         {
             if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
 

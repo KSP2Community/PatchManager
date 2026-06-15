@@ -291,13 +291,13 @@ namespace PatchManager.LuaPatching
         /// <summary>
         /// Registered patches keyed by addressables label. Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
         /// </summary>
-        public Dictionary<string, List<LuaPatch>> AllPatches = new();
+        public Dictionary<string, List<PatchDefinition>> AllPatches = new();
 
         /// <summary>
         /// Registers a patch and records its label in <see cref="PatchedLabels" />.
         /// </summary>
         /// <param name="patch">The patch to register.</param>
-        public void AddPatch(LuaPatch patch)
+        public void AddPatch(PatchDefinition patch)
         {
             if (AllPatches.TryGetValue(patch.Label, out var l))
             {
@@ -305,7 +305,7 @@ namespace PatchManager.LuaPatching
             }
             else
             {
-                AllPatches[patch.Label] = new List<LuaPatch> { patch };
+                AllPatches[patch.Label] = new List<PatchDefinition> { patch };
             }
 
             PatchedLabels.Add(patch.Label);
@@ -341,7 +341,7 @@ namespace PatchManager.LuaPatching
         /// Per-label, per-pass bucket maps. Each pass holds its own <see cref="LabelPatchBuckets" /> so
         /// pass execution iterates only the patches in that pass.
         /// </summary>
-        public Dictionary<string, Dictionary<LuaPatch.PatchPass, LabelPatchBuckets>> AllPatchesBuckets = new();
+        public Dictionary<string, Dictionary<PatchDefinition.PatchPass, LabelPatchBuckets>> AllPatchesBuckets = new();
 
         private static readonly char[] WildcardChars = { '*', '?' };
 
@@ -357,7 +357,7 @@ namespace PatchManager.LuaPatching
             // Two-phase setup so :Needs/:Conflicts can resolve patches in any label and any pass.
             // Phase 1: run mod-constraint filtering on every label's patches and union the surviving
             // names into a global existence set.
-            var perLabelModFiltered = new Dictionary<string, List<LuaPatch>>(AllPatches.Count);
+            var perLabelModFiltered = new Dictionary<string, List<PatchDefinition>>(AllPatches.Count);
             var globalAllPatches = new HashSet<string>();
             foreach (var (label, patches) in AllPatches)
             {
@@ -376,9 +376,9 @@ namespace PatchManager.LuaPatching
             }
         }
 
-        private List<LuaPatch> ApplyModConstraints(List<LuaPatch> patches)
+        private List<PatchDefinition> ApplyModConstraints(List<PatchDefinition> patches)
         {
-            var modConstrained = new List<LuaPatch>(patches.Count);
+            var modConstrained = new List<PatchDefinition>(patches.Count);
             foreach (var patch in patches)
             {
                 foreach (var mod in patch.NeedsMods)
@@ -405,12 +405,12 @@ namespace PatchManager.LuaPatching
             return modConstrained;
         }
 
-        private void SetupLabelForRun(string label, List<LuaPatch> modConstrained, HashSet<string> globalAllPatches)
+        private void SetupLabelForRun(string label, List<PatchDefinition> modConstrained, HashSet<string> globalAllPatches)
         {
             // Patch-constraint filter against the global existence set. Needs/Conflicts span every
             // label and every pass: a patch in this label's Default pass can require a patch declared
             // in another label's Late pass, and vice versa.
-            var patchConstrained = new List<LuaPatch>(modConstrained.Count);
+            var patchConstrained = new List<PatchDefinition>(modConstrained.Count);
             foreach (var patch in modConstrained)
             {
                 foreach (var id in patch.NeedsPatches)
@@ -435,12 +435,12 @@ namespace PatchManager.LuaPatching
                 continue_patch:;
             }
 
-            var perPassBuckets = new Dictionary<LuaPatch.PatchPass, LabelPatchBuckets>();
+            var perPassBuckets = new Dictionary<PatchDefinition.PatchPass, LabelPatchBuckets>();
             AllPatchesBuckets[label] = perPassBuckets;
 
             // Within each pass, sort each ordering bucket independently. Before/After targets in other
             // buckets are silently filtered out (treated as if the target did not exist).
-            foreach (LuaPatch.PatchPass pass in Enum.GetValues(typeof(LuaPatch.PatchPass)))
+            foreach (PatchDefinition.PatchPass pass in Enum.GetValues(typeof(PatchDefinition.PatchPass)))
             {
                 var passPatches = patchConstrained.Where(p => p.Pass == pass).ToList();
                 if (passPatches.Count == 0)
@@ -449,7 +449,7 @@ namespace PatchManager.LuaPatching
                     continue;
                 }
 
-                var orderedSorted = new List<LuaPatch>(passPatches.Count);
+                var orderedSorted = new List<PatchDefinition>(passPatches.Count);
                 foreach (var ord in OrderingSequence)
                 {
                     var orderingBucket = passPatches.Where(p => p.Ordering == ord).ToList();
@@ -461,8 +461,8 @@ namespace PatchManager.LuaPatching
                     orderedSorted[i].Order = i;
                 }
 
-                var exactGroups = new Dictionary<string, List<LuaPatch>>();
-                var matchAll = new List<LuaPatch>();
+                var exactGroups = new Dictionary<string, List<PatchDefinition>>();
+                var matchAll = new List<PatchDefinition>();
                 var wildcard = new List<WildcardEntry>();
 
                 foreach (var p in orderedSorted)
@@ -479,7 +479,7 @@ namespace PatchManager.LuaPatching
                             {
                                 if (!exactGroups.TryGetValue(pattern, out var groups))
                                 {
-                                    exactGroups[pattern] = groups = new List<LuaPatch>();
+                                    exactGroups[pattern] = groups = new List<PatchDefinition>();
                                 }
                                 groups.Add(p);
                             }
@@ -505,16 +505,16 @@ namespace PatchManager.LuaPatching
             }
         }
 
-        private static readonly LuaPatch.PatchOrdering[] OrderingSequence =
+        private static readonly PatchDefinition.PatchOrdering[] OrderingSequence =
         {
-            LuaPatch.PatchOrdering.First,
-            LuaPatch.PatchOrdering.Default,
-            LuaPatch.PatchOrdering.Last
+            PatchDefinition.PatchOrdering.First,
+            PatchDefinition.PatchOrdering.Default,
+            PatchDefinition.PatchOrdering.Last
         };
 
-        private List<LuaPatch> SortBucket(List<LuaPatch> bucket)
+        private List<PatchDefinition> SortBucket(List<PatchDefinition> bucket)
         {
-            if (bucket.Count == 0) return new List<LuaPatch>();
+            if (bucket.Count == 0) return new List<PatchDefinition>();
 
             var bucketNames = new HashSet<string>(bucket.Count);
             foreach (var p in bucket) bucketNames.Add(p.Name);
@@ -565,7 +565,7 @@ namespace PatchManager.LuaPatching
 
             var inDegree = new Dictionary<string, int>(bucket.Count);
             var outEdges = new Dictionary<string, HashSet<string>>(bucket.Count);
-            var namePatchMap = new Dictionary<string, LuaPatch>(bucket.Count);
+            var namePatchMap = new Dictionary<string, PatchDefinition>(bucket.Count);
 
             foreach (var patch in bucket)
             {
@@ -595,7 +595,7 @@ namespace PatchManager.LuaPatching
                 if (d == 0) queue.Enqueue(n);
             }
 
-            var sorted = new List<LuaPatch>(bucket.Count);
+            var sorted = new List<PatchDefinition>(bucket.Count);
             while (queue.Count > 0)
             {
                 var name = queue.Dequeue();
@@ -635,7 +635,7 @@ namespace PatchManager.LuaPatching
         /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
         /// <param name="errorCount">Set to the number of patches that threw.</param>
         /// <returns>The patched JSON, or <c>null</c> when the asset was removed.</returns>
-        public JToken RunAllPatchesFor(string label, string name, JToken data, LuaPatch.PatchPass pass, out int patchCount, out int errorCount)
+        public JToken RunAllPatchesFor(string label, string name, JToken data, PatchDefinition.PatchPass pass, out int patchCount, out int errorCount)
         {
             patchCount = 0;
             errorCount = 0;
@@ -680,7 +680,7 @@ namespace PatchManager.LuaPatching
         /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
         /// <param name="errorCount">Set to the number of patches that threw.</param>
         /// <returns>The patched JSON for the asset.</returns>
-        public JToken RunAllPatchesFor(LuaAsset asset, LuaPatch.PatchPass pass, out int patchCount, out int errorCount)
+        public JToken RunAllPatchesFor(LuaAsset asset, PatchDefinition.PatchPass pass, out int patchCount, out int errorCount)
         {
             patchCount = 0;
             errorCount = 0;
@@ -718,19 +718,19 @@ namespace PatchManager.LuaPatching
         /// <param name="name">The asset's addressables address; matched against each patch's name pattern.</param>
         /// <param name="pass">The pass to look up.</param>
         /// <returns>The matching patches, or an empty sequence when no patches are registered for the label in this pass.</returns>
-        public IEnumerable<LuaPatch> GetAllSortedPatchesFor(string label, string name, LuaPatch.PatchPass pass)
+        public IEnumerable<PatchDefinition> GetAllSortedPatchesFor(string label, string name, PatchDefinition.PatchPass pass)
         {
             if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) yield break;
             if (!perPass.TryGetValue(pass, out var buckets)) yield break;
 
-            var exact = buckets.Exact.TryGetValue(name, out var e) ? e : Array.Empty<LuaPatch>();
+            var exact = buckets.Exact.TryGetValue(name, out var e) ? e : Array.Empty<PatchDefinition>();
             var matchAll = buckets.MatchAll;
             var wildcard = buckets.Wildcard;
             var exactI = 0;
             var matchAllI = 0;
             var wildCardI = 0;
 
-            HashSet<LuaPatch> alreadyYielded = new(exact.Length+matchAll.Length+wildcard.Length);
+            HashSet<PatchDefinition> alreadyYielded = new(exact.Length+matchAll.Length+wildcard.Length);
 
             while (true)
             {
@@ -781,7 +781,7 @@ namespace PatchManager.LuaPatching
         /// <param name="name">The asset's addressables address.</param>
         /// <param name="pass">The pass to check.</param>
         /// <returns>True if any patch in <paramref name="pass" /> matches, false otherwise.</returns>
-        public bool HasAnyPatchInPass(string label, string name, LuaPatch.PatchPass pass)
+        public bool HasAnyPatchInPass(string label, string name, PatchDefinition.PatchPass pass)
         {
             if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
             if (!perPass.TryGetValue(pass, out var buckets)) return false;
@@ -835,14 +835,14 @@ namespace PatchManager.LuaPatching
             /// <summary>
             /// The patch itself
             /// </summary>
-            public readonly LuaPatch Patch;
+            public readonly PatchDefinition Patch;
 
             /// <summary>
             /// Creates a new WildcardEntry instance
             /// </summary>
             /// <param name="pattern">The pattern the patch applies to</param>
             /// <param name="patch">The patch itself</param>
-            public WildcardEntry(NamePattern pattern, LuaPatch patch)
+            public WildcardEntry(NamePattern pattern, PatchDefinition patch)
             {
                 Pattern = pattern;
                 Patch = patch;
@@ -857,12 +857,12 @@ namespace PatchManager.LuaPatching
             /// <summary>
             /// Exact name matching patches
             /// </summary>
-            public Dictionary<string, LuaPatch[]> Exact = new();
+            public Dictionary<string, PatchDefinition[]> Exact = new();
 
             /// <summary>
             /// All matching patches
             /// </summary>
-            public LuaPatch[] MatchAll = Array.Empty<LuaPatch>();
+            public PatchDefinition[] MatchAll = Array.Empty<PatchDefinition>();
 
             /// <summary>
             /// Wildcard matching patches

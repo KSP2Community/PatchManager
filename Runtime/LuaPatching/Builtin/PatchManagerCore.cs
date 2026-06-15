@@ -42,9 +42,9 @@ public class PatchManagerCore
     /// <param name="converter">The name of the converter to use, as registered via <see cref="Attributes.ConverterAttribute" />.</param>
     /// <param name="label">The addressables label whose assets to patch.</param>
     /// <param name="name">The patch's local name; the host mod's ID is prepended to form the full namespaced name.</param>
-    /// <returns>The registered patch, suitable for chaining (for example <see cref="LuaPatch.Do" />).</returns>
+    /// <returns>The registered patch, suitable for chaining (for example <see cref="PatchDefinition.Do" />).</returns>
     /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
-    public LuaPatch Patch(Script script, string converter, string label, string name)
+    public PatchDefinition Patch(Script script, string converter, string label, string name)
     {
         if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
         {
@@ -54,7 +54,7 @@ public class PatchManagerCore
         var modId = script.Globals.Get("ModId").CastToString();
         var actualName =  modId + ':' + name;
 
-        var newPatch = new LuaPatch
+        var newPatch = new PatchDefinition
         {
             ConverterInstance = converterInstance,
             Label = label,

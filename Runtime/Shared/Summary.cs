@@ -51,7 +51,7 @@ public class Summary
         public string Name;
 
         /// <summary>The pass the patch ran in.</summary>
-        public LuaPatch.PatchPass Pass;
+        public PatchDefinition.PatchPass Pass;
 
         /// <summary>The application state of the patch.</summary>
         public ApplicationState State;
@@ -78,7 +78,7 @@ public class Summary
         /// <summary>
         /// Patch entries recorded for this asset, keyed by the pass they ran in.
         /// </summary>
-        public Dictionary<LuaPatch.PatchPass, List<SummaryEntry>> EntriesByPass = new();
+        public Dictionary<PatchDefinition.PatchPass, List<SummaryEntry>> EntriesByPass = new();
 
         /// <summary>
         /// True if any pass recorded at least one entry for this asset, false otherwise.
@@ -103,7 +103,7 @@ public class Summary
 
     [CanBeNull] private List<AssetSummary> _currentLabel;
     [CanBeNull] private AssetSummary _currentAsset;
-    private LuaPatch.PatchPass _currentPass = LuaPatch.PatchPass.Default;
+    private PatchDefinition.PatchPass _currentPass = PatchDefinition.PatchPass.Default;
 
     /// <summary>
     /// Marks a patch as removed during setup (failed mod or patch constraint, or caught in a cycle).
@@ -121,7 +121,7 @@ public class Summary
     /// <see cref="Error(string, string)" />, and <see cref="RemovedAsset" /> calls are stamped with.
     /// </summary>
     /// <param name="pass">The pass currently being run.</param>
-    public void BeginPass(LuaPatch.PatchPass pass)
+    public void BeginPass(PatchDefinition.PatchPass pass)
     {
         _currentPass = pass;
     }
@@ -330,7 +330,7 @@ public class Summary
         sb.AppendLine("");
 
         sb.AppendLine("Per-Pass Statistics:");
-        foreach (LuaPatch.PatchPass pass in Enum.GetValues(typeof(LuaPatch.PatchPass)))
+        foreach (PatchDefinition.PatchPass pass in Enum.GetValues(typeof(PatchDefinition.PatchPass)))
         {
             var passEntries = allEntries.Where(p => p.Pass == pass).ToList();
             if (passEntries.Count == 0) continue;

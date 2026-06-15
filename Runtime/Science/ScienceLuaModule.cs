@@ -38,12 +38,12 @@ public class ScienceLuaModule
     /// Registers a discoverables-list patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every discoverables asset by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every discoverables asset by default; restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchDiscoverables(Script script, string name)
+    public PatchDefinition PatchDiscoverables(Script script, string name)
     {
         return _core.Patch(script, "Discoverables", "science_region_discoverables", name);
     }
@@ -55,12 +55,12 @@ public class ScienceLuaModule
     /// Registers a science-experiment patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every experiment by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every experiment by default; restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchExperiments(Script script, string name)
+    public PatchDefinition PatchExperiments(Script script, string name)
     {
         return _core.Patch(script, "Experiment", "scienceExperiment", name);
     }
@@ -94,12 +94,12 @@ public class ScienceLuaModule
     /// Registers a science-region patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every region asset by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every region asset by default; restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchRegions(Script script, string name)
+    public PatchDefinition PatchRegions(Script script, string name)
     {
         return _core.Patch(script, "ScienceRegions", "science_region", name);
     }
@@ -112,12 +112,12 @@ public class ScienceLuaModule
     /// Registers a tech-tree-node patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every tech-tree node by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every tech-tree node by default; restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchTechNodes(Script script, string name)
+    public PatchDefinition PatchTechNodes(Script script, string name)
     {
         return _core.Patch(script, "JSON", "techNodeData", name);
     }

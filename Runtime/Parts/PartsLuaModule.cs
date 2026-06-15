@@ -33,12 +33,12 @@ public class PartsLuaModule
     /// Registers a part patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every part by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every part by default; restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name)
+    public PatchDefinition Patch(Script script, string name)
     {
         return _core.Patch(script, "Part", "parts_data", name);
     }

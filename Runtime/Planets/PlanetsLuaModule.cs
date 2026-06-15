@@ -36,12 +36,12 @@ public class PlanetsLuaModule
     /// Registers a celestial-body patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every body by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every body by default; restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name)
+    public PatchDefinition Patch(Script script, string name)
     {
         return _core.Patch(script, "Planet", "celestial_bodies", name);
     }
@@ -52,7 +52,7 @@ public class PlanetsLuaModule
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchDefaultGalaxy(Script script, string name)
+    public PatchDefinition PatchDefaultGalaxy(Script script, string name)
     {
         return _core.Patch(script, "Galaxy", "GalaxyDefinition_Default", name);
     }
@@ -61,12 +61,12 @@ public class PlanetsLuaModule
     /// Registers a patch against the <c>atmosphere_overrides</c> label with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// Use <see cref="LuaPatch.Named" /> to restrict which override files the patch runs against.
+    /// Use <see cref="PatchDefinition.Named" /> to restrict which override files the patch runs against.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchAtmosphereOverride(Script script, string name)
+    public PatchDefinition PatchAtmosphereOverride(Script script, string name)
     {
         return _core.Patch(script, "JSON", "atmosphere_overrides", name);
     }
@@ -92,12 +92,12 @@ public class PlanetsLuaModule
     /// Registers a patch against the <c>volume_cloud_overrides</c> label with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// Use <see cref="LuaPatch.Named" /> to restrict which override files the patch runs against.
+    /// Use <see cref="PatchDefinition.Named" /> to restrict which override files the patch runs against.
     /// </remarks>
     /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchCloudOverride(Script script, string name)
+    public PatchDefinition PatchCloudOverride(Script script, string name)
     {
         return _core.Patch(script, "Cloud", "volume_cloud_overrides", name);
     }

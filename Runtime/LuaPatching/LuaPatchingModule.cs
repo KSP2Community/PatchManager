@@ -22,6 +22,12 @@ namespace PatchManager.LuaPatching
         {
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
 
+            // Bridge Lua's 1-based array indices to the 0-based LuaIndex used by the C#-facing position members.
+            // Only fires when a CLR method parameter is typed LuaIndex, so it is inert until the wrappers adopt it.
+            Script.GlobalOptions.CustomConverters.SetScriptToClrCustomConversion(
+                DataType.Number, typeof(LuaIndex),
+                dv => new LuaIndex((int)dv.Number - 1));
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 UserData.RegisterAssembly(assembly, false);
