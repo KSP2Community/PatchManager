@@ -144,10 +144,9 @@ namespace PatchManager.LuaPatching
         public Dictionary<string, List<PatchDefinition>> AllPatches = new();
 
         /// <summary>
-        /// True while patch definitions are being registered. Flipped false at the end of
-        /// <see cref="SetupPatchesForRun" />, after which the Lua definition entrypoints
-        /// (<c>PM:Patch</c>/<c>PM:New</c>) throw. Patch application (Do callbacks) and builder/query
-        /// helpers stay valid regardless of this flag.
+        /// True while patch definitions are being registered. The loading lifecycle closes it once every mod
+        /// body has run, after which the Lua definition entrypoints (<c>PM:Patch</c>/<c>PM:New</c>) throw. Patch
+        /// application (Do callbacks) and builder/query helpers stay valid regardless of this flag.
         /// </summary>
         public bool RegistrationOpen = true;
 
@@ -232,11 +231,6 @@ namespace PatchManager.LuaPatching
             {
                 SetupLabelForRun(label, modConstrained, globalAllPatches);
             }
-
-            // Registration is finalized. Any further PM:Patch/PM:New (from a Do callback or runtime
-            // closure) would register into an already-sorted registry that never re-applies, so close
-            // the window. The definition entrypoints in PatchManagerCore throw past this point.
-            RegistrationOpen = false;
         }
 
         private List<PatchDefinition> ApplyModConstraints(List<PatchDefinition> patches)

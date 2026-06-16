@@ -7,10 +7,8 @@ using PatchManager.Core.Cache;
 using PatchManager.LuaPatching;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
-using Redux.UI.Settings.Submenus;
 using ReduxLib.Configuration;
 using ReduxLib.Configuration.Attributes;
-using UniLinq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -58,51 +56,37 @@ namespace PatchManager.Core
             PatchingManager.HashScriptFiles();
             var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
+            // Every mod body has already run in SpaceWarp's per-plugin script phase, which precedes
+            // GeneralLoadingActions on both warm and cold launches, so close the Lua patch-definition window here.
+            SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
+                () => new FlowAction("Patch Manager: Closing Registration", CloseRegistration));
+
             if (!isValid)
             {
                 _wasCacheInvalidated = true;
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0, () =>
+                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1, () =>
                     new FlowAction("Patch Manager: Collecting script results", CollectScriptResults));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
-                    () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(2,
-                    () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+                    () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
-                    () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+                    () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
-                    () => new FlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
+                    () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(5,
-                    () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+                    () => new FlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(6,
-                    () => new FlowAction("Patch Manager: Registering Standalone Configs", RegisterStandaloneConfigs));
+                    () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
             else
             {
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
-                    () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
                 SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
-                    () => new FlowAction("Patch Manager: Registering Standalone Configs", RegisterStandaloneConfigs));
+                    () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
             }
         }
 
-        private void RegisterStandaloneConfigs(Action resolve, Action<string> reject)
+        private static void CloseRegistration(Action resolve, Action<string> reject)
         {
-            var menuManager = GameManager.Instance.Game.SettingsMenuManager;
-            if (menuManager == null)
-            {
-                resolve();
-                return;
-            }
-
-            foreach (var standalone in ConfigReplay.StandaloneConfigs.OrderBy(o => o.ModId, StringComparer.Ordinal))
-            {
-                if (standalone.ConfigFile is { Sections.Count: > 0 } file
-                    && file.Sections.Any(s => s.Keys.Count > 0))
-                {
-                    menuManager.RegisterMenu(new UitkConfigFileSettingsMenu(standalone.ModId, file));
-                }
-            }
-
+            PatchingManager.Universe.RegistrationOpen = false;
             resolve();
         }
 
