@@ -27,7 +27,7 @@ namespace PatchManager.LuaPatching
     /// assembly. Each universe instance then constructs its own <see cref="PatchManagerCore" /> and live
     /// submodule instances, exposes them as the global <c>PM</c> table, and tracks per-mod patch state. Mods
     /// load Lua patches via the <c>LoadPatch*</c> methods, which are expected to register patches and stages
-    /// through <c>PM</c>; once loading is done, <see cref="SetupPatchesForRun" /> finalizes ordering and the
+    /// through <c>PM</c>. Once loading is done, <see cref="SetupPatchesForRun" /> finalizes ordering and the
     /// <c>RunAllPatchesFor</c> overloads execute the chain against each asset.
     /// </remarks>
     public class Universe
@@ -108,160 +108,10 @@ namespace PatchManager.LuaPatching
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
         }
 
-        private static PatchManagerScriptLoader _managerScriptLoader = new();
-
         #region Patch Loading
 
-        /// <summary>
-        /// Number of Lua library files (filenames starting with <c>_</c>) discovered across loaded patch directories.
-        /// </summary>
-        public int LibraryCount = 0;
 
-        /// <summary>
-        /// Loads and runs a single <c>.lua</c> patch file, registering whatever patches it declares.
-        /// </summary>
-        /// <param name="file">The patch file to load.</param>
-        /// <param name="directoryInfo">The directory the patch was discovered in; exposed to the script as the <c>Location</c> global.</param>
-        public void LoadSinglePatchFile(FileInfo file, DirectoryInfo directoryInfo)
-        {
-            var modId = Path.GetFileNameWithoutExtension(file.Name);
-            var luaConfig = BuildLuaConfig(modId, file.FullName);
-            var patchScript = new Script(CoreModules.Preset_SoftSandbox)
-            {
-                Options =
-                {
-                    ScriptLoader = _managerScriptLoader
-                },
-                Globals =
-                {
-                    ["ModId"] = modId,
-                    ["Location"] = directoryInfo.FullName,
-                    ["PM"] = PatchManagerLibraryInstance,
-                    ["Config"] = UserData.Create(luaConfig)
-                }
-            };
-
-            JsonModule.Register(patchScript);
-            var relativeName = file.FullName.MakeRelativePathTo(Directory.GetCurrentDirectory());
-            try
-            {
-                patchScript.DoString(File.ReadAllText(file.FullName),
-                    codeFriendlyName: relativeName);
-            }
-            catch (InterpreterException e)
-            {
-                Summary.ErrorFile(relativeName, e);
-                ErrorLogger($"{file.FullName} failed to load: {e.DecoratedMessage}");
-                ErrorLogger(e.ToString());
-            }
-            catch (Exception e)
-            {
-                Summary.ErrorFile(relativeName, e);
-                ErrorLogger($"{file.FullName} failed to load: {e.Message}");
-                ErrorLogger(e.ToString());
-            }
-
-            AllMods.Add(modId);
-        }
-
-        /// <summary>
-        /// Loads every <c>.lua</c> file under the given directory (excluding files starting with <c>_</c>) and runs
-        /// each one to register its patches.
-        /// </summary>
-        /// <remarks>
-        /// Library files (filenames starting with <c>_</c>) are not executed but counted in <see cref="LibraryCount" />.
-        /// All scripts share a single <see cref="Script" /> with the given <paramref name="modId" />.
-        /// </remarks>
-        /// <param name="directory">The directory containing the patch files.</param>
-        /// <param name="modId">The mod ID; exposed to scripts as the <c>ModId</c> global and used as their default stage.</param>
-        public void LoadPatchesInDirectory(DirectoryInfo directory, string modId)
-        {
-            var luaConfig = BuildLuaConfig(modId, null);
-            var patchScript = new Script(CoreModules.Preset_SoftSandbox)
-            {
-                Options =
-                {
-                    ScriptLoader = _managerScriptLoader
-                },
-                Globals =
-                {
-                    ["ModId"] = modId,
-                    ["Location"] = directory.FullName,
-                    ["PM"] = PatchManagerLibraryInstance,
-                    ["Config"] = UserData.Create(luaConfig)
-                }
-            };
-            AllMods.Add(modId);
-            JsonModule.Register(patchScript);
-
-            foreach (var file in directory.EnumerateFiles("*.lua", SearchOption.AllDirectories)
-                         .Where(f => !f.Name.StartsWith("_")))
-            {
-                var relativeName = file.FullName.MakeRelativePathTo(Directory.GetCurrentDirectory());
-                try
-                {
-                    patchScript.DoString(File.ReadAllText(file.FullName));
-                }
-                catch (InterpreterException e)
-                {
-                    Summary.ErrorFile(relativeName, e);
-                    ErrorLogger($"{file.FullName} failed to load: {e.DecoratedMessage}");
-                    ErrorLogger(e.ToString());
-                }
-                catch (Exception e)
-                {
-                    Summary.ErrorFile(relativeName, e);
-                    ErrorLogger($"{file.FullName} failed to load: {e.Message}");
-                    ErrorLogger(e.ToString());
-                }
-            }
-
-            LibraryCount += directory.EnumerateFiles("_*.lua", SearchOption.AllDirectories).Count();
-        }
-
-        /// <summary>
-        /// Loads and runs a single Lua patch from a <see cref="TextAsset" />.
-        /// </summary>
-        /// <param name="textAsset">The text asset whose contents are the patch script.</param>
-        /// <param name="modId">The mod ID; exposed to the script as the <c>ModId</c> global.</param>
-        /// <param name="summary">The summary to log errors to</param>
-        public void LoadPatchAsset(TextAsset textAsset, string modId)
-        {
-            var luaConfig = BuildLuaConfig(modId, null);
-            var patchScript = new Script(CoreModules.Preset_SoftSandbox)
-            {
-                Options =
-                {
-                    ScriptLoader = _managerScriptLoader
-                },
-                Globals =
-                {
-                    ["ModId"] = modId,
-                    ["PM"] = PatchManagerLibraryInstance,
-                    ["Config"] = UserData.Create(luaConfig)
-                }
-            };
-            AllMods.Add(modId);
-            JsonModule.Register(patchScript);
-            try
-            {
-                patchScript.DoString(textAsset.text);
-            }
-            catch (InterpreterException e)
-            {
-                Summary.ErrorFile(textAsset.name, e);
-                ErrorLogger($"{textAsset.name} failed to load: {e.DecoratedMessage}");
-                ErrorLogger(e.ToString());
-            }
-            catch (Exception e)
-            {
-                Summary.ErrorFile(textAsset.name, e);
-                ErrorLogger($"{textAsset.name} failed to load: {e.Message}");
-                ErrorLogger(e.ToString());
-            }
-        }
-
-        private LuaPatchConfig BuildLuaConfig(string modId, string standaloneLuaPath)
+        public LuaPatchConfig BuildLuaConfig(string modId, string standaloneLuaPath)
         {
             try
             {
@@ -292,6 +142,14 @@ namespace PatchManager.LuaPatching
         /// Registered patches keyed by addressables label. Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
         /// </summary>
         public Dictionary<string, List<PatchDefinition>> AllPatches = new();
+
+        /// <summary>
+        /// True while patch definitions are being registered. Flipped false at the end of
+        /// <see cref="SetupPatchesForRun" />, after which the Lua definition entrypoints
+        /// (<c>PM:Patch</c>/<c>PM:New</c>) throw. Patch application (Do callbacks) and builder/query
+        /// helpers stay valid regardless of this flag.
+        /// </summary>
+        public bool RegistrationOpen = true;
 
         /// <summary>
         /// Registers a patch and records its label in <see cref="PatchedLabels" />.
@@ -374,6 +232,11 @@ namespace PatchManager.LuaPatching
             {
                 SetupLabelForRun(label, modConstrained, globalAllPatches);
             }
+
+            // Registration is finalized. Any further PM:Patch/PM:New (from a Do callback or runtime
+            // closure) would register into an already-sorted registry that never re-applies, so close
+            // the window. The definition entrypoints in PatchManagerCore throw past this point.
+            RegistrationOpen = false;
         }
 
         private List<PatchDefinition> ApplyModConstraints(List<PatchDefinition> patches)
@@ -625,7 +488,7 @@ namespace PatchManager.LuaPatching
         /// <remarks>
         /// Patches are chained: each one operates on the previous patch's <see cref="DynValue" /> when the converters
         /// match, otherwise the chain is flushed back to JSON, lifted by the new converter, and chaining resumes.
-        /// Returns <paramref name="data" /> unchanged when no patch applied; returns <c>null</c> when a patch
+        /// Returns <paramref name="data" /> unchanged when no patch applied. Returns <c>null</c> when a patch
         /// removed the asset.
         /// </remarks>
         /// <param name="label">The asset's addressables label.</param>
@@ -715,7 +578,7 @@ namespace PatchManager.LuaPatching
         /// stage-sorted order, filtered by name pattern.
         /// </summary>
         /// <param name="label">The addressables label to look up.</param>
-        /// <param name="name">The asset's addressables address; matched against each patch's name pattern.</param>
+        /// <param name="name">The asset's addressables address, matched against each patch's name pattern.</param>
         /// <param name="pass">The pass to look up.</param>
         /// <returns>The matching patches, or an empty sequence when no patches are registered for the label in this pass.</returns>
         public IEnumerable<PatchDefinition> GetAllSortedPatchesFor(string label, string name, PatchDefinition.PatchPass pass)
@@ -796,7 +659,7 @@ namespace PatchManager.LuaPatching
         /// extension).
         /// </summary>
         /// <param name="label">The Addressables label whose assets to enumerate.</param>
-        /// <returns>A map from asset Unity name to primary address; empty when the label resolves to nothing.</returns>
+        /// <returns>A map from asset Unity name to primary address, empty when the label resolves to nothing.</returns>
         public Dictionary<string, string> BuildPrimaryKeyMapForLabel(string label)
         {
             var map = new Dictionary<string, string>();

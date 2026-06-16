@@ -38,20 +38,25 @@ public class PatchManagerCore
     /// <summary>
     /// Registers a patch keyed by the given addressables label and namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="converter">The name of the converter to use, as registered via <see cref="Attributes.ConverterAttribute" />.</param>
     /// <param name="label">The addressables label whose assets to patch.</param>
-    /// <param name="name">The patch's local name; the host mod's ID is prepended to form the full namespaced name.</param>
+    /// <param name="name">The patch's local name. The host mod's ID is prepended to form the full namespaced name.</param>
     /// <returns>The registered patch, suitable for chaining (for example <see cref="PatchDefinition.Do" />).</returns>
     /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
-    public PatchDefinition Patch(Script script, string converter, string label, string name)
+    public PatchDefinition Patch(ScriptExecutionContext context, string converter, string label, string name)
     {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException($"PM:Patch('{name}') can only be called during patch registration, not from a Do callback or at runtime.");
+        }
+
         if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
         {
             throw new ScriptRuntimeException($"Unknown converter {converter}");
         }
 
-        var modId = script.Globals.Get("ModId").CastToString();
+        var modId = context.CurrentGlobalEnv.Get("ModId").CastToString();
         var actualName =  modId + ':' + name;
 
         var newPatch = new PatchDefinition
@@ -75,6 +80,11 @@ public class PatchManagerCore
     /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
     public void New(string converter, string label, string name, DynValue newObject)
     {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException($"PM:New('{name}') can only be called during patch registration, not from a Do callback or at runtime.");
+        }
+
         if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
         {
             throw new ScriptRuntimeException($"Unknown converter {converter}");

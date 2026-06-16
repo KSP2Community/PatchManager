@@ -37,15 +37,15 @@ public class GenericLuaModule
     /// Registers a JSON patch under <paramref name="label" /> with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every asset under <paramref name="label" /> by default; restrict it via <see cref="PatchDefinition.Named" />.
+    /// The patch matches every asset under <paramref name="label" /> by default. Restrict it via <see cref="PatchDefinition.Named" />.
     /// </remarks>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
     /// <param name="label">The addressables label to patch.</param>
-    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public PatchDefinition Patch(Script script, string label, string name)
+    public PatchDefinition Patch(ScriptExecutionContext context, string label, string name)
     {
-        return _core.Patch(script, "JSON", label, name);
+        return _core.Patch(context, "JSON", label, name);
     }
 
     /// <summary>

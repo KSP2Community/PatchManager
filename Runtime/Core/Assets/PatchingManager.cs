@@ -32,7 +32,6 @@ namespace PatchManager.Core.Assets
 
         private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
-        private static int _initialLibraryCount;
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
         internal static bool UseIndentedOutput;
@@ -68,57 +67,6 @@ namespace PatchManager.Core.Assets
             loadedPlugins.AddRange(singleFileModIds);
             Universe = new(Logging.LogError, Logging.LogMessage,
                 loadedPlugins);
-            _initialLibraryCount = Universe.LibraryCount;
-        }
-
-        private static int _previousLibraryCount = -1;
-
-        /// <summary>
-        /// Loads every <c>.lua</c> patch file under <paramref name="modFolder" /> and records each one's hash in
-        /// the cache checksum.
-        /// </summary>
-        /// <param name="modName">The mod ID, used as the script's <c>ModId</c> global.</param>
-        /// <param name="modFolder">The directory containing the mod's patches.</param>
-        public static void ImportModPatches(string modName, string modFolder)
-        {
-            Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
-
-            var currentLibraryCount = Universe.LibraryCount - _initialLibraryCount;
-
-            if (currentLibraryCount > _previousLibraryCount)
-            {
-                Logging.LogInfo($"{currentLibraryCount} mod libraries loaded!");
-                _previousLibraryCount++;
-            }
-
-            var patchFiles = Directory.GetFiles(modFolder, "*.lua", SearchOption.AllDirectories);
-            foreach (var patchFile in patchFiles)
-            {
-                var patchHash = Hash.FromFile(patchFile);
-                CurrentPatchHashes.Patches.Add(patchFile, patchHash);
-            }
-        }
-
-        /// <summary>
-        /// Loads a single <c>.lua</c> patch file and records its hash in the cache checksum.
-        /// </summary>
-        /// <param name="fileInfo">The patch file to load.</param>
-        public static void ImportSinglePatch(FileInfo fileInfo)
-        {
-            Universe.LoadSinglePatchFile(fileInfo, new DirectoryInfo("."));
-            CurrentPatchHashes.Patches.Add(fileInfo.FullName, Hash.FromFile(fileInfo.FullName));
-        }
-
-        /// <summary>
-        /// Loads a patch from a <see cref="TextAsset" /> and records its hash in the cache checksum.
-        /// </summary>
-        /// <param name="asset">The text asset whose contents are the patch script.</param>
-        /// <param name="modId">The mod ID to associate the patch with.</param>
-        public static void ImportAssetPatch(TextAsset asset, string modId)
-        {
-            Universe.LoadPatchAsset(asset, modId);
-            // TODO: Actually fix the double-loading of addressables rather than just changing Add to TryAdd
-            CurrentPatchHashes.Patches.TryAdd($"{modId}/{asset.name}", Hash.FromString(asset.text));
         }
 
         /// <summary>
@@ -131,6 +79,48 @@ namespace PatchManager.Core.Assets
             Universe.SetupPatchesForRun();
             Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
             Logging.LogInfo($"{Universe.AllNewAssets.Count} assets created!");
+        }
+
+        /// <summary>
+        /// Hashes every mod's declared script files into the patch-cache checksum.
+        /// </summary>
+        /// <remarks>
+        /// Runs before the cache-validity decision (and before the bodies run), so the decision sees whether the
+        /// patch files changed since last launch. Addressable-sourced scripts are not files and are gated by mod
+        /// version instead. Uses the same string hash as <see cref="CollectScriptResults" /> so the two agree.
+        /// </remarks>
+        public static void HashScriptFiles()
+        {
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                foreach (var file in descriptor.ScriptFiles)
+                {
+                    if (File.Exists(file))
+                    {
+                        CurrentPatchHashes.Patches[file] = Hash.FromString(File.ReadAllText(file));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Collects what the runtime exposed per descriptor: every ran script's hash into the patch-cache
+        /// checksum, and every script error into the patch summary.
+        /// </summary>
+        public static void CollectScriptResults()
+        {
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                foreach (var script in descriptor.LoadedScripts)
+                {
+                    CurrentPatchHashes.Patches[script.Key] = Hash.FromString(script.Value);
+                }
+
+                foreach (var error in descriptor.ScriptErrors)
+                {
+                    Universe.Summary.ErroredFiles.Add(error);
+                }
+            }
         }
 
         /// <summary>

@@ -22,6 +22,12 @@ namespace PatchManager.LuaPatching
         {
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
 
+            // PatchManager contributes PM/J into each mod env the SpaceWarp runtime forks.
+            if (!ReduxLib.GameInterfaces.ModRuntime.Contributors.OfType<Builtin.PatchManagerEnvContributor>().Any())
+            {
+                ReduxLib.GameInterfaces.ModRuntime.Contributors.Add(new Builtin.PatchManagerEnvContributor());
+            }
+
             // Bridge Lua's 1-based array indices to the 0-based LuaIndex used by the C#-facing position members.
             // Only fires when a CLR method parameter is typed LuaIndex, so it is inert until the wrappers adopt it.
             Script.GlobalOptions.CustomConverters.SetScriptToClrCustomConversion(
