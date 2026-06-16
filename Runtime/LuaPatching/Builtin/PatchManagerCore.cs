@@ -22,6 +22,18 @@ public class PatchManagerCore
     }
 
     /// <summary>
+    /// The metadata tag a config value carries to invalidate the patch cache when its value changes between
+    /// launches. The canonical constant - PM's own consumer and any C# config reference this.
+    /// </summary>
+    public const string InvalidatesOnChangeTag = "InvalidatesPatchManagerOnChange";
+
+    /// <summary>
+    /// The cache-invalidation tag, exposed to scripts as <c>PM.InvalidatesOnChange</c> so a config entry can
+    /// be tagged with <c>:Tag(PM.InvalidatesOnChange)</c>.
+    /// </summary>
+    public string InvalidatesOnChange => InvalidatesOnChangeTag;
+
+    /// <summary>
     /// Returns the registered submodule with the given name (for example <c>PM.Planets</c>).
     /// </summary>
     /// <param name="name">The submodule name as registered via <see cref="Attributes.PatchManagerModuleAttribute" />.</param>

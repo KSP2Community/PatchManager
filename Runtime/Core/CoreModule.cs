@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using KSP.Game;
+using KSP.Game.Flow;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
 using PatchManager.LuaPatching;
@@ -39,15 +40,23 @@ namespace PatchManager.Core
         private bool _wasCacheInvalidated;
 
         /// <summary>
-        /// Decides whether to invalidate the cache, then schedules the patch-loading flow actions for the SpaceWarp loader.
+        /// Schedules the post-body cache-validity decision. The decision needs the config values mod bodies
+        /// bind, so it runs in <see cref="DecideCacheValidity" /> (after the per-plugin body phase) rather than
+        /// here in Init, which runs in PM's Awake, before any body.
         /// </summary>
         public override void Init()
         {
-            ConfigReplay.ReplayAll();
+            SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
+                () => new FlowAction("Patch Manager: Closing Registration", CloseRegistration));
+            SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
+                () => new FlowAction("Patch Manager: Deciding Cache Validity", DecideCacheValidity));
+        }
 
+        private void DecideCacheValidity(Action resolve, Action<string> reject)
+        {
             if (Application.isEditor || _shouldAlwaysInvalidate ||
                 SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun ||
-                ConfigReplay.HasStaleConfigs)
+                PatchingManager.TaggedConfigChanged())
             {
                 CacheManager.CreateCacheFolderIfNotExists();
                 CacheManager.InvalidateCache();
@@ -56,32 +65,27 @@ namespace PatchManager.Core
             PatchingManager.HashScriptFiles();
             var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
-            // Every mod body has already run in SpaceWarp's per-plugin script phase, which precedes
-            // GeneralLoadingActions on both warm and cold launches, so close the Lua patch-definition window here.
-            SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
-                () => new FlowAction("Patch Manager: Closing Registration", CloseRegistration));
-
+            var tail = new List<GenericFlowAction>();
             if (!isValid)
             {
                 _wasCacheInvalidated = true;
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1, () =>
-                    new FlowAction("Patch Manager: Collecting script results", CollectScriptResults));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(2,
-                    () => new FlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(3,
-                    () => new FlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(4,
-                    () => new FlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(5,
-                    () => new FlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(6,
-                    () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+                tail.Add(new GenericFlowAction("Patch Manager: Collecting script results", CollectScriptResults));
+                tail.Add(new GenericFlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
+                tail.Add(new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
+                tail.Add(new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
+                tail.Add(new GenericFlowAction("Patch Manager: Saving Invalidation Snapshot", PatchingManager.SaveInvalidationSnapshot));
+                tail.Add(new GenericFlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
             }
-            else
+
+            tail.Add(new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+
+            var insertIndex = GameManager.Instance.LoadingFlow.flowIndex + 1;
+            for (var i = tail.Count - 1; i >= 0; i--)
             {
-                SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
-                    () => new FlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
+                GameManager.Instance.LoadingFlow.FlowActions.Insert(insertIndex, tail[i]);
             }
+
+            resolve();
         }
 
         private static void CloseRegistration(Action resolve, Action<string> reject)

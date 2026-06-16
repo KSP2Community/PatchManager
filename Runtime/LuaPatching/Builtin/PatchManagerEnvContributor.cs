@@ -20,7 +20,6 @@ public class PatchManagerEnvContributor : IModEnvContributor
         }
 
         globals["PM"] = universe.PatchManagerLibraryInstance;
-        globals["Config"] = UserData.Create(universe.BuildLuaConfig(globals.Get("ModId").CastToString(), null));
 
         var script = globals.OwnerScript;
         if (script.Globals.Get("J").IsNil())

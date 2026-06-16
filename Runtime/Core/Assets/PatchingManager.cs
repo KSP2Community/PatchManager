@@ -10,7 +10,9 @@ using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Utility;
 using PatchManager.LuaPatching;
+using PatchManager.LuaPatching.Builtin;
 using PatchManager.Shared;
+using ReduxLib.Configuration;
 using SpaceWarp2.API.Mods;
 using UniLinq;
 using UnityEngine;
@@ -121,6 +123,74 @@ namespace PatchManager.Core.Assets
                     Universe.Summary.ErroredFiles.Add(error);
                 }
             }
+        }
+
+        /// <summary>
+        /// Whether any config value tagged <c>InvalidatesPatchManagerOnChange</c> differs from the snapshot
+        /// taken at the last cache build. Must run after mod bodies have bound their config.
+        /// </summary>
+        /// <returns>True if a tagged value changed (or was added or removed) since the snapshot.</returns>
+        public static bool TaggedConfigChanged()
+        {
+            var current = GatherTaggedValues();
+            var snapshot = CacheManager.Inventory.InvalidationSnapshot;
+            if (current.Count != snapshot.Count)
+            {
+                return true;
+            }
+
+            foreach (var pair in current)
+            {
+                if (!snapshot.TryGetValue(pair.Key, out var stored) || !JToken.DeepEquals(pair.Value, stored))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Snapshots the current values of <c>InvalidatesPatchManagerOnChange</c>-tagged config into the
+        /// inventory, so the next launch can detect a change. Runs as part of a cache rebuild.
+        /// </summary>
+        /// <param name="resolve">Flow success callback.</param>
+        /// <param name="reject">Flow failure callback.</param>
+        public static void SaveInvalidationSnapshot(Action resolve, Action<string> reject)
+        {
+            CacheManager.Inventory.InvalidationSnapshot = GatherTaggedValues();
+            CacheManager.SaveInventory();
+            resolve();
+        }
+
+        private static Dictionary<string, JToken> GatherTaggedValues()
+        {
+            var result = new Dictionary<string, JToken>();
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                var file = descriptor.ConfigFile;
+                if (file == null)
+                {
+                    continue;
+                }
+
+                foreach (var section in file.Sections)
+                {
+                    foreach (var key in section.Keys)
+                    {
+                        var entry = section[key];
+                        if (!entry.HasTag(PatchManagerCore.InvalidatesOnChangeTag))
+                        {
+                            continue;
+                        }
+
+                        var entryKey = $"{descriptor.Guid}:{section.Name}/{key}";
+                        result[entryKey] = entry.Value == null ? JValue.CreateNull() : JToken.FromObject(entry.Value);
+                    }
+                }
+            }
+
+            return result;
         }
 
         /// <summary>

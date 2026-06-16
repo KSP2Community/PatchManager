@@ -405,8 +405,8 @@ public class PatchDefinition
     /// </summary>
     /// <remarks>
     /// Preferred over a top-level <c>if</c> guard around <c>PM.Patch(...)</c> when the gate value comes
-    /// from <c>Config:</c>: registering the patch unconditionally lets the summary report what would
-    /// have applied, and keeps the binding visible to <see cref="Core.Cache.ConfigReplay" /> regardless
+    /// from a config value: registering the patch unconditionally lets the summary report what would
+    /// have applied, and the gating config value still binds (and shows in the settings menu) regardless
     /// of the gate's current value.
     /// </remarks>
     /// <param name="gate">The constant value the predicate evaluates to.</param>

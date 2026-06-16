@@ -54,14 +54,12 @@ namespace PatchManager.Core.Cache.Json
         [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; } = 0;
 
         /// <summary>
-        /// Per-mod replay slices for <c>Config:</c> bindings, keyed by mod ID. Each slice carries identity
-        /// (descriptor vs standalone + .lua path) and the bindings the mod's patches declared. Lets the settings
-        /// UI surface bindings on hot-cache launches when the patch scripts don't run, and lets
-        /// <see cref="ConfigReplay" /> compare current values against the value the patch ran with to decide
-        /// whether to invalidate.
+        /// Snapshot of the values of config entries tagged <c>InvalidatesPatchManagerOnChange</c> at the last
+        /// cache build, keyed <c>{modId}:{section}/{name}</c>. The next launch diffs current values against this
+        /// to decide whether the cache is stale - the successor to the per-binding ranWith tracking.
         /// </summary>
-        [JsonProperty("serialized_configs")]
-        public Dictionary<string, ConfigReplaySlice> SerializedConfigs { get; internal set; } = new();
+        [JsonProperty("invalidation_snapshot")]
+        public Dictionary<string, JToken> InvalidationSnapshot { get; internal set; } = new();
 
         /// <summary>
         /// Get a <see cref="CacheEntry" /> by its label.
@@ -100,7 +98,7 @@ namespace PatchManager.Core.Cache.Json
         }
 
         /// <summary>
-        /// Loads an inventory from the given path; creates a fresh one if the file is missing or corrupt.
+        /// Loads an inventory from the given path, creating a fresh one if the file is missing or corrupt.
         /// </summary>
         /// <param name="path">Path to the inventory JSON file.</param>
         /// <returns>The loaded inventory, or a fresh one on error.</returns>

@@ -108,29 +108,6 @@ namespace PatchManager.LuaPatching
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
         }
 
-        #region Patch Loading
-
-
-        public LuaPatchConfig BuildLuaConfig(string modId, string standaloneLuaPath)
-        {
-            try
-            {
-                return new LuaPatchConfig
-                {
-                    ConfigFile = ConfigReplay.GetConfigFileForMod(modId, standaloneLuaPath),
-                    ModId = modId,
-                    StandaloneLuaPath = standaloneLuaPath
-                };
-            }
-            catch (Exception e)
-            {
-                ErrorLogger($"Could not resolve config file for '{modId}': {e.Message}");
-                return new LuaPatchConfig { ModId = modId, StandaloneLuaPath = standaloneLuaPath };
-            }
-        }
-
-        #endregion
-
         #region Patch/Stage Registering
 
         /// <summary>
