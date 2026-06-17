@@ -30,7 +30,6 @@ namespace PatchManager
         /// </summary>
         public void Awake()
         {
-            // Let's register all our modules!
             Instance = this;
             ModuleManager.Register(typeof(LuaPatchingModule));
             ModuleManager.Register(typeof(CoreModule));
@@ -44,7 +43,7 @@ namespace PatchManager
             Logging.Initialize(SWLogger);
             foreach (var module in ModuleManager.Modules)
             {
-                // We are going to use reduxes core configuration
+                // Bind against Redux's core configuration.
                 module.BindConfiguration(SWConfiguration);
             }
             ModuleManager.InitAll();

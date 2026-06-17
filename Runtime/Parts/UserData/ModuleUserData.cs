@@ -97,7 +97,7 @@ public class ModuleUserData : IndexedListUserData
     /// </summary>
     /// <param name="type">The data module's short name as registered in <c>PartsUtilities.DataModules</c>.</param>
     /// <param name="callback">Optional callback that receives the new entry for further configuration.</param>
-    /// <exception cref="Exception">Thrown when <paramref name="type" /> is not a registered data module.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="type" /> is not a registered data module.</exception>
     public void AddData(string type, [CanBeNull] Action<DynValue> callback = null)
     {
         if (!PartsUtilities.DataModules.TryGetValue(type, out var dataModuleType))
@@ -174,12 +174,23 @@ public class ModuleUserData : IndexedListUserData
         }
     }
 
+    /// <summary>
+    /// Ensures a data entry of the given type exists, then runs <paramref name="callback" /> against its raw DataObject JSON.
+    /// </summary>
+    /// <param name="type">The data module's short name.</param>
+    /// <param name="callback">Callback that receives the entry's DataObject for further configuration.</param>
     [MoonSharpHidden]
     public void EnsureDataObject(string type, Action<JObject> callback)
     {
         EnsureData(type, _ => callback(GetDataObject(type)));
     }
 
+    /// <summary>
+    /// Returns the raw DataObject JSON for the data entry of the given type.
+    /// </summary>
+    /// <param name="type">The data module's short name.</param>
+    /// <returns>The entry's DataObject.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when no entry of the given type exists.</exception>
     [MoonSharpHidden]
     public JObject GetDataObject(string type)
     {

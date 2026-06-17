@@ -76,7 +76,7 @@ namespace PatchManager.Core.Assets
         /// </summary>
         public static void RegisterPatches()
         {
-            Logging.LogInfo($"Registering all patches!");
+            Logging.LogInfo("Registering all patches!");
             CSharpPatching.FluentPatchRegistry.Flush(Universe);
             Universe.SetupPatchesForRun();
             Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
@@ -126,9 +126,12 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Whether any config value tagged <c>InvalidatesPatchManagerOnChange</c> differs from the snapshot
-        /// taken at the last cache build. Must run after mod bodies have bound their config.
+        /// Determines whether any config value tagged <c>InvalidatesPatchManagerOnChange</c> differs from the
+        /// snapshot taken at the last cache build.
         /// </summary>
+        /// <remarks>
+        /// Must run after mod bodies have bound their config.
+        /// </remarks>
         /// <returns>True if a tagged value changed (or was added or removed) since the snapshot.</returns>
         public static bool TaggedConfigChanged()
         {
@@ -269,11 +272,13 @@ namespace PatchManager.Core.Assets
 
         /// <summary>
         /// Schedules per-(pass, label) flow actions in pass-major order (every label's Early before any
-        /// Default, every label's Default before any Late). A label only receives an action for a pass
-        /// if it has a patch in that pass. The first action a label receives lazily loads its
-        /// addressables. The last action writes the label's archive and releases its load handle. A
-        /// final action persists totals and inventory.
+        /// Default, every label's Default before any Late).
         /// </summary>
+        /// <remarks>
+        /// A label only receives an action for a pass if it has a patch in that pass. The first action a label
+        /// receives lazily loads its addressables. The last action writes the label's archive and releases its
+        /// load handle. A final action persists totals and inventory.
+        /// </remarks>
         /// <param name="resolve">Callback invoked once scheduling finishes.</param>
         /// <param name="reject">Reject callback (currently unused).</param>
         public static void RebuildAllCache(Action resolve, Action<string> reject)

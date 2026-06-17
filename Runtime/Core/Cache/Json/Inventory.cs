@@ -36,22 +36,22 @@ namespace PatchManager.Core.Cache.Json
         /// <summary>
         /// Total number of patches applied during the most recent rebuild.
         /// </summary>
-        [JsonProperty("patch_count")] public int PatchCount { get; internal set; } = 0;
+        [JsonProperty("patch_count")] public int PatchCount { get; internal set; }
 
         /// <summary>
         /// Total number of patch errors during the most recent rebuild.
         /// </summary>
-        [JsonProperty("error_count")] public int ErrorCount { get; internal set; } = 0;
+        [JsonProperty("error_count")] public int ErrorCount { get; internal set; }
 
         /// <summary>
         /// Total number of distinct asset definitions touched by patches during the most recent rebuild.
         /// </summary>
-        [JsonProperty("definition_count")] public int DefinitionCount { get; internal set; } = 0;
+        [JsonProperty("definition_count")] public int DefinitionCount { get; internal set; }
 
         /// <summary>
         /// Total number of new assets created during the most recent rebuild.
         /// </summary>
-        [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; } = 0;
+        [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; }
 
         /// <summary>
         /// Snapshot of the values of config entries tagged <c>InvalidatesPatchManagerOnChange</c> at the last
@@ -62,7 +62,7 @@ namespace PatchManager.Core.Cache.Json
         public Dictionary<string, JToken> InvalidationSnapshot { get; internal set; } = new();
 
         /// <summary>
-        /// Get a <see cref="CacheEntry" /> by its label.
+        /// Gets a <see cref="CacheEntry" /> by its label.
         /// </summary>
         /// <param name="label">Asset label to get the entry for.</param>
         /// <returns>A pair of asset label and instance of <see cref="CacheEntry" /> if found, otherwise the default pair.</returns>
@@ -74,7 +74,7 @@ namespace PatchManager.Core.Cache.Json
         }
 
         /// <summary>
-        /// Get a <see cref="CacheEntry" /> by its archive's name.
+        /// Gets a <see cref="CacheEntry" /> by its archive's name.
         /// </summary>
         /// <param name="archiveFilename">Archive filename to get the entry for.</param>
         /// <returns>A pair of asset label and instance of <see cref="CacheEntry" /> if found, otherwise the default pair.</returns>
@@ -107,7 +107,7 @@ namespace PatchManager.Core.Cache.Json
             CacheManager.CreateCacheFolderIfNotExists();
             if (!File.Exists(path))
             {
-                Logging.LogDebug($"Inventory file does not exist, creating new inventory.");
+                Logging.LogDebug("Inventory file does not exist, creating new inventory.");
                 return Create();
             }
 

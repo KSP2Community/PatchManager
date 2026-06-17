@@ -6,9 +6,11 @@ using PatchManager.LuaPatching;
 namespace PatchManager.Generic
 {
     /// <summary>
-    /// Patches an arbitrary addressables label through the generic JSON converter, mirroring PM.Json. Use this for
-    /// asset kinds that have no dedicated domain attribute.
+    /// Patches an arbitrary addressables label through the generic JSON converter, mirroring PM.Json.
     /// </summary>
+    /// <remarks>
+    /// Use this for asset kinds that have no dedicated domain attribute.
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class PatchJsonAttribute : PatchAttribute
     {

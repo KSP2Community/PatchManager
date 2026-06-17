@@ -57,6 +57,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _names;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NamedAttribute" /> class.
+        /// </summary>
         /// <param name="names">The asset names to target.</param>
         public NamedAttribute(params string[] names) => _names = names;
 
@@ -70,6 +73,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _names;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NotNamedAttribute" /> class.
+        /// </summary>
         /// <param name="names">The asset names to reject.</param>
         public NotNamedAttribute(params string[] names) => _names = names;
 
@@ -83,6 +89,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NeedsAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The required mod IDs.</param>
         public NeedsAttribute(params string[] ids) => _ids = ids;
 
@@ -96,6 +105,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConflictsAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The conflicting mod IDs.</param>
         public ConflictsAttribute(params string[] ids) => _ids = ids;
 
@@ -109,6 +121,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NeedsPatchAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The required patch IDs.</param>
         public NeedsPatchAttribute(params string[] ids) => _ids = ids;
 
@@ -122,6 +137,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConflictsPatchAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The conflicting patch IDs.</param>
         public ConflictsPatchAttribute(params string[] ids) => _ids = ids;
 
@@ -135,6 +153,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AfterAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The mod IDs whose patches this runs after.</param>
         public AfterAttribute(params string[] ids) => _ids = ids;
 
@@ -148,6 +169,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AfterPatchAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The patch IDs to run after.</param>
         public AfterPatchAttribute(params string[] ids) => _ids = ids;
 
@@ -161,6 +185,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BeforeAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The mod IDs whose patches this runs before.</param>
         public BeforeAttribute(params string[] ids) => _ids = ids;
 
@@ -174,6 +201,9 @@ namespace PatchManager.CSharpPatching.Attributes
     {
         private readonly string[] _ids;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BeforePatchAttribute" /> class.
+        /// </summary>
         /// <param name="ids">The patch IDs to run before.</param>
         public BeforePatchAttribute(params string[] ids) => _ids = ids;
 
@@ -191,6 +221,9 @@ namespace PatchManager.CSharpPatching.Attributes
         private readonly string _predicateMethod;
         private readonly string _message;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiresAttribute" /> class.
+        /// </summary>
         /// <param name="predicateMethod">The name of a sibling method used as the predicate, via nameof.</param>
         /// <param name="message">Optional message logged when the predicate rejects an asset.</param>
         public RequiresAttribute(string predicateMethod, string message = null)
@@ -202,13 +235,8 @@ namespace PatchManager.CSharpPatching.Attributes
         /// <inheritdoc />
         public void Apply(PatchDefinition patch, object owner)
         {
-            var mi = owner.GetType().GetMethod(_predicateMethod,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-            if (mi == null)
-            {
-                Logging.LogError($"[Requires] could not find predicate method '{_predicateMethod}' on {owner.GetType().Name}");
-                return;
-            }
+            var mi = PredicateResolver.Resolve(owner, _predicateMethod, "Requires");
+            if (mi == null) return;
 
             var target = mi.IsStatic ? null : owner;
             patch.Requires(dv => (bool)mi.Invoke(target, new[] { dv.UserData?.Object }), _message);
@@ -227,9 +255,15 @@ namespace PatchManager.CSharpPatching.Attributes
         /// <summary>Optional message logged when the requirement fails.</summary>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HasAttribute" /> class.
+        /// </summary>
         /// <param name="key">The key the asset must expose.</param>
         public HasAttribute(string key) => _key = key;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HasAttribute" /> class with a value predicate.
+        /// </summary>
         /// <param name="key">The key the asset must expose.</param>
         /// <param name="predicateMethod">A sibling method run against the value at the key, by nameof.</param>
         public HasAttribute(string key, string predicateMethod)
@@ -247,20 +281,12 @@ namespace PatchManager.CSharpPatching.Attributes
                 return;
             }
 
-            var mi = owner.GetType().GetMethod(_predicateMethod,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-            if (mi == null)
-            {
-                Logging.LogError($"[Has] could not find predicate method '{_predicateMethod}' on {owner.GetType().Name}");
-                return;
-            }
+            var mi = PredicateResolver.Resolve(owner, _predicateMethod, "Has");
+            if (mi == null) return;
 
             var target = mi.IsStatic ? null : owner;
-            patch.Has(_key, dv => (bool)mi.Invoke(target, new[] { AsJson(dv) }), Message);
+            patch.Has(_key, dv => (bool)mi.Invoke(target, new[] { JsonUserData.Wrap(dv) }), Message);
         }
-
-        private static JsonUserData AsJson(DynValue dv) =>
-            dv.UserData?.Object as JsonUserData ?? new JsonUserData(JsonUserData.GetJTokenForDynValue(dv));
     }
 
     /// <summary>Requires the asset to not expose a key.</summary>
@@ -270,6 +296,9 @@ namespace PatchManager.CSharpPatching.Attributes
         private readonly string _key;
         private readonly string _message;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HasNoAttribute" /> class.
+        /// </summary>
         /// <param name="key">The key the asset must not expose.</param>
         /// <param name="message">Optional message logged when the key is present.</param>
         public HasNoAttribute(string key, string message = null)
@@ -280,5 +309,20 @@ namespace PatchManager.CSharpPatching.Attributes
 
         /// <inheritdoc />
         public void Apply(PatchDefinition patch, object owner) => patch.HasNo(_key, _message);
+    }
+
+    internal static class PredicateResolver
+    {
+        // Resolves a sibling predicate method by name across visibility and static/instance, logging if absent.
+        public static MethodInfo Resolve(object owner, string methodName, string tag)
+        {
+            var mi = owner.GetType().GetMethod(methodName,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (mi == null)
+            {
+                Logging.LogError($"[{tag}] could not find predicate method '{methodName}' on {owner.GetType().Name}");
+            }
+            return mi;
+        }
     }
 }

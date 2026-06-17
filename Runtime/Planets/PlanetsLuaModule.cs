@@ -43,7 +43,7 @@ public class PlanetsLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition Patch(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"Planet", "celestial_bodies", name);
+        return _core.Patch(context, "Planet", "celestial_bodies", name);
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public class PlanetsLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchDefaultGalaxy(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"Galaxy", "GalaxyDefinition_Default", name);
+        return _core.Patch(context, "Galaxy", "GalaxyDefinition_Default", name);
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public class PlanetsLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchAtmosphereOverride(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"JSON", "atmosphere_overrides", name);
+        return _core.Patch(context, "JSON", "atmosphere_overrides", name);
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public class PlanetsLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchCloudOverride(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"Cloud", "volume_cloud_overrides", name);
+        return _core.Patch(context, "Cloud", "volume_cloud_overrides", name);
     }
 
     /// <summary>

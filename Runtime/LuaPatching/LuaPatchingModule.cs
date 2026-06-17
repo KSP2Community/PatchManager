@@ -5,6 +5,7 @@ using PatchManager.LuaPatching.Attributes;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using ReduxLib.Reflection;
 
 namespace PatchManager.LuaPatching
 {
@@ -41,7 +42,7 @@ namespace PatchManager.LuaPatching
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (var type in assembly.GetTypes())
+                foreach (var type in assembly.GetLoadableTypes())
                 {
                     var attributes = type.GetCustomAttributes(true);
                     if (attributes.OfType<MoonSharpUserDataAttribute>().Any())

@@ -4,11 +4,13 @@ using ReduxLib.GameInterfaces;
 namespace PatchManager.LuaPatching.Builtin;
 
 /// <summary>
-/// PatchManager's contribution to each mod environment the runtime creates. Seeds only the patch-specific
-/// globals (<c>PM</c> and, once per script, <c>J</c>). The general mod-loading globals (ModId, Location,
-/// require) are seeded by the runtime itself.
+/// PatchManager's contribution to each mod environment the runtime creates.
 /// </summary>
-public class PatchManagerEnvContributor : IModEnvContributor
+/// <remarks>
+/// Adds only the patch-specific globals (<c>PM</c> and, once per script, <c>J</c>). The general mod-loading
+/// globals (ModId, Location, require) are contributed by the runtime itself.
+/// </remarks>
+public sealed class PatchManagerEnvContributor : IModEnvContributor
 {
     /// <inheritdoc />
     public void Contribute(Table globals)

@@ -7,9 +7,11 @@ namespace PatchManager.CSharpPatching
 {
     /// <summary>
     /// Collects fluent <c>PM.&lt;Domain&gt;.Patch(...)</c> registrations until PatchManager flushes them into the
-    /// universe, just before patches are set up for the run. Registering after the flush throws - it is too late
-    /// to take part in the patch flow.
+    /// universe, just before patches are set up for the run.
     /// </summary>
+    /// <remarks>
+    /// Registering after the flush throws - it is too late to take part in the patch flow.
+    /// </remarks>
     internal static class FluentPatchRegistry
     {
         private static readonly List<PatchDefinition> Pending = new();
@@ -18,6 +20,14 @@ namespace PatchManager.CSharpPatching
         /// <summary>
         /// Builds a patch for the given converter and label, queues it for registration, and returns it for chaining.
         /// </summary>
+        /// <param name="modId">The mod ID the patch is namespaced under.</param>
+        /// <param name="converter">The name of the converter that produces the asset wrapper.</param>
+        /// <param name="label">The label selecting which assets the patch targets.</param>
+        /// <param name="name">The patch name, unique within the mod ID.</param>
+        /// <returns>The queued patch, for fluent chaining.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when registration has already closed, or when the converter name is unknown.
+        /// </exception>
         public static PatchDefinition Build(string modId, string converter, string label, string name)
         {
             if (_closed)
@@ -45,9 +55,12 @@ namespace PatchManager.CSharpPatching
         }
 
         /// <summary>
-        /// Flushes every queued fluent patch into <paramref name="universe" /> and closes registration. Called once
-        /// by PatchManager, just before SetupPatchesForRun.
+        /// Flushes every queued fluent patch into <paramref name="universe" /> and closes registration.
         /// </summary>
+        /// <remarks>
+        /// Called once by PatchManager, just before SetupPatchesForRun.
+        /// </remarks>
+        /// <param name="universe">The universe to add the queued patches to.</param>
         public static void Flush(Universe universe)
         {
             _closed = true;

@@ -25,15 +25,15 @@ public class PatchDefinition
     /// </remarks>
     public enum PatchPass {
         /// <summary>
-        /// Runs first; typically reserved for reading created or existing assets into shared state.
+        /// Runs first, typically reserved for reading created or existing assets into shared state.
         /// </summary>
         Early,
         /// <summary>
-        /// Runs second; the default pass where most patches apply their changes.
+        /// Runs second, the default pass where most patches apply their changes.
         /// </summary>
         Default,
         /// <summary>
-        /// Runs third; typically reserved for final writeback from shared state.
+        /// Runs third, typically reserved for final writeback from shared state.
         /// </summary>
         Late
     }
@@ -72,7 +72,7 @@ public class PatchDefinition
     /// </summary>
     /// <remarks>
     /// Returns <c>"remove"</c> (case-insensitive) to delete the asset, or <c>null</c> to keep it. The callback
-    /// mutates the wrapped JSON in place; its non-removal return value is otherwise unused.
+    /// mutates the wrapped JSON in place. Its non-removal return value is otherwise unused.
     /// </remarks>
     [MoonSharpHidden] [CanBeNull] public Func<DynValue, string> PatchMethod;
 
@@ -81,7 +81,7 @@ public class PatchDefinition
     /// </summary>
     /// <remarks>
     /// The callback returns <c>"remove"</c> (case-insensitive) to delete the asset, or <c>null</c> to keep it. The callback
-    /// mutates the wrapped JSON in place; its non-removal return value is otherwise unused.
+    /// mutates the wrapped JSON in place. Its non-removal return value is otherwise unused.
     /// </remarks>
     /// <param name="patchMethod">The supplied callback.</param>
     /// <returns>The patch instance for chaining.</returns>
@@ -207,7 +207,7 @@ public class PatchDefinition
     /// <remarks>
     /// This set is resolved against the patches already filtered through mod-level requirements.
     /// </remarks>
-    /// <param name="ids">The required patch IDs; namespaced to the host mod when they do not already carry a namespace.</param>
+    /// <param name="ids">The required patch IDs, namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
     public PatchDefinition NeedsPatch(params string[] ids)
     {
@@ -226,7 +226,7 @@ public class PatchDefinition
     /// <summary>
     /// Makes the patch refuse to run alongside these patches.
     /// </summary>
-    /// <param name="ids">The conflicting patch IDs; namespaced to the host mod when they do not already carry a namespace.</param>
+    /// <param name="ids">The conflicting patch IDs, namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
     public PatchDefinition ConflictsPatch(params string[] ids)
     {
@@ -245,7 +245,7 @@ public class PatchDefinition
     /// <summary>
     /// Makes this patch run after the given patches when they exist.
     /// </summary>
-    /// <param name="ids">The patch IDs to run after; namespaced to the host mod when they do not already carry a namespace.</param>
+    /// <param name="ids">The patch IDs to run after, namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
     public PatchDefinition AfterPatch(params string[] ids)
     {
@@ -283,7 +283,7 @@ public class PatchDefinition
     /// <summary>
     /// Makes this patch run before the given patches when they exist.
     /// </summary>
-    /// <param name="ids">The patch IDs to run before; namespaced to the host mod when they do not already carry a namespace.</param>
+    /// <param name="ids">The patch IDs to run before, namespaced to the host mod when they do not already carry a namespace.</param>
     /// <returns>The patch instance for chaining.</returns>
     public PatchDefinition BeforePatch(params string[] ids)
     {
@@ -521,7 +521,7 @@ public class PatchDefinition
     /// <param name="summary">The summary to record application, skip, or error events into.</param>
     /// <param name="removed">Set to <c>true</c> when the callback signals deletion by returning <c>"remove"</c>.</param>
     /// <param name="errored">Set to <c>true</c> when the callback or a predicate threw, or when no <c>:Do(...)</c> block was registered.</param>
-    /// <returns><c>true</c> when the patch ran without error or predicate failure, <c>false</c> otherwise.</returns>
+    /// <returns>True if the patch ran without error or predicate failure, false otherwise.</returns>
     public bool Apply(DynValue value, Summary summary, out bool removed, out bool errored)
     {
         removed = false;

@@ -16,15 +16,10 @@ namespace PatchManager.CSharpPatching.Attributes
         public string ModId { get; }
 
         /// <summary>
-        /// Derives the mod ID from the declaring assembly.
+        /// Initializes a new instance of the <see cref="PMPatchAttribute" /> class.
         /// </summary>
-        public PMPatchAttribute()
-        {
-            ModId = null;
-        }
-
-        /// <param name="modId">The explicit mod ID override.</param>
-        public PMPatchAttribute(string modId)
+        /// <param name="modId">The explicit mod ID override, or null to derive it from the declaring assembly.</param>
+        public PMPatchAttribute(string modId = null)
         {
             ModId = modId;
         }

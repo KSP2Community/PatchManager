@@ -52,6 +52,15 @@ public class JsonUserData
     public static JToken GetJTokenForDynValue(DynValue dv) => GetJTokenForDynValue(null, dv);
 
     /// <summary>
+    /// Wraps a Lua value as a <see cref="JsonUserData" />: an existing wrapper is returned as-is, anything else
+    /// is wrapped fresh from its JSON token.
+    /// </summary>
+    /// <param name="dv">The Lua value to wrap.</param>
+    /// <returns>The value as a <see cref="JsonUserData" />.</returns>
+    public static JsonUserData Wrap(DynValue dv) =>
+        dv.UserData?.Object as JsonUserData ?? new JsonUserData(GetJTokenForDynValue(dv));
+
+    /// <summary>
     /// Converts a Lua <see cref="DynValue" /> into a <see cref="JToken" />, using <paramref name="previous" />'s type
     /// as a hint for ambiguous numeric and empty-table cases.
     /// </summary>
@@ -345,7 +354,7 @@ public class JsonUserData
     /// Removes the array element at the given position (0-based from C#, 1-based from Lua via the LuaIndex converter).
     /// </summary>
     /// <param name="index">The array position to remove.</param>
-    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" /> or when the index is out of range.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the token is not <see cref="JTokenType.Array" /> or when the index is out of range.</exception>
     public virtual void RemoveAt(LuaIndex index)
     {
         if (Token.Type != JTokenType.Array)
@@ -365,7 +374,7 @@ public class JsonUserData
     /// Removes the object property with the given key.
     /// </summary>
     /// <param name="key">The property name to remove.</param>
-    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Object" />.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the token is not <see cref="JTokenType.Object" />.</exception>
     public virtual void Remove(string key)
     {
         if (Token.Type != JTokenType.Object)
@@ -449,7 +458,7 @@ public class JsonUserData
     /// <summary>
     /// Removes every element from the wrapped array.
     /// </summary>
-    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Clear()
     {
         if (Token.Type == JTokenType.Array)
@@ -467,7 +476,7 @@ public class JsonUserData
     /// </summary>
     /// <param name="index">The position to insert at.</param>
     /// <param name="value">The element to insert.</param>
-    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Insert(LuaIndex index, DynValue value)
     {
         if (Token.Type != JTokenType.Array)
@@ -499,7 +508,7 @@ public class JsonUserData
     /// Appends an element to the end of the wrapped array.
     /// </summary>
     /// <param name="value">The element to append.</param>
-    /// <exception cref="Exception">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when the token is not <see cref="JTokenType.Array" />.</exception>
     public virtual void Append(DynValue value)
     {
         if (Token.Type != JTokenType.Array)
@@ -564,9 +573,9 @@ public class JsonUserData
     }
 
     /// <summary>
-    /// Remove all items that match a passed predicate
+    /// Removes every array element that matches the given predicate.
     /// </summary>
-    /// <param name="callback">The predicate to check against</param>
+    /// <param name="callback">The predicate to test each element against.</param>
     public virtual void RemoveWhere(Func<DynValue,bool> callback)
     {
         var array = RequireArray(Token, "self");
@@ -590,7 +599,7 @@ public class JsonUserData
     /// </remarks>
     /// <param name="token">The token to lift, or <c>null</c> for a missing key.</param>
     /// <returns>The Lua value for the given token.</returns>
-    /// <exception cref="Exception">Thrown when <paramref name="token" />'s type is not one of the handled token types.</exception>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="token" />'s type is not one of the handled token types.</exception>
     [MoonSharpHidden]
     public static DynValue GetFromJToken(JToken token)
     {

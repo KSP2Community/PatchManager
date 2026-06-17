@@ -45,7 +45,7 @@ public class ScienceLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchDiscoverables(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"Discoverables", "science_region_discoverables", name);
+        return _core.Patch(context, "Discoverables", "science_region_discoverables", name);
     }
     #endregion
 
@@ -62,17 +62,16 @@ public class ScienceLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchExperiments(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"Experiment", "scienceExperiment", name);
+        return _core.Patch(context, "Experiment", "scienceExperiment", name);
     }
 
     /// <summary>
     /// Creates a new science experiment with the given name and runs <paramref name="callback" /> against it for
     /// further configuration.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
     /// <param name="name">The experiment name.</param>
     /// <param name="callback">Callback that receives the new experiment for further configuration.</param>
-    public void NewExperiment(Script script, string name, Action<ExperimentUserData> callback)
+    public void NewExperiment(string name, Action<ExperimentUserData> callback)
     {
         var core = new ExperimentCore
         {
@@ -101,7 +100,7 @@ public class ScienceLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchRegions(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"ScienceRegions", "science_region", name);
+        return _core.Patch(context, "ScienceRegions", "science_region", name);
     }
     #endregion
 
@@ -119,7 +118,7 @@ public class ScienceLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchTechNodes(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context,"JSON", "techNodeData", name);
+        return _core.Patch(context, "JSON", "techNodeData", name);
     }
 
     /// <summary>

@@ -8,9 +8,9 @@ namespace PatchManager.LuaPatching.Builtin;
 /// The PatchManager Lua library, exposed to scripts as the global <c>PM</c>.
 /// </summary>
 [MoonSharpUserData]
-public class PatchManagerCore
+public sealed class PatchManagerCore
 {
-    private Universe _universe;
+    private readonly Universe _universe;
 
     /// <summary>
     /// Creates the library bound to the given universe.
@@ -23,8 +23,11 @@ public class PatchManagerCore
 
     /// <summary>
     /// The metadata tag a config value carries to invalidate the patch cache when its value changes between
-    /// launches. The canonical constant - PM's own consumer and any C# config reference this.
+    /// launches.
     /// </summary>
+    /// <remarks>
+    /// The canonical constant. PM's own consumer and any C# config reference this.
+    /// </remarks>
     public const string InvalidatesOnChangeTag = "InvalidatesPatchManagerOnChange";
 
     /// <summary>
@@ -69,7 +72,7 @@ public class PatchManagerCore
         }
 
         var modId = context.CurrentGlobalEnv.Get("ModId").CastToString();
-        var actualName =  modId + ':' + name;
+        var actualName = modId + ':' + name;
 
         var newPatch = new PatchDefinition
         {
@@ -102,7 +105,7 @@ public class PatchManagerCore
             throw new ScriptRuntimeException($"Unknown converter {converter}");
         }
 
-        var newPatch = new LuaAsset()
+        var newPatch = new LuaAsset
         {
             ConverterInstance = converterInstance,
             Label = label,

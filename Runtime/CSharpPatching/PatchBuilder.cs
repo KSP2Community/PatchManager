@@ -5,10 +5,14 @@ using PatchManager.LuaPatching;
 namespace PatchManager.CSharpPatching
 {
     /// <summary>
-    /// A type-safe fluent wrapper over a queued <see cref="PatchDefinition" />. <typeparamref name="T" /> is the
-    /// asset wrapper the patch's converter produces, for example PartUserData, so <see cref="Do(Action{T})" /> and
-    /// <see cref="Requires(Func{T,bool},string)" /> take that type with no cast and no chance of a wrong-type lambda.
+    /// A type-safe fluent wrapper over a queued <see cref="PatchDefinition" />.
     /// </summary>
+    /// <remarks>
+    /// <typeparamref name="T" /> is the asset wrapper the patch's converter produces, for example PartUserData, so
+    /// <see cref="Do(Action{T})" /> and <see cref="Requires(Func{T,bool},string)" /> take that type with no cast and
+    /// no chance of a wrong-type lambda.
+    /// </remarks>
+    /// <typeparam name="T">The asset wrapper type the patch's converter produces.</typeparam>
     public readonly struct PatchBuilder<T>
     {
         private readonly PatchDefinition _patch;
@@ -73,13 +77,9 @@ namespace PatchManager.CSharpPatching
         /// <summary>Requires the asset to expose a key whose value satisfies the predicate.</summary>
         public PatchBuilder<T> Has(string key, Func<JsonUserData, bool> predicate, string message = null)
         {
-            _patch.Has(key, dv => predicate(AsJson(dv)), message);
+            _patch.Has(key, dv => predicate(JsonUserData.Wrap(dv)), message);
             return this;
         }
-
-        // Wraps the value resolved at a key so a typed predicate can read it: a child userdata as-is, a leaf as a fresh wrapper.
-        private static JsonUserData AsJson(DynValue dv) =>
-            dv.UserData?.Object as JsonUserData ?? new JsonUserData(JsonUserData.GetJTokenForDynValue(dv));
 
         /// <summary>Requires the asset to not expose a key.</summary>
         public PatchBuilder<T> HasNo(string key, string message = null) { _patch.HasNo(key, message); return this; }

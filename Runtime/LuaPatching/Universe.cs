@@ -11,7 +11,6 @@ using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Shared;
 using ReduxLib.Logging;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -48,10 +47,13 @@ namespace PatchManager.LuaPatching
         /// </summary>
         public readonly HashSet<string> AllMods;
 
-        public Summary Summary = new();
-        
         /// <summary>
-        /// Creates a new universe, instantiates each registered submodule, and seeds the per-mod stage priorities.
+        /// Accumulates per-patch apply, skip, removal, and error events across a patching run.
+        /// </summary>
+        public Summary Summary = new();
+
+        /// <summary>
+        /// Creates a new universe, instantiates each registered submodule, and initializes the per-mod stage state.
         /// </summary>
         /// <param name="errorLogger">Callback for error-level logging.</param>
         /// <param name="messageLogger">Callback for informational logging.</param>
@@ -591,11 +593,11 @@ namespace PatchManager.LuaPatching
         }
 
         /// <summary>
-        /// Check if there are any patches that match the given label/name combo
+        /// Checks whether any patch matches the given label and name across every pass.
         /// </summary>
-        /// <param name="label">The label</param>
-        /// <param name="name">The name</param>
-        /// <returns>true if any patches match</returns>
+        /// <param name="label">The addressables label.</param>
+        /// <param name="name">The asset's addressables address.</param>
+        /// <returns>True if any patch matches, false otherwise.</returns>
         public bool HasAnyPatchFor(string label, string name)
         {
             if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
@@ -657,25 +659,25 @@ namespace PatchManager.LuaPatching
         #region utilities
 
         /// <summary>
-        /// Stores information about wildcard patches
+        /// A wildcard patch paired with the compiled name pattern it matches against.
         /// </summary>
         public readonly struct WildcardEntry
         {
             /// <summary>
-            /// The pattern that this patch applies to
+            /// The pattern this patch applies to.
             /// </summary>
             public readonly NamePattern Pattern;
 
             /// <summary>
-            /// The patch itself
+            /// The patch itself.
             /// </summary>
             public readonly PatchDefinition Patch;
 
             /// <summary>
-            /// Creates a new WildcardEntry instance
+            /// Creates a new wildcard entry.
             /// </summary>
-            /// <param name="pattern">The pattern the patch applies to</param>
-            /// <param name="patch">The patch itself</param>
+            /// <param name="pattern">The pattern the patch applies to.</param>
+            /// <param name="patch">The patch itself.</param>
             public WildcardEntry(NamePattern pattern, PatchDefinition patch)
             {
                 Pattern = pattern;
@@ -684,22 +686,22 @@ namespace PatchManager.LuaPatching
         }
 
         /// <summary>
-        /// Buckets for each label
+        /// The patches for a single label in a single pass, grouped by how they match an asset name.
         /// </summary>
         public sealed class LabelPatchBuckets
         {
             /// <summary>
-            /// Exact name matching patches
+            /// Patches keyed by the exact asset name they match.
             /// </summary>
             public Dictionary<string, PatchDefinition[]> Exact = new();
 
             /// <summary>
-            /// All matching patches
+            /// Patches that match every asset name.
             /// </summary>
             public PatchDefinition[] MatchAll = Array.Empty<PatchDefinition>();
 
             /// <summary>
-            /// Wildcard matching patches
+            /// Patches that match an asset name by wildcard pattern.
             /// </summary>
             public WildcardEntry[] Wildcard = Array.Empty<WildcardEntry>();
         }

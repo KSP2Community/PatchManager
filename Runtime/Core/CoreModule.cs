@@ -10,7 +10,6 @@ using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using ReduxLib.Configuration;
 using ReduxLib.Configuration.Attributes;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
@@ -40,10 +39,12 @@ namespace PatchManager.Core
         private bool _wasCacheInvalidated;
 
         /// <summary>
-        /// Schedules the post-body cache-validity decision. The decision needs the config values mod bodies
-        /// bind, so it runs in <see cref="DecideCacheValidity" /> (after the per-plugin body phase) rather than
-        /// here in Init, which runs in PM's Awake, before any body.
+        /// Schedules the post-body cache-validity decision.
         /// </summary>
+        /// <remarks>
+        /// The decision needs the config values mod bodies bind, so it runs in <see cref="DecideCacheValidity" />
+        /// (after the per-plugin body phase) rather than here in Init, which runs in PM's Awake, before any body.
+        /// </remarks>
         public override void Init()
         {
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
@@ -79,6 +80,8 @@ namespace PatchManager.Core
 
             tail.Add(new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
 
+            // Splice the tail in right after this step. Insert back-to-front so each Insert at the same index
+            // pushes the previous one down, leaving the tail in its original order.
             var insertIndex = GameManager.Instance.LoadingFlow.flowIndex + 1;
             for (var i = tail.Count - 1; i >= 0; i--)
             {
@@ -128,7 +131,6 @@ namespace PatchManager.Core
         {
             Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
             Locators.Register(new ArchiveResourceLocator());
-            // Perfect place to load the patch manager information from the old inventory as well
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
                 CacheManager.Inventory.DefinitionCount;
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =

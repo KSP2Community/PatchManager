@@ -1,8 +1,11 @@
 namespace PatchManager.CSharpPatching
 {
     /// <summary>
-    /// The outcome a C# patch method returns. Mirrors the Lua patch convention of returning "remove" or nil.
+    /// The outcome a C# patch method returns.
     /// </summary>
+    /// <remarks>
+    /// Mirrors the Lua patch convention of returning "remove" or nil.
+    /// </remarks>
     public enum PatchResult
     {
         /// <summary>

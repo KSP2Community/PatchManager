@@ -6,9 +6,12 @@ using PatchManager.LuaPatching;
 namespace PatchManager.Resources
 {
     /// <summary>
-    /// Patches resource and recipe definitions, mirroring PM.Resources. The Resource converter yields either a
-    /// resource or a recipe wrapper depending on the asset, so the typed surface uses the shared JsonUserData base.
+    /// Patches resource and recipe definitions, mirroring PM.Resources.
     /// </summary>
+    /// <remarks>
+    /// The Resource converter yields either a resource or a recipe wrapper depending on the asset, so the typed
+    /// surface uses the shared JsonUserData base.
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class PatchResourceAttribute : PatchAttribute
     {

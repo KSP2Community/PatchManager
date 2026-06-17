@@ -7,14 +7,16 @@ using PatchManager.CSharpPatching.Attributes;
 using PatchManager.LuaPatching;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using ReduxLib.Reflection;
 
 namespace PatchManager.CSharpPatching
 {
     /// <summary>
-    /// Discovers C# [PMPatch] classes across loaded assemblies and registers their patch methods with the
-    /// universe, mirroring how Lua patch scripts register through PM. Runs in PreLoad, after CoreModule has
-    /// created the universe.
+    /// Discovers C# [PMPatch] classes across loaded assemblies and registers their patch methods with the universe.
     /// </summary>
+    /// <remarks>
+    /// Mirrors how Lua patch scripts register through PM. Runs in PreLoad, after CoreModule has created the universe.
+    /// </remarks>
     public class CSharpPatchingModule : BaseModule
     {
         /// <inheritdoc />
@@ -29,17 +31,7 @@ namespace PatchManager.CSharpPatching
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                Type[] types;
-                try
-                {
-                    types = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    types = e.Types.Where(t => t != null).ToArray();
-                }
-
-                foreach (var type in types)
+                foreach (var type in assembly.GetLoadableTypes())
                 {
                     var pmPatch = type.GetCustomAttribute<PMPatchAttribute>();
                     if (pmPatch == null) continue;
