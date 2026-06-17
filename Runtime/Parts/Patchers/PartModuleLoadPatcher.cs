@@ -5,6 +5,7 @@ using KSP.Game;
 using KSP.Sim.Definitions;
 using PatchManager.Shared;
 using Redux.Audio;
+using Redux.Ksp1Import.Assets;
 using Redux.Ksp1Import.Modules;
 using Redux.VFX.ReentryMeshGeneration;
 using UniLinq;
@@ -123,7 +124,10 @@ namespace PatchManager.Parts.Patchers
             RemoveOrphanedPartBehaviourModules(obj, partData);
 
             PartAudioPresetPatcher.Apply(obj, partData);
-            RuntimeReentryMeshFallback.EnsureGenerated(obj, partData.partName);
+            RuntimeReentryMeshFallback.EnsureGenerated(
+                obj,
+                partData.partName,
+                Ksp1ImportedPartRegistry.IsImportedPart(partData.partName));
 
             gameObject = obj;
         }
