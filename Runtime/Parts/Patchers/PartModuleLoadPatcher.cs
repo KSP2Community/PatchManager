@@ -5,6 +5,7 @@ using KSP.Game;
 using KSP.Sim.Definitions;
 using PatchManager.Shared;
 using Redux.Audio;
+using Redux.Ksp1Import.Assets;
 using Redux.Ksp1Import.Modules;
 using Redux.VFX.ReentryMeshGeneration;
 using UniLinq;
@@ -24,6 +25,11 @@ namespace PatchManager.Parts.Patchers
         /// </summary>
         internal static Dictionary<string, string> PartPrefabMap { get; } = new();
 
+        internal static string GetPrefabAddress(string partName)
+        {
+            return PartPrefabMap.TryGetValue(partName, out var prefabName) ? prefabName : partName + ".prefab";
+        }
+
         /// <summary>
         /// Adds a <see cref="PartBehaviourModule" /> component for each serialized module on <paramref name="partData" />,
         /// wires up serialized fields from the corresponding <see cref="ModuleData" />, removes orphaned behaviour
@@ -32,15 +38,19 @@ namespace PatchManager.Parts.Patchers
         /// </summary>
         /// <param name="gameObject">The part's GameObject; may be reassigned to a freshly-instantiated prefab.</param>
         /// <param name="partData">The part's data, supplying the list of serialized modules.</param>
-        internal static void ApplyOnGameObject(ref GameObject gameObject, PartData partData)
+        /// <param name="replacePrefab">If true, registered prefab aliases replace <paramref name="gameObject" />.</param>
+        internal static void ApplyOnGameObject(ref GameObject gameObject, PartData partData, bool replacePrefab = true)
         {
             var obj = gameObject;
 
-            if (PartPrefabMap.TryGetValue(partData.partName, out var prefabName))
+            var prefabName = GetPrefabAddress(partData.partName);
+            if (replacePrefab && prefabName != partData.partName + ".prefab")
             {
                 var prefab = GameManager.Instance.Assets.LoadAssetAsync<GameObject>(prefabName).WaitForCompletion();
                 obj = Object.Instantiate(prefab);
             }
+
+            RemoveOrphanedPartBehaviourModules(obj, partData);
 
             foreach (var module in partData.serializedPartModules)
             {
@@ -111,6 +121,19 @@ namespace PatchManager.Parts.Patchers
                 Ksp1PartModuleRuntimeSetup.Configure(instance, obj, partData);
             }
 
+            RemoveOrphanedPartBehaviourModules(obj, partData);
+
+            PartAudioPresetPatcher.Apply(obj, partData);
+            RuntimeReentryMeshFallback.EnsureGenerated(
+                obj,
+                partData.partName,
+                Ksp1ImportedPartRegistry.IsImportedPart(partData.partName));
+
+            gameObject = obj;
+        }
+
+        private static void RemoveOrphanedPartBehaviourModules(GameObject obj, PartData partData)
+        {
             foreach (var component in obj.GetComponents<PartBehaviourModule>())
             {
                 // Debug.Log($"ApplyOnGameObject - {partData.partName} checking {component.GetType().FullName}");
@@ -122,22 +145,11 @@ namespace PatchManager.Parts.Patchers
                         continue;
                     }
 
-                    // Debug.Log($"ApplyOnGameObject - {partData.partName} removing {component.GetType().FullName}");
-                    if (Application.isEditor)
-                    {
-                        Object.DestroyImmediate(component);
-                    }
-                    else
-                    {
-                        Object.Destroy(component);
-                    }
+                    // This runs while reconciling a freshly cloned/instantiated part prefab. Runtime Destroy is
+                    // deferred, which leaves DisallowMultipleComponent blockers alive until end of frame.
+                    Object.DestroyImmediate(component);
                 }
             }
-
-            PartAudioPresetPatcher.Apply(obj, partData);
-            RuntimeReentryMeshFallback.EnsureGenerated(obj, partData.partName);
-
-            gameObject = obj;
         }
 
         private static bool IsRequiredBySerializedModule(Type componentType, PartData partData)
