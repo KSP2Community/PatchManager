@@ -96,6 +96,12 @@ public class ResourcesLuaModule
 
     private static int _nextId;
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStaticState()
+    {
+        _nextId = default;
+    }
+
     /// <summary>
     /// Registers a JSON resource-units definition, queueing it under the <c>resource_units</c> addressables label
     /// with a sequential synthetic name.

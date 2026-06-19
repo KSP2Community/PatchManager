@@ -25,6 +25,12 @@ namespace PatchManager
         /// </summary>
         internal static PatchManager Instance;
 
+        // NOTE: Instance is intentionally NOT reset on Play Mode enter. Awake (which sets it) only runs
+        // once per domain, but the per-play lifecycle hooks (OnPreInitialized/OnInitialized, run by
+        // SpaceWarp's InitializeModAction each play) use PatchManager.Instance. Nulling it here would
+        // leave it null on the 2nd Play Mode session (Awake does not re-run) and crash e.g.
+        // ResourcesModule.Load. Instead it is re-affirmed each play in OnPreInitialized below.
+
         /// <summary>
         /// Registers each PatchManager submodule, binds shared configuration, and runs the modules' <see cref="IModule.Init" /> hooks.
         /// </summary>
@@ -52,6 +58,9 @@ namespace PatchManager
         /// <inheritdoc />
         public override void OnPreInitialized()
         {
+            // Runs every Play Mode enter (unlike Awake, which is once per domain), so re-affirm the
+            // singleton reference here for module Pre/Load hooks that use PatchManager.Instance.
+            Instance = this;
             ModuleManager.PreLoadAll();
         }
 

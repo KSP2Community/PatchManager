@@ -62,6 +62,13 @@ namespace PatchManager.Parts
 
         private static Dictionary<string, Type> _dataModules;
 
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            _componentModules = null;
+            _dataModules = null;
+        }
+
         private static void BuildDataModuleDictionary()
         {
             _dataModules = new();

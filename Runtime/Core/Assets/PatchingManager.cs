@@ -58,6 +58,19 @@ namespace PatchManager.Core.Assets
         /// </summary>
         internal static int TotalDefinitionPatchCount;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            Universe = null;
+            _createdAssets = new();
+            UseIndentedOutput = default;
+            TotalPatchCount = default;
+            TotalErrorCount = default;
+            TotalNewAssetCount = default;
+            TotalDefinitionPatchCount = default;
+            _rebuildStates = null;
+        }
+
         /// <summary>
         /// Constructs a new patch <see cref="LuaPatching.Universe" /> seeded with every loaded SpaceWarp plugin's
         /// GUID plus the supplied single-file mod IDs.
