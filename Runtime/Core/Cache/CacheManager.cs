@@ -33,6 +33,12 @@ namespace PatchManager.Core.Cache
 
         private static Inventory _inventory;
 
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            _inventory = null;
+        }
+
         /// <summary>
         /// Singleton <see cref="Json.Inventory" /> for the current run, lazily loaded from disk on first access.
         /// </summary>

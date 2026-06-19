@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MoonSharp.Interpreter;
-using MoonSharp.Interpreter.Interop.RegistrationPolicies;
 using Newtonsoft.Json.Linq;
 using PatchManager.Core.Cache;
 using PatchManager.LuaPatching.Attributes;
 using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Shared;
-using ReduxLib.Logging;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -109,6 +106,14 @@ namespace PatchManager.LuaPatching
         }
 
         private static PatchManagerScriptLoader _managerScriptLoader = new();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            SubmoduleTypes = new();
+            Converters = new();
+            _managerScriptLoader = new();
+        }
 
         #region Patch Loading
 

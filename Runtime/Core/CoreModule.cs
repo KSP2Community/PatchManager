@@ -14,7 +14,6 @@ using ReduxLib.Configuration;
 using ReduxLib.Configuration.Attributes;
 using SpaceWarp2.API.Mods.JSON;
 using UniLinq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -214,7 +213,14 @@ namespace PatchManager.Core
         /// </summary>
         private void RegisterResourceLocator(Action resolve, Action<string> reject)
         {
-            Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
+            // RegisterResourceLocator is a loading flow action that runs each Play Mode enter. Only add the
+            // provider if absent so it doesn't accumulate when the ResourceProviders list persists across
+            // sessions (Domain Reload disabled). The Locators registry is cleared per play (see Locators).
+            if (Addressables.ResourceManager.ResourceProviders.All(p => p.GetType() != typeof(ArchiveResourceProvider)))
+            {
+                Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
+            }
+
             Locators.Register(new ArchiveResourceLocator());
             // Perfect place to load the patch manager information from the old inventory as well
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
