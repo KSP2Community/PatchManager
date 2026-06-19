@@ -45,7 +45,16 @@ namespace PatchManager.Resources
                 Logging.LogInfo("No custom resource units were defined");
             }
 
-            PatchManager.Instance.AddComponent<NonStageableResourcesUIController>();
+            // Host on a dedicated persistent GameObject rather than PatchManager.Instance: PatchManager is
+            // a KerbalMod whose GameObject is destroyed between Play Mode sessions when Domain Reload is
+            // disabled, so AddComponent on it throws MissingReferenceException on a later play. The
+            // controller is standalone; guard against adding a duplicate within a session.
+            if (Object.FindAnyObjectByType<NonStageableResourcesUIController>() == null)
+            {
+                var host = new GameObject(nameof(NonStageableResourcesUIController));
+                Object.DontDestroyOnLoad(host);
+                host.AddComponent<NonStageableResourcesUIController>();
+            }
         }
 
 

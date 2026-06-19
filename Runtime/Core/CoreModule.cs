@@ -129,7 +129,25 @@ namespace PatchManager.Core
         /// </summary>
         private void RegisterResourceLocator(Action resolve, Action<string> reject)
         {
-            Addressables.ResourceManager.ResourceProviders.Add(new ArchiveResourceProvider());
+            // Only add the provider if absent: RegisterResourceLocator is a loading flow action that runs
+            // each Play Mode enter, so a plain Add would accumulate duplicate providers if the list
+            // persists across sessions (Domain Reload disabled). The Locators registry is cleared per play.
+            var providers = Addressables.ResourceManager.ResourceProviders;
+            bool hasArchiveProvider = false;
+            for (int i = 0; i < providers.Count; i++)
+            {
+                if (providers[i].GetType() == typeof(ArchiveResourceProvider))
+                {
+                    hasArchiveProvider = true;
+                    break;
+                }
+            }
+
+            if (!hasArchiveProvider)
+            {
+                providers.Add(new ArchiveResourceProvider());
+            }
+
             Locators.Register(new ArchiveResourceLocator());
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
                 CacheManager.Inventory.DefinitionCount;
