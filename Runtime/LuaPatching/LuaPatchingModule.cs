@@ -5,6 +5,7 @@ using PatchManager.LuaPatching.Attributes;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using ReduxLib.Reflection;
 
 namespace PatchManager.LuaPatching
 {
@@ -22,6 +23,18 @@ namespace PatchManager.LuaPatching
         {
             UserData.RegistrationPolicy = new FallbackRegistrationPolicy();
 
+            // PatchManager contributes PM/J into each mod env the SpaceWarp runtime forks.
+            if (!ReduxLib.GameInterfaces.ModRuntime.Contributors.OfType<Builtin.PatchManagerEnvContributor>().Any())
+            {
+                ReduxLib.GameInterfaces.ModRuntime.Contributors.Add(new Builtin.PatchManagerEnvContributor());
+            }
+
+            // Bridge Lua's 1-based array indices to the 0-based LuaIndex used by the C#-facing position members.
+            // Only fires when a CLR method parameter is typed LuaIndex, so it is inert until the wrappers adopt it.
+            Script.GlobalOptions.CustomConverters.SetScriptToClrCustomConversion(
+                DataType.Number, typeof(LuaIndex),
+                dv => new LuaIndex((int)dv.Number - 1));
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 UserData.RegisterAssembly(assembly, false);
@@ -29,7 +42,7 @@ namespace PatchManager.LuaPatching
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (var type in assembly.GetTypes())
+                foreach (var type in assembly.GetLoadableTypes())
                 {
                     var attributes = type.GetCustomAttributes(true);
                     if (attributes.OfType<MoonSharpUserDataAttribute>().Any())

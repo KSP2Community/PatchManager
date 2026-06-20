@@ -37,14 +37,14 @@ public class MissionsLuaModule
     /// Registers a mission patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every mission by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every mission by default. Restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
-    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch Patch(Script script, string name)
+    public PatchDefinition Patch(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(script, "Mission", "missions", name);
+        return _core.Patch(context, "Mission", "missions", name);
     }
 
     #region Utility Methods

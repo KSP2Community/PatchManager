@@ -36,35 +36,33 @@ namespace PatchManager.Core.Cache.Json
         /// <summary>
         /// Total number of patches applied during the most recent rebuild.
         /// </summary>
-        [JsonProperty("patch_count")] public int PatchCount { get; internal set; } = 0;
+        [JsonProperty("patch_count")] public int PatchCount { get; internal set; }
 
         /// <summary>
         /// Total number of patch errors during the most recent rebuild.
         /// </summary>
-        [JsonProperty("error_count")] public int ErrorCount { get; internal set; } = 0;
+        [JsonProperty("error_count")] public int ErrorCount { get; internal set; }
 
         /// <summary>
         /// Total number of distinct asset definitions touched by patches during the most recent rebuild.
         /// </summary>
-        [JsonProperty("definition_count")] public int DefinitionCount { get; internal set; } = 0;
+        [JsonProperty("definition_count")] public int DefinitionCount { get; internal set; }
 
         /// <summary>
         /// Total number of new assets created during the most recent rebuild.
         /// </summary>
-        [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; } = 0;
+        [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; }
 
         /// <summary>
-        /// Per-mod replay slices for <c>Config:</c> bindings, keyed by mod ID. Each slice carries identity
-        /// (descriptor vs standalone + .lua path) and the bindings the mod's patches declared. Lets the settings
-        /// UI surface bindings on hot-cache launches when the patch scripts don't run, and lets
-        /// <see cref="ConfigReplay" /> compare current values against the value the patch ran with to decide
-        /// whether to invalidate.
+        /// Snapshot of the values of config entries tagged <c>InvalidatesPatchManagerOnChange</c> at the last
+        /// cache build, keyed <c>{modId}:{section}/{name}</c>. The next launch diffs current values against this
+        /// to decide whether the cache is stale - the successor to the per-binding ranWith tracking.
         /// </summary>
-        [JsonProperty("serialized_configs")]
-        public Dictionary<string, ConfigReplaySlice> SerializedConfigs { get; internal set; } = new();
+        [JsonProperty("invalidation_snapshot")]
+        public Dictionary<string, JToken> InvalidationSnapshot { get; internal set; } = new();
 
         /// <summary>
-        /// Get a <see cref="CacheEntry" /> by its label.
+        /// Gets a <see cref="CacheEntry" /> by its label.
         /// </summary>
         /// <param name="label">Asset label to get the entry for.</param>
         /// <returns>A pair of asset label and instance of <see cref="CacheEntry" /> if found, otherwise the default pair.</returns>
@@ -76,7 +74,7 @@ namespace PatchManager.Core.Cache.Json
         }
 
         /// <summary>
-        /// Get a <see cref="CacheEntry" /> by its archive's name.
+        /// Gets a <see cref="CacheEntry" /> by its archive's name.
         /// </summary>
         /// <param name="archiveFilename">Archive filename to get the entry for.</param>
         /// <returns>A pair of asset label and instance of <see cref="CacheEntry" /> if found, otherwise the default pair.</returns>
@@ -100,7 +98,7 @@ namespace PatchManager.Core.Cache.Json
         }
 
         /// <summary>
-        /// Loads an inventory from the given path; creates a fresh one if the file is missing or corrupt.
+        /// Loads an inventory from the given path, creating a fresh one if the file is missing or corrupt.
         /// </summary>
         /// <param name="path">Path to the inventory JSON file.</param>
         /// <returns>The loaded inventory, or a fresh one on error.</returns>
@@ -109,7 +107,7 @@ namespace PatchManager.Core.Cache.Json
             CacheManager.CreateCacheFolderIfNotExists();
             if (!File.Exists(path))
             {
-                Logging.LogDebug($"Inventory file does not exist, creating new inventory.");
+                Logging.LogDebug("Inventory file does not exist, creating new inventory.");
                 return Create();
             }
 

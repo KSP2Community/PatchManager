@@ -49,7 +49,7 @@ public abstract class ExtensibleJsonUserData : JsonUserData
     public abstract DynValue TryToGet(string property);
 
     /// <summary>
-    /// Attempts to handle a write to the given property; returns whether the subclass consumed the assignment.
+    /// Attempts to handle a write to the given property. Returns whether the subclass consumed the assignment.
     /// </summary>
     /// <param name="property">The property name being written.</param>
     /// <param name="value">The value being assigned.</param>
@@ -58,7 +58,7 @@ public abstract class ExtensibleJsonUserData : JsonUserData
     public abstract bool TryToSet(string property, DynValue value);
 
     /// <summary>
-    /// Attempts to handle a delete on the given property; returns whether the subclass consumed the request.
+    /// Attempts to handle a delete on the given property. Returns whether the subclass consumed the request.
     /// </summary>
     /// <param name="property">The property name being removed.</param>
     /// <returns>True if the subclass handled the removal, false to fall through to the underlying JSON.</returns>
@@ -89,17 +89,15 @@ public abstract class ExtensibleJsonUserData : JsonUserData
     }
 
     /// <inheritdoc />
-    public override DynValue this[string index]
+    protected override DynValue TryGetVirtual(DynValue key)
     {
-        get
-        {
-            if (TryToGet(index) is { } result) return result;
-            return base[index];
-        }
-        set
-        {
-            if (TryToSet(index, value)) return;
-            base[index] = value;
-        }
+        if (key.Type == DataType.String && TryToGet(key.String) is { } result) return result;
+        return null;
+    }
+
+    /// <inheritdoc />
+    protected override bool TrySetVirtual(DynValue key, DynValue value)
+    {
+        return key.Type == DataType.String && TryToSet(key.String, value);
     }
 }

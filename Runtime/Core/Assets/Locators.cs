@@ -13,9 +13,9 @@ namespace PatchManager.Core.Assets
         private static readonly List<IResourceLocator> ResourceLocators = new();
 
         // CoreModule.RegisterResourceLocator (a loading flow action) calls Register() on every Play Mode
-        // enter. With Domain Reload disabled this static list survives across sessions, so without
-        // clearing it the locators accumulate (and LocateAll returns duplicate locations) — one extra
-        // ArchiveResourceLocator per play. A Domain Reload would have emptied it; do the same here.
+        // enter. With Domain Reload disabled this static list persists across sessions, so without clearing
+        // it the locators accumulate and LocateAll returns duplicate locations. A Domain Reload would have
+        // emptied it; do the same here.
         [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticState()
         {

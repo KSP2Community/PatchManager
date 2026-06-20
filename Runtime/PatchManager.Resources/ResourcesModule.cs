@@ -5,6 +5,7 @@ using KSP.Game;
 using Newtonsoft.Json.Linq;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
+using Unity.VisualScripting;
 using UnityEngine.AddressableAssets;
 using UnityEngine;
 
@@ -44,11 +45,10 @@ namespace PatchManager.Resources
                 Logging.LogInfo("No custom resource units were defined");
             }
 
-            // Host on a dedicated persistent GameObject rather than PatchManager.Instance.gameObject:
-            // with Domain Reload disabled SpaceWarp reuses the mod's C# object across Play Mode sessions
-            // but its GameObject is destroyed on exit, so attaching to it throws MissingReferenceException
-            // on the 2nd play. The controller is standalone (doesn't depend on PatchManager). Guard so we
-            // don't add a duplicate within a session.
+            // Host on a dedicated persistent GameObject rather than PatchManager.Instance: PatchManager is
+            // a KerbalMod whose GameObject is destroyed between Play Mode sessions when Domain Reload is
+            // disabled, so AddComponent on it throws MissingReferenceException on a later play. The
+            // controller is standalone; guard against adding a duplicate within a session.
             if (Object.FindAnyObjectByType<NonStageableResourcesUIController>() == null)
             {
                 var host = new GameObject(nameof(NonStageableResourcesUIController));

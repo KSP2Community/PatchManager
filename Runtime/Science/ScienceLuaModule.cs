@@ -38,14 +38,14 @@ public class ScienceLuaModule
     /// Registers a discoverables-list patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every discoverables asset by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every discoverables asset by default. Restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
-    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchDiscoverables(Script script, string name)
+    public PatchDefinition PatchDiscoverables(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(script, "Discoverables", "science_region_discoverables", name);
+        return _core.Patch(context, "Discoverables", "science_region_discoverables", name);
     }
     #endregion
 
@@ -55,24 +55,23 @@ public class ScienceLuaModule
     /// Registers a science-experiment patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every experiment by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every experiment by default. Restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
-    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchExperiments(Script script, string name)
+    public PatchDefinition PatchExperiments(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(script, "Experiment", "scienceExperiment", name);
+        return _core.Patch(context, "Experiment", "scienceExperiment", name);
     }
 
     /// <summary>
     /// Creates a new science experiment with the given name and runs <paramref name="callback" /> against it for
     /// further configuration.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
     /// <param name="name">The experiment name.</param>
     /// <param name="callback">Callback that receives the new experiment for further configuration.</param>
-    public void NewExperiment(Script script, string name, Action<ExperimentUserData> callback)
+    public void NewExperiment(string name, Action<ExperimentUserData> callback)
     {
         var core = new ExperimentCore
         {
@@ -94,14 +93,14 @@ public class ScienceLuaModule
     /// Registers a science-region patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every region asset by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every region asset by default. Restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
-    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchRegions(Script script, string name)
+    public PatchDefinition PatchRegions(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(script, "ScienceRegions", "science_region", name);
+        return _core.Patch(context, "ScienceRegions", "science_region", name);
     }
     #endregion
 
@@ -112,25 +111,25 @@ public class ScienceLuaModule
     /// Registers a tech-tree-node patch with the given namespaced patch name.
     /// </summary>
     /// <remarks>
-    /// The patch matches every tech-tree node by default; restrict it via <see cref="LuaPatch.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
+    /// The patch matches every tech-tree node by default. Restrict it via <see cref="PatchDefinition.Named" />, which supports <c>*</c> and <c>?</c> wildcards.
     /// </remarks>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
-    /// <param name="name">The patch's local name; namespaced with the host mod's ID.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
-    public LuaPatch PatchTechNodes(Script script, string name)
+    public PatchDefinition PatchTechNodes(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(script, "JSON", "techNodeData", name);
+        return _core.Patch(context, "JSON", "techNodeData", name);
     }
 
     /// <summary>
     /// Adds the given part IDs to the tech node named <paramref name="nodeName" />'s <c>UnlockedPartIds</c> list.
     /// </summary>
-    /// <param name="script">The host Lua script.</param>
+    /// <param name="context">The Lua execution context.</param>
     /// <param name="nodeName">The tech node name.</param>
     /// <param name="parts">The part IDs to append.</param>
-    public void AddPartsToTechNode(Script script, string nodeName, params string[] parts)
+    public void AddPartsToTechNode(ScriptExecutionContext context, string nodeName, params string[] parts)
     {
-        PatchTechNodes(script, $"add_{Guid.NewGuid()}").Named(nodeName).Do(node =>
+        PatchTechNodes(context, $"add_{Guid.NewGuid()}").Named(nodeName).Do(node =>
         {
             if (node.IsNil()) return null;
 

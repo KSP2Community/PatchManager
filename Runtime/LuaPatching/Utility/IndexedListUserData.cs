@@ -12,10 +12,10 @@ namespace PatchManager.LuaPatching.Utility;
 /// Subclasses provide an item -> name function via <see cref="Name" /> (and optionally a custom item conversion via
 /// <see cref="Convert" />), and the base class maintains parallel <see cref="Indices" /> and <see cref="Conversions" />
 /// caches that translate string keys to array positions and to wrapped item values. Lua scripts then treat the array
-/// as if it were a Lua table keyed by item name -- string indexing, <see cref="Remove(string)" />, and iteration via
+/// as if it were a Lua table keyed by item name. String indexing, <see cref="Remove(string)" />, and iteration via
 /// <see cref="Pairs" /> all operate on names rather than raw JSON object keys. Mutations (<see cref="Append" />,
 /// <see cref="Insert" />, <see cref="Remove(int)" />, <see cref="Clear" />) update the caches in step.
-/// String-indexed assignment is intentionally unsupported and always throws -- callers must use the explicit
+/// String-indexed assignment is intentionally unsupported and always throws. Callers must use the explicit
 /// add/remove methods so the name-to-index mapping stays consistent.
 /// </remarks>
 public abstract class IndexedListUserData : JsonUserData
@@ -27,7 +27,7 @@ public abstract class IndexedListUserData : JsonUserData
     protected readonly JArray List;
 
     /// <summary>
-    /// Maps item name to its position in <see cref="List" />. Maintained by the base class; subclasses should not mutate it directly.
+    /// Maps item name to its position in <see cref="List" />. Maintained by the base class. Subclasses should not mutate it directly.
     /// </summary>
     protected readonly Dictionary<string, int> Indices = new();
 
@@ -132,17 +132,18 @@ public abstract class IndexedListUserData : JsonUserData
     }
 
     /// <inheritdoc />
-    public override DynValue this[string index]
+    protected override DynValue TryGetVirtual(DynValue key)
     {
-        get
-        {
-            if (Indices.TryGetValue(index, out var idx))
-            {
-                return Conversions[idx];
-            }
-            return DynValue.Nil;
-        }
-        set => throw new ScriptRuntimeException("Indexed lists are read only, except when using the methods for them");
+        if (key.Type != DataType.String) return null;
+        return Indices.TryGetValue(key.String, out var idx) ? Conversions[idx] : DynValue.Nil;
+    }
+
+    /// <inheritdoc />
+    protected override bool TrySetVirtual(DynValue key, DynValue value)
+    {
+        if (key.Type == DataType.String)
+            throw new ScriptRuntimeException("Indexed lists are read only, except when using the methods for them");
+        return false;
     }
 
     /// <inheritdoc />
@@ -156,12 +157,13 @@ public abstract class IndexedListUserData : JsonUserData
     }
 
     /// <inheritdoc />
-    public override void RemoveAt(int index)
+    public override void RemoveAt(LuaIndex index)
     {
-        if (index <= 0 || index > Indices.Count) throw new IndexOutOfRangeException();
-        Indices.Remove(Name(List[index-1]));
-        List.RemoveAt(index-1);
-        Conversions.RemoveAt(index-1);
+        var i = index.Value;
+        if (i < 0 || i >= Indices.Count) throw new IndexOutOfRangeException();
+        Indices.Remove(Name(List[i]));
+        List.RemoveAt(i);
+        Conversions.RemoveAt(i);
         SoftRefresh();
     }
 
@@ -190,11 +192,12 @@ public abstract class IndexedListUserData : JsonUserData
     }
 
     /// <inheritdoc />
-    public override void Insert(int index, DynValue value)
+    public override void Insert(LuaIndex index, DynValue value)
     {
         base.Insert(index, value);
-        Indices[Name(List[index])] = index;
-        Conversions.Insert(index, Convert(List[index]));
+        var i = index.Value;
+        Indices[Name(List[i])] = i;
+        Conversions.Insert(i, Convert(List[i]));
         SoftRefresh();
     }
 

@@ -8,9 +8,9 @@ namespace PatchManager.LuaPatching.Builtin;
 /// The PatchManager Lua library, exposed to scripts as the global <c>PM</c>.
 /// </summary>
 [MoonSharpUserData]
-public class PatchManagerCore
+public sealed class PatchManagerCore
 {
-    private Universe _universe;
+    private readonly Universe _universe;
 
     /// <summary>
     /// Creates the library bound to the given universe.
@@ -20,6 +20,21 @@ public class PatchManagerCore
     {
         _universe = universe;
     }
+
+    /// <summary>
+    /// The metadata tag a config value carries to invalidate the patch cache when its value changes between
+    /// launches.
+    /// </summary>
+    /// <remarks>
+    /// The canonical constant. PM's own consumer and any C# config reference this.
+    /// </remarks>
+    public const string InvalidatesOnChangeTag = "InvalidatesPatchManagerOnChange";
+
+    /// <summary>
+    /// The cache-invalidation tag, exposed to scripts as <c>PM.InvalidatesOnChange</c> so a config entry can
+    /// be tagged with <c>:Tag(PM.InvalidatesOnChange)</c>.
+    /// </summary>
+    public string InvalidatesOnChange => InvalidatesOnChangeTag;
 
     /// <summary>
     /// Returns the registered submodule with the given name (for example <c>PM.Planets</c>).
@@ -38,23 +53,28 @@ public class PatchManagerCore
     /// <summary>
     /// Registers a patch keyed by the given addressables label and namespaced patch name.
     /// </summary>
-    /// <param name="script">The host Lua script; its <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global is used to namespace <paramref name="name" />.</param>
     /// <param name="converter">The name of the converter to use, as registered via <see cref="Attributes.ConverterAttribute" />.</param>
     /// <param name="label">The addressables label whose assets to patch.</param>
-    /// <param name="name">The patch's local name; the host mod's ID is prepended to form the full namespaced name.</param>
-    /// <returns>The registered patch, suitable for chaining (for example <see cref="LuaPatch.Do" />).</returns>
+    /// <param name="name">The patch's local name. The host mod's ID is prepended to form the full namespaced name.</param>
+    /// <returns>The registered patch, suitable for chaining (for example <see cref="PatchDefinition.Do" />).</returns>
     /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
-    public LuaPatch Patch(Script script, string converter, string label, string name)
+    public PatchDefinition Patch(ScriptExecutionContext context, string converter, string label, string name)
     {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException($"PM:Patch('{name}') can only be called during patch registration, not from a Do callback or at runtime.");
+        }
+
         if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
         {
             throw new ScriptRuntimeException($"Unknown converter {converter}");
         }
 
-        var modId = script.Globals.Get("ModId").CastToString();
-        var actualName =  modId + ':' + name;
+        var modId = context.CurrentGlobalEnv.Get("ModId").CastToString();
+        var actualName = modId + ':' + name;
 
-        var newPatch = new LuaPatch
+        var newPatch = new PatchDefinition
         {
             ConverterInstance = converterInstance,
             Label = label,
@@ -75,12 +95,17 @@ public class PatchManagerCore
     /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
     public void New(string converter, string label, string name, DynValue newObject)
     {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException($"PM:New('{name}') can only be called during patch registration, not from a Do callback or at runtime.");
+        }
+
         if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
         {
             throw new ScriptRuntimeException($"Unknown converter {converter}");
         }
 
-        var newPatch = new LuaAsset()
+        var newPatch = new LuaAsset
         {
             ConverterInstance = converterInstance,
             Label = label,

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using PatchManager.Core;
+using PatchManager.CSharpPatching;
 using PatchManager.Generic;
 using PatchManager.LuaPatching;
 using PatchManager.Missions;
@@ -35,7 +36,6 @@ namespace PatchManager
         /// </summary>
         public void Awake()
         {
-            // Let's register all our modules!
             Instance = this;
             ModuleManager.Register(typeof(LuaPatchingModule));
             ModuleManager.Register(typeof(CoreModule));
@@ -45,10 +45,11 @@ namespace PatchManager
             ModuleManager.Register(typeof(ResourcesModule));
             ModuleManager.Register(typeof(ScienceModule));
             ModuleManager.Register(typeof(PlanetsModule));
+            ModuleManager.Register(typeof(CSharpPatchingModule));
             Logging.Initialize(SWLogger);
             foreach (var module in ModuleManager.Modules)
             {
-                // We are going to use reduxes core configuration
+                // Bind against Redux's core configuration.
                 module.BindConfiguration(SWConfiguration);
             }
             ModuleManager.InitAll();

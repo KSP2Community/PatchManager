@@ -10,7 +10,9 @@ using PatchManager.Core.Cache;
 using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Utility;
 using PatchManager.LuaPatching;
+using PatchManager.LuaPatching.Builtin;
 using PatchManager.Shared;
+using ReduxLib.Configuration;
 using SpaceWarp2.API.Mods;
 using UniLinq;
 using UnityEngine;
@@ -26,13 +28,12 @@ namespace PatchManager.Core.Assets
     internal static class PatchingManager
     {
         /// <summary>
-        /// The current patch universe; created by <see cref="GenerateUniverse" />.
+        /// The current patch universe, created by <see cref="GenerateUniverse" />.
         /// </summary>
         internal static Universe Universe;
 
         private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
-        private static int _initialLibraryCount;
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
         internal static bool UseIndentedOutput;
@@ -61,14 +62,12 @@ namespace PatchManager.Core.Assets
         private static void ResetStaticState()
         {
             Universe = null;
-            _initialLibraryCount = default;
             _createdAssets = new();
             UseIndentedOutput = default;
             TotalPatchCount = default;
             TotalErrorCount = default;
             TotalNewAssetCount = default;
             TotalDefinitionPatchCount = default;
-            _previousLibraryCount = -1;
             _rebuildStates = null;
         }
 
@@ -83,57 +82,6 @@ namespace PatchManager.Core.Assets
             loadedPlugins.AddRange(singleFileModIds);
             Universe = new(Logging.LogError, Logging.LogMessage,
                 loadedPlugins);
-            _initialLibraryCount = Universe.LibraryCount;
-        }
-
-        private static int _previousLibraryCount = -1;
-
-        /// <summary>
-        /// Loads every <c>.lua</c> patch file under <paramref name="modFolder" /> and records each one's hash in
-        /// the cache checksum.
-        /// </summary>
-        /// <param name="modName">The mod ID; used as the script's <c>ModId</c> global.</param>
-        /// <param name="modFolder">The directory containing the mod's patches.</param>
-        public static void ImportModPatches(string modName, string modFolder)
-        {
-            Universe.LoadPatchesInDirectory(new DirectoryInfo(modFolder), modName);
-
-            var currentLibraryCount = Universe.LibraryCount - _initialLibraryCount;
-
-            if (currentLibraryCount > _previousLibraryCount)
-            {
-                Logging.LogInfo($"{currentLibraryCount} mod libraries loaded!");
-                _previousLibraryCount++;
-            }
-
-            var patchFiles = Directory.GetFiles(modFolder, "*.lua", SearchOption.AllDirectories);
-            foreach (var patchFile in patchFiles)
-            {
-                var patchHash = Hash.FromFile(patchFile);
-                CurrentPatchHashes.Patches.Add(patchFile, patchHash);
-            }
-        }
-
-        /// <summary>
-        /// Loads a single <c>.lua</c> patch file and records its hash in the cache checksum.
-        /// </summary>
-        /// <param name="fileInfo">The patch file to load.</param>
-        public static void ImportSinglePatch(FileInfo fileInfo)
-        {
-            Universe.LoadSinglePatchFile(fileInfo, new DirectoryInfo("."));
-            CurrentPatchHashes.Patches.Add(fileInfo.FullName, Hash.FromFile(fileInfo.FullName));
-        }
-
-        /// <summary>
-        /// Loads a patch from a <see cref="TextAsset" /> and records its hash in the cache checksum.
-        /// </summary>
-        /// <param name="asset">The text asset whose contents are the patch script.</param>
-        /// <param name="modId">The mod ID to associate the patch with.</param>
-        public static void ImportAssetPatch(TextAsset asset, string modId)
-        {
-            Universe.LoadPatchAsset(asset, modId);
-            // TODO: Actually fix the double-loading of addressables rather than just changing Add to TryAdd
-            CurrentPatchHashes.Patches.TryAdd($"{modId}/{asset.name}", Hash.FromString(asset.text));
         }
 
         /// <summary>
@@ -141,10 +89,124 @@ namespace PatchManager.Core.Assets
         /// </summary>
         public static void RegisterPatches()
         {
-            Logging.LogInfo($"Registering all patches!");
+            Logging.LogInfo("Registering all patches!");
+            CSharpPatching.FluentPatchRegistry.Flush(Universe);
             Universe.SetupPatchesForRun();
             Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
             Logging.LogInfo($"{Universe.AllNewAssets.Count} assets created!");
+        }
+
+        /// <summary>
+        /// Hashes every mod's declared script files into the patch-cache checksum.
+        /// </summary>
+        /// <remarks>
+        /// Runs before the cache-validity decision (and before the bodies run), so the decision sees whether the
+        /// patch files changed since last launch. Addressable-sourced scripts are not files and are gated by mod
+        /// version instead. Uses the same string hash as <see cref="CollectScriptResults" /> so the two agree.
+        /// </remarks>
+        public static void HashScriptFiles()
+        {
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                foreach (var file in descriptor.ScriptFiles)
+                {
+                    if (File.Exists(file))
+                    {
+                        CurrentPatchHashes.Patches[file] = Hash.FromString(File.ReadAllText(file));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Collects what the runtime exposed per descriptor: every ran script's hash into the patch-cache
+        /// checksum, and every script error into the patch summary.
+        /// </summary>
+        public static void CollectScriptResults()
+        {
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                foreach (var script in descriptor.LoadedScripts)
+                {
+                    CurrentPatchHashes.Patches[script.Key] = Hash.FromString(script.Value);
+                }
+
+                foreach (var error in descriptor.ScriptErrors)
+                {
+                    Universe.Summary.ErroredFiles.Add(error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines whether any config value tagged <c>InvalidatesPatchManagerOnChange</c> differs from the
+        /// snapshot taken at the last cache build.
+        /// </summary>
+        /// <remarks>
+        /// Must run after mod bodies have bound their config.
+        /// </remarks>
+        /// <returns>True if a tagged value changed (or was added or removed) since the snapshot.</returns>
+        public static bool TaggedConfigChanged()
+        {
+            var current = GatherTaggedValues();
+            var snapshot = CacheManager.Inventory.InvalidationSnapshot;
+            if (current.Count != snapshot.Count)
+            {
+                return true;
+            }
+
+            foreach (var pair in current)
+            {
+                if (!snapshot.TryGetValue(pair.Key, out var stored) || !JToken.DeepEquals(pair.Value, stored))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Snapshots the current values of <c>InvalidatesPatchManagerOnChange</c>-tagged config into the
+        /// inventory, so the next launch can detect a change. Runs as part of a cache rebuild.
+        /// </summary>
+        /// <param name="resolve">Flow success callback.</param>
+        /// <param name="reject">Flow failure callback.</param>
+        public static void SaveInvalidationSnapshot(Action resolve, Action<string> reject)
+        {
+            CacheManager.Inventory.InvalidationSnapshot = GatherTaggedValues();
+            CacheManager.SaveInventory();
+            resolve();
+        }
+
+        private static Dictionary<string, JToken> GatherTaggedValues()
+        {
+            var result = new Dictionary<string, JToken>();
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                var file = descriptor.ConfigFile;
+                if (file == null)
+                {
+                    continue;
+                }
+
+                foreach (var section in file.Sections)
+                {
+                    foreach (var key in section.Keys)
+                    {
+                        var entry = section[key];
+                        if (!entry.HasTag(PatchManagerCore.InvalidatesOnChangeTag))
+                        {
+                            continue;
+                        }
+
+                        var entryKey = $"{descriptor.Guid}:{section.Name}/{key}";
+                        result[entryKey] = entry.Value == null ? JValue.CreateNull() : JToken.FromObject(entry.Value);
+                    }
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -214,20 +276,22 @@ namespace PatchManager.Core.Assets
 
         private static Dictionary<string, LabelRebuildState> _rebuildStates;
 
-        private static readonly LuaPatch.PatchPass[] OrderedPasses =
+        private static readonly PatchDefinition.PatchPass[] OrderedPasses =
         {
-            LuaPatch.PatchPass.Early,
-            LuaPatch.PatchPass.Default,
-            LuaPatch.PatchPass.Late
+            PatchDefinition.PatchPass.Early,
+            PatchDefinition.PatchPass.Default,
+            PatchDefinition.PatchPass.Late
         };
 
         /// <summary>
         /// Schedules per-(pass, label) flow actions in pass-major order (every label's Early before any
-        /// Default, every label's Default before any Late). A label only receives an action for a pass
-        /// if it has a patch in that pass. The first action a label receives lazily loads its
-        /// addressables; the last action writes the label's archive and releases its load handle. A
-        /// final action persists totals and inventory.
+        /// Default, every label's Default before any Late).
         /// </summary>
+        /// <remarks>
+        /// A label only receives an action for a pass if it has a patch in that pass. The first action a label
+        /// receives lazily loads its addressables. The last action writes the label's archive and releases its
+        /// load handle. A final action persists totals and inventory.
+        /// </remarks>
         /// <param name="resolve">Callback invoked once scheduling finishes.</param>
         /// <param name="reject">Reject callback (currently unused).</param>
         public static void RebuildAllCache(Action resolve, Action<string> reject)
@@ -242,7 +306,7 @@ namespace PatchManager.Core.Assets
 
             InitRebuildStates(labels);
 
-            var activePassesPerLabel = new Dictionary<string, List<LuaPatch.PatchPass>>(labels.Count);
+            var activePassesPerLabel = new Dictionary<string, List<PatchDefinition.PatchPass>>(labels.Count);
             foreach (var label in labels)
             {
                 activePassesPerLabel[label] = ActivePassesFor(label);
@@ -309,9 +373,9 @@ namespace PatchManager.Core.Assets
             }
         }
 
-        private static List<LuaPatch.PatchPass> ActivePassesFor(string label)
+        private static List<PatchDefinition.PatchPass> ActivePassesFor(string label)
         {
-            var result = new List<LuaPatch.PatchPass>();
+            var result = new List<PatchDefinition.PatchPass>();
             foreach (var pass in OrderedPasses)
             {
                 if (HasPatchesInPass(label, pass)) result.Add(pass);
@@ -320,12 +384,12 @@ namespace PatchManager.Core.Assets
                 && _rebuildStates.TryGetValue(label, out var state)
                 && state.CreatedAssets.Count > 0)
             {
-                result.Add(LuaPatch.PatchPass.Default);
+                result.Add(PatchDefinition.PatchPass.Default);
             }
             return result;
         }
 
-        private static bool HasPatchesInPass(string label, LuaPatch.PatchPass pass)
+        private static bool HasPatchesInPass(string label, PatchDefinition.PatchPass pass)
         {
             if (!Universe.AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
             if (!perPass.TryGetValue(pass, out var buckets)) return false;
@@ -334,7 +398,7 @@ namespace PatchManager.Core.Assets
                 || buckets.Exact.Count > 0;
         }
 
-        private static GenericFlowAction MakePassAction(string label, LuaPatch.PatchPass pass, bool loadFirst, bool writeLast)
+        private static GenericFlowAction MakePassAction(string label, PatchDefinition.PatchPass pass, bool loadFirst, bool writeLast)
         {
             var labelCopy = label;
             var passCopy = pass;
@@ -343,7 +407,7 @@ namespace PatchManager.Core.Assets
 
             var passSuffix = pass switch
             {
-                LuaPatch.PatchPass.Default => "",
+                PatchDefinition.PatchPass.Default => "",
                 _ => $" [{pass.ToString().ToUpperInvariant()}]"
             };
 
@@ -356,7 +420,7 @@ namespace PatchManager.Core.Assets
 
         private static IEnumerator RunPassActionCoroutine(
             string label,
-            LuaPatch.PatchPass pass,
+            PatchDefinition.PatchPass pass,
             bool loadFirst,
             bool writeLast,
             Action resolve
@@ -411,7 +475,7 @@ namespace PatchManager.Core.Assets
             }
         }
 
-        private static void RunPassForLabel(string label, LuaPatch.PatchPass pass)
+        private static void RunPassForLabel(string label, PatchDefinition.PatchPass pass)
         {
             if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
 
