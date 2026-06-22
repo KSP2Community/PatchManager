@@ -1,0 +1,176 @@
+---@meta
+-- AUTO-GENERATED from analysis of codebase and assets - do not edit by hand.
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartStateConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartStatusConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartPropertiesConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartDefinitionConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartDefinitionContainerConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartOwnerStateConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartOwnerDefinitionConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/PartRelationshipDataConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/AttachNodeDefinitionConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/AttachNodeStateConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/AttchNodeConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/ScriptInterop/impl/moonsharp/StagePartsStateConverter.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/PartProperties.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/PartDefinition.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/AttachNodeDefinition.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/PartRelationshipData.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/PartStatus.cs
+-- Source: ksp2redux/Assets/Code/KSP/Sim/AttachNodeType.cs
+
+---Operational status of a part.
+---@alias PartStatus
+---| "NONE"
+---| "IDLE"
+---| "ACTIVE"
+---| "DEACTIVATED"
+---| "DEAD"
+
+---Represents the raw serialized properties of a part definition, including physical, thermal, attachment, and resource configuration.
+---@class Part
+-- alt: PartProperties, KSP.Sim.Definitions.PartProperties
+---@field partName string
+---@field model string
+---@field ActivatesEvenIfDisconnected boolean
+---@field alphaCutoff number
+---@field angularDrag number
+---@field attachRules AttachRulesInterop
+---@field author string
+---@field bodyLiftOnlyAttachName string
+---@field bodyLiftOnlyUnattachedLift boolean
+---@field buoyancy number
+---@field buoyancyUseSine boolean
+---@field boundsCentroidOffset Vec3
+---@field boundsMultiplier number
+---@field breakingForce number
+---@field breakingTorque number
+---@field bulkheadProfiles string
+---@field category string
+---@field family string
+---@field CoMOffset Vec3
+---@field CoPOffset Vec3
+---@field CoLOffset Vec3
+---@field CenterOfBuoyancy Vec3
+---@field CenterOfDisplacement Vec3
+---@field childStageOffset integer
+---@field cost integer
+---@field crashTolerance number
+---@field CrewCapacity integer
+---@field description string
+---@field dragModelType string
+---@field emissiveConstant number
+---@field entryCost integer
+---@field explosionPotential number
+---@field fuelCrossFeed boolean
+---@field heatConductivity number
+---@field heatConvectiveConstant number
+---@field iconCenter Vec3
+---@field inverseStageCarryover boolean
+---@field isCompound boolean
+---@field manufacturer string
+---@field mass number
+---@field maximum_drag number
+---@field maxLength integer
+---@field maxTemp number
+---@field minimum_drag number
+---@field mirrorRefAxis Vec3
+---@field noAutoEVAMulti boolean
+---@field oabEditorCategory OABEditorCategory
+---@field radiatorHeadroom number
+---@field radiatorMax number
+---@field resourcePriorityUseParentInverseStage boolean
+---@field rimFalloff integer
+---@field PhysicsMode any C# field type is PartPhysicsModes, which has no registered converter.
+---@field scale number
+---@field sizeKey string
+---@field sizeCategory MetaAssemblySizeFilterTypeInterop
+---@field skinMassPerArea number
+---@field skinMaxTemp number
+---@field skinInternalConductionMult number
+---@field skipColliderIgnores boolean
+---@field specPower number
+---@field stackSymmetry integer
+---@field stageOffset integer
+---@field stageType AssemblyPartStageTypeInterop
+---@field subcategory string
+---@field tags string
+---@field TechRequired string
+---@field title string
+---@field thermalMassModifier number
+---@field allowKinematicPhysicsIfIntersectTerrain boolean
+---@field attachNodes AttachNode[]
+---@field resources ContainedResourceDefinitionInterop[]
+---@field partCosts PartResourceCost[]
+---@field modules table[]
+
+---Represents the definition of a part attachment node, including its position, orientation, type, and joint configuration.
+---@class AttachNode
+-- alt: KSP.Sim.Definitions.AttachNodeDefinition
+---@field nodeID string Required. Must be unique for this node.
+---@field nodeType AttachNodeType
+---@field attachMethod string Enum AttachNodeMethod marshalled as its name string (no converter).
+---@field position Vec3d
+---@field orientation Vec3d
+---@field size integer
+---@field sizeKey string
+---@field resourceXFeed boolean
+---@field rigid boolean
+---@field angularStrengthMultiplier number
+---@field visualSize number
+
+---Converts AttachNodeState values between C# and MoonSharp script representations.
+---@class AttachNodeState
+-- alt: KSP.Sim.State.AttachNodeState
+---@field nodeId string
+---@field IsDynamic boolean
+---@field AttachedPartGuid IGGuid
+---@field attachedPartNodeID string
+---@field SizeForDynamic number
+---@field SizeKeyForDynamic string
+---@field LocalPositionForDynamic Vec3d
+---@field LocalRotationForDynamic Quatd
+
+---Converts PartState struct values to and from MoonSharp script table representations.
+---@class PartState
+-- alt: KSP.Sim.State.PartState
+---@field PartOwnerGuid IGGuid
+---@field localPosition Vec3d
+---@field localRotation Quatd
+---@field partStatus PartStatus
+---@field attachNodeStates AttachNodeState[]
+
+---Converts PartDefinition struct values between the CLR and MoonSharp script representations.
+---@class PartDefinition
+-- alt: KSP.Sim.Definitions.PartDefinition
+---@field Guid any C# System.Guid marshalled raw, no registered converter.
+---@field Properties any C# field type is PartData, which has no registered converter.
+---@field Modules any[] Element type SerializedPartModule has no registered converter.
+
+---Converts PartDefinitionContainer values between the CLR representation and MoonSharp DynValue tables.
+---@class partcontainer
+-- alt: PartDefinitionContainer, KSP.Sim.Definitions.PartDefinitionContainer
+---@field partGuid string
+---@field partDefinition PartDefinition
+---@field partState PartState?
+
+---Converts PartOwnerState struct values between CLR and MoonSharp script representations.
+---@class PartOwnerState
+-- alt: KSP.Sim.State.PartOwnerState
+---@field virtualConnections PartRelationship[]
+
+---Represents the MoonSharp script interop converter for PartOwnerDefinition.
+---@class PartOwner
+-- alt: PartOwnerDefinition, KSP.Sim.Definitions.PartOwnerDefinition
+
+---Represents a directional relationship between two simulation parts, defined by their GUIDs and a relationship type.
+---@class PartRelationship
+-- alt: KSP.Sim.PartRelationshipData
+---@field HostPartGuid IGGuid
+---@field TargetPartGuid IGGuid
+---@field relationshipType PartRelationshipType
+
+---Converts StagePartsState values to and from MoonSharp script values.
+---@class StageParts
+-- alt: StagePartsState, KSP.Sim.State.StagePartsState
+---@field PartIds IGGuid[]
