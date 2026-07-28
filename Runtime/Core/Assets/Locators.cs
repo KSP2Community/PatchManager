@@ -39,11 +39,29 @@ namespace PatchManager.Core.Assets
         /// <returns>True if any assets were found, false otherwise.</returns>
         public static bool LocateAll(object label, out List<IResourceLocation> locations)
         {
+            return LocateAll(label, typeof(TextAsset), out locations);
+        }
+
+        /// <summary>
+        /// Locate assets by key and requested type across every Patch Manager
+        /// asset-domain locator.
+        /// </summary>
+        public static bool LocateAll(
+            object key,
+            System.Type type,
+            out List<IResourceLocation> locations
+        )
+        {
             locations = new List<IResourceLocation>();
             foreach (var locator in ResourceLocators)
             {
-                locator.Locate(label, typeof(TextAsset), out var foundLocations);
-                locations.AddRange(foundLocations);
+                if (
+                    locator.Locate(key, type, out var foundLocations)
+                    && foundLocations != null
+                )
+                {
+                    locations.AddRange(foundLocations);
+                }
             }
 
             return locations.Count > 0;
