@@ -383,6 +383,19 @@ public static class PrefabPatchComposer
         if (segments.Length != 2)
             return false;
         var component = Convert.ToSingle(value, CultureInfo.InvariantCulture);
+        if (
+            transform is RectTransform rectTransform
+            && TrySetRectTransform(
+                rectTransform,
+                segments[0],
+                segments[1],
+                component
+            )
+        )
+        {
+            return true;
+        }
+
         switch (segments[0])
         {
             case "m_LocalPosition":
@@ -415,6 +428,101 @@ public static class PrefabPatchComposer
             }
             default:
                 return false;
+        }
+    }
+
+    private static bool TrySetRectTransform(
+        RectTransform transform,
+        string property,
+        string componentName,
+        float componentValue
+    )
+    {
+        switch (property)
+        {
+            case "m_AnchoredPosition":
+            case "anchoredPosition":
+            {
+                var value = transform.anchoredPosition;
+                SetVector2Component(
+                    ref value,
+                    componentName,
+                    componentValue
+                );
+                transform.anchoredPosition = value;
+                return true;
+            }
+            case "m_SizeDelta":
+            case "sizeDelta":
+            {
+                var value = transform.sizeDelta;
+                SetVector2Component(
+                    ref value,
+                    componentName,
+                    componentValue
+                );
+                transform.sizeDelta = value;
+                return true;
+            }
+            case "m_AnchorMin":
+            case "anchorMin":
+            {
+                var value = transform.anchorMin;
+                SetVector2Component(
+                    ref value,
+                    componentName,
+                    componentValue
+                );
+                transform.anchorMin = value;
+                return true;
+            }
+            case "m_AnchorMax":
+            case "anchorMax":
+            {
+                var value = transform.anchorMax;
+                SetVector2Component(
+                    ref value,
+                    componentName,
+                    componentValue
+                );
+                transform.anchorMax = value;
+                return true;
+            }
+            case "m_Pivot":
+            case "pivot":
+            {
+                var value = transform.pivot;
+                SetVector2Component(
+                    ref value,
+                    componentName,
+                    componentValue
+                );
+                transform.pivot = value;
+                return true;
+            }
+            default:
+                return false;
+        }
+    }
+
+    private static void SetVector2Component(
+        ref Vector2 vector,
+        string component,
+        float value
+    )
+    {
+        switch (component)
+        {
+            case "x":
+                vector.x = value;
+                return;
+            case "y":
+                vector.y = value;
+                return;
+            default:
+                throw new InvalidOperationException(
+                    $"Unknown Vector2 component '{component}'."
+                );
         }
     }
 
