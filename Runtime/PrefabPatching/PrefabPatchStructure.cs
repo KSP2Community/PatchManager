@@ -14,11 +14,19 @@ public static class PrefabPatchStructure
 {
     public static string Calculate(GameObject root)
     {
+        var description = Describe(root);
+        return description == null
+            ? null
+            : PrefabPatchJson.Sha256(description);
+    }
+
+    public static string Describe(GameObject root)
+    {
         if (root == null)
             return null;
         var builder = new StringBuilder();
         Append(root.transform, builder);
-        return PrefabPatchJson.Sha256(builder.ToString());
+        return builder.ToString();
     }
 
     public static int[] GetSiblingPath(Transform root, Transform target)
@@ -57,7 +65,7 @@ public static class PrefabPatchStructure
         builder.Append('[')
             .Append(transform.GetSiblingIndex())
             .Append('|')
-            .Append(transform.name)
+            .Append(transform.parent == null ? "<root>" : transform.name)
             .Append('|')
             .Append(transform.gameObject.activeSelf ? '1' : '0');
         foreach (
@@ -67,7 +75,7 @@ public static class PrefabPatchStructure
         )
         {
             builder.Append('|')
-                .Append(component.GetType().AssemblyQualifiedName);
+                .Append(component.GetType().FullName);
         }
 
         builder.Append(']');

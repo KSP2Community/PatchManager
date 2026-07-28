@@ -94,6 +94,7 @@ public sealed class PrefabPatchPrefabIdentity
     public string SourceSerializedFileName;
     public long SourcePathId;
     public string AssetType;
+    public string StructuralDescription;
     public string StructuralFingerprint;
 
     [JsonIgnore]

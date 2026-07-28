@@ -1,19 +1,20 @@
 using UnityEngine;
 
-namespace PatchManager.PrefabPatching;
-
-/// <summary>
-/// Explicit stable ID for a GameObject introduced by a visual prefab patch.
-/// Later patches address it as owning patch ID plus this patch-local ID.
-/// </summary>
-[DisallowMultipleComponent]
-public sealed class PrefabPatchObjectId : MonoBehaviour
+namespace PatchManager.PrefabPatching
 {
-    [SerializeField] private string _id;
-
-    public string Id
+    /// <summary>
+    /// Explicit stable ID for a GameObject introduced by a visual prefab patch.
+    /// Later patches address it as owning patch ID plus this patch-local ID.
+    /// </summary>
+    [DisallowMultipleComponent]
+    public sealed class PrefabPatchObjectId : MonoBehaviour
     {
-        get => _id;
-        set => _id = value;
+        [SerializeField] private string _id;
+
+        public string Id
+        {
+            get => _id;
+            set => _id = value;
+        }
     }
 }
