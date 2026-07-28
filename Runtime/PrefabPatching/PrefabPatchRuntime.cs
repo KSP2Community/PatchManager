@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using PatchManager.Core.Assets;
-using PatchManager.Shared;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -196,7 +194,7 @@ public static class PrefabPatchRuntime
         {
             stopwatch.Stop();
             CurrentMetrics.StartupMilliseconds = stopwatch.ElapsedMilliseconds;
-            Logging.LogError(exception);
+            UnityEngine.Debug.LogException(exception);
             reject(
                 "Patch Manager prefab discovery failed: "
                     + exception.Message
@@ -208,7 +206,8 @@ public static class PrefabPatchRuntime
     /// Adds the public GameObject provider and locator to Patch Manager's
     /// supported KSP AssetProvider interception boundary.
     /// </summary>
-    public static void RegisterResourceProvider()
+    public static UnityEngine.AddressableAssets.ResourceLocators.IResourceLocator
+        RegisterResourceProvider()
     {
         var providers = Addressables.ResourceManager.ResourceProviders;
         if (
@@ -221,7 +220,7 @@ public static class PrefabPatchRuntime
         }
 
         _locator = new PrefabPatchResourceLocator(Entries);
-        Locators.Register(_locator);
+        return _locator;
     }
 
     internal static bool TryProvide(
@@ -339,7 +338,7 @@ public static class PrefabPatchRuntime
             entry.Failed = true;
             entry.Failure = exception;
             failure = exception;
-            Logging.LogError(
+            UnityEngine.Debug.LogError(
                 $"Prefab composition failed for '{address}': {exception}"
             );
             WriteSummary();

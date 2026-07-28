@@ -169,7 +169,7 @@ namespace PatchManager.Core
             }
 
             Locators.Register(new ArchiveResourceLocator());
-            PrefabPatchRuntime.RegisterResourceProvider();
+            Locators.Register(PrefabPatchRuntime.RegisterResourceProvider());
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
                 CacheManager.Inventory.DefinitionCount;
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =
