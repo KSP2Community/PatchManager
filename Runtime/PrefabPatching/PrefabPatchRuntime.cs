@@ -9,6 +9,9 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.Profiling;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using Object = UnityEngine.Object;
 
 namespace PatchManager.PrefabPatching;
@@ -99,6 +102,16 @@ public static class PrefabPatchRuntime
         try
         {
             var manifests = new List<PrefabPatchManifest>(Registered);
+#if UNITY_EDITOR
+            manifests.AddRange(LoadEditorProjectManifests());
+            ResolveDiscoveredManifests(
+                manifests,
+                activeModIds,
+                stopwatch,
+                resolve
+            );
+            return;
+#else
             var locations = FindManifestLocations();
             if (locations.Count > 0)
             {
@@ -166,12 +179,54 @@ public static class PrefabPatchRuntime
                 stopwatch,
                 resolve
             );
+#endif
         }
         catch (Exception exception)
         {
             RejectDiscovery(stopwatch, reject, exception);
         }
     }
+
+#if UNITY_EDITOR
+    private static IEnumerable<PrefabPatchManifest> LoadEditorProjectManifests()
+    {
+        foreach (
+            var path in AssetDatabase
+                .GetAllAssetPaths()
+                .Where(path =>
+                    path.EndsWith(
+                        ".prefabpatch.json",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
+                .OrderBy(path => path, StringComparer.Ordinal)
+        )
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+            if (asset == null)
+                continue;
+
+            PrefabPatchManifest manifest;
+            try
+            {
+                manifest =
+                    PrefabPatchJson.Deserialize<PrefabPatchManifest>(
+                        asset.text
+                    );
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidDataException(
+                    $"Could not parse prefab patch manifest '{path}'.",
+                    exception
+                );
+            }
+
+            if (manifest != null)
+                yield return manifest;
+        }
+    }
+#endif
 
     private static void ResolveDiscoveredManifests(
         IReadOnlyCollection<PrefabPatchManifest> manifests,
