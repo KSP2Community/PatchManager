@@ -48,6 +48,31 @@ namespace PatchManager.Core
         /// </remarks>
         public override void Init()
         {
+            RegisterLoadingActions();
+        }
+
+        [RuntimeInitializeOnLoadMethod(
+            RuntimeInitializeLoadType.AfterAssembliesLoaded
+        )]
+        private static void RestoreLoadingActionsWithoutDomainReload()
+        {
+            // SpaceWarp resets GeneralLoadingActions at SubsystemRegistration.
+            // With domain reload disabled PatchManager's MonoBehaviour and module
+            // instances survive, so Awake/Init do not run again to repopulate it.
+            // AfterAssembliesLoaded runs after that reset and before SpaceWarp
+            // builds the new play session's loading flow.
+            foreach (var module in ModuleManager.Modules)
+            {
+                if (module is CoreModule core)
+                {
+                    core.RegisterLoadingActions();
+                    return;
+                }
+            }
+        }
+
+        private void RegisterLoadingActions()
+        {
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                 () => new FlowAction("Patch Manager: Closing Registration", CloseRegistration));
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
