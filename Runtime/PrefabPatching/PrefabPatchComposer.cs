@@ -170,7 +170,19 @@ public static class PrefabPatchComposer
                 }
 
                 if (immediateDestroy)
+                {
+                    // Runtime composition operates on a session-owned clone,
+                    // never directly on the read-only AssetBundle asset.
                     Object.DestroyImmediate(component);
+                    if (component != null)
+                    {
+                        throw new InvalidOperationException(
+                            $"RemoveComponent operation "
+                                + $"'{operation.OperationId}' did not destroy "
+                                + $"'{operation.Target.ObjectType}'."
+                        );
+                    }
+                }
                 else
                 {
                     Object.Destroy(component);

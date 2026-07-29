@@ -54,6 +54,7 @@ public static class PrefabPatchRuntime
         StringComparer.Ordinal
     );
     private static PrefabPatchResourceLocator _locator;
+    private static GameObject _effectivePrefabRoot;
 
     public static bool RegistrationOpen { get; private set; } = true;
     public static Metrics CurrentMetrics { get; private set; } = new();
@@ -105,91 +106,137 @@ public static class PrefabPatchRuntime
                     locations,
                     null
                 );
-                var assets = manifestHandle.WaitForCompletion();
-                if (manifestHandle.Status != AsyncOperationStatus.Succeeded)
-                {
-                    throw manifestHandle.OperationException
-                        ?? new InvalidOperationException(
-                            "Prefab patch manifest load failed."
-                        );
-                }
-
-                foreach (var asset in assets.Where(value => value != null))
+                manifestHandle.Completed += operation =>
                 {
                     try
                     {
-                        manifests.Add(
-                            PrefabPatchJson.Deserialize<PrefabPatchManifest>(
-                                asset.text
-                            )
+                        if (operation.Status != AsyncOperationStatus.Succeeded)
+                        {
+                            throw operation.OperationException
+                                ?? new InvalidOperationException(
+                                    "Prefab patch manifest load failed."
+                                );
+                        }
+
+                        foreach (
+                            var asset in operation
+                                .Result.Where(value => value != null)
+                        )
+                        {
+                            try
+                            {
+                                manifests.Add(
+                                    PrefabPatchJson.Deserialize<
+                                        PrefabPatchManifest
+                                    >(asset.text)
+                                );
+                            }
+                            catch (Exception exception)
+                            {
+                                throw new InvalidDataException(
+                                    $"Could not parse prefab patch manifest "
+                                        + $"'{asset.name}'.",
+                                    exception
+                                );
+                            }
+                        }
+
+                        ResolveDiscoveredManifests(
+                            manifests,
+                            activeModIds,
+                            stopwatch,
+                            resolve
                         );
                     }
                     catch (Exception exception)
                     {
-                        throw new InvalidDataException(
-                            $"Could not parse prefab patch manifest "
-                                + $"'{asset.name}'.",
-                            exception
-                        );
+                        RejectDiscovery(stopwatch, reject, exception);
                     }
-                }
-
-                Addressables.Release(manifestHandle);
-            }
-
-            CurrentMetrics.DiscoveredManifestCount = manifests.Count;
-            var cache = new PrefabPatchPlanCache(PlanCacheDirectory);
-            Entries.Clear();
-            foreach (
-                var group in manifests
-                    .Where(value => value?.TargetPrefab != null)
-                    .GroupBy(
-                        value => value.TargetPrefab.CanonicalKey,
-                        StringComparer.Ordinal
-                    )
-                    .OrderBy(group => group.Key, StringComparer.Ordinal)
-            )
-            {
-                var result = cache.LoadOrResolve(
-                    group,
-                    activeModIds,
-                    Application.unityVersion,
-                    Application.platform.ToString()
-                );
-                if (result.CacheHit)
-                    CurrentMetrics.CacheHitCount++;
-                else
-                    CurrentMetrics.CacheMissCount++;
-                if (
-                    result.Plan?.TargetPrefab != null
-                    && result.Plan.IsValid
-                )
-                {
-                    Entries[result.Plan.TargetPrefab.Address] = new Entry
+                    finally
                     {
-                        Plan = result.Plan
-                    };
-                }
+                        Addressables.Release(operation);
+                    }
+                };
+                return;
             }
 
-            CurrentMetrics.ResolvedPlanCount = Entries.Count;
-            WriteSummary();
-            stopwatch.Stop();
-            CurrentMetrics.StartupMilliseconds = stopwatch.ElapsedMilliseconds;
-            CurrentMetrics.MemoryAfterBytes =
-                Profiler.GetTotalAllocatedMemoryLong();
-            resolve();
+            ResolveDiscoveredManifests(
+                manifests,
+                activeModIds,
+                stopwatch,
+                resolve
+            );
         }
         catch (Exception exception)
         {
-            stopwatch.Stop();
-            CurrentMetrics.StartupMilliseconds = stopwatch.ElapsedMilliseconds;
-            UnityEngine.Debug.LogException(exception);
-            reject(
-                "Patch Manager prefab discovery failed: "
-                    + exception.Message
-            );
+            RejectDiscovery(stopwatch, reject, exception);
         }
+    }
+
+    private static void ResolveDiscoveredManifests(
+        IReadOnlyCollection<PrefabPatchManifest> manifests,
+        ISet<string> activeModIds,
+        Stopwatch stopwatch,
+        Action resolve
+    )
+    {
+        CurrentMetrics.DiscoveredManifestCount = manifests.Count;
+        var cache = new PrefabPatchPlanCache(PlanCacheDirectory);
+        Entries.Clear();
+        foreach (
+            var group in manifests
+                .Where(value => value?.TargetPrefab != null)
+                .GroupBy(
+                    value => value.TargetPrefab.CanonicalKey,
+                    StringComparer.Ordinal
+                )
+                .OrderBy(group => group.Key, StringComparer.Ordinal)
+        )
+        {
+            var result = cache.LoadOrResolve(
+                group,
+                activeModIds,
+                Application.unityVersion,
+                Application.platform.ToString()
+            );
+            if (result.CacheHit)
+                CurrentMetrics.CacheHitCount++;
+            else
+                CurrentMetrics.CacheMissCount++;
+            if (
+                result.Plan?.TargetPrefab != null
+                && result.Plan.IsValid
+            )
+            {
+                Entries[result.Plan.TargetPrefab.Address] = new Entry
+                {
+                    Plan = result.Plan
+                };
+            }
+        }
+
+        CurrentMetrics.ResolvedPlanCount = Entries.Count;
+        WriteSummary();
+        stopwatch.Stop();
+        CurrentMetrics.StartupMilliseconds = stopwatch.ElapsedMilliseconds;
+        CurrentMetrics.MemoryAfterBytes =
+            Profiler.GetTotalAllocatedMemoryLong();
+        resolve();
+    }
+
+    private static void RejectDiscovery(
+        Stopwatch stopwatch,
+        Action<string> reject,
+        Exception exception
+    )
+    {
+        stopwatch.Stop();
+        CurrentMetrics.StartupMilliseconds = stopwatch.ElapsedMilliseconds;
+        UnityEngine.Debug.LogException(exception);
+        reject(
+            "Patch Manager prefab discovery failed: "
+                + exception.Message
+        );
     }
 
     private static List<IResourceLocation> FindManifestLocations()
@@ -324,14 +371,19 @@ public static class PrefabPatchRuntime
                 entry.References.Add(reference.Address, value);
             }
 
+            var effectivePrefab = CreateEffectivePrefab(stock);
             var result = PrefabPatchComposer.ApplySynchronously(
-                stock,
+                effectivePrefab,
                 entry.Plan,
                 entry.References
             );
             if (!result.Success)
+            {
+                Object.DestroyImmediate(effectivePrefab);
                 throw new InvalidOperationException(result.Failure);
-            entry.EffectivePrefab = stock;
+            }
+
+            entry.EffectivePrefab = effectivePrefab;
             stopwatch.Stop();
             CurrentMetrics.FirstCompositionMilliseconds +=
                 stopwatch.ElapsedMilliseconds;
@@ -345,7 +397,7 @@ public static class PrefabPatchRuntime
                 );
             CurrentMetrics.MemoryAfterBytes =
                 Profiler.GetTotalAllocatedMemoryLong();
-            prefab = stock;
+            prefab = effectivePrefab;
             return true;
         }
         catch (Exception exception)
@@ -360,6 +412,32 @@ public static class PrefabPatchRuntime
             WriteSummary();
             return false;
         }
+    }
+
+    private static GameObject CreateEffectivePrefab(GameObject stock)
+    {
+        if (_effectivePrefabRoot == null)
+        {
+            _effectivePrefabRoot = new GameObject(
+                "PatchManager Effective Prefabs"
+            );
+            _effectivePrefabRoot.hideFlags = HideFlags.HideAndDontSave;
+            _effectivePrefabRoot.SetActive(false);
+            Object.DontDestroyOnLoad(_effectivePrefabRoot);
+        }
+
+        // AssetBundle assets are read-only native objects. Patching them in
+        // place is not stable: Unity can restore removed components before a
+        // later instantiation. Keep an inactive, session-owned template
+        // instead. Parenting under an inactive root prevents prefab
+        // MonoBehaviours from initializing while the patch is composed.
+        var effectivePrefab = Object.Instantiate(
+            stock,
+            _effectivePrefabRoot.transform,
+            false
+        );
+        effectivePrefab.name = stock.name;
+        return effectivePrefab;
     }
 
     private static IResourceLocation ResolveOriginalLocation(
@@ -489,11 +567,42 @@ public static class PrefabPatchRuntime
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStaticState()
     {
+        ReleaseSessionResources();
         Registered.Clear();
         Entries.Clear();
         _locator = null;
         RegistrationOpen = true;
         CurrentMetrics = new Metrics();
+    }
+
+    /// <summary>
+    /// Releases effective prefab templates and the Addressables handles that
+    /// keep their stock assets and referenced objects alive.
+    /// </summary>
+    public static void ReleaseSessionResources()
+    {
+        foreach (var entry in Entries.Values)
+        {
+            if (entry.EffectivePrefab != null)
+                Object.DestroyImmediate(entry.EffectivePrefab);
+            entry.EffectivePrefab = null;
+
+            foreach (var handle in entry.ReferenceHandles)
+            {
+                if (handle.IsValid())
+                    handle.Release();
+            }
+
+            entry.ReferenceHandles.Clear();
+            entry.References.Clear();
+            if (entry.StockHandle.IsValid())
+                entry.StockHandle.Release();
+            entry.StockHandle = default;
+        }
+
+        if (_effectivePrefabRoot != null)
+            Object.DestroyImmediate(_effectivePrefabRoot);
+        _effectivePrefabRoot = null;
     }
 }
 
@@ -521,7 +630,6 @@ internal sealed class PrefabPatchResourceLocator :
         var address = key?.ToString();
         if (
             string.IsNullOrWhiteSpace(address)
-            || !_entries.ContainsKey(address)
             || (
                 type != typeof(object)
                 && type != typeof(Object)
@@ -534,16 +642,88 @@ internal sealed class PrefabPatchResourceLocator :
             return false;
         }
 
-        locations = new IResourceLocation[]
+        if (_entries.ContainsKey(address))
         {
-            new ResourceLocationBase(
-                "prefab-patch:" + address,
-                address,
-                typeof(PrefabPatchResourceProvider).FullName,
-                typeof(GameObject)
+            locations = new IResourceLocation[] { CreatePatchLocation(address) };
+            return true;
+        }
+
+        var resolved = new List<IResourceLocation>();
+        var identities = new HashSet<string>(StringComparer.Ordinal);
+        var replacedAny = false;
+        foreach (var locator in Addressables.ResourceLocators)
+        {
+            if (
+                !locator.Locate(key, typeof(GameObject), out var sourceLocations)
+                || sourceLocations == null
             )
-        };
-        return true;
+                continue;
+
+            foreach (var sourceLocation in sourceLocations)
+            {
+                var sourceAddress = sourceLocation?.PrimaryKey;
+                IResourceLocation resolvedLocation = sourceLocation;
+                if (
+                    !string.IsNullOrWhiteSpace(sourceAddress)
+                    && _entries.ContainsKey(sourceAddress)
+                )
+                {
+                    resolvedLocation = CreatePatchLocation(sourceAddress);
+                    replacedAny = true;
+                }
+
+                if (
+                    resolvedLocation != null
+                    && identities.Add(GetLocationIdentity(resolvedLocation))
+                )
+                    resolved.Add(resolvedLocation);
+            }
+        }
+
+        locations = replacedAny
+            ? resolved
+            : Array.Empty<IResourceLocation>();
+        return replacedAny;
+    }
+
+    private static IResourceLocation CreatePatchLocation(string address)
+    {
+        return new ResourceLocationBase(
+            "prefab-patch:" + address,
+            address,
+            typeof(PrefabPatchResourceProvider).FullName,
+            typeof(GameObject)
+        );
+    }
+
+    private static string GetLocationIdentity(IResourceLocation location)
+    {
+        if (
+            string.Equals(
+                location.ProviderId,
+                typeof(PrefabPatchResourceProvider).FullName,
+                StringComparison.Ordinal
+            )
+        )
+            return "patch|" + location.PrimaryKey;
+
+        var dependencies = location.Dependencies == null
+            ? string.Empty
+            : string.Join(
+                ";",
+                location.Dependencies.Select(dependency =>
+                    (dependency?.PrimaryKey ?? string.Empty)
+                    + "|"
+                    + (dependency?.InternalId ?? string.Empty)
+                )
+            );
+        return (location.PrimaryKey ?? string.Empty)
+            + "|"
+            + (location.InternalId ?? string.Empty)
+            + "|"
+            + (location.ResourceType?.AssemblyQualifiedName ?? string.Empty)
+            + "|"
+            + dependencies;
     }
 }
 

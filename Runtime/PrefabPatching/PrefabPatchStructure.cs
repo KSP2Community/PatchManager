@@ -25,7 +25,7 @@ public static class PrefabPatchStructure
         if (root == null)
             return null;
         var builder = new StringBuilder();
-        Append(root.transform, builder);
+        Append(root.transform, builder, true);
         return builder.ToString();
     }
 
@@ -60,12 +60,16 @@ public static class PrefabPatchStructure
         return current;
     }
 
-    private static void Append(Transform transform, StringBuilder builder)
+    private static void Append(
+        Transform transform,
+        StringBuilder builder,
+        bool isRoot
+    )
     {
         builder.Append('[')
-            .Append(transform.GetSiblingIndex())
+            .Append(isRoot ? 0 : transform.GetSiblingIndex())
             .Append('|')
-            .Append(transform.parent == null ? "<root>" : transform.name)
+            .Append(isRoot ? "<root>" : transform.name)
             .Append('|')
             .Append(transform.gameObject.activeSelf ? '1' : '0');
         foreach (
@@ -80,6 +84,6 @@ public static class PrefabPatchStructure
 
         builder.Append(']');
         for (var i = 0; i < transform.childCount; i++)
-            Append(transform.GetChild(i), builder);
+            Append(transform.GetChild(i), builder, false);
     }
 }
