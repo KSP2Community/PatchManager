@@ -98,17 +98,8 @@ public static class PrefabPatchRuntime
         try
         {
             var manifests = new List<PrefabPatchManifest>(Registered);
-            var locationsHandle =
-                Addressables.LoadResourceLocationsAsync(
-                    PrefabPatchSchema.AddressablesLabel,
-                    typeof(TextAsset)
-                );
-            var locations = locationsHandle.WaitForCompletion();
-            if (
-                locationsHandle.Status == AsyncOperationStatus.Succeeded
-                && locations != null
-                && locations.Count > 0
-            )
+            var locations = FindManifestLocations();
+            if (locations.Count > 0)
             {
                 var manifestHandle = Addressables.LoadAssetsAsync<TextAsset>(
                     locations,
@@ -146,7 +137,6 @@ public static class PrefabPatchRuntime
                 Addressables.Release(manifestHandle);
             }
 
-            Addressables.Release(locationsHandle);
             CurrentMetrics.DiscoveredManifestCount = manifests.Count;
             var cache = new PrefabPatchPlanCache(PlanCacheDirectory);
             Entries.Clear();
@@ -200,6 +190,32 @@ public static class PrefabPatchRuntime
                     + exception.Message
             );
         }
+    }
+
+    private static List<IResourceLocation> FindManifestLocations()
+    {
+        return Addressables.ResourceLocators
+            .SelectMany(locator =>
+                locator.Locate(
+                    PrefabPatchSchema.AddressablesLabel,
+                    typeof(TextAsset),
+                    out var locations
+                )
+                    ? locations
+                    : Array.Empty<IResourceLocation>()
+            )
+            .Where(location => location != null)
+            .GroupBy(
+                location =>
+                    $"{location.ProviderId}\0{location.InternalId}\0"
+                    + $"{location.PrimaryKey}\0"
+                    + $"{location.ResourceType?.AssemblyQualifiedName}",
+                StringComparer.Ordinal
+            )
+            .Select(group => group.First())
+            .OrderBy(location => location.PrimaryKey, StringComparer.Ordinal)
+            .ThenBy(location => location.InternalId, StringComparer.Ordinal)
+            .ToList();
     }
 
     /// <summary>
