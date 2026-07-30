@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -15,6 +17,28 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public static class PrefabPatchComposer
 {
+    private sealed class PendingReference
+    {
+        public Object Target;
+        public string PropertyPath;
+        public PrefabPatchObjectReference Reference;
+        public string OperationId;
+    }
+
+    private sealed class AnimationCurvePayload
+    {
+        public Keyframe[] Keys;
+        public int PreWrapMode;
+        public int PostWrapMode;
+    }
+
+    private sealed class GradientPayload
+    {
+        public GradientColorKey[] ColorKeys;
+        public GradientAlphaKey[] AlphaKeys;
+        public int Mode;
+    }
+
     public sealed class Result
     {
         public bool Success;
@@ -22,6 +46,9 @@ public static class PrefabPatchComposer
         public long ElapsedMilliseconds;
         public int AppliedOperationCount;
         public Dictionary<string, GameObject> PatchOwnedObjects = new(
+            StringComparer.Ordinal
+        );
+        public Dictionary<string, Component> PatchOwnedComponents = new(
             StringComparer.Ordinal
         );
     }
@@ -34,6 +61,9 @@ public static class PrefabPatchComposer
     {
         var stopwatch = Stopwatch.StartNew();
         var result = new Result();
+        Transform originalParent = null;
+        var originalSiblingIndex = 0;
+        GameObject safetyRoot = null;
         try
         {
             if (prefab == null)
@@ -63,7 +93,19 @@ public static class PrefabPatchComposer
                 );
             }
 
+            if (prefab.activeInHierarchy)
+            {
+                originalParent = prefab.transform.parent;
+                originalSiblingIndex = prefab.transform.GetSiblingIndex();
+                safetyRoot = new GameObject(
+                    "PatchManager Composition Root"
+                );
+                safetyRoot.hideFlags = HideFlags.HideAndDontSave;
+                safetyRoot.SetActive(false);
+                prefab.transform.SetParent(safetyRoot.transform, false);
+            }
             var unusedDeferredDestroy = false;
+            var pendingReferences = new List<PendingReference>();
             foreach (var operation in plan.Operations)
             {
                 ApplyOne(
@@ -71,10 +113,37 @@ public static class PrefabPatchComposer
                     operation,
                     references,
                     result.PatchOwnedObjects,
+                    result.PatchOwnedComponents,
+                    pendingReferences,
                     ref unusedDeferredDestroy,
                     true
                 );
                 result.AppliedOperationCount++;
+            }
+
+            foreach (var pending in pendingReferences)
+            {
+                var reference = ResolveReference(
+                    prefab,
+                    pending.Reference,
+                    references,
+                    result.PatchOwnedObjects,
+                    result.PatchOwnedComponents
+                );
+                if (reference == null && pending.Reference != null)
+                {
+                    throw new InvalidOperationException(
+                        $"Operation '{pending.OperationId}' could not resolve "
+                            + $"object reference "
+                            + $"'{DescribeReference(pending.Reference)}'."
+                    );
+                }
+
+                SetRawValue(
+                    pending.Target,
+                    pending.PropertyPath,
+                    reference
+                );
             }
 
             result.Success = true;
@@ -85,6 +154,16 @@ public static class PrefabPatchComposer
         }
         finally
         {
+            if (safetyRoot != null)
+            {
+                if (prefab != null)
+                {
+                    prefab.transform.SetParent(originalParent, false);
+                    if (originalParent != null)
+                        prefab.transform.SetSiblingIndex(originalSiblingIndex);
+                }
+                Object.DestroyImmediate(safetyRoot);
+            }
             stopwatch.Stop();
             result.ElapsedMilliseconds = stopwatch.ElapsedMilliseconds;
         }
@@ -97,6 +176,8 @@ public static class PrefabPatchComposer
         PrefabPatchOperation operation,
         IReadOnlyDictionary<string, Object> references,
         IDictionary<string, GameObject> patchOwned,
+        IDictionary<string, Component> patchComponents,
+        ICollection<PendingReference> pendingReferences,
         ref bool deferredDestroy,
         bool immediateDestroy
     )
@@ -105,7 +186,14 @@ public static class PrefabPatchComposer
         {
             var parentObject = operation.Target == null
                 ? root
-                : AsGameObject(Resolve(root, operation.Target, patchOwned));
+                : AsGameObject(
+                    Resolve(
+                        root,
+                        operation.Target,
+                        patchOwned,
+                        patchComponents
+                    )
+                );
             if (parentObject == null)
                 throw MissingTarget(operation);
             CreateFragment(
@@ -113,12 +201,20 @@ public static class PrefabPatchComposer
                 operation.AddedObject,
                 parentObject.transform,
                 references,
-                patchOwned
+                patchOwned,
+                patchComponents,
+                pendingReferences,
+                operation.OperationId
             );
             return;
         }
 
-        var target = Resolve(root, operation.Target, patchOwned);
+        var target = Resolve(
+            root,
+            operation.Target,
+            patchOwned,
+            patchComponents
+        );
         if (target == null)
             throw MissingTarget(operation);
         switch (operation.Kind)
@@ -127,23 +223,20 @@ public static class PrefabPatchComposer
                 SetValue(target, operation.PropertyPath, operation.Value);
                 return;
             case PrefabPatchOperationKind.SetObjectReference:
-                if (
-                    operation.ObjectReference == null
-                    || !references.TryGetValue(
-                        operation.ObjectReference.Address,
-                        out var reference
-                    )
-                    || reference == null
-                )
-                {
+                if (operation.ObjectReference == null)
                     throw new InvalidOperationException(
-                        $"Operation '{operation.OperationId}' could not resolve "
-                            + $"object reference "
-                            + $"'{operation.ObjectReference?.Address}'."
+                        $"Operation '{operation.OperationId}' has no object "
+                            + "reference payload."
                     );
-                }
-
-                SetRawValue(target, operation.PropertyPath, reference);
+                pendingReferences.Add(
+                    new PendingReference
+                    {
+                        Target = target,
+                        PropertyPath = operation.PropertyPath,
+                        Reference = operation.ObjectReference,
+                        OperationId = operation.OperationId
+                    }
+                );
                 return;
             case PrefabPatchOperationKind.SetActive:
                 AsGameObject(target)?.SetActive(
@@ -157,7 +250,12 @@ public static class PrefabPatchComposer
                 AddComponent(
                     AsGameObject(target),
                     operation.AddedComponent,
-                    references
+                    references,
+                    patchOwned,
+                    patchComponents,
+                    pendingReferences,
+                    operation.PatchId,
+                    operation.OperationId
                 );
                 return;
             case PrefabPatchOperationKind.RemoveComponent:
@@ -200,9 +298,22 @@ public static class PrefabPatchComposer
     private static Object Resolve(
         GameObject root,
         PrefabPatchObjectTarget target,
-        IDictionary<string, GameObject> patchOwned
+        IDictionary<string, GameObject> patchOwned,
+        IDictionary<string, Component> patchComponents
     )
     {
+        if (target.Kind == PrefabPatchTargetKind.PatchComponent)
+        {
+            var componentKey =
+                $"{target.OwnerPatchId}:{target.ComponentId}";
+            return patchComponents.TryGetValue(
+                componentKey,
+                out var patchComponent
+            )
+                ? patchComponent
+                : null;
+        }
+
         Transform transform;
         if (target.Kind == PrefabPatchTargetKind.Stock)
         {
@@ -245,7 +356,10 @@ public static class PrefabPatchComposer
         PrefabPatchObjectFragment fragment,
         Transform parent,
         IReadOnlyDictionary<string, Object> references,
-        IDictionary<string, GameObject> patchOwned
+        IDictionary<string, GameObject> patchOwned,
+        IDictionary<string, Component> patchComponents,
+        ICollection<PendingReference> pendingReferences,
+        string operationId
     )
     {
         if (fragment == null || string.IsNullOrWhiteSpace(fragment.ObjectId))
@@ -258,8 +372,33 @@ public static class PrefabPatchComposer
                 $"Patch-owned object '{key}' already exists."
             );
 
-        var gameObject = new GameObject(fragment.Name ?? fragment.ObjectId);
+        var transformType = ResolveType(fragment.TransformType);
+        var gameObject =
+            transformType != null
+            && typeof(RectTransform).IsAssignableFrom(transformType)
+                ? new GameObject(
+                    fragment.Name ?? fragment.ObjectId,
+                    typeof(RectTransform)
+                )
+                : new GameObject(fragment.Name ?? fragment.ObjectId);
         gameObject.transform.SetParent(parent, false);
+        gameObject.layer = fragment.Layer;
+        if (!string.IsNullOrWhiteSpace(fragment.Tag))
+        {
+            try
+            {
+                gameObject.tag = fragment.Tag;
+            }
+            catch (UnityException exception)
+            {
+                throw new InvalidOperationException(
+                    $"Patch-owned object '{key}' uses unknown tag "
+                        + $"'{fragment.Tag}'.",
+                    exception
+                );
+            }
+        }
+        gameObject.isStatic = fragment.IsStatic;
         gameObject.transform.localPosition = ToVector3(
             fragment.LocalPosition,
             Vector3.zero
@@ -272,78 +411,199 @@ public static class PrefabPatchComposer
             fragment.LocalScale,
             Vector3.one
         );
+        if (gameObject.transform is RectTransform rectTransform)
+        {
+            rectTransform.anchorMin = ToVector2(
+                fragment.AnchorMin,
+                rectTransform.anchorMin
+            );
+            rectTransform.anchorMax = ToVector2(
+                fragment.AnchorMax,
+                rectTransform.anchorMax
+            );
+            rectTransform.anchoredPosition = ToVector2(
+                fragment.AnchoredPosition,
+                rectTransform.anchoredPosition
+            );
+            rectTransform.sizeDelta = ToVector2(
+                fragment.SizeDelta,
+                rectTransform.sizeDelta
+            );
+            rectTransform.pivot = ToVector2(
+                fragment.Pivot,
+                rectTransform.pivot
+            );
+        }
         gameObject.SetActive(fragment.Active);
         gameObject.AddComponent<PrefabPatchObjectId>().Id = fragment.ObjectId;
         patchOwned.Add(key, gameObject);
         foreach (var component in fragment.Components)
-            AddComponent(gameObject, component, references);
+            AddComponent(
+                gameObject,
+                component,
+                references,
+                patchOwned,
+                patchComponents,
+                pendingReferences,
+                patchId,
+                operationId
+            );
         foreach (var child in fragment.Children)
-            CreateFragment(patchId, child, gameObject.transform, references, patchOwned);
+            CreateFragment(
+                patchId,
+                child,
+                gameObject.transform,
+                references,
+                patchOwned,
+                patchComponents,
+                pendingReferences,
+                operationId
+            );
         return gameObject;
     }
 
     private static Component AddComponent(
         GameObject target,
         PrefabPatchComponentFragment fragment,
-        IReadOnlyDictionary<string, Object> references
+        IReadOnlyDictionary<string, Object> references,
+        IDictionary<string, GameObject> patchOwned,
+        IDictionary<string, Component> patchComponents,
+        ICollection<PendingReference> pendingReferences,
+        string patchId,
+        string operationId
     )
     {
         if (target == null || fragment == null)
             throw new InvalidOperationException(
                 "An added component has no target or payload."
             );
-        switch (fragment.Kind)
+        if (string.IsNullOrWhiteSpace(fragment.ComponentType))
+            throw new InvalidOperationException(
+                "An added component has no assembly-qualified component type."
+            );
+        var type = ResolveType(fragment.ComponentType);
+        if (type == null || !typeof(Component).IsAssignableFrom(type))
         {
-            case PrefabPatchComponentKind.BoxCollider:
-            {
-                var value = target.AddComponent<BoxCollider>();
-                value.enabled = fragment.Enabled;
-                value.center = ToVector3(fragment.Center, Vector3.zero);
-                value.size = ToVector3(fragment.Size, Vector3.one);
-                value.isTrigger = fragment.IsTrigger;
-                return value;
-            }
-            case PrefabPatchComponentKind.SphereCollider:
-            {
-                var value = target.AddComponent<SphereCollider>();
-                value.enabled = fragment.Enabled;
-                value.center = ToVector3(fragment.Center, Vector3.zero);
-                value.radius = (float)fragment.Radius;
-                value.isTrigger = fragment.IsTrigger;
-                return value;
-            }
-            case PrefabPatchComponentKind.MeshFilter:
-            {
-                var value = target.AddComponent<MeshFilter>();
-                if (fragment.Mesh != null)
+            throw new InvalidOperationException(
+                $"Added component type '{fragment.ComponentType}' could "
+                    + "not be resolved as a Unity Component."
+            );
+        }
+        if (typeof(Transform).IsAssignableFrom(type))
+        {
+            throw new InvalidOperationException(
+                $"Transform type '{fragment.ComponentType}' must be "
+                    + "declared by the object fragment, not added as a "
+                    + "component."
+            );
+        }
+
+        var component = target.AddComponent(type);
+        foreach (var value in fragment.Values ?? new())
+        {
+            if (
+                value == null
+                || string.IsNullOrWhiteSpace(value.PropertyPath)
+            )
+                continue;
+            SetValue(component, value.PropertyPath, value.Value);
+        }
+        QueueComponentReferences(
+            component,
+            fragment,
+            pendingReferences,
+            operationId
+        );
+        RegisterPatchComponent(
+            patchId,
+            fragment,
+            component,
+            patchComponents
+        );
+        return component;
+    }
+
+    private static void QueueComponentReferences(
+        Component component,
+        PrefabPatchComponentFragment fragment,
+        ICollection<PendingReference> pendingReferences,
+        string operationId
+    )
+    {
+        foreach (var reference in fragment.References ?? new())
+        {
+            if (
+                reference == null
+                || string.IsNullOrWhiteSpace(reference.PropertyPath)
+            )
+                continue;
+            pendingReferences.Add(
+                new PendingReference
                 {
-                    if (
-                        !references.TryGetValue(
-                            fragment.Mesh.Address,
-                            out var reference
-                        )
-                        || reference is not Mesh mesh
-                    )
-                    {
-                        throw new InvalidOperationException(
-                            $"Could not resolve Mesh reference "
-                                + $"'{fragment.Mesh.Address}'."
-                        );
-                    }
-
-                    value.sharedMesh = mesh;
+                    Target = component,
+                    PropertyPath = reference.PropertyPath,
+                    Reference = reference.Reference,
+                    OperationId = operationId
                 }
-
-                return value;
-            }
-            case PrefabPatchComponentKind.MeshRenderer:
-                return target.AddComponent<MeshRenderer>();
-            default:
-                throw new NotSupportedException(
-                    $"Added component kind '{fragment.Kind}' is unsupported."
-                );
+            );
         }
     }
+
+    private static void RegisterPatchComponent(
+        string patchId,
+        PrefabPatchComponentFragment fragment,
+        Component component,
+        IDictionary<string, Component> patchComponents
+    )
+    {
+        if (string.IsNullOrWhiteSpace(fragment.ComponentId))
+            return;
+        var key = $"{patchId}:{fragment.ComponentId}";
+        if (patchComponents.ContainsKey(key))
+            throw new InvalidOperationException(
+                $"Patch-owned component '{key}' already exists."
+            );
+        patchComponents.Add(key, component);
+    }
+
+    private static Object ResolveReference(
+        GameObject root,
+        PrefabPatchObjectReference reference,
+        IReadOnlyDictionary<string, Object> references,
+        IDictionary<string, GameObject> patchOwned,
+        IDictionary<string, Component> patchComponents
+    )
+    {
+        if (reference == null)
+            return null;
+        if (
+            reference.Kind == PrefabPatchObjectReferenceKind.Target
+            || reference.Target != null
+        )
+        {
+            return Resolve(
+                root,
+                reference.Target,
+                patchOwned,
+                patchComponents
+            );
+        }
+
+        return !string.IsNullOrWhiteSpace(reference.Address)
+            && references.TryGetValue(reference.Address, out var value)
+                ? value
+                : null;
+    }
+
+    private static string DescribeReference(
+        PrefabPatchObjectReference reference
+    ) =>
+        reference == null
+            ? "<null>"
+            : reference.Kind == PrefabPatchObjectReferenceKind.Target
+                || reference.Target != null
+                ? reference.Target?.CanonicalKey ?? "<missing-target>"
+                : reference.Address ?? "<missing-address>";
 
     private static void SetValue(
         Object target,
@@ -355,6 +615,15 @@ public static class PrefabPatchComposer
             throw new InvalidOperationException(
                 $"Property '{propertyPath}' has no typed value."
             );
+        if (value.Kind == PrefabPatchValueKind.ArraySize)
+        {
+            SetCollectionSize(
+                target,
+                propertyPath,
+                checked((int)value.Integer)
+            );
+            return;
+        }
         SetRawValue(target, propertyPath, ConvertValue(value));
     }
 
@@ -544,28 +813,280 @@ public static class PrefabPatchComposer
         object value
     )
     {
-        var segments = path.Split('.');
+        var segments = ParsePath(path);
         SetMemberRecursive(root, segments, 0, value);
+    }
+
+    private static void SetCollectionSize(
+        object root,
+        string propertyPath,
+        int size
+    )
+    {
+        const string suffix = ".Array.size";
+        if (
+            string.IsNullOrWhiteSpace(propertyPath)
+            || !propertyPath.EndsWith(suffix, StringComparison.Ordinal)
+        )
+        {
+            throw new InvalidOperationException(
+                $"Collection-size path '{propertyPath}' does not end in "
+                    + $"'{suffix}'."
+            );
+        }
+        if (size < 0)
+            throw new ArgumentOutOfRangeException(nameof(size));
+        var collectionPath = propertyPath.Substring(
+            0,
+            propertyPath.Length - suffix.Length
+        );
+        ResizeCollectionRecursive(
+            root,
+            ParsePath(collectionPath),
+            0,
+            size
+        );
+    }
+
+    private static object ResizeCollectionRecursive(
+        object current,
+        IReadOnlyList<MemberPathSegment> segments,
+        int index,
+        int size
+    )
+    {
+        if (current == null)
+            throw new InvalidOperationException(
+                "Cannot resize a collection through a null serialized value."
+            );
+        var segment = segments[index];
+        var member = FindMember(current.GetType(), segment.Name)
+            ?? throw new MissingMemberException(
+                current.GetType().FullName,
+                segment.Name
+            );
+        var memberType = GetMemberType(member);
+        var memberValue = GetMemberValue(member, current);
+        if (segment.HasIndex)
+        {
+            if (memberValue is not IList list)
+                throw new InvalidOperationException(
+                    $"Member '{segment.Name}' is not an indexed collection."
+                );
+            var element = list[segment.Index];
+            var updated = ResizeCollectionRecursive(
+                element,
+                segments,
+                index + 1,
+                size
+            );
+            var elementType = GetCollectionElementType(memberType);
+            if (elementType.IsValueType)
+                list[segment.Index] = updated;
+            return current;
+        }
+
+        if (index < segments.Count - 1)
+        {
+            var updated = ResizeCollectionRecursive(
+                memberValue,
+                segments,
+                index + 1,
+                size
+            );
+            if (memberType.IsValueType)
+                SetMemberValue(member, current, updated);
+            return current;
+        }
+
+        if (memberType.IsArray)
+        {
+            var elementType =
+                memberType.GetElementType() ?? typeof(object);
+            var previous = memberValue as Array;
+            var replacement = Array.CreateInstance(elementType, size);
+            if (previous != null)
+            {
+                Array.Copy(
+                    previous,
+                    replacement,
+                    Math.Min(previous.Length, size)
+                );
+            }
+            for (
+                var itemIndex = previous?.Length ?? 0;
+                itemIndex < size;
+                itemIndex++
+            )
+            {
+                replacement.SetValue(
+                    CreateCollectionElement(elementType),
+                    itemIndex
+                );
+            }
+            SetMemberValue(member, current, replacement);
+            return current;
+        }
+
+        if (memberValue is not IList mutableList)
+        {
+            if (
+                memberType.IsInterface
+                || memberType.IsAbstract
+            )
+            {
+                throw new InvalidOperationException(
+                    $"Collection member '{segment.Name}' of type "
+                        + $"'{memberType.FullName}' is null and cannot be "
+                        + "constructed."
+                );
+            }
+            mutableList = (IList)Activator.CreateInstance(memberType);
+            SetMemberValue(member, current, mutableList);
+        }
+        var itemType = GetCollectionElementType(memberType);
+        while (mutableList.Count > size)
+            mutableList.RemoveAt(mutableList.Count - 1);
+        while (mutableList.Count < size)
+            mutableList.Add(CreateCollectionElement(itemType));
+        return current;
+    }
+
+    private static object CreateCollectionElement(Type itemType)
+    {
+        if (
+            itemType == typeof(string)
+            || itemType.IsAbstract
+            || itemType.IsInterface
+        )
+            return null;
+        try
+        {
+            return Activator.CreateInstance(itemType);
+        }
+        catch (MissingMethodException)
+        {
+            return System.Runtime.Serialization.FormatterServices
+                .GetUninitializedObject(itemType);
+        }
+    }
+
+    private readonly struct MemberPathSegment
+    {
+        public readonly string Name;
+        public readonly int Index;
+        public readonly bool HasIndex;
+
+        public MemberPathSegment(string name, int index, bool hasIndex)
+        {
+            Name = name;
+            Index = index;
+            HasIndex = hasIndex;
+        }
+
+        public override string ToString() =>
+            HasIndex ? $"{Name}[{Index}]" : Name;
+    }
+
+    private static IReadOnlyList<MemberPathSegment> ParsePath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException(
+                "A serialized property path is required.",
+                nameof(path)
+            );
+        var normalized = path.Replace(".Array.data[", "[");
+        var result = new List<MemberPathSegment>();
+        foreach (var raw in normalized.Split('.'))
+        {
+            var bracket = raw.LastIndexOf('[');
+            if (
+                bracket > 0
+                && raw.EndsWith("]", StringComparison.Ordinal)
+                && int.TryParse(
+                    raw.Substring(bracket + 1, raw.Length - bracket - 2),
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out var index
+                )
+            )
+            {
+                result.Add(
+                    new MemberPathSegment(
+                        raw.Substring(0, bracket),
+                        index,
+                        true
+                    )
+                );
+            }
+            else
+            {
+                result.Add(new MemberPathSegment(raw, 0, false));
+            }
+        }
+
+        return result;
     }
 
     private static object SetMemberRecursive(
         object current,
-        IReadOnlyList<string> segments,
+        IReadOnlyList<MemberPathSegment> segments,
         int index,
         object value
     )
     {
         if (current == null)
             throw new InvalidOperationException(
-                $"Cannot traverse null while setting '{string.Join(".", segments)}'."
+                $"Cannot traverse null while setting "
+                    + $"'{string.Join(".", segments)}'."
             );
-        var member = FindMember(current.GetType(), segments[index]);
+        var segment = segments[index];
+        var member = FindMember(current.GetType(), segment.Name);
         if (member == null)
             throw new MissingMemberException(
                 current.GetType().FullName,
-                segments[index]
+                segment.Name
             );
         var memberType = GetMemberType(member);
+        var memberValue = GetMemberValue(member, current);
+        if (segment.HasIndex)
+        {
+            if (memberValue is not IList list)
+            {
+                throw new InvalidOperationException(
+                    $"Member '{segment.Name}' on "
+                        + $"'{current.GetType().FullName}' is not an indexed "
+                        + "serialized collection."
+                );
+            }
+            if (segment.Index < 0 || segment.Index >= list.Count)
+            {
+                throw new IndexOutOfRangeException(
+                    $"Serialized collection '{segment.Name}' has "
+                        + $"{list.Count} item(s), but index {segment.Index} "
+                        + "was requested."
+                );
+            }
+
+            var elementType = GetCollectionElementType(memberType);
+            if (index == segments.Count - 1)
+            {
+                list[segment.Index] = ConvertForType(value, elementType);
+                return current;
+            }
+
+            var element = list[segment.Index];
+            var updatedElement = SetMemberRecursive(
+                element,
+                segments,
+                index + 1,
+                value
+            );
+            if (elementType.IsValueType)
+                list[segment.Index] = updatedElement;
+            return current;
+        }
+
         if (index == segments.Count - 1)
         {
             var converted = ConvertForType(value, memberType);
@@ -573,9 +1094,8 @@ public static class PrefabPatchComposer
             return current;
         }
 
-        var child = GetMemberValue(member, current);
         var updatedChild = SetMemberRecursive(
-            child,
+            memberValue,
             segments,
             index + 1,
             value
@@ -583,6 +1103,15 @@ public static class PrefabPatchComposer
         if (memberType.IsValueType)
             SetMemberValue(member, current, updatedChild);
         return current;
+    }
+
+    private static Type GetCollectionElementType(Type collectionType)
+    {
+        if (collectionType.IsArray)
+            return collectionType.GetElementType() ?? typeof(object);
+        if (collectionType.IsGenericType)
+            return collectionType.GetGenericArguments()[0];
+        return typeof(object);
     }
 
     private static MemberInfo FindMember(Type type, string name)
@@ -599,6 +1128,36 @@ public static class PrefabPatchComposer
             var property = current.GetProperty(name, flags);
             if (property != null && property.CanRead && property.CanWrite)
                 return property;
+        }
+
+        if (
+            name.StartsWith("m_", StringComparison.Ordinal)
+            && name.Length > 2
+        )
+        {
+            var serializedName =
+                char.ToLowerInvariant(name[2]) + name.Substring(3);
+            var property = type.GetProperty(serializedName, flags);
+            if (property != null && property.CanRead && property.CanWrite)
+                return property;
+
+            var alias = name switch
+            {
+                "m_Mesh" => "sharedMesh",
+                "m_Material" => "sharedMaterial",
+                "m_Materials" => "sharedMaterials",
+                _ => null
+            };
+            if (alias != null)
+            {
+                property = type.GetProperty(alias, flags);
+                if (
+                    property != null
+                    && property.CanRead
+                    && property.CanWrite
+                )
+                    return property;
+            }
         }
 
         return null;
@@ -628,6 +1187,34 @@ public static class PrefabPatchComposer
 
     private static object ConvertForType(object value, Type targetType)
     {
+        if (value is PrefabPatchValue patchValue)
+        {
+            if (
+                patchValue.Kind
+                == PrefabPatchValueKind.ManagedReference
+            )
+            {
+                var concreteType = ResolveType(
+                    patchValue.SerializedType
+                );
+                if (
+                    concreteType == null
+                    || !targetType.IsAssignableFrom(concreteType)
+                )
+                {
+                    throw new InvalidOperationException(
+                        $"Managed-reference type "
+                            + $"'{patchValue.SerializedType}' is not "
+                            + $"assignable to '{targetType.FullName}'."
+                    );
+                }
+                return CreateCollectionElement(concreteType);
+            }
+            if (patchValue.Kind != PrefabPatchValueKind.Json)
+                value = ConvertValue(patchValue);
+            else
+                return DeserializeJsonValue(patchValue, targetType);
+        }
         if (value == null || targetType.IsInstanceOfType(value))
             return value;
         if (targetType.IsEnum)
@@ -636,6 +1223,56 @@ public static class PrefabPatchComposer
             value,
             targetType,
             CultureInfo.InvariantCulture
+        );
+    }
+
+    private static object DeserializeJsonValue(
+        PrefabPatchValue value,
+        Type targetType
+    )
+    {
+        if (targetType == typeof(AnimationCurve))
+        {
+            var payload = JsonConvert.DeserializeObject<
+                AnimationCurvePayload
+            >(value.String, PrefabPatchJson.Settings);
+            var curve = new AnimationCurve(
+                payload?.Keys ?? Array.Empty<Keyframe>()
+            )
+            {
+                preWrapMode =
+                    (WrapMode)(payload?.PreWrapMode ?? (int)WrapMode.Default),
+                postWrapMode =
+                    (WrapMode)(payload?.PostWrapMode ?? (int)WrapMode.Default)
+            };
+            return curve;
+        }
+        if (targetType == typeof(Gradient))
+        {
+            var payload = JsonConvert.DeserializeObject<GradientPayload>(
+                value.String,
+                PrefabPatchJson.Settings
+            );
+            var gradient = new Gradient
+            {
+                mode = (GradientMode)(
+                    payload?.Mode ?? (int)GradientMode.Blend
+                )
+            };
+            gradient.SetKeys(
+                payload?.ColorKeys ?? Array.Empty<GradientColorKey>(),
+                payload?.AlphaKeys ?? Array.Empty<GradientAlphaKey>()
+            );
+            return gradient;
+        }
+        if (targetType == typeof(Hash128))
+            return Hash128.Parse(
+                JsonConvert.DeserializeObject<string>(value.String)
+            );
+        return JsonConvert.DeserializeObject(
+            value.String ?? "null",
+            targetType,
+            PrefabPatchJson.Settings
         );
     }
 
@@ -671,6 +1308,7 @@ public static class PrefabPatchComposer
                     (float)value.Z,
                     (float)value.W
                 ),
+            PrefabPatchValueKind.Json => value,
             _ => throw new NotSupportedException(
                 $"Typed value kind '{value.Kind}' is unsupported."
             )
@@ -683,6 +1321,14 @@ public static class PrefabPatchComposer
         value == null
             ? fallback
             : new Vector3((float)value.X, (float)value.Y, (float)value.Z);
+
+    private static Vector2 ToVector2(
+        PrefabPatchValue value,
+        Vector2 fallback
+    ) =>
+        value == null
+            ? fallback
+            : new Vector2((float)value.X, (float)value.Y);
 
     private static Quaternion ToQuaternion(
         PrefabPatchValue value,

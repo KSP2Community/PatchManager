@@ -398,7 +398,13 @@ public static class PrefabPatchRuntime
             foreach (
                 var reference in entry.Plan.Operations
                     .SelectMany(GetReferences)
-                    .Where(value => value != null)
+                    .Where(
+                        value =>
+                            value != null
+                            && value.Kind
+                            == PrefabPatchObjectReferenceKind.Addressable
+                            && !string.IsNullOrWhiteSpace(value.Address)
+                    )
                     .GroupBy(value => value.Address, StringComparer.Ordinal)
                     .Select(group => group.First())
                     .OrderBy(value => value.Address, StringComparer.Ordinal)
@@ -549,8 +555,14 @@ public static class PrefabPatchRuntime
     {
         if (operation.ObjectReference != null)
             yield return operation.ObjectReference;
-        if (operation.AddedComponent?.Mesh != null)
-            yield return operation.AddedComponent.Mesh;
+        foreach (
+            var reference in operation.AddedComponent?.References
+                ?? Enumerable.Empty<PrefabPatchSerializedReference>()
+        )
+        {
+            if (reference?.Reference != null)
+                yield return reference.Reference;
+        }
         if (operation.AddedObject == null)
             yield break;
         foreach (var reference in GetReferences(operation.AddedObject))
@@ -563,8 +575,14 @@ public static class PrefabPatchRuntime
     {
         foreach (var component in fragment.Components)
         {
-            if (component.Mesh != null)
-                yield return component.Mesh;
+            foreach (
+                var reference in component.References
+                    ?? Enumerable.Empty<PrefabPatchSerializedReference>()
+            )
+            {
+                if (reference?.Reference != null)
+                    yield return reference.Reference;
+            }
         }
 
         foreach (var child in fragment.Children)

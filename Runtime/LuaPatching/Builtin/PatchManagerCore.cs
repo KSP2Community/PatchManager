@@ -86,6 +86,43 @@ public sealed class PatchManagerCore
     }
 
     /// <summary>
+    /// Begins a declarative prefab patch. The target is a Lua table matching
+    /// PrefabPatchPrefabIdentity; every operation added to the returned
+    /// builder is converted into the shared public prefab-patch schema.
+    /// </summary>
+    public PrefabPatchLuaBuilder Prefab(
+        ScriptExecutionContext context,
+        string name,
+        DynValue target,
+        string modVersion = null
+    )
+    {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException(
+                $"PM:Prefab('{name}') can only be called during patch "
+                    + "registration."
+            );
+        }
+
+        var modId = context.CurrentGlobalEnv
+            .Get("ModId")
+            .CastToString();
+        var identity =
+            PrefabPatchLuaBuilder.Model<
+                global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
+            >(target, "prefab identity");
+        return new PrefabPatchLuaBuilder(
+            new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
+                modId,
+                name,
+                identity,
+                modVersion
+            )
+        );
+    }
+
+    /// <summary>
     /// Queues a brand-new asset for creation under the given label and address.
     /// </summary>
     /// <param name="converter">The name of the converter that will serialize <paramref name="newObject" /> to JSON.</param>

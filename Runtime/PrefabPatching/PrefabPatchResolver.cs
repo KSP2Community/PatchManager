@@ -495,6 +495,9 @@ public static class PrefabPatchResolver
             .Select((manifest, index) => (manifest.PatchId, index))
             .ToDictionary(pair => pair.PatchId, pair => pair.index);
         var introduced = new Dictionary<string, string>(StringComparer.Ordinal);
+        var introducedComponents = new Dictionary<string, string>(
+            StringComparer.Ordinal
+        );
         var writes = new Dictionary<string, PrefabPatchOperation>(
             StringComparer.Ordinal
         );
@@ -508,7 +511,6 @@ public static class PrefabPatchResolver
             foreach (
                 var operation in manifest.Operations
                     .Where(value => value != null)
-                    .OrderBy(value => value.OperationId, StringComparer.Ordinal)
             )
             {
                 operation.PatchId = manifest.PatchId;
@@ -546,11 +548,19 @@ public static class PrefabPatchResolver
 
                 if (
                     operation.Target?.Kind
-                    == PrefabPatchTargetKind.PatchOwned
+                        == PrefabPatchTargetKind.PatchOwned
+                    || operation.Target?.Kind
+                        == PrefabPatchTargetKind.PatchComponent
                 )
                 {
                     var owner = operation.Target.OwnerPatchId;
-                    var objectKey = $"{owner}:{operation.Target.ObjectId}";
+                    var isComponent =
+                        operation.Target.Kind
+                        == PrefabPatchTargetKind.PatchComponent;
+                    var ownedId = isComponent
+                        ? operation.Target.ComponentId
+                        : operation.Target.ObjectId;
+                    var objectKey = $"{owner}:{ownedId}";
                     if (
                         !string.Equals(
                             owner,
@@ -575,8 +585,24 @@ public static class PrefabPatchResolver
                     }
 
                     if (
-                        !introduced.ContainsKey(objectKey)
-                        || patchOrder[owner] >= patchOrder[manifest.PatchId]
+                        !(isComponent
+                            ? introducedComponents.ContainsKey(objectKey)
+                            : introduced.ContainsKey(objectKey))
+                        || (
+                            !string.Equals(
+                                owner,
+                                manifest.PatchId,
+                                StringComparison.Ordinal
+                            )
+                            && (
+                                !patchOrder.TryGetValue(
+                                    owner,
+                                    out var ownerOrder
+                                )
+                                || ownerOrder
+                                    >= patchOrder[manifest.PatchId]
+                            )
+                        )
                     )
                     {
                         Add(
@@ -585,7 +611,9 @@ public static class PrefabPatchResolver
                             "PM-PREFAB-PATCH-OWNED-TARGET",
                             manifest.PatchId,
                             operation.OperationId,
-                            $"Patch-owned target '{objectKey}' is not introduced "
+                            $"Patch-owned "
+                                + (isComponent ? "component" : "object")
+                                + $" target '{objectKey}' is not introduced "
                                 + "by an earlier required operation."
                         );
                         fatal = true;
@@ -595,33 +623,60 @@ public static class PrefabPatchResolver
 
                 if (operation.Kind == PrefabPatchOperationKind.AddObject)
                 {
-                    var objectId = operation.AddedObject?.ObjectId;
-                    var objectKey = $"{manifest.PatchId}:{objectId}";
-                    if (string.IsNullOrWhiteSpace(objectId))
+                    if (
+                        !RegisterFragment(
+                            operation.AddedObject,
+                            manifest.PatchId,
+                            operation.OperationId,
+                            introduced,
+                            introducedComponents,
+                            plan
+                        )
+                    )
+                        fatal = true;
+                }
+                else if (
+                    operation.Kind == PrefabPatchOperationKind.AddComponent
+                )
+                {
+                    var componentId = operation.AddedComponent?.ComponentId;
+                    var componentKey =
+                        $"{manifest.PatchId}:{componentId}";
+                    if (
+                        string.IsNullOrWhiteSpace(componentId)
+                        || string.IsNullOrWhiteSpace(
+                            operation.AddedComponent?.ComponentType
+                        )
+                    )
                     {
                         Add(
                             plan,
                             PrefabPatchDiagnosticSeverity.Error,
-                            "PM-PREFAB-ADDED-OBJECT-ID",
+                            "PM-PREFAB-ADDED-COMPONENT-ID",
                             manifest.PatchId,
                             operation.OperationId,
-                            $"Added object operation '{operation.OperationId}' "
-                                + "has no patch-local object ID."
+                            $"Added component operation "
+                                + $"'{operation.OperationId}' needs a stable "
+                                + "component ID and assembly-qualified type."
                         );
                         fatal = true;
                         continue;
                     }
-
-                    if (!introduced.TryAdd(objectKey, operation.OperationId))
+                    if (
+                        !introducedComponents.TryAdd(
+                            componentKey,
+                            operation.OperationId
+                        )
+                    )
                     {
                         Add(
                             plan,
                             PrefabPatchDiagnosticSeverity.Error,
-                            "PM-PREFAB-DUPLICATE-OBJECT-ID",
+                            "PM-PREFAB-DUPLICATE-COMPONENT-ID",
                             manifest.PatchId,
                             operation.OperationId,
-                            $"Patch-owned object '{objectKey}' is introduced "
-                                + "more than once."
+                            $"Patch-owned component '{componentKey}' is "
+                                + "introduced more than once."
                         );
                         fatal = true;
                         continue;
@@ -710,6 +765,106 @@ public static class PrefabPatchResolver
             )
         };
         return PrefabPatchJson.Sha256(PrefabPatchJson.Serialize(value));
+    }
+
+    private static bool RegisterFragment(
+        PrefabPatchObjectFragment fragment,
+        string patchId,
+        string operationId,
+        IDictionary<string, string> objects,
+        IDictionary<string, string> components,
+        PrefabPatchResolvedPlan plan
+    )
+    {
+        if (fragment == null || string.IsNullOrWhiteSpace(fragment.ObjectId))
+        {
+            Add(
+                plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-ADDED-OBJECT-ID",
+                patchId,
+                operationId,
+                $"Added object operation '{operationId}' contains an object "
+                    + "without a stable patch-local ID."
+            );
+            return false;
+        }
+
+        var valid = true;
+        var objectKey = $"{patchId}:{fragment.ObjectId}";
+        if (!objects.TryAdd(objectKey, operationId))
+        {
+            Add(
+                plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-DUPLICATE-OBJECT-ID",
+                patchId,
+                operationId,
+                $"Patch-owned object '{objectKey}' is introduced more than "
+                    + "once."
+            );
+            valid = false;
+        }
+
+        foreach (
+            var component in fragment.Components
+                ?? new List<PrefabPatchComponentFragment>()
+        )
+        {
+            var componentId = component?.ComponentId;
+            var componentKey = $"{patchId}:{componentId}";
+            if (
+                component == null
+                || string.IsNullOrWhiteSpace(componentId)
+                || string.IsNullOrWhiteSpace(component.ComponentType)
+            )
+            {
+                Add(
+                    plan,
+                    PrefabPatchDiagnosticSeverity.Error,
+                    "PM-PREFAB-ADDED-COMPONENT-ID",
+                    patchId,
+                    operationId,
+                    $"Patch-owned object '{objectKey}' contains a component "
+                        + "without a stable ID or assembly-qualified type."
+                );
+                valid = false;
+                continue;
+            }
+            if (!components.TryAdd(componentKey, operationId))
+            {
+                Add(
+                    plan,
+                    PrefabPatchDiagnosticSeverity.Error,
+                    "PM-PREFAB-DUPLICATE-COMPONENT-ID",
+                    patchId,
+                    operationId,
+                    $"Patch-owned component '{componentKey}' is introduced "
+                        + "more than once."
+                );
+                valid = false;
+            }
+        }
+
+        foreach (
+            var child in fragment.Children
+                ?? new List<PrefabPatchObjectFragment>()
+        )
+        {
+            if (
+                !RegisterFragment(
+                    child,
+                    patchId,
+                    operationId,
+                    objects,
+                    components,
+                    plan
+                )
+            )
+                valid = false;
+        }
+
+        return valid;
     }
 
     private static void AddSameBucketEdges(

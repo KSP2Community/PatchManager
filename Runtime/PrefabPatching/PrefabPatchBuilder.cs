@@ -142,6 +142,36 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    public PrefabPatchBuilder SetObjectReference(
+        string operationId,
+        PrefabPatchObjectTarget target,
+        string propertyPath,
+        PrefabPatchObjectReference reference
+    ) =>
+        AddOperation(
+            new PrefabPatchOperation
+            {
+                OperationId = operationId,
+                Kind = PrefabPatchOperationKind.SetObjectReference,
+                Target = target,
+                PropertyPath = propertyPath,
+                ObjectReference = reference
+            }
+        );
+
+    public PrefabPatchBuilder SuppressObject(
+        string operationId,
+        PrefabPatchObjectTarget target
+    ) =>
+        AddOperation(
+            new PrefabPatchOperation
+            {
+                OperationId = operationId,
+                Kind = PrefabPatchOperationKind.SuppressObject,
+                Target = target
+            }
+        );
+
     public PrefabPatchBuilder AddObject(
         string operationId,
         PrefabPatchObjectTarget parent,
@@ -157,6 +187,95 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    public PrefabPatchBuilder AddComponent(
+        string operationId,
+        PrefabPatchObjectTarget target,
+        PrefabPatchComponentFragment component
+    ) =>
+        AddOperation(
+            new PrefabPatchOperation
+            {
+                OperationId = operationId,
+                Kind = PrefabPatchOperationKind.AddComponent,
+                Target = target,
+                AddedComponent = component
+            }
+        );
+
+    public PrefabPatchBuilder RemoveComponent(
+        string operationId,
+        PrefabPatchObjectTarget target
+    ) =>
+        AddOperation(
+            new PrefabPatchOperation
+            {
+                OperationId = operationId,
+                Kind = PrefabPatchOperationKind.RemoveComponent,
+                Target = target
+            }
+        );
+
+    public PrefabPatchBuilder Configuration(params string[] inputs)
+    {
+        _manifest.ConfigurationInputs = Sorted(
+            (_manifest.ConfigurationInputs ?? Array.Empty<string>())
+                .Concat(inputs ?? Array.Empty<string>())
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct(StringComparer.Ordinal)
+        );
+        return this;
+    }
+
+    public static PrefabPatchObjectTarget PatchObject(
+        string ownerPatchId,
+        string objectId
+    ) =>
+        new()
+        {
+            Kind = PrefabPatchTargetKind.PatchOwned,
+            OwnerPatchId = ownerPatchId,
+            ObjectId = objectId,
+            RuntimeLocator = new PrefabPatchRuntimeLocator
+            {
+                TargetKind = PrefabPatchRuntimeTargetKind.GameObject,
+                SiblingIndices = Array.Empty<int>()
+            }
+        };
+
+    public static PrefabPatchObjectTarget PatchComponent(
+        string ownerPatchId,
+        string componentId
+    ) =>
+        new()
+        {
+            Kind = PrefabPatchTargetKind.PatchComponent,
+            OwnerPatchId = ownerPatchId,
+            ComponentId = componentId,
+            RuntimeLocator = new PrefabPatchRuntimeLocator
+            {
+                TargetKind = PrefabPatchRuntimeTargetKind.Component,
+                SiblingIndices = Array.Empty<int>()
+            }
+        };
+
+    public static PrefabPatchObjectReference Addressable(
+        string address,
+        Type expectedType = null
+    ) =>
+        PrefabPatchObjectReference.FromAddress(
+            address,
+            expectedType?.AssemblyQualifiedName
+        );
+
+    public static PrefabPatchObjectReference TargetReference(
+        PrefabPatchObjectTarget target,
+        Type expectedType = null
+    ) =>
+        PrefabPatchObjectReference.FromTarget(
+            target,
+            expectedType?.AssemblyQualifiedName
+        );
+
     public PrefabPatchManifest Build()
     {
         _manifest.NeedsMods = Sorted(_needsMods);
@@ -167,9 +286,6 @@ public sealed class PrefabPatchBuilder
         _manifest.AfterPatches = Sorted(_afterPatches);
         _manifest.BeforeMods = Sorted(_beforeMods);
         _manifest.AfterMods = Sorted(_afterMods);
-        _manifest.Operations = _manifest.Operations
-            .OrderBy(value => value.OperationId, StringComparer.Ordinal)
-            .ToList();
         _manifest.DeclaredCapabilities = _manifest.Operations
             .Select(value => value.Kind.ToString())
             .Distinct(StringComparer.Ordinal)

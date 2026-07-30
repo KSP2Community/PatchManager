@@ -10,8 +10,8 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public static class PrefabPatchSchema
 {
-    public const int Version = 1;
-    public const int ComposerVersion = 1;
+    public const int Version = 2;
+    public const int ComposerVersion = 2;
     public const string AddressablesLabel = "patch-manager-prefab-patches";
 }
 
@@ -35,7 +35,8 @@ public enum PrefabPatchOrdering
 public enum PrefabPatchTargetKind
 {
     Stock,
-    PatchOwned
+    PatchOwned,
+    PatchComponent
 }
 
 [JsonConverter(typeof(StringEnumConverter))]
@@ -68,16 +69,17 @@ public enum PrefabPatchValueKind
     Vector3,
     Vector4,
     Quaternion,
-    Color
+    Color,
+    ArraySize,
+    ManagedReference,
+    Json
 }
 
 [JsonConverter(typeof(StringEnumConverter))]
-public enum PrefabPatchComponentKind
+public enum PrefabPatchObjectReferenceKind
 {
-    BoxCollider,
-    SphereCollider,
-    MeshFilter,
-    MeshRenderer
+    Addressable,
+    Target
 }
 
 /// <summary>
@@ -128,13 +130,16 @@ public sealed class PrefabPatchObjectTarget
     public string ObjectType;
     public string OwnerPatchId;
     public string ObjectId;
+    public string ComponentId;
     public PrefabPatchRuntimeLocator RuntimeLocator;
 
     [JsonIgnore]
     public string CanonicalKey =>
         Kind == PrefabPatchTargetKind.Stock
             ? $"stock:{SourceSerializedFileName}:{SourcePathId}:{ObjectType}"
-            : $"patch:{OwnerPatchId}:{ObjectId}";
+            : Kind == PrefabPatchTargetKind.PatchComponent
+                ? $"patch-component:{OwnerPatchId}:{ComponentId}"
+                : $"patch:{OwnerPatchId}:{ObjectId}";
 }
 
 /// <summary>
@@ -149,6 +154,7 @@ public sealed class PrefabPatchValue
     public long Integer;
     public double Float;
     public string String;
+    public string SerializedType;
     public double X;
     public double Y;
     public double Z;
@@ -168,35 +174,78 @@ public sealed class PrefabPatchValue
 }
 
 /// <summary>
-/// Addressable Unity object reference used by SetObjectReference or a component
-/// fragment. Source identity is retained for compatibility diagnostics.
+/// Addressable or target-local Unity object reference used by
+/// SetObjectReference or a component fragment. Source identity is retained for
+/// compatibility diagnostics.
 /// </summary>
 [Serializable]
 public sealed class PrefabPatchObjectReference
 {
+    public PrefabPatchObjectReferenceKind Kind;
     public string Address;
     public string ExpectedType;
     public string CatalogId;
     public string SourceBundleFileName;
     public string SourceSerializedFileName;
     public long SourcePathId;
+    public PrefabPatchObjectTarget Target;
+
+    public static PrefabPatchObjectReference FromAddress(
+        string address,
+        string expectedType = null
+    ) =>
+        new()
+        {
+            Kind = PrefabPatchObjectReferenceKind.Addressable,
+            Address = address,
+            ExpectedType = expectedType
+        };
+
+    public static PrefabPatchObjectReference FromTarget(
+        PrefabPatchObjectTarget target,
+        string expectedType = null
+    ) =>
+        new()
+        {
+            Kind = PrefabPatchObjectReferenceKind.Target,
+            Target = target,
+            ExpectedType = expectedType
+        };
 }
 
 /// <summary>
-/// Constrained component payload used for added patch-owned objects and
-/// AddComponent operations.
+/// One serialized field/property value captured from an arbitrary component.
+/// Visual, C#, and Lua authoring all emit this property-stream representation.
+/// </summary>
+[Serializable]
+public sealed class PrefabPatchSerializedValue
+{
+    public string PropertyPath;
+    public PrefabPatchValue Value;
+}
+
+/// <summary>
+/// One Unity object reference removed from a serialized component payload and
+/// restored after every patch-owned object and component has been created.
+/// </summary>
+[Serializable]
+public sealed class PrefabPatchSerializedReference
+{
+    public string PropertyPath;
+    public PrefabPatchObjectReference Reference;
+}
+
+/// <summary>
+/// Serialized payload used for added patch-owned objects and AddComponent
+/// operations.
 /// </summary>
 [Serializable]
 public sealed class PrefabPatchComponentFragment
 {
-    public PrefabPatchComponentKind Kind;
     public string ComponentId;
-    public bool Enabled = true;
-    public PrefabPatchValue Center;
-    public PrefabPatchValue Size;
-    public double Radius;
-    public bool IsTrigger;
-    public PrefabPatchObjectReference Mesh;
+    public string ComponentType;
+    public List<PrefabPatchSerializedValue> Values = new();
+    public List<PrefabPatchSerializedReference> References = new();
 }
 
 /// <summary>
@@ -208,10 +257,19 @@ public sealed class PrefabPatchObjectFragment
 {
     public string ObjectId;
     public string Name;
+    public string TransformType;
     public bool Active = true;
+    public int Layer;
+    public string Tag = "Untagged";
+    public bool IsStatic;
     public PrefabPatchValue LocalPosition;
     public PrefabPatchValue LocalRotation;
     public PrefabPatchValue LocalScale;
+    public PrefabPatchValue AnchorMin;
+    public PrefabPatchValue AnchorMax;
+    public PrefabPatchValue AnchoredPosition;
+    public PrefabPatchValue SizeDelta;
+    public PrefabPatchValue Pivot;
     public List<PrefabPatchComponentFragment> Components = new();
     public List<PrefabPatchObjectFragment> Children = new();
 }
