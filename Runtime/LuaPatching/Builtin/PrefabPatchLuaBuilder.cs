@@ -249,9 +249,13 @@ public sealed class PrefabPatchLuaBuilder
         return this;
     }
 
-    public PrefabPatchManifest Build() => _builder.Build();
+    public JsonUserData Build() =>
+        new(JToken.Parse(PrefabPatchJson.Serialize(_builder.Build())));
 
-    public PrefabPatchManifest Register() => _builder.Register();
+    public void Register()
+    {
+        _builder.Register();
+    }
 
     private static PrefabPatchValue Value(DynValue value)
     {
