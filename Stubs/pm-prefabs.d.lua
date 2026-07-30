@@ -2,7 +2,7 @@
 -- Patch Manager declarative prefab-patch frontend.
 
 ---@alias PrefabPatchTarget table
----| { kind: '"Stock"', sourceSerializedFileName: string, sourcePathId: integer, objectType: string, runtimeLocator: table }
+---| { kind: '"Stock"', sourceSerializedFileName: string, sourcePathId: integer|string, objectType: string, runtimeLocator: table }
 ---| { kind: '"PatchOwned"', ownerPatchId: string, objectId: string, objectType: string?, runtimeLocator: table? }
 ---| { kind: '"PatchComponent"', ownerPatchId: string, componentId: string, objectType: string? }
 
@@ -62,7 +62,7 @@
 ---@field sourceBundleFileName string
 ---@field sourceBundleHash string?
 ---@field sourceSerializedFileName string
----@field sourcePathId integer
+---@field sourcePathId integer|string Use a decimal string for 64-bit IDs outside Lua's exact numeric range.
 ---@field assetType string
 ---@field structuralDescription string
 ---@field structuralFingerprint string

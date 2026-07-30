@@ -113,6 +113,12 @@ Lua uses `PM:Prefab`. Tables use the camel-case names from the public JSON
 schema; empty Lua tables are normalized to empty arrays where the model expects
 a collection.
 
+Write `sourcePathId` values as quoted decimal strings when copying canonical
+identities or stock targets into Lua. Unity path IDs are signed 64-bit integers,
+while Lua numbers cannot exactly represent every value in that range. Patch
+Manager accepts either form and converts decimal strings to `Int64` without
+losing precision.
+
 ```lua
 local patch = PM:Prefab("toolbar", targetIdentity)
     :Needs("some-required-mod")
