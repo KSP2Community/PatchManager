@@ -162,6 +162,9 @@ required patch.
 
 ## Runtime and compatibility behavior
 
+- Prefab discovery, plan-cache, ordering, diagnostics, and composition failures
+  are written as a `Prefab Patches` section in the existing
+  `pm_summary.log`; prefab updates preserve the ordinary JSON-patch summary.
 - Composition occurs once per resolved stock prefab and the effective prefab is
   cached for repeated provider requests.
 - Resolver ordering, required/conflicting mods and patches, and field conflicts

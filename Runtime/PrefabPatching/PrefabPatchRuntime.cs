@@ -17,6 +17,63 @@ using Object = UnityEngine.Object;
 namespace PatchManager.PrefabPatching;
 
 /// <summary>
+/// Coordinates the ordinary and prefab-patch sections of Patch Manager's
+/// single human-readable summary log.
+/// </summary>
+public static class PatchManagerSummaryLog
+{
+    private const string SummaryPath = "./pm_summary.log";
+    private static readonly object Gate = new();
+    private static string _coreSummary;
+    private static string _prefabSummary;
+
+    public static void UpdateCoreSummary(string summary)
+    {
+        lock (Gate)
+        {
+            _coreSummary = Normalize(summary);
+            Write();
+        }
+    }
+
+    public static void UpdatePrefabSummary(string summary)
+    {
+        lock (Gate)
+        {
+            _prefabSummary = Normalize(summary);
+            Write();
+        }
+    }
+
+    public static void Reset()
+    {
+        lock (Gate)
+        {
+            _coreSummary = null;
+            _prefabSummary = null;
+        }
+    }
+
+    private static string Normalize(string summary)
+    {
+        return string.IsNullOrWhiteSpace(summary)
+            ? null
+            : summary.TrimEnd();
+    }
+
+    private static void Write()
+    {
+        var sections = new[] { _coreSummary, _prefabSummary }
+            .Where(value => !string.IsNullOrEmpty(value));
+        File.WriteAllText(
+            SummaryPath,
+            string.Join(Environment.NewLine + Environment.NewLine, sections)
+                + Environment.NewLine
+        );
+    }
+}
+
+/// <summary>
 /// Public registry and lazy effective-prefab runtime for the prefab domain.
 /// </summary>
 public static class PrefabPatchRuntime
@@ -58,7 +115,6 @@ public static class PrefabPatchRuntime
     }
 
     private const string PlanCacheDirectory = "./pm_cache/prefabs";
-    private const string SummaryPath = "./pm_prefab_summary.log";
     private static readonly List<PrefabPatchManifest> Registered = new();
     private static readonly Dictionary<string, Entry> Entries = new(
         StringComparer.Ordinal
@@ -673,13 +729,13 @@ public static class PrefabPatchRuntime
     {
         var lines = new List<string>
         {
-            "Patch Manager prefab patch summary",
-            $"Schema: {PrefabPatchSchema.Version}",
-            $"Composer: {PrefabPatchSchema.ComposerVersion}",
-            $"Discovered manifests: {CurrentMetrics.DiscoveredManifestCount}",
-            $"Resolved plans: {CurrentMetrics.ResolvedPlanCount}",
-            $"Plan cache hits: {CurrentMetrics.CacheHitCount}",
-            $"Plan cache misses: {CurrentMetrics.CacheMissCount}"
+            "Prefab Patches:",
+            $"    Schema: {PrefabPatchSchema.Version}",
+            $"    Composer: {PrefabPatchSchema.ComposerVersion}",
+            $"    Discovered Manifests: {CurrentMetrics.DiscoveredManifestCount}",
+            $"    Resolved Plans: {CurrentMetrics.ResolvedPlanCount}",
+            $"    Plan Cache Hits: {CurrentMetrics.CacheHitCount}",
+            $"    Plan Cache Misses: {CurrentMetrics.CacheMissCount}"
         };
         foreach (
             var pair in Entries.OrderBy(
@@ -689,10 +745,10 @@ public static class PrefabPatchRuntime
         )
         {
             lines.Add("");
-            lines.Add($"Target: {pair.Key}");
-            lines.Add($"Cache key: {pair.Value.Plan.CacheKey}");
+            lines.Add($"    Target - {pair.Key}:");
+            lines.Add($"        Cache Key: {pair.Value.Plan.CacheKey}");
             lines.Add(
-                "Ordered patches: "
+                "        Ordered Patches: "
                     + string.Join(
                         ", ",
                         pair.Value.Plan.OrderedPatchIds
@@ -701,22 +757,27 @@ public static class PrefabPatchRuntime
             foreach (var diagnostic in pair.Value.Plan.Diagnostics)
             {
                 lines.Add(
-                    $"[{diagnostic.Severity}] {diagnostic.Code} "
+                    $"        [{diagnostic.Severity}] {diagnostic.Code} "
                         + $"{diagnostic.PatchId} {diagnostic.OperationId}: "
                         + diagnostic.Message
                 );
             }
 
             if (pair.Value.Failed)
-                lines.Add("Composition failure: " + pair.Value.Failure);
+                lines.Add(
+                    "        Composition Failure: " + pair.Value.Failure
+                );
         }
 
-        File.WriteAllLines(SummaryPath, lines);
+        PatchManagerSummaryLog.UpdatePrefabSummary(
+            string.Join(Environment.NewLine, lines)
+        );
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStaticState()
     {
+        PatchManagerSummaryLog.Reset();
         ReleaseSessionResources();
         Registered.Clear();
         Entries.Clear();
