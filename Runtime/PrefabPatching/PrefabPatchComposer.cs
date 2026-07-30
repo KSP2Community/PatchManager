@@ -74,7 +74,10 @@ public static class PrefabPatchComposer
                 );
             var actualFingerprint = PrefabPatchStructure.Calculate(prefab);
             if (
-                !string.Equals(
+                !string.IsNullOrWhiteSpace(
+                    plan.TargetPrefab.StructuralFingerprint
+                )
+                && !string.Equals(
                     actualFingerprint,
                     plan.TargetPrefab.StructuralFingerprint,
                     StringComparison.Ordinal
@@ -317,10 +320,17 @@ public static class PrefabPatchComposer
         Transform transform;
         if (target.Kind == PrefabPatchTargetKind.Stock)
         {
-            transform = PrefabPatchStructure.Resolve(
-                root.transform,
-                target.RuntimeLocator?.SiblingIndices
-            );
+            transform = !string.IsNullOrWhiteSpace(
+                target.RuntimeLocator?.HierarchyPath
+            )
+                ? PrefabPatchStructure.ResolveHierarchyPath(
+                    root.transform,
+                    target.RuntimeLocator.HierarchyPath
+                )
+                : PrefabPatchStructure.Resolve(
+                    root.transform,
+                    target.RuntimeLocator?.SiblingIndices
+                );
         }
         else
         {

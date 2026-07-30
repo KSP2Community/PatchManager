@@ -60,6 +60,57 @@ public static class PrefabPatchStructure
         return current;
     }
 
+    public static Transform ResolveHierarchyPath(
+        Transform root,
+        string hierarchyPath
+    )
+    {
+        if (root == null)
+            return null;
+        var parts = (hierarchyPath ?? string.Empty)
+            .Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        var index = 0;
+        if (
+            parts.Length > 0
+            && string.Equals(
+                parts[0],
+                root.name,
+                StringComparison.Ordinal
+            )
+        )
+        {
+            index = 1;
+        }
+
+        var current = root;
+        for (; index < parts.Length; index++)
+        {
+            var name = parts[index];
+            Transform match = null;
+            for (var childIndex = 0; childIndex < current.childCount; childIndex++)
+            {
+                var child = current.GetChild(childIndex);
+                if (!string.Equals(child.name, name, StringComparison.Ordinal))
+                    continue;
+                if (match != null)
+                {
+                    throw new InvalidOperationException(
+                        $"Hierarchy path '{hierarchyPath}' is ambiguous: "
+                            + $"'{current.name}' has multiple children named "
+                            + $"'{name}'. Use visual authoring for this target."
+                    );
+                }
+                match = child;
+            }
+
+            if (match == null)
+                return null;
+            current = match;
+        }
+
+        return current;
+    }
+
     private static void Append(
         Transform transform,
         StringBuilder builder,

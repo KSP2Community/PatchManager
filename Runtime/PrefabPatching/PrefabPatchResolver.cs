@@ -38,7 +38,11 @@ public static class PrefabPatchResolver
             return plan;
         }
 
-        plan.TargetPrefab = manifests[0].TargetPrefab;
+        plan.TargetPrefab = manifests
+            .Select(manifest => manifest.TargetPrefab)
+            .Where(target => target != null)
+            .OrderByDescending(target => target.IsCanonical)
+            .FirstOrDefault();
         var address = plan.TargetPrefab?.Address;
         var fatal = false;
         var byId = new Dictionary<string, PrefabPatchManifest>(
@@ -52,13 +56,7 @@ public static class PrefabPatchResolver
                 continue;
             }
 
-            if (
-                !string.Equals(
-                    manifest.TargetPrefab.CanonicalKey,
-                    plan.TargetPrefab.CanonicalKey,
-                    StringComparison.Ordinal
-                )
-            )
+            if (!TargetsMatch(manifest.TargetPrefab, plan.TargetPrefab))
             {
                 Add(
                     plan,
@@ -67,8 +65,8 @@ public static class PrefabPatchResolver
                     manifest.PatchId,
                     null,
                     $"Patch '{manifest.PatchId}' targets "
-                        + $"'{manifest.TargetPrefab.CanonicalKey}', not "
-                        + $"'{plan.TargetPrefab.CanonicalKey}'."
+                        + $"'{manifest.TargetPrefab.Address}', not "
+                        + $"'{plan.TargetPrefab.Address}'."
                 );
                 fatal = true;
                 continue;
@@ -178,13 +176,6 @@ public static class PrefabPatchResolver
         if (
             manifest.TargetPrefab == null
             || string.IsNullOrWhiteSpace(manifest.TargetPrefab.Address)
-            || string.IsNullOrWhiteSpace(
-                manifest.TargetPrefab.SourceSerializedFileName
-            )
-            || manifest.TargetPrefab.SourcePathId == 0
-            || string.IsNullOrWhiteSpace(
-                manifest.TargetPrefab.StructuralFingerprint
-            )
         )
         {
             Add(
@@ -193,8 +184,26 @@ public static class PrefabPatchResolver
                 "PM-PREFAB-TARGET-IDENTITY",
                 manifest.PatchId,
                 null,
-                $"Patch '{manifest.PatchId}' has an incomplete canonical "
-                    + "prefab identity or structural fingerprint."
+                $"Patch '{manifest.PatchId}' has no target Addressables key."
+            );
+            return false;
+        }
+
+        if (
+            manifest.TargetPrefab.HasCanonicalMetadata
+            && !manifest.TargetPrefab.IsCanonical
+        )
+        {
+            Add(
+                plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-TARGET-IDENTITY",
+                manifest.PatchId,
+                null,
+                $"Patch '{manifest.PatchId}' contains partial compiler "
+                    + "identity metadata. Imperative patches should specify "
+                    + "only the Addressables key; visual manifests must contain "
+                    + "a complete CAB/path identity and structural fingerprint."
             );
             return false;
         }
@@ -223,6 +232,30 @@ public static class PrefabPatchResolver
 
         manifest.ManifestHash = calculatedHash;
         return true;
+    }
+
+    private static bool TargetsMatch(
+        PrefabPatchPrefabIdentity left,
+        PrefabPatchPrefabIdentity right
+    )
+    {
+        if (
+            left == null
+            || right == null
+            || !string.Equals(
+                left.Address,
+                right.Address,
+                StringComparison.Ordinal
+            )
+        )
+            return false;
+        return !left.IsCanonical
+            || !right.IsCanonical
+            || string.Equals(
+                left.CanonicalKey,
+                right.CanonicalKey,
+                StringComparison.Ordinal
+            );
     }
 
     private static void FilterModConstraints(

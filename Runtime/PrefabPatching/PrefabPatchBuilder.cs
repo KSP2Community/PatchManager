@@ -54,6 +54,16 @@ public sealed class PrefabPatchBuilder
         };
     }
 
+    public PrefabPatchBuilder(
+        string modId,
+        string patchName,
+        string address
+    ) : this(
+        modId,
+        patchName,
+        PrefabPatchPrefabIdentity.FromAddress(address)
+    ) { }
+
     public PrefabPatchBuilder Early()
     {
         _manifest.Pass = PrefabPatchPass.Early;
@@ -262,6 +272,45 @@ public sealed class PrefabPatchBuilder
             }
         };
 
+    public static PrefabPatchObjectTarget GameObjectAt(
+        string hierarchyPath
+    ) =>
+        StockTarget(
+            hierarchyPath,
+            PrefabPatchRuntimeTargetKind.GameObject,
+            typeof(UnityEngine.GameObject).AssemblyQualifiedName,
+            0
+        );
+
+    public static PrefabPatchObjectTarget ComponentAt<TComponent>(
+        string hierarchyPath,
+        int componentOrdinal = 0
+    ) where TComponent : UnityEngine.Component =>
+        ComponentAt(
+            hierarchyPath,
+            typeof(TComponent).AssemblyQualifiedName,
+            componentOrdinal
+        );
+
+    public static PrefabPatchObjectTarget ComponentAt(
+        string hierarchyPath,
+        string componentType,
+        int componentOrdinal = 0
+    )
+    {
+        if (string.IsNullOrWhiteSpace(componentType))
+            throw new ArgumentException(
+                "Component type is required.",
+                nameof(componentType)
+            );
+        return StockTarget(
+            hierarchyPath,
+            PrefabPatchRuntimeTargetKind.Component,
+            componentType,
+            componentOrdinal
+        );
+    }
+
     public static PrefabPatchObjectReference Addressable(
         string address,
         Type expectedType = null
@@ -328,4 +377,43 @@ public sealed class PrefabPatchBuilder
 
     private static string[] Sorted(IEnumerable<string> values) =>
         values.OrderBy(value => value, StringComparer.Ordinal).ToArray();
+
+    private static PrefabPatchObjectTarget StockTarget(
+        string hierarchyPath,
+        PrefabPatchRuntimeTargetKind targetKind,
+        string objectType,
+        int componentOrdinal
+    )
+    {
+        if (hierarchyPath == null)
+            throw new ArgumentNullException(nameof(hierarchyPath));
+        if (componentOrdinal < 0)
+            throw new ArgumentOutOfRangeException(
+                nameof(componentOrdinal)
+            );
+        var normalizedPath = string.Join(
+            "/",
+            hierarchyPath.Split(
+                new[] { '/' },
+                StringSplitOptions.RemoveEmptyEntries
+            )
+        );
+        return new PrefabPatchObjectTarget
+        {
+            Kind = PrefabPatchTargetKind.Stock,
+            ObjectType = objectType,
+            RuntimeLocator = new PrefabPatchRuntimeLocator
+            {
+                HierarchyPath = normalizedPath,
+                TargetKind = targetKind,
+                ComponentType =
+                    targetKind == PrefabPatchRuntimeTargetKind.Component
+                        ? objectType
+                        : null,
+                ComponentOrdinal = componentOrdinal,
+                DisplayPath = normalizedPath,
+                SiblingIndices = Array.Empty<int>()
+            }
+        };
+    }
 }

@@ -53,47 +53,25 @@ before composition.
 
 ## C# authoring
 
-Register C# patches before `PrefabPatchRuntime.CloseRegistration()`:
+Register C# patches before `PrefabPatchRuntime.CloseRegistration()`. Handwritten
+patches target a stock Addressables key and select objects by their ordinary
+prefab hierarchy path:
 
 ```csharp
 using PatchManager.PrefabPatching;
 using PatchManager.CSharpPatching;
-using UnityEngine;
 using UnityEngine.UI;
 
-var button = PrefabPatchComponentBuilder
-    .For<Button>("toolbar:button")
-    .Value("m_Interactable", PrefabPatchValue.FromBoolean(false))
-    .Reference(
-        "m_TargetGraphic",
-        PrefabPatchBuilder.TargetReference(
-            PrefabPatchBuilder.PatchComponent(
-                "toolbar",
-                "toolbar:image"
-            ),
-            typeof(Graphic)
-        )
-    )
-    .Build();
-var image = PrefabPatchComponentBuilder
-    .For<Image>("toolbar:image")
-    .Build();
+var background = PrefabPatchBuilder.ComponentAt<Image>(
+    "KSP2UIWindow/Root/Window-App/Background"
+);
 
-Patching.Mod.PatchPrefab("toolbar", targetIdentity)
-    .AddObject(
-        "01-add-toolbar",
-        stockParentTarget,
-        new PrefabPatchObjectBuilder("toolbar", "Toolbar")
-            .Rect(
-                Vector2.zero,
-                Vector2.zero,
-                Vector2.zero,
-                new Vector2(320, 80),
-                new Vector2(0.5f, 0.5f)
-            )
-            .Component(image)
-            .Component(button)
-            .Build()
+Patching.Mod.PatchPrefab("toolbar", "SomeWindow.prefab")
+    .SetValue(
+        "tint-background",
+        background,
+        "m_Color.r",
+        PrefabPatchValue.FromFloat(0.25)
     )
     .Register();
 ```
@@ -113,36 +91,16 @@ Lua uses `PM:Prefab`. Tables use the camel-case names from the public JSON
 schema; empty Lua tables are normalized to empty arrays where the model expects
 a collection.
 
-Write `sourcePathId` values as quoted decimal strings when copying canonical
-identities or stock targets into Lua. Unity path IDs are signed 64-bit integers,
-while Lua numbers cannot exactly represent every value in that range. Patch
-Manager accepts either form and converts decimal strings to `Int64` without
-losing precision.
-
 ```lua
-local patch = PM:Prefab("toolbar", targetIdentity)
+local patch = PM:Prefab("toolbar", "SomeWindow.prefab")
     :Needs("some-required-mod")
-    :AddObject("01-add-toolbar", stockParent, {
-        objectId = "toolbar",
-        name = "Toolbar",
-        transformType = UnityRectTransformType,
-        active = true,
-        tag = "Untagged",
-        components = {
-            {
-                componentId = "toolbar:button",
-                componentType = UnityButtonType,
-                values = {
-                    {
-                        propertyPath = "m_Interactable",
-                        value = { kind = "Boolean", boolean = false }
-                    }
-                },
-                references = {}
-            }
-        },
-        children = {}
-    })
+    :SetComponent(
+        "tint-background",
+        "KSP2UIWindow/Root/Window-App/Background",
+        "UnityEngine.UI.Image",
+        "m_Color.r",
+        0.25
+    )
 
 patch:Register()
 ```
@@ -150,15 +108,21 @@ patch:Register()
 The returned builder supports `Early`, `Late`, `First`, `Last`, dependency and
 ordering methods, `Set`, `Reference`, `Active`, `Suppress`, `AddObject`,
 `AddComponent`, `RemoveComponent`, `Build`, and `Register`. `Build` is useful
-for tools/tests; normal mods call `Register`.
+for tools/tests; normal mods call `Register`. `GameObject(path)` and
+`Component(path, type, ordinal)` return key-first targets that can be passed to
+any generic operation method; `SetComponent` is shorthand for the common
+scalar-component case.
 
-Pure Lua/C# patches still need the stock prefab's canonical identity and
-structural fingerprint, plus canonical stock-object targets. Those values are
-source-build-specific safety data, not name-based hierarchy paths. They can be
-copied from a visual compiler manifest for the same linked prefab. Patch-owned
-targets only need the local owning patch name plus stable object/component ID.
-An explicit `other-mod:patch-name` is used only when targeting another mod's
-required patch.
+Bundle/CAB names, hashes, path IDs, and structural fingerprints are compiler
+metadata, not handwritten C#/Lua inputs. Visual manifests retain that stronger
+source-build validation. Imperative patches intentionally resolve their
+Addressables key and named hierarchy path at runtime. Duplicate child names at
+one hierarchy level are rejected as ambiguous rather than resolved
+arbitrarily.
+
+Patch-owned targets use the local owning patch name plus stable
+object/component ID. An explicit `other-mod:patch-name` is used only when
+targeting another mod's required patch.
 
 ## Runtime and compatibility behavior
 

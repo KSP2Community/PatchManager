@@ -100,18 +100,52 @@ public sealed class PrefabPatchPrefabIdentity
     public string StructuralFingerprint;
 
     [JsonIgnore]
+    public bool HasCanonicalMetadata =>
+        !string.IsNullOrWhiteSpace(CatalogId)
+        || !string.IsNullOrWhiteSpace(CatalogHash)
+        || !string.IsNullOrWhiteSpace(SourceBundleFileName)
+        || !string.IsNullOrWhiteSpace(SourceBundleHash)
+        || !string.IsNullOrWhiteSpace(SourceSerializedFileName)
+        || SourcePathId != 0
+        || !string.IsNullOrWhiteSpace(StructuralDescription)
+        || !string.IsNullOrWhiteSpace(StructuralFingerprint);
+
+    [JsonIgnore]
+    public bool IsCanonical =>
+        !string.IsNullOrWhiteSpace(SourceSerializedFileName)
+        && SourcePathId != 0
+        && !string.IsNullOrWhiteSpace(StructuralFingerprint);
+
+    [JsonIgnore]
     public string CanonicalKey =>
-        $"{CatalogId}|{SourceSerializedFileName}|{SourcePathId}|{AssetType}";
+        IsCanonical
+            ? $"{CatalogId}|{SourceSerializedFileName}|{SourcePathId}|{AssetType}"
+            : $"address:{Address}";
+
+    public static PrefabPatchPrefabIdentity FromAddress(string address)
+    {
+        if (string.IsNullOrWhiteSpace(address))
+            throw new ArgumentException(
+                "Addressables key is required.",
+                nameof(address)
+            );
+        return new PrefabPatchPrefabIdentity
+        {
+            Address = address.Trim(),
+            AssetType = typeof(UnityEngine.GameObject).AssemblyQualifiedName
+        };
+    }
 }
 
 /// <summary>
-/// Deterministic runtime traversal hint. It is validated against the manifest's
-/// source identity and structural fingerprint; it is never the canonical ID.
+/// Runtime traversal data. Visual compilation uses sibling indices backed by
+/// canonical source identity; key-first C#/Lua authoring uses a hierarchy path.
 /// </summary>
 [Serializable]
 public sealed class PrefabPatchRuntimeLocator
 {
     public int[] SiblingIndices = Array.Empty<int>();
+    public string HierarchyPath;
     public PrefabPatchRuntimeTargetKind TargetKind;
     public string ComponentType;
     public int ComponentOrdinal;
@@ -134,12 +168,29 @@ public sealed class PrefabPatchObjectTarget
     public PrefabPatchRuntimeLocator RuntimeLocator;
 
     [JsonIgnore]
-    public string CanonicalKey =>
-        Kind == PrefabPatchTargetKind.Stock
-            ? $"stock:{SourceSerializedFileName}:{SourcePathId}:{ObjectType}"
-            : Kind == PrefabPatchTargetKind.PatchComponent
-                ? $"patch-component:{OwnerPatchId}:{ComponentId}"
-                : $"patch:{OwnerPatchId}:{ObjectId}";
+    public string CanonicalKey
+    {
+        get
+        {
+            if (Kind == PrefabPatchTargetKind.PatchComponent)
+                return $"patch-component:{OwnerPatchId}:{ComponentId}";
+            if (Kind == PrefabPatchTargetKind.PatchOwned)
+                return $"patch:{OwnerPatchId}:{ObjectId}";
+
+            var path = !string.IsNullOrWhiteSpace(
+                RuntimeLocator?.HierarchyPath
+            )
+                ? RuntimeLocator.HierarchyPath
+                : RuntimeLocator?.DisplayPath;
+            if (!string.IsNullOrWhiteSpace(path))
+                return $"path:{path}:{RuntimeLocator.TargetKind}:"
+                    + $"{RuntimeLocator.ComponentType}:"
+                    + $"{RuntimeLocator.ComponentOrdinal}";
+
+            return $"stock:{SourceSerializedFileName}:"
+                + $"{SourcePathId}:{ObjectType}";
+        }
+    }
 }
 
 /// <summary>

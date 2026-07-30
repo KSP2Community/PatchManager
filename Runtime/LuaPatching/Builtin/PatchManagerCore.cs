@@ -86,9 +86,9 @@ public sealed class PatchManagerCore
     }
 
     /// <summary>
-    /// Begins a declarative prefab patch. The target is a Lua table matching
-    /// PrefabPatchPrefabIdentity; every operation added to the returned
-    /// builder is converted into the shared public prefab-patch schema.
+    /// Begins a declarative prefab patch. Normal Lua authoring passes an
+    /// Addressables key string; generated tooling may pass a complete
+    /// PrefabPatchPrefabIdentity table.
     /// </summary>
     public PrefabPatchLuaBuilder Prefab(
         ScriptExecutionContext context,
@@ -107,10 +107,12 @@ public sealed class PatchManagerCore
         var modId = context.CurrentGlobalEnv
             .Get("ModId")
             .CastToString();
-        var identity =
-            PrefabPatchLuaBuilder.Model<
+        var identity = target.Type == DataType.String
+            ? global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
+                .FromAddress(target.String)
+            : PrefabPatchLuaBuilder.Model<
                 global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
-            >(target, "prefab identity");
+            >(target, "prefab identity or Addressables key");
         return new PrefabPatchLuaBuilder(
             new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
                 modId,

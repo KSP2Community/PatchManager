@@ -112,7 +112,7 @@ public sealed class PrefabPatchPlanCache
 
     public string GetPath(PrefabPatchPrefabIdentity target)
     {
-        var identity = target?.CanonicalKey ?? target?.Address ?? "invalid";
+        var identity = target?.Address ?? target?.CanonicalKey ?? "invalid";
         return Path.Combine(
             _directory,
             PrefabPatchJson.Sha256(identity) + ".plan.json"

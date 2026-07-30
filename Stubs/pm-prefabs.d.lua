@@ -112,6 +112,22 @@ function PrefabPatchLuaBuilder:Configuration(...) end
 ---@return PrefabPatchLuaBuilder self
 function PrefabPatchLuaBuilder:Set(operationId, target, propertyPath, value) end
 ---@param operationId string
+---@param hierarchyPath string Slash-separated path; the root name is optional.
+---@param componentType string Full CLR type name, for example UnityEngine.UI.Image.
+---@param propertyPath string
+---@param value boolean|number|string|PrefabPatchValue
+---@param componentOrdinal? integer Zero-based ordinal when the GameObject has multiple components of this type.
+---@return PrefabPatchLuaBuilder self
+function PrefabPatchLuaBuilder:SetComponent(operationId, hierarchyPath, componentType, propertyPath, value, componentOrdinal) end
+---@param hierarchyPath string Slash-separated path; the root name is optional.
+---@return PrefabPatchTarget target
+function PrefabPatchLuaBuilder:GameObject(hierarchyPath) end
+---@param hierarchyPath string Slash-separated path; the root name is optional.
+---@param componentType string Full CLR type name.
+---@param componentOrdinal? integer Zero-based ordinal when the GameObject has multiple components of this type.
+---@return PrefabPatchTarget target
+function PrefabPatchLuaBuilder:Component(hierarchyPath, componentType, componentOrdinal) end
+---@param operationId string
 ---@param target PrefabPatchTarget
 ---@param propertyPath string
 ---@param reference PrefabPatchReference
@@ -146,6 +162,6 @@ function PrefabPatchLuaBuilder:Build() end
 function PrefabPatchLuaBuilder:Register() end
 
 ---@param name string Patch-local name; ModId is prepended automatically.
----@param target PrefabPatchIdentity
+---@param target string|PrefabPatchIdentity Addressables key for handwritten patches; full identity tables are generated-tool input.
 ---@return PrefabPatchLuaBuilder builder
 function PatchManagerCore:Prefab(name, target) end

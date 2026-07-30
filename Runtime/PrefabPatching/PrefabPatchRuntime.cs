@@ -325,7 +325,7 @@ public static class PrefabPatchRuntime
             var group in manifests
                 .Where(value => value?.TargetPrefab != null)
                 .GroupBy(
-                    value => value.TargetPrefab.CanonicalKey,
+                    value => value.TargetPrefab.Address,
                     StringComparer.Ordinal
                 )
                 .OrderBy(group => group.Key, StringComparer.Ordinal)

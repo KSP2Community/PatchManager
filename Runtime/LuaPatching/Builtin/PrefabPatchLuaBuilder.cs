@@ -117,6 +117,42 @@ public sealed class PrefabPatchLuaBuilder
         return this;
     }
 
+    public PrefabPatchLuaBuilder SetComponent(
+        string operationId,
+        string hierarchyPath,
+        string componentType,
+        string propertyPath,
+        DynValue value,
+        int componentOrdinal = 0
+    )
+    {
+        _builder.SetValue(
+            operationId,
+            PrefabPatchBuilder.ComponentAt(
+                hierarchyPath,
+                componentType,
+                componentOrdinal
+            ),
+            propertyPath,
+            Value(value)
+        );
+        return this;
+    }
+
+    public PrefabPatchObjectTarget GameObject(string hierarchyPath) =>
+        PrefabPatchBuilder.GameObjectAt(hierarchyPath);
+
+    public PrefabPatchObjectTarget Component(
+        string hierarchyPath,
+        string componentType,
+        int componentOrdinal = 0
+    ) =>
+        PrefabPatchBuilder.ComponentAt(
+            hierarchyPath,
+            componentType,
+            componentOrdinal
+        );
+
     public PrefabPatchLuaBuilder Reference(
         string operationId,
         DynValue target,
