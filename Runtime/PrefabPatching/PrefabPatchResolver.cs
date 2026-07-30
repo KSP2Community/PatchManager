@@ -41,7 +41,12 @@ public static class PrefabPatchResolver
         plan.TargetPrefab = manifests
             .Select(manifest => manifest.TargetPrefab)
             .Where(target => target != null)
-            .OrderByDescending(target => target.IsCanonical)
+            .OrderByDescending(
+                target =>
+                    !string.IsNullOrWhiteSpace(
+                        target.StructuralFingerprint
+                    )
+            )
             .FirstOrDefault();
         var address = plan.TargetPrefab?.Address;
         var fatal = false;
@@ -64,9 +69,17 @@ public static class PrefabPatchResolver
                     "PM-PREFAB-MIXED-TARGET",
                     manifest.PatchId,
                     null,
-                    $"Patch '{manifest.PatchId}' targets "
-                        + $"'{manifest.TargetPrefab.Address}', not "
-                        + $"'{plan.TargetPrefab.Address}'."
+                    string.Equals(
+                        manifest.TargetPrefab.Address,
+                        plan.TargetPrefab.Address,
+                        StringComparison.Ordinal
+                    )
+                        ? $"Patch '{manifest.PatchId}' was compiled against "
+                            + "a different structural version of "
+                            + $"'{plan.TargetPrefab.Address}'."
+                        : $"Patch '{manifest.PatchId}' targets "
+                            + $"'{manifest.TargetPrefab.Address}', not "
+                            + $"'{plan.TargetPrefab.Address}'."
                 );
                 fatal = true;
                 continue;
@@ -189,25 +202,6 @@ public static class PrefabPatchResolver
             return false;
         }
 
-        if (
-            manifest.TargetPrefab.HasCanonicalMetadata
-            && !manifest.TargetPrefab.IsCanonical
-        )
-        {
-            Add(
-                plan,
-                PrefabPatchDiagnosticSeverity.Error,
-                "PM-PREFAB-TARGET-IDENTITY",
-                manifest.PatchId,
-                null,
-                $"Patch '{manifest.PatchId}' contains partial compiler "
-                    + "identity metadata. Imperative patches should specify "
-                    + "only the Addressables key; visual manifests must contain "
-                    + "a complete CAB/path identity and structural fingerprint."
-            );
-            return false;
-        }
-
         var calculatedHash = PrefabPatchJson.CalculateManifestHash(manifest);
         if (
             !string.IsNullOrWhiteSpace(manifest.ManifestHash)
@@ -249,11 +243,11 @@ public static class PrefabPatchResolver
             )
         )
             return false;
-        return !left.IsCanonical
-            || !right.IsCanonical
+        return string.IsNullOrWhiteSpace(left.StructuralFingerprint)
+            || string.IsNullOrWhiteSpace(right.StructuralFingerprint)
             || string.Equals(
-                left.CanonicalKey,
-                right.CanonicalKey,
+                left.StructuralFingerprint,
+                right.StructuralFingerprint,
                 StringComparison.Ordinal
             );
     }

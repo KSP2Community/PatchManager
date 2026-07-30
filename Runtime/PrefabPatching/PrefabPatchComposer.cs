@@ -88,9 +88,7 @@ public static class PrefabPatchComposer
                     $"Stock prefab '{plan.TargetPrefab.Address}' structural "
                         + $"fingerprint changed. Expected "
                         + $"'{plan.TargetPrefab.StructuralFingerprint}', got "
-                        + $"'{actualFingerprint}'. Expected structure: "
-                        + $"'{plan.TargetPrefab.StructuralDescription}'. "
-                        + $"Actual structure: "
+                        + $"'{actualFingerprint}'. Actual structure: "
                         + $"'{PrefabPatchStructure.Describe(prefab)}'. "
                         + "Recompile or repair the patch."
                 );

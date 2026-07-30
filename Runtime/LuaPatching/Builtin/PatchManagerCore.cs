@@ -86,9 +86,7 @@ public sealed class PatchManagerCore
     }
 
     /// <summary>
-    /// Begins a declarative prefab patch. Normal Lua authoring passes an
-    /// Addressables key string; generated tooling may pass a complete
-    /// PrefabPatchPrefabIdentity table.
+    /// Begins a declarative prefab patch for one stock Addressables key.
     /// </summary>
     public PrefabPatchLuaBuilder Prefab(
         ScriptExecutionContext context,
@@ -107,12 +105,15 @@ public sealed class PatchManagerCore
         var modId = context.CurrentGlobalEnv
             .Get("ModId")
             .CastToString();
-        var identity = target.Type == DataType.String
-            ? global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
-                .FromAddress(target.String)
-            : PrefabPatchLuaBuilder.Model<
-                global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
-            >(target, "prefab identity or Addressables key");
+        if (target.Type != DataType.String)
+        {
+            throw new ScriptRuntimeException(
+                "PM:Prefab expects the stock prefab's Addressables key."
+            );
+        }
+        var identity =
+            global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
+                .FromAddress(target.String);
         return new PrefabPatchLuaBuilder(
             new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
                 modId,

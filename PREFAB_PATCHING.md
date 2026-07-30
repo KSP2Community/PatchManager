@@ -113,12 +113,12 @@ for tools/tests; normal mods call `Register`. `GameObject(path)` and
 any generic operation method; `SetComponent` is shorthand for the common
 scalar-component case.
 
-Bundle/CAB names, hashes, path IDs, and structural fingerprints are compiler
-metadata, not handwritten C#/Lua inputs. Visual manifests retain that stronger
-source-build validation. Imperative patches intentionally resolve their
-Addressables key and named hierarchy path at runtime. Duplicate child names at
-one hierarchy level are rejected as ambiguous rather than resolved
-arbitrarily.
+Visual, C#, and Lua manifests all identify the stock prefab by its Addressables
+key. Compiled visual manifests additionally retain a structural fingerprint
+and sibling-index runtime locators, but do not serialize catalog, bundle, CAB,
+path-ID, or full structural-description metadata. Imperative patches resolve
+named hierarchy paths at runtime. Duplicate child names at one hierarchy level
+are rejected as ambiguous rather than resolved arbitrarily.
 
 Patch-owned targets use the local owning patch name plus stable
 object/component ID. An explicit `other-mod:patch-name` is used only when

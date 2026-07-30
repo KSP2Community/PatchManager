@@ -83,44 +83,18 @@ public enum PrefabPatchObjectReferenceKind
 }
 
 /// <summary>
-/// Canonical identity and compatibility data for one stock Addressable prefab.
+/// Runtime identity and optional compatibility data for one stock Addressable
+/// prefab.
 /// </summary>
 [Serializable]
 public sealed class PrefabPatchPrefabIdentity
 {
     public string Address;
-    public string CatalogId;
-    public string CatalogHash;
-    public string SourceBundleFileName;
-    public string SourceBundleHash;
-    public string SourceSerializedFileName;
-    public long SourcePathId;
     public string AssetType;
-    public string StructuralDescription;
     public string StructuralFingerprint;
 
     [JsonIgnore]
-    public bool HasCanonicalMetadata =>
-        !string.IsNullOrWhiteSpace(CatalogId)
-        || !string.IsNullOrWhiteSpace(CatalogHash)
-        || !string.IsNullOrWhiteSpace(SourceBundleFileName)
-        || !string.IsNullOrWhiteSpace(SourceBundleHash)
-        || !string.IsNullOrWhiteSpace(SourceSerializedFileName)
-        || SourcePathId != 0
-        || !string.IsNullOrWhiteSpace(StructuralDescription)
-        || !string.IsNullOrWhiteSpace(StructuralFingerprint);
-
-    [JsonIgnore]
-    public bool IsCanonical =>
-        !string.IsNullOrWhiteSpace(SourceSerializedFileName)
-        && SourcePathId != 0
-        && !string.IsNullOrWhiteSpace(StructuralFingerprint);
-
-    [JsonIgnore]
-    public string CanonicalKey =>
-        IsCanonical
-            ? $"{CatalogId}|{SourceSerializedFileName}|{SourcePathId}|{AssetType}"
-            : $"address:{Address}";
+    public string CanonicalKey => $"address:{Address}";
 
     public static PrefabPatchPrefabIdentity FromAddress(string address)
     {
@@ -159,8 +133,6 @@ public sealed class PrefabPatchRuntimeLocator
 public sealed class PrefabPatchObjectTarget
 {
     public PrefabPatchTargetKind Kind;
-    public string SourceSerializedFileName;
-    public long SourcePathId;
     public string ObjectType;
     public string OwnerPatchId;
     public string ObjectId;
@@ -187,8 +159,12 @@ public sealed class PrefabPatchObjectTarget
                     + $"{RuntimeLocator.ComponentType}:"
                     + $"{RuntimeLocator.ComponentOrdinal}";
 
-            return $"stock:{SourceSerializedFileName}:"
-                + $"{SourcePathId}:{ObjectType}";
+            var indices = RuntimeLocator?.SiblingIndices == null
+                ? ""
+                : string.Join(",", RuntimeLocator.SiblingIndices);
+            return $"indices:{indices}:{RuntimeLocator?.TargetKind}:"
+                + $"{RuntimeLocator?.ComponentType}:"
+                + $"{RuntimeLocator?.ComponentOrdinal}";
         }
     }
 }
@@ -226,8 +202,7 @@ public sealed class PrefabPatchValue
 
 /// <summary>
 /// Addressable or target-local Unity object reference used by
-/// SetObjectReference or a component fragment. Source identity is retained for
-/// compatibility diagnostics.
+/// SetObjectReference or a component fragment.
 /// </summary>
 [Serializable]
 public sealed class PrefabPatchObjectReference
@@ -235,10 +210,6 @@ public sealed class PrefabPatchObjectReference
     public PrefabPatchObjectReferenceKind Kind;
     public string Address;
     public string ExpectedType;
-    public string CatalogId;
-    public string SourceBundleFileName;
-    public string SourceSerializedFileName;
-    public long SourcePathId;
     public PrefabPatchObjectTarget Target;
 
     public static PrefabPatchObjectReference FromAddress(

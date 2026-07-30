@@ -280,6 +280,13 @@ public sealed class PrefabPatchLuaBuilder
     {
         try
         {
+            if (
+                value.Type == DataType.UserData
+                && value.UserData?.Object is T model
+            )
+            {
+                return model;
+            }
             var token = JsonUserData.GetJTokenForDynValue(value);
             token = NormalizeEmptyTables(token, typeof(T));
             var serializer = JsonSerializer.Create(

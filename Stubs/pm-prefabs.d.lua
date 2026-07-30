@@ -2,7 +2,7 @@
 -- Patch Manager declarative prefab-patch frontend.
 
 ---@alias PrefabPatchTarget table
----| { kind: '"Stock"', sourceSerializedFileName: string, sourcePathId: integer|string, objectType: string, runtimeLocator: table }
+---| { kind: '"Stock"', objectType: string, runtimeLocator: table }
 ---| { kind: '"PatchOwned"', ownerPatchId: string, objectId: string, objectType: string?, runtimeLocator: table? }
 ---| { kind: '"PatchComponent"', ownerPatchId: string, componentId: string, objectType: string? }
 
@@ -54,18 +54,6 @@
 ---@field pivot PrefabPatchValue?
 ---@field components PrefabPatchComponentFragment[]?
 ---@field children PrefabPatchObjectFragment[]?
-
----@class PrefabPatchIdentity
----@field address string
----@field catalogId string
----@field catalogHash string?
----@field sourceBundleFileName string
----@field sourceBundleHash string?
----@field sourceSerializedFileName string
----@field sourcePathId integer|string Use a decimal string for 64-bit IDs outside Lua's exact numeric range.
----@field assetType string
----@field structuralDescription string
----@field structuralFingerprint string
 
 ---@class PrefabPatchLuaBuilder
 PrefabPatchLuaBuilder = {}
@@ -162,6 +150,6 @@ function PrefabPatchLuaBuilder:Build() end
 function PrefabPatchLuaBuilder:Register() end
 
 ---@param name string Patch-local name; ModId is prepended automatically.
----@param target string|PrefabPatchIdentity Addressables key for handwritten patches; full identity tables are generated-tool input.
+---@param target string Stock prefab Addressables key.
 ---@return PrefabPatchLuaBuilder builder
 function PatchManagerCore:Prefab(name, target) end
