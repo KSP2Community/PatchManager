@@ -10,8 +10,8 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public static class PrefabPatchSchema
 {
-    public const int Version = 2;
-    public const int ComposerVersion = 2;
+    public const int Version = 1;
+    public const int ComposerVersion = 1;
     public const string AddressablesLabel = "patch-manager-prefab-patches";
 }
 
@@ -281,6 +281,7 @@ public sealed class PrefabPatchObjectFragment
 public sealed class PrefabPatchOperation
 {
     public string OperationId;
+    [JsonIgnore]
     public string PatchId;
     public PrefabPatchOperationKind Kind;
     public PrefabPatchObjectTarget Target;
@@ -329,9 +330,11 @@ public sealed class PrefabPatchManifest
 {
     public int SchemaVersion = PrefabPatchSchema.Version;
     public int ComposerVersion = PrefabPatchSchema.ComposerVersion;
+    public string PatchName;
+    [JsonIgnore]
     public string PatchId;
+    [JsonIgnore]
     public string ModId;
-    public string ModVersion;
     public PrefabPatchPrefabIdentity TargetPrefab;
     public PrefabPatchPass Pass = PrefabPatchPass.Default;
     public PrefabPatchOrdering Ordering = PrefabPatchOrdering.Default;

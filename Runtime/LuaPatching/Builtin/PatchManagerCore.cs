@@ -93,8 +93,7 @@ public sealed class PatchManagerCore
     public PrefabPatchLuaBuilder Prefab(
         ScriptExecutionContext context,
         string name,
-        DynValue target,
-        string modVersion = null
+        DynValue target
     )
     {
         if (!_universe.RegistrationOpen)
@@ -116,8 +115,7 @@ public sealed class PatchManagerCore
             new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
                 modId,
                 name,
-                identity,
-                modVersion
+                identity
             )
         );
     }

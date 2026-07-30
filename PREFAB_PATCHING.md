@@ -19,9 +19,17 @@ components, into nested serialized arrays/lists, to stock prefab objects, and
 to mod or stock Addressables. It also prevents `OnEnable` from observing a
 partially hydrated effective prefab.
 
-The first implementation was never released. Schema 2 is therefore the only
-accepted schema; there is no schema-1 migration path. Recompile any local
-experimental manifests from their authoring variants.
+This is still the initial prerelease schema (`schemaVersion: 1`,
+`composerVersion: 1`). There is no compatibility or migration layer. Recompile
+local experimental manifests from their authoring variants whenever the schema
+changes.
+
+Compiled JSON contains the local `patchName`, operations, dependencies, and
+target identity. It does not serialize a mod ID or mod version. In editor Play
+Mode, the owning Mod authoring asset supplies the ID. In a player, Patch
+Manager associates each manifest's Addressables catalog with the SpaceWarp
+descriptor that loaded it and uses that descriptor's `swinfo` ID. The
+fully-qualified `mod-id:patch-name` exists only in the resolved runtime model.
 
 ## Visual authoring
 
@@ -49,6 +57,7 @@ Register C# patches before `PrefabPatchRuntime.CloseRegistration()`:
 
 ```csharp
 using PatchManager.PrefabPatching;
+using PatchManager.CSharpPatching;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -59,7 +68,7 @@ var button = PrefabPatchComponentBuilder
         "m_TargetGraphic",
         PrefabPatchBuilder.TargetReference(
             PrefabPatchBuilder.PatchComponent(
-                "my-mod:toolbar",
+                "toolbar",
                 "toolbar:image"
             ),
             typeof(Graphic)
@@ -70,7 +79,7 @@ var image = PrefabPatchComponentBuilder
     .For<Image>("toolbar:image")
     .Build();
 
-new PrefabPatchBuilder("my-mod", "toolbar", targetIdentity, "1.0.0")
+Patching.Mod.PatchPrefab("toolbar", targetIdentity)
     .AddObject(
         "01-add-toolbar",
         stockParentTarget,
@@ -141,7 +150,9 @@ Pure Lua/C# patches still need the stock prefab's canonical identity and
 structural fingerprint, plus canonical stock-object targets. Those values are
 source-build-specific safety data, not name-based hierarchy paths. They can be
 copied from a visual compiler manifest for the same linked prefab. Patch-owned
-targets only need the owning patch ID plus stable object/component ID.
+targets only need the local owning patch name plus stable object/component ID.
+An explicit `other-mod:patch-name` is used only when targeting another mod's
+required patch.
 
 ## Runtime and compatibility behavior
 

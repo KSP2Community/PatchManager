@@ -10,6 +10,7 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public sealed class PrefabPatchBuilder
 {
+    private readonly string _modId;
     private readonly PrefabPatchManifest _manifest;
     private readonly HashSet<string> _needsMods = new(StringComparer.Ordinal);
     private readonly HashSet<string> _conflictsMods = new(
@@ -29,8 +30,7 @@ public sealed class PrefabPatchBuilder
     public PrefabPatchBuilder(
         string modId,
         string patchName,
-        PrefabPatchPrefabIdentity target,
-        string modVersion = null
+        PrefabPatchPrefabIdentity target
     )
     {
         if (string.IsNullOrWhiteSpace(modId))
@@ -40,14 +40,15 @@ public sealed class PrefabPatchBuilder
                 "Patch name is required.",
                 nameof(patchName)
             );
+        if (patchName.IndexOf(':') >= 0)
+            throw new ArgumentException(
+                "Patch name must be local to the mod and cannot contain ':'.",
+                nameof(patchName)
+            );
+        _modId = modId.Trim();
         _manifest = new PrefabPatchManifest
         {
-            PatchId =
-                patchName.IndexOf(':') >= 0
-                    ? patchName
-                    : modId + ":" + patchName,
-            ModId = modId,
-            ModVersion = modVersion,
+            PatchName = patchName.Trim(),
             TargetPrefab =
                 target ?? throw new ArgumentNullException(nameof(target))
         };
@@ -105,7 +106,10 @@ public sealed class PrefabPatchBuilder
     {
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        operation.PatchId = _manifest.PatchId;
+        operation.PatchId = PrefabPatchOwnership.Qualify(
+            _modId,
+            _manifest.PatchName
+        );
         _manifest.Operations.Add(operation);
         return this;
     }
@@ -292,7 +296,7 @@ public sealed class PrefabPatchBuilder
             .OrderBy(value => value, StringComparer.Ordinal)
             .ToArray();
         _manifest.ManifestHash = PrefabPatchJson.CalculateManifestHash(_manifest);
-        return _manifest;
+        return PrefabPatchOwnership.Bind(_manifest, _modId);
     }
 
     public PrefabPatchManifest Register()
@@ -319,13 +323,8 @@ public sealed class PrefabPatchBuilder
         return this;
     }
 
-    private IEnumerable<string> Normalize(IEnumerable<string> ids) =>
-        (ids ?? Array.Empty<string>()).Select(
-            id =>
-                id.IndexOf(':') >= 0
-                    ? id
-                    : _manifest.ModId + ":" + id
-        );
+    private static IEnumerable<string> Normalize(IEnumerable<string> ids) =>
+        ids ?? Array.Empty<string>();
 
     private static string[] Sorted(IEnumerable<string> values) =>
         values.OrderBy(value => value, StringComparer.Ordinal).ToArray();

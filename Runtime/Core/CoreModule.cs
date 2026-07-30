@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using KSP.Game;
 using KSP.Game.Flow;
@@ -11,6 +12,7 @@ using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using ReduxLib.Configuration;
 using ReduxLib.Configuration.Attributes;
+using SpaceWarp2.API.Mods;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
@@ -135,8 +137,28 @@ namespace PatchManager.Core
             Action<string> reject
         )
         {
+            var catalogOwners = PluginList.AllEnabledAndActivePlugins
+                .SelectMany(descriptor =>
+                    descriptor.AddressableResourceLocators.Select(locator =>
+                        new
+                        {
+                            locator.LocatorId,
+                            descriptor.Guid
+                        }
+                    )
+                )
+                .GroupBy(value => value.LocatorId, StringComparer.Ordinal)
+                .ToDictionary(
+                    group => group.Key,
+                    group =>
+                        group.Select(value => value.Guid)
+                            .Distinct(StringComparer.Ordinal)
+                            .Single(),
+                    StringComparer.Ordinal
+                );
             PrefabPatchRuntime.DiscoverAndResolve(
                 PatchingManager.Universe.AllMods,
+                catalogOwners,
                 resolve,
                 reject
             );

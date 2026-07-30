@@ -147,6 +147,5 @@ function PrefabPatchLuaBuilder:Register() end
 
 ---@param name string Patch-local name; ModId is prepended automatically.
 ---@param target PrefabPatchIdentity
----@param modVersion string?
 ---@return PrefabPatchLuaBuilder builder
-function PatchManagerCore:Prefab(name, target, modVersion) end
+function PatchManagerCore:Prefab(name, target) end

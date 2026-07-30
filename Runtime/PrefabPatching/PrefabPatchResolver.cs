@@ -140,6 +140,7 @@ public static class PrefabPatchResolver
         if (
             string.IsNullOrWhiteSpace(manifest.PatchId)
             || manifest.PatchId.IndexOf(':') <= 0
+            || string.IsNullOrWhiteSpace(manifest.PatchName)
         )
         {
             Add(
@@ -148,7 +149,8 @@ public static class PrefabPatchResolver
                 "PM-PREFAB-PATCH-ID",
                 manifest.PatchId,
                 null,
-                "Prefab patch IDs must be namespaced as 'mod-id:patch-id'."
+                "Prefab patch ownership has not been bound from its "
+                    + "containing mod."
             );
             return false;
         }
