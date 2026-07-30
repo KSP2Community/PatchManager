@@ -9,9 +9,6 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.Profiling;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using Object = UnityEngine.Object;
 
 namespace PatchManager.PrefabPatching;
@@ -81,6 +78,9 @@ public static class PrefabPatchRuntime
     public sealed class Metrics
     {
         public int DiscoveredManifestCount;
+        public int RegisteredManifestCount;
+        public int AddressableManifestCount;
+        public string[] ManifestSources = Array.Empty<string>();
         public int ResolvedPlanCount;
         public int CacheHitCount;
         public int CacheMissCount;
@@ -112,6 +112,7 @@ public static class PrefabPatchRuntime
         public IResourceLocation Location;
         public string OwnerModId;
         public string LocatorId;
+        public string Label;
     }
 
     private const string PlanCacheDirectory = "./pm_cache/prefabs";
@@ -126,13 +127,6 @@ public static class PrefabPatchRuntime
     public static Metrics CurrentMetrics { get; private set; } = new();
     public static IReadOnlyDictionary<string, PrefabPatchResolvedPlan> Plans =>
         Entries.ToDictionary(pair => pair.Key, pair => pair.Value.Plan);
-#if UNITY_EDITOR
-    /// <summary>
-    /// Editor integration hook that maps a compiled manifest asset path to
-    /// the Mod authoring asset (and therefore swinfo ID) that owns it.
-    /// </summary>
-    public static Func<string, string> EditorManifestOwnerResolver { get; set; }
-#endif
 
     /// <summary>
     /// Registers a fluent or generated C# manifest before registration closes.
@@ -165,14 +159,14 @@ public static class PrefabPatchRuntime
     ) =>
         DiscoverAndResolve(
             activeModIds,
-            new Dictionary<string, string>(StringComparer.Ordinal),
+            Array.Empty<PrefabPatchManifestSource>(),
             resolve,
             reject
         );
 
     public static void DiscoverAndResolve(
         ISet<string> activeModIds,
-        IReadOnlyDictionary<string, string> manifestCatalogOwners,
+        IReadOnlyCollection<PrefabPatchManifestSource> manifestSources,
         Action resolve,
         Action<string> reject
     )
@@ -185,17 +179,26 @@ public static class PrefabPatchRuntime
         try
         {
             var manifests = new List<PrefabPatchManifest>(Registered);
-#if UNITY_EDITOR
-            manifests.AddRange(LoadEditorProjectManifests());
-            ResolveDiscoveredManifests(
-                manifests,
-                activeModIds,
-                stopwatch,
-                resolve
-            );
-            return;
-#else
-            var locations = FindManifestLocations(manifestCatalogOwners);
+            CurrentMetrics.RegisteredManifestCount = Registered.Count;
+            CurrentMetrics.ManifestSources = (manifestSources
+                    ?? Array.Empty<PrefabPatchManifestSource>())
+                .Where(source =>
+                    source != null
+                    && !string.IsNullOrWhiteSpace(source.OwnerModId)
+                    && !string.IsNullOrWhiteSpace(
+                        source.AddressablesLabel
+                    )
+                )
+                .Select(source =>
+                    source.OwnerModId.Trim()
+                    + ": "
+                    + source.AddressablesLabel.Trim()
+                )
+                .Distinct(StringComparer.Ordinal)
+                .OrderBy(value => value, StringComparer.Ordinal)
+                .ToArray();
+            var locations = FindManifestLocations(manifestSources);
+            CurrentMetrics.AddressableManifestCount = locations.Count;
             if (locations.Count > 0)
             {
                 foreach (var source in locations)
@@ -235,7 +238,9 @@ public static class PrefabPatchRuntime
                         throw new InvalidDataException(
                             $"Could not load prefab patch manifest "
                                 + $"'{source.Location.PrimaryKey}' from "
-                                + $"catalog '{source.LocatorId}'.",
+                                + $"label '{source.Label}' owned by "
+                                + $"'{source.OwnerModId}' in catalog "
+                                + $"'{source.LocatorId}'.",
                             exception
                         );
                     }
@@ -253,63 +258,12 @@ public static class PrefabPatchRuntime
                 stopwatch,
                 resolve
             );
-#endif
         }
         catch (Exception exception)
         {
             RejectDiscovery(stopwatch, reject, exception);
         }
     }
-
-#if UNITY_EDITOR
-    private static IEnumerable<PrefabPatchManifest> LoadEditorProjectManifests()
-    {
-        foreach (
-            var path in AssetDatabase
-                .GetAllAssetPaths()
-                .Where(path =>
-                    path.EndsWith(
-                        ".prefabpatch.json",
-                        StringComparison.OrdinalIgnoreCase
-                    )
-                )
-                .OrderBy(path => path, StringComparer.Ordinal)
-        )
-        {
-            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-            if (asset == null)
-                continue;
-
-            PrefabPatchManifest manifest;
-            try
-            {
-                manifest =
-                    PrefabPatchJson.Deserialize<PrefabPatchManifest>(
-                        asset.text
-                    );
-            }
-            catch (Exception exception)
-            {
-                throw new InvalidDataException(
-                    $"Could not parse prefab patch manifest '{path}'.",
-                    exception
-                );
-            }
-
-            if (manifest == null)
-                continue;
-            var owner = EditorManifestOwnerResolver?.Invoke(path);
-            if (string.IsNullOrWhiteSpace(owner))
-            {
-                throw new InvalidDataException(
-                    $"Could not determine the owning Mod asset for prefab "
-                        + $"patch manifest '{path}'."
-                );
-            }
-            yield return PrefabPatchOwnership.Bind(manifest, owner);
-        }
-    }
-#endif
 
     private static void ResolveDiscoveredManifests(
         IReadOnlyCollection<PrefabPatchManifest> manifests,
@@ -378,46 +332,81 @@ public static class PrefabPatchRuntime
     }
 
     private static List<ManifestLocation> FindManifestLocations(
-        IReadOnlyDictionary<string, string> catalogOwners
+        IReadOnlyCollection<PrefabPatchManifestSource> manifestSources
     )
     {
-        return Addressables.ResourceLocators
-            .SelectMany(locator =>
+        var sources = (manifestSources
+                ?? Array.Empty<PrefabPatchManifestSource>())
+            .Where(source =>
+                source != null
+                && !string.IsNullOrWhiteSpace(source.OwnerModId)
+                && !string.IsNullOrWhiteSpace(source.AddressablesLabel)
+            )
+            .Select(source => new PrefabPatchManifestSource
             {
-                if (
-                    locator == null
-                    || !locator.Locate(
-                    PrefabPatchSchema.AddressablesLabel,
-                    typeof(TextAsset),
-                    out var locations
-                )
-                )
-                {
-                    return Array.Empty<ManifestLocation>();
-                }
-
-                string ownerModId = null;
-                catalogOwners?.TryGetValue(
-                    locator.LocatorId,
-                    out ownerModId
-                );
-                if (string.IsNullOrWhiteSpace(ownerModId))
-                {
-                    throw new InvalidDataException(
-                        $"Addressables catalog '{locator.LocatorId}' contains "
-                            + "prefab patch manifests but is not associated "
-                            + "with a loaded mod swinfo descriptor."
-                    );
-                }
-                return locations
-                    .Where(location => location != null)
-                    .Select(location => new ManifestLocation
-                    {
-                        Location = location,
-                        OwnerModId = ownerModId,
-                        LocatorId = locator.LocatorId
-                    });
+                OwnerModId = source.OwnerModId.Trim(),
+                AddressablesLabel = source.AddressablesLabel.Trim()
             })
+            .Distinct(PrefabPatchManifestSourceComparer.Instance)
+            .OrderBy(source => source.OwnerModId, StringComparer.Ordinal)
+            .ThenBy(
+                source => source.AddressablesLabel,
+                StringComparer.Ordinal
+            )
+            .ToArray();
+
+        foreach (
+            var duplicate in sources
+                .GroupBy(
+                    source => source.AddressablesLabel,
+                    StringComparer.Ordinal
+                )
+                .Where(group =>
+                    group.Select(source => source.OwnerModId)
+                        .Distinct(StringComparer.Ordinal)
+                        .Skip(1)
+                        .Any()
+                )
+        )
+        {
+            throw new InvalidDataException(
+                $"Prefab patch Addressables label '{duplicate.Key}' is "
+                    + "declared by multiple active mods: "
+                    + string.Join(
+                        ", ",
+                        duplicate.Select(source => source.OwnerModId)
+                            .Distinct(StringComparer.Ordinal)
+                    )
+            );
+        }
+
+        return sources
+            .SelectMany(source =>
+                Addressables.ResourceLocators.SelectMany(locator =>
+                {
+                    if (
+                        locator == null
+                        || !locator.Locate(
+                            source.AddressablesLabel,
+                            typeof(TextAsset),
+                            out var locations
+                        )
+                    )
+                    {
+                        return Array.Empty<ManifestLocation>();
+                    }
+
+                    return locations
+                        .Where(location => location != null)
+                        .Select(location => new ManifestLocation
+                        {
+                            Location = location,
+                            OwnerModId = source.OwnerModId,
+                            LocatorId = locator.LocatorId,
+                            Label = source.AddressablesLabel
+                        });
+                })
+            )
             .GroupBy(
                 source =>
                     $"{source.Location.ProviderId}\0"
@@ -446,11 +435,57 @@ public static class PrefabPatchRuntime
                 source => source.Location.PrimaryKey,
                 StringComparer.Ordinal
             )
+            .ThenBy(source => source.OwnerModId, StringComparer.Ordinal)
             .ThenBy(
                 source => source.Location.InternalId,
                 StringComparer.Ordinal
             )
             .ToList();
+    }
+
+    private sealed class PrefabPatchManifestSourceComparer :
+        IEqualityComparer<PrefabPatchManifestSource>
+    {
+        public static readonly PrefabPatchManifestSourceComparer Instance =
+            new();
+
+        public bool Equals(
+            PrefabPatchManifestSource left,
+            PrefabPatchManifestSource right
+        ) =>
+            ReferenceEquals(left, right)
+            || (
+                left != null
+                && right != null
+                && string.Equals(
+                    left.OwnerModId,
+                    right.OwnerModId,
+                    StringComparison.Ordinal
+                )
+                && string.Equals(
+                    left.AddressablesLabel,
+                    right.AddressablesLabel,
+                    StringComparison.Ordinal
+                )
+            );
+
+        public int GetHashCode(PrefabPatchManifestSource source)
+        {
+            if (source == null)
+                return 0;
+            unchecked
+            {
+                return (
+                        StringComparer.Ordinal.GetHashCode(
+                            source.OwnerModId ?? string.Empty
+                        )
+                        * 397
+                    )
+                    ^ StringComparer.Ordinal.GetHashCode(
+                        source.AddressablesLabel ?? string.Empty
+                    );
+            }
+        }
     }
 
     /// <summary>
@@ -733,10 +768,14 @@ public static class PrefabPatchRuntime
             $"    Schema: {PrefabPatchSchema.Version}",
             $"    Composer: {PrefabPatchSchema.ComposerVersion}",
             $"    Discovered Manifests: {CurrentMetrics.DiscoveredManifestCount}",
+            $"    Registered Manifests: {CurrentMetrics.RegisteredManifestCount}",
+            $"    Addressable Manifests: {CurrentMetrics.AddressableManifestCount}",
             $"    Resolved Plans: {CurrentMetrics.ResolvedPlanCount}",
             $"    Plan Cache Hits: {CurrentMetrics.CacheHitCount}",
             $"    Plan Cache Misses: {CurrentMetrics.CacheMissCount}"
         };
+        foreach (var source in CurrentMetrics.ManifestSources)
+            lines.Add($"    Manifest Source: {source}");
         foreach (
             var pair in Entries.OrderBy(
                 value => value.Key,

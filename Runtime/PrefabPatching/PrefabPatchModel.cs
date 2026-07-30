@@ -12,7 +12,18 @@ public static class PrefabPatchSchema
 {
     public const int Version = 1;
     public const int ComposerVersion = 1;
-    public const string AddressablesLabel = "patch-manager-prefab-patches";
+    public const string AddressablesLabelSuffix = "_prefab_patches";
+}
+
+/// <summary>
+/// One active mod's Addressables discovery boundary for declarative prefab
+/// patches. The mod descriptor supplies ownership; the manifest asset address
+/// is deliberately not part of patch identity.
+/// </summary>
+public sealed class PrefabPatchManifestSource
+{
+    public string OwnerModId;
+    public string AddressablesLabel;
 }
 
 [JsonConverter(typeof(StringEnumConverter))]

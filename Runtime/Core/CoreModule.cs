@@ -137,28 +137,25 @@ namespace PatchManager.Core
             Action<string> reject
         )
         {
-            var catalogOwners = PluginList.AllEnabledAndActivePlugins
-                .SelectMany(descriptor =>
-                    descriptor.AddressableResourceLocators.Select(locator =>
-                        new
+            var manifestSources =
+                PluginList.AllEnabledAndActivePlugins
+                    .Where(descriptor =>
+                        !string.IsNullOrWhiteSpace(
+                            descriptor.AddressablePrefabPatchLabel
+                        )
+                    )
+                    .Select(descriptor =>
+                        new PrefabPatchManifestSource
                         {
-                            locator.LocatorId,
-                            descriptor.Guid
+                            OwnerModId = descriptor.Guid,
+                            AddressablesLabel =
+                                descriptor.AddressablePrefabPatchLabel
                         }
                     )
-                )
-                .GroupBy(value => value.LocatorId, StringComparer.Ordinal)
-                .ToDictionary(
-                    group => group.Key,
-                    group =>
-                        group.Select(value => value.Guid)
-                            .Distinct(StringComparer.Ordinal)
-                            .Single(),
-                    StringComparer.Ordinal
-                );
+                    .ToArray();
             PrefabPatchRuntime.DiscoverAndResolve(
                 PatchingManager.Universe.AllMods,
-                catalogOwners,
+                manifestSources,
                 resolve,
                 reject
             );

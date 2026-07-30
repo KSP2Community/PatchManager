@@ -25,11 +25,16 @@ local experimental manifests from their authoring variants whenever the schema
 changes.
 
 Compiled JSON contains the local `patchName`, operations, dependencies, and
-target identity. It does not serialize a mod ID or mod version. In editor Play
-Mode, the owning Mod authoring asset supplies the ID. In a player, Patch
-Manager associates each manifest's Addressables catalog with the SpaceWarp
-descriptor that loaded it and uses that descriptor's `swinfo` ID. The
-fully-qualified `mod-id:patch-name` exists only in the resolved runtime model.
+target identity. It does not serialize a mod ID or mod version. Each SpaceWarp
+descriptor declares an `addressable_prefab_patch_label`; Patch Manager queries
+that label in both editor Play Mode and players and assigns the descriptor's
+`swinfo` ID to every returned manifest. The manifest asset's own Addressables
+address is not patch identity. The fully-qualified `mod-id:patch-name` exists
+only in the resolved runtime model.
+
+KSP2UnityTools-generated mods default to `<mod-id>_prefab_patches`. Redux uses
+`redux_prefab_patches`. Script TextAssets use the parallel
+`<mod-id>_patches`/`redux_patches` convention. Loose Lua files remain supported.
 
 ## Visual authoring
 
