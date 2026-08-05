@@ -63,14 +63,16 @@ namespace PatchManager.Core
                 CacheManager.InvalidateCache();
             }
 
+            // Both passes feed the checksum, so both run before the decision reads it. Mod bodies have already
+            // run at this point, so CollectScriptResults finds the addressable-sourced scripts in memory.
             PatchingManager.HashScriptFiles();
+            PatchingManager.CollectScriptResults();
             var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
             var tail = new List<GenericFlowAction>();
             if (!isValid)
             {
                 _wasCacheInvalidated = true;
-                tail.Add(new GenericFlowAction("Patch Manager: Collecting script results", CollectScriptResults));
                 tail.Add(new GenericFlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 tail.Add(new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
                 tail.Add(new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
@@ -107,12 +109,6 @@ namespace PatchManager.Core
         private static void RegisterAllPatches(Action resolve, Action<string> reject)
         {
             PatchingManager.RegisterPatches();
-            resolve();
-        }
-
-        private static void CollectScriptResults(Action resolve, Action<string> reject)
-        {
-            PatchingManager.CollectScriptResults();
             resolve();
         }
 
