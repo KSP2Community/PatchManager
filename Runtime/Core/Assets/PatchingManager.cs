@@ -97,24 +97,64 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Hashes every mod's declared script files into the patch-cache checksum.
+        /// Hashes every mod's Lua files into the patch-cache checksum.
         /// </summary>
         /// <remarks>
-        /// Runs before the cache-validity decision (and before the bodies run), so the decision sees whether the
-        /// patch files changed since last launch. Addressable-sourced scripts are not files and are gated by mod
-        /// version instead. Uses the same string hash as <see cref="CollectScriptResults" /> so the two agree.
+        /// Runs before the cache-validity decision, so the decision sees whether any patch source changed since
+        /// last launch. Uses the same string hash as <see cref="CollectScriptResults" /> so the two agree.
         /// </remarks>
         public static void HashScriptFiles()
         {
             foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
             {
-                foreach (var file in descriptor.ScriptFiles)
+                // KSP1 mods carry no Lua and their folders are whole GameData trees, so sweeping them is a lot
+                // of directory walking for nothing.
+                if (descriptor.IsKsp1)
                 {
-                    if (File.Exists(file))
-                    {
-                        CurrentPatchHashes.Patches[file] = Hash.FromString(File.ReadAllText(file));
-                    }
+                    continue;
                 }
+
+                HashScriptsForMod(descriptor.Folder?.FullName, descriptor.ScriptFiles, CurrentPatchHashes);
+            }
+        }
+
+        /// <summary>
+        /// Hashes one mod's declared script files plus every other Lua file in its folder into
+        /// <paramref name="into" />.
+        /// </summary>
+        /// <remarks>
+        /// The folder sweep is what catches the <c>_</c>-prefixed library files. Those are excluded from a
+        /// descriptor's declared scripts because they are pulled in with <c>require</c> rather than run as
+        /// bodies, but they shape patch output all the same, so leaving them out of the key lets an edited
+        /// library serve stale archives. Sweeping the folder also covers a library required across mods, since
+        /// every mod's own folder gets swept in turn.
+        /// </remarks>
+        /// <param name="modFolder">The mod's folder, or null when it has none.</param>
+        /// <param name="declaredScriptFiles">The script files the descriptor declared at discovery.</param>
+        /// <param name="into">The patch hash set to record into.</param>
+        internal static void HashScriptsForMod(
+            string modFolder,
+            IEnumerable<string> declaredScriptFiles,
+            PatchHashes into
+        )
+        {
+            foreach (var file in declaredScriptFiles)
+            {
+                if (File.Exists(file))
+                {
+                    into.Patches[file] = Hash.FromString(File.ReadAllText(file));
+                }
+            }
+
+            if (string.IsNullOrEmpty(modFolder) || !Directory.Exists(modFolder))
+            {
+                return;
+            }
+
+            // Keyed by path, so a file the descriptor already declared just gets the same hash written twice.
+            foreach (var file in Directory.EnumerateFiles(modFolder, "*.lua", SearchOption.AllDirectories))
+            {
+                into.Patches[file] = Hash.FromString(File.ReadAllText(file));
             }
         }
 

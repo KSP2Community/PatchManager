@@ -116,8 +116,36 @@ namespace PatchManager.Core.Cache
 
             OpenArchives.Clear();
 
-            Directory.Delete(CACHE_DIRECTORY, true);
+            try
+            {
+                DeleteDirectory(CACHE_DIRECTORY);
+            }
+            catch (Exception e)
+            {
+                Logging.LogError($"Failed to clear the patch cache: {e}");
+            }
+
             CreateCacheFolderIfNotExists();
+        }
+
+        private static void DeleteDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                return;
+            }
+
+            foreach (var directory in Directory.GetDirectories(path))
+            {
+                DeleteDirectory(directory);
+            }
+
+            foreach (var file in Directory.GetFiles(path))
+            {
+                File.Delete(file);
+            }
+
+            Directory.Delete(path, false);
         }
 
         /// <summary>
