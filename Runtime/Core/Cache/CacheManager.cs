@@ -36,6 +36,13 @@ namespace PatchManager.Core.Cache
         [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticState()
         {
+            foreach (var archive in OpenArchives.Values)
+            {
+                archive.Dispose();
+            }
+
+            OpenArchives.Clear();
+            CacheValidLabels.Clear();
             _inventory = null;
         }
 

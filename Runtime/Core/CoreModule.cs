@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using KSP.Game;
@@ -39,14 +39,15 @@ namespace PatchManager.Core
         private bool _wasCacheInvalidated;
 
         /// <summary>
-        /// Schedules the post-body cache-validity decision.
+        /// Registers the post-body cache-validity decision for the current play session.
         /// </summary>
         /// <remarks>
         /// The decision needs the config values mod bodies bind, so it runs in <see cref="DecideCacheValidity" />
-        /// (after the per-plugin body phase) rather than here in Init, which runs in PM's Awake, before any body.
+        /// (after the per-plugin body phase) rather than during one-time module initialization, which runs before any body.
         /// </remarks>
-        public override void Init()
+        public override void RegisterPlaySessionActions()
         {
+            _wasCacheInvalidated = false;
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                 () => new FlowAction("Patch Manager: Closing Registration", CloseRegistration));
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,
