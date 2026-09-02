@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using KSP.Game;
 using KSP.Game.Flow;
 using PatchManager.Core.Assets;
 using PatchManager.Core.Cache;
 using PatchManager.LuaPatching;
+using PatchManager.PrefabPatching;
 using PatchManager.Shared;
 using PatchManager.Shared.Modules;
 using ReduxLib.Configuration;
 using ReduxLib.Configuration.Attributes;
+using SpaceWarp2.API.Mods;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
@@ -81,6 +84,12 @@ namespace PatchManager.Core
                 tail.Add(new GenericFlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
             }
 
+            tail.Add(
+                new GenericFlowAction(
+                    "Patch Manager: Resolving Prefab Patch Plans",
+                    ResolvePrefabPatchPlans
+                )
+            );
             tail.Add(new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
 
             // Splice the tail in right after this step. Insert back-to-front so each Insert at the same index
@@ -97,7 +106,37 @@ namespace PatchManager.Core
         private static void CloseRegistration(Action resolve, Action<string> reject)
         {
             PatchingManager.Universe.RegistrationOpen = false;
+            PrefabPatchRuntime.CloseRegistration();
             resolve();
+        }
+
+        private static void ResolvePrefabPatchPlans(
+            Action resolve,
+            Action<string> reject
+        )
+        {
+            var manifestSources =
+                PluginList.AllEnabledAndActivePlugins
+                    .Where(descriptor =>
+                        !string.IsNullOrWhiteSpace(
+                            descriptor.AddressablePrefabPatchLabel
+                        )
+                    )
+                    .Select(descriptor =>
+                        new PrefabPatchManifestSource
+                        {
+                            OwnerModId = descriptor.Guid,
+                            AddressablesLabel =
+                                descriptor.AddressablePrefabPatchLabel
+                        }
+                    )
+                    .ToArray();
+            PrefabPatchRuntime.DiscoverAndResolve(
+                PatchingManager.Universe.AllMods,
+                manifestSources,
+                resolve,
+                reject
+            );
         }
 
         private void SavePatchSummary(Action resolve, Action<string> reject)
@@ -146,6 +185,7 @@ namespace PatchManager.Core
             }
 
             Locators.Register(new ArchiveResourceLocator());
+            Locators.Register(PrefabPatchRuntime.RegisterResourceProvider());
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
                 CacheManager.Inventory.DefinitionCount;
             GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =
@@ -188,6 +228,15 @@ namespace PatchManager.Core
             {
                 text.text += $"\n- {label}";
             }
+
+            var prefabMetrics = PrefabPatchRuntime.CurrentMetrics;
+            text.text +=
+                $"\nPrefab plans: {prefabMetrics.ResolvedPlanCount}"
+                + $" ({prefabMetrics.CacheHitCount} cache hit(s), "
+                + $"{prefabMetrics.CacheMissCount} miss(es))";
+            text.text +=
+                $"\nRetained prefab handles: "
+                + $"{prefabMetrics.RetainedAddressablesHandles}";
 
             text.visible = true;
             text.style.display = DisplayStyle.Flex;

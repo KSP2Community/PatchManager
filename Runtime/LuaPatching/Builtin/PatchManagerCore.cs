@@ -86,6 +86,44 @@ public sealed class PatchManagerCore
     }
 
     /// <summary>
+    /// Begins a declarative prefab patch for one stock Addressables key.
+    /// </summary>
+    public PrefabPatchLuaBuilder Prefab(
+        ScriptExecutionContext context,
+        string name,
+        DynValue target
+    )
+    {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException(
+                $"PM:Prefab('{name}') can only be called during patch "
+                    + "registration."
+            );
+        }
+
+        var modId = context.CurrentGlobalEnv
+            .Get("ModId")
+            .CastToString();
+        if (target.Type != DataType.String)
+        {
+            throw new ScriptRuntimeException(
+                "PM:Prefab expects the stock prefab's Addressables key."
+            );
+        }
+        var identity =
+            global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
+                .FromAddress(target.String);
+        return new PrefabPatchLuaBuilder(
+            new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
+                modId,
+                name,
+                identity
+            )
+        );
+    }
+
+    /// <summary>
     /// Queues a brand-new asset for creation under the given label and address.
     /// </summary>
     /// <param name="converter">The name of the converter that will serialize <paramref name="newObject" /> to JSON.</param>

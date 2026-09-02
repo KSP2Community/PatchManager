@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using PatchManager.Core.Cache.Json;
+using PatchManager.PrefabPatching;
 using PatchManager.Shared;
 
 namespace PatchManager.Core.Cache
@@ -200,7 +201,7 @@ namespace PatchManager.Core.Cache
 
         public static void SaveSummary(Summary universeSummary)
         {
-            File.WriteAllText("./pm_summary.log", universeSummary.Dump());
+            PatchManagerSummaryLog.UpdateCoreSummary(universeSummary.Dump());
         }
     }
 }
