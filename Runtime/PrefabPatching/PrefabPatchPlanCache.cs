@@ -12,22 +12,42 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public sealed class PrefabPatchPlanCache
 {
+    /// <summary>
+    /// Describes the resolved plan and how it was obtained.
+    /// </summary>
     public sealed class Result
     {
+        /// <summary>The resolved prefab patch plan.</summary>
         public PrefabPatchResolvedPlan Plan;
+        /// <summary>Whether the plan came from a valid cache entry.</summary>
         public bool CacheHit;
+        /// <summary>Whether a backup cache entry was restored.</summary>
         public bool RecoveredBackup;
+        /// <summary>Total cache lookup or resolve time in milliseconds.</summary>
         public long ElapsedMilliseconds;
+        /// <summary>Cache file path, when a target produced one.</summary>
         public string Path;
     }
 
     private readonly string _directory;
 
+    /// <summary>
+    /// Creates a cache rooted at the specified directory.
+    /// </summary>
+    /// <param name="directory">Directory for per-prefab plan files.</param>
     public PrefabPatchPlanCache(string directory)
     {
         _directory = Path.GetFullPath(directory);
     }
 
+    /// <summary>
+    /// Loads a compatible cached plan or resolves and atomically stores a new one.
+    /// </summary>
+    /// <param name="source">Manifests targeting one prefab.</param>
+    /// <param name="activeModIds">IDs of mods active in the current session.</param>
+    /// <param name="unityVersion">Unity version used by the running game.</param>
+    /// <param name="targetPlatform">Current runtime platform identifier.</param>
+    /// <returns>The resolved plan and cache outcome.</returns>
     public Result LoadOrResolve(
         IEnumerable<PrefabPatchManifest> source,
         ISet<string> activeModIds,
@@ -110,6 +130,11 @@ public sealed class PrefabPatchPlanCache
         };
     }
 
+    /// <summary>
+    /// Gets the cache file path for a target prefab identity.
+    /// </summary>
+    /// <param name="target">Target prefab identity.</param>
+    /// <returns>The absolute plan-cache path.</returns>
     public string GetPath(PrefabPatchPrefabIdentity target)
     {
         var identity = target?.Address ?? target?.CanonicalKey ?? "invalid";
@@ -119,6 +144,14 @@ public sealed class PrefabPatchPlanCache
         );
     }
 
+    /// <summary>
+    /// Calculates the fingerprint used to invalidate resolved plans.
+    /// </summary>
+    /// <param name="manifests">Manifests targeting one prefab.</param>
+    /// <param name="activeModIds">IDs of active mods.</param>
+    /// <param name="unityVersion">Current Unity version.</param>
+    /// <param name="targetPlatform">Current runtime platform.</param>
+    /// <returns>A canonical source fingerprint.</returns>
     public static string CalculateSourceFingerprint(
         IEnumerable<PrefabPatchManifest> manifests,
         ISet<string> activeModIds,

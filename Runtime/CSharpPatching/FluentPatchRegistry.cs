@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PatchManager.LuaPatching;
 using PatchManager.Shared;
+using UnityEngine;
 
 namespace PatchManager.CSharpPatching
 {
@@ -16,6 +17,13 @@ namespace PatchManager.CSharpPatching
     {
         private static readonly List<PatchDefinition> Pending = new();
         private static bool _closed;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            Pending.Clear();
+            _closed = false;
+        }
 
         /// <summary>
         /// Builds a patch for the given converter and label, queues it for registration, and returns it for chaining.

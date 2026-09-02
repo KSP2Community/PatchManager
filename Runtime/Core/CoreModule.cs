@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -42,39 +42,15 @@ namespace PatchManager.Core
         private bool _wasCacheInvalidated;
 
         /// <summary>
-        /// Schedules the post-body cache-validity decision.
+        /// Registers the post-body cache-validity decision for the current play session.
         /// </summary>
         /// <remarks>
         /// The decision needs the config values mod bodies bind, so it runs in <see cref="DecideCacheValidity" />
-        /// (after the per-plugin body phase) rather than here in Init, which runs in PM's Awake, before any body.
+        /// (after the per-plugin body phase) rather than during one-time module initialization, which runs before any body.
         /// </remarks>
-        public override void Init()
+        public override void RegisterPlaySessionActions()
         {
-            RegisterLoadingActions();
-        }
-
-        [RuntimeInitializeOnLoadMethod(
-            RuntimeInitializeLoadType.AfterAssembliesLoaded
-        )]
-        private static void RestoreLoadingActionsWithoutDomainReload()
-        {
-            // SpaceWarp resets GeneralLoadingActions at SubsystemRegistration.
-            // With domain reload disabled PatchManager's MonoBehaviour and module
-            // instances survive, so Awake/Init do not run again to repopulate it.
-            // AfterAssembliesLoaded runs after that reset and before SpaceWarp
-            // builds the new play session's loading flow.
-            foreach (var module in ModuleManager.Modules)
-            {
-                if (module is CoreModule core)
-                {
-                    core.RegisterLoadingActions();
-                    return;
-                }
-            }
-        }
-
-        private void RegisterLoadingActions()
-        {
+            _wasCacheInvalidated = false;
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(0,
                 () => new FlowAction("Patch Manager: Closing Registration", CloseRegistration));
             SpaceWarp2.API.Loading.Loading.GeneralLoadingActions.Insert(1,

@@ -19,6 +19,11 @@ namespace PatchManager.Shared.Modules
         }
 
         /// <inheritdoc />
+        public virtual void RegisterPlaySessionActions()
+        {
+        }
+
+        /// <inheritdoc />
         public virtual void Load()
         {
         }

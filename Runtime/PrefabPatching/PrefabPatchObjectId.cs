@@ -11,6 +11,9 @@ namespace PatchManager.PrefabPatching
     {
         [SerializeField] private string _id;
 
+        /// <summary>
+        /// Gets or sets the patch-local stable object ID.
+        /// </summary>
         public string Id
         {
             get => _id;

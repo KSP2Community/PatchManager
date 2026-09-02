@@ -32,7 +32,7 @@ namespace PatchManager.Core.Assets
         /// </summary>
         internal static Universe Universe;
 
-        private static readonly PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
+        private static PatchHashes CurrentPatchHashes = PatchHashes.CreateDefault();
 
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
@@ -62,12 +62,13 @@ namespace PatchManager.Core.Assets
         private static void ResetStaticState()
         {
             Universe = null;
-            _createdAssets = new();
-            UseIndentedOutput = default;
-            TotalPatchCount = default;
-            TotalErrorCount = default;
-            TotalNewAssetCount = default;
-            TotalDefinitionPatchCount = default;
+            CurrentPatchHashes = PatchHashes.CreateDefault();
+            _createdAssets = new Dictionary<string, List<(string name, LuaAsset data)>>();
+            UseIndentedOutput = false;
+            TotalPatchCount = 0;
+            TotalErrorCount = 0;
+            TotalNewAssetCount = 0;
+            TotalDefinitionPatchCount = 0;
             _rebuildStates = null;
         }
 

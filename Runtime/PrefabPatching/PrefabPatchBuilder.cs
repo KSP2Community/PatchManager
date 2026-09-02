@@ -8,6 +8,13 @@ namespace PatchManager.PrefabPatching;
 /// Fluent C# frontend that generates the same declarative public manifest used
 /// by visual prefab-variant compilation.
 /// </summary>
+/// <remarks>
+/// Calls only mutate an in-memory <see cref="PrefabPatchManifest" />. Call
+/// <see cref="Build" /> to inspect or serialize it, or <see cref="Register" />
+/// during mod initialization to add it to the current runtime registration
+/// window. Dependency and ordering methods share the
+/// <see cref="IPatchRelationships" /> model used by ordinary JSON patches.
+/// </remarks>
 public sealed class PrefabPatchBuilder
 {
     private readonly string _modId;
@@ -27,6 +34,10 @@ public sealed class PrefabPatchBuilder
     private readonly HashSet<string> _beforeMods = new(StringComparer.Ordinal);
     private readonly HashSet<string> _afterMods = new(StringComparer.Ordinal);
 
+    /// <summary>Creates a builder for a prefab identified by a complete target descriptor.</summary>
+    /// <param name="modId">The owning SpaceWarp mod ID.</param>
+    /// <param name="patchName">A mod-local patch name without a colon.</param>
+    /// <param name="target">The stock prefab identity to patch.</param>
     public PrefabPatchBuilder(
         string modId,
         string patchName,
@@ -54,6 +65,10 @@ public sealed class PrefabPatchBuilder
         };
     }
 
+    /// <summary>Creates a builder for a stock prefab Addressables key.</summary>
+    /// <param name="modId">The owning SpaceWarp mod ID.</param>
+    /// <param name="patchName">A mod-local patch name without a colon.</param>
+    /// <param name="address">The stock prefab Addressables key.</param>
     public PrefabPatchBuilder(
         string modId,
         string patchName,
@@ -64,54 +79,68 @@ public sealed class PrefabPatchBuilder
         PrefabPatchPrefabIdentity.FromAddress(address)
     ) { }
 
+    /// <summary>Places the patch in the Early pass.</summary>
     public PrefabPatchBuilder Early()
     {
         _manifest.Pass = PrefabPatchPass.Early;
         return this;
     }
 
+    /// <summary>Places the patch in the Late pass.</summary>
     public PrefabPatchBuilder Late()
     {
         _manifest.Pass = PrefabPatchPass.Late;
         return this;
     }
 
+    /// <summary>Places the patch in the First bucket of its pass.</summary>
     public PrefabPatchBuilder First()
     {
         _manifest.Ordering = PrefabPatchOrdering.First;
         return this;
     }
 
+    /// <summary>Places the patch in the Last bucket of its pass.</summary>
     public PrefabPatchBuilder Last()
     {
         _manifest.Ordering = PrefabPatchOrdering.Last;
         return this;
     }
 
+    /// <summary>Requires the supplied mod IDs to be active.</summary>
     public PrefabPatchBuilder NeedsMod(params string[] ids) =>
         Add(_needsMods, ids);
 
+    /// <summary>Disables the patch when any supplied mod ID is active.</summary>
     public PrefabPatchBuilder ConflictsMod(params string[] ids) =>
         Add(_conflictsMods, ids);
 
+    /// <summary>Requires the supplied patch IDs to be enabled.</summary>
     public PrefabPatchBuilder NeedsPatch(params string[] ids) =>
         Add(_needsPatches, Normalize(ids));
 
+    /// <summary>Disables the patch when any supplied patch ID is enabled.</summary>
     public PrefabPatchBuilder ConflictsPatch(params string[] ids) =>
         Add(_conflictsPatches, Normalize(ids));
 
+    /// <summary>Orders this patch before the supplied patch IDs in the same bucket.</summary>
     public PrefabPatchBuilder BeforePatch(params string[] ids) =>
         Add(_beforePatches, Normalize(ids));
 
+    /// <summary>Orders this patch after the supplied patch IDs in the same bucket.</summary>
     public PrefabPatchBuilder AfterPatch(params string[] ids) =>
         Add(_afterPatches, Normalize(ids));
 
+    /// <summary>Orders this patch before patches owned by the supplied mods.</summary>
     public PrefabPatchBuilder BeforeMod(params string[] ids) =>
         Add(_beforeMods, ids);
 
+    /// <summary>Orders this patch after patches owned by the supplied mods.</summary>
     public PrefabPatchBuilder AfterMod(params string[] ids) =>
         Add(_afterMods, ids);
 
+    /// <summary>Adds a normalized operation and binds it to this patch.</summary>
+    /// <param name="operation">The operation to append in call order.</param>
     public PrefabPatchBuilder AddOperation(PrefabPatchOperation operation)
     {
         if (operation == null)
@@ -124,6 +153,7 @@ public sealed class PrefabPatchBuilder
         return this;
     }
 
+    /// <summary>Writes a serialized value on the target object or component.</summary>
     public PrefabPatchBuilder SetValue(
         string operationId,
         PrefabPatchObjectTarget target,
@@ -141,6 +171,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Changes a target GameObject's active state.</summary>
     public PrefabPatchBuilder SetActive(
         string operationId,
         PrefabPatchObjectTarget target,
@@ -156,6 +187,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Writes an Addressable or target-local Unity object reference.</summary>
     public PrefabPatchBuilder SetObjectReference(
         string operationId,
         PrefabPatchObjectTarget target,
@@ -173,6 +205,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Suppresses a target GameObject in the effective prefab.</summary>
     public PrefabPatchBuilder SuppressObject(
         string operationId,
         PrefabPatchObjectTarget target
@@ -186,6 +219,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Adds an inline patch-owned hierarchy beneath a target parent.</summary>
     public PrefabPatchBuilder AddObject(
         string operationId,
         PrefabPatchObjectTarget parent,
@@ -201,6 +235,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Adds a serialized component fragment to a target GameObject.</summary>
     public PrefabPatchBuilder AddComponent(
         string operationId,
         PrefabPatchObjectTarget target,
@@ -216,6 +251,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Removes the targeted component from the effective prefab.</summary>
     public PrefabPatchBuilder RemoveComponent(
         string operationId,
         PrefabPatchObjectTarget target
@@ -229,6 +265,7 @@ public sealed class PrefabPatchBuilder
             }
         );
 
+    /// <summary>Adds configuration values that participate in cache invalidation.</summary>
     public PrefabPatchBuilder Configuration(params string[] inputs)
     {
         _manifest.ConfigurationInputs = Sorted(
@@ -240,6 +277,7 @@ public sealed class PrefabPatchBuilder
         return this;
     }
 
+    /// <summary>Targets an object introduced by this or a required patch.</summary>
     public static PrefabPatchObjectTarget PatchObject(
         string ownerPatchId,
         string objectId
@@ -256,6 +294,7 @@ public sealed class PrefabPatchBuilder
             }
         };
 
+    /// <summary>Targets a component introduced by this or a required patch.</summary>
     public static PrefabPatchObjectTarget PatchComponent(
         string ownerPatchId,
         string componentId
@@ -272,6 +311,7 @@ public sealed class PrefabPatchBuilder
             }
         };
 
+    /// <summary>Targets a stock GameObject by hierarchy path.</summary>
     public static PrefabPatchObjectTarget GameObjectAt(
         string hierarchyPath
     ) =>
@@ -282,6 +322,7 @@ public sealed class PrefabPatchBuilder
             0
         );
 
+    /// <summary>Targets a typed stock component by hierarchy path and ordinal.</summary>
     public static PrefabPatchObjectTarget ComponentAt<TComponent>(
         string hierarchyPath,
         int componentOrdinal = 0
@@ -292,6 +333,7 @@ public sealed class PrefabPatchBuilder
             componentOrdinal
         );
 
+    /// <summary>Targets a stock component by assembly-qualified type and ordinal.</summary>
     public static PrefabPatchObjectTarget ComponentAt(
         string hierarchyPath,
         string componentType,
@@ -311,6 +353,7 @@ public sealed class PrefabPatchBuilder
         );
     }
 
+    /// <summary>Creates a reference to an Addressable asset.</summary>
     public static PrefabPatchObjectReference Addressable(
         string address,
         Type expectedType = null
@@ -320,6 +363,7 @@ public sealed class PrefabPatchBuilder
             expectedType?.AssemblyQualifiedName
         );
 
+    /// <summary>Creates a reference to another object in the composed prefab.</summary>
     public static PrefabPatchObjectReference TargetReference(
         PrefabPatchObjectTarget target,
         Type expectedType = null
@@ -329,6 +373,7 @@ public sealed class PrefabPatchBuilder
             expectedType?.AssemblyQualifiedName
         );
 
+    /// <summary>Normalizes relationships, capabilities, ownership, and the manifest hash.</summary>
     public PrefabPatchManifest Build()
     {
         _manifest.NeedsMods = Sorted(_needsMods);
@@ -348,6 +393,7 @@ public sealed class PrefabPatchBuilder
         return PrefabPatchOwnership.Bind(_manifest, _modId);
     }
 
+    /// <summary>Builds and registers the manifest for the current play session.</summary>
     public PrefabPatchManifest Register()
     {
         var manifest = Build();

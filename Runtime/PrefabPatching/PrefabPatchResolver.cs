@@ -8,8 +8,21 @@ namespace PatchManager.PrefabPatching;
 /// Deterministic dependency, ordering, target, and conflict resolver for the
 /// prefab asset domain. It does not execute Unity mutations.
 /// </summary>
+/// <remarks>
+/// Resolution validates ownership and target compatibility, removes patches
+/// whose mod or patch constraints are not satisfied, topologically sorts each
+/// pass and ordering bucket, validates patch-owned target lifetimes, and
+/// flattens operations into one cacheable plan. All tie-breaking uses ordinal
+/// patch IDs so identical inputs produce identical output.
+/// </remarks>
 public static class PrefabPatchResolver
 {
+    /// <summary>Resolves manifests for one stock prefab into an executable plan.</summary>
+    /// <param name="source">The owned manifests targeting the prefab.</param>
+    /// <param name="activeModIds">The active SpaceWarp mod IDs.</param>
+    /// <param name="unityVersion">The Unity version included in the cache input.</param>
+    /// <param name="targetPlatform">The runtime platform included in the cache input.</param>
+    /// <returns>A plan containing ordered operations and all diagnostics.</returns>
     public static PrefabPatchResolvedPlan Resolve(
         IEnumerable<PrefabPatchManifest> source,
         ISet<string> activeModIds,
@@ -377,138 +390,181 @@ public static class PrefabPatchResolver
                 )
             )
             {
-                var members = enabled
-                    .Select(id => byId[id])
-                    .Where(
-                        manifest =>
-                            manifest.Pass == pass && manifest.Ordering == bucket
-                    )
-                    .ToDictionary(
-                        manifest => manifest.PatchId,
-                        StringComparer.Ordinal
-                    );
-                var incoming = members.Keys.ToDictionary(
-                    id => id,
-                    _ => new HashSet<string>(StringComparer.Ordinal),
-                    StringComparer.Ordinal
+                result.AddRange(
+                    OrderBucket(byId, enabled, pass, bucket, plan, ref fatal)
                 );
-                var outgoing = members.Keys.ToDictionary(
-                    id => id,
-                    _ => new HashSet<string>(StringComparer.Ordinal),
-                    StringComparer.Ordinal
-                );
-
-                foreach (var manifest in members.Values)
-                {
-                    foreach (var dependency in Safe(manifest.NeedsPatches))
-                    {
-                        if (!enabled.Contains(dependency))
-                            continue;
-                        var dependencyManifest = byId[dependency];
-                        if (
-                            Rank(dependencyManifest) > Rank(manifest)
-                        )
-                        {
-                            Add(
-                                plan,
-                                PrefabPatchDiagnosticSeverity.Error,
-                                "PM-PREFAB-DEPENDENCY-ORDER",
-                                manifest.PatchId,
-                                null,
-                                $"Patch '{manifest.PatchId}' requires later "
-                                    + $"patch '{dependency}'."
-                            );
-                            fatal = true;
-                        }
-                        else if (members.ContainsKey(dependency))
-                        {
-                            AddEdge(
-                                dependency,
-                                manifest.PatchId,
-                                incoming,
-                                outgoing
-                            );
-                        }
-                    }
-
-                    AddSameBucketEdges(
-                        manifest,
-                        manifest.AfterPatches,
-                        after: true,
-                        members,
-                        incoming,
-                        outgoing,
-                        plan
-                    );
-                    AddSameBucketEdges(
-                        manifest,
-                        manifest.BeforePatches,
-                        after: false,
-                        members,
-                        incoming,
-                        outgoing,
-                        plan
-                    );
-                    AddModEdges(
-                        manifest,
-                        manifest.AfterMods,
-                        after: true,
-                        members,
-                        incoming,
-                        outgoing
-                    );
-                    AddModEdges(
-                        manifest,
-                        manifest.BeforeMods,
-                        after: false,
-                        members,
-                        incoming,
-                        outgoing
-                    );
-                }
-
-                var ready = new SortedSet<string>(
-                    incoming
-                        .Where(pair => pair.Value.Count == 0)
-                        .Select(pair => pair.Key),
-                    StringComparer.Ordinal
-                );
-                var emitted = new HashSet<string>(StringComparer.Ordinal);
-                while (ready.Count > 0)
-                {
-                    var id = ready.Min;
-                    ready.Remove(id);
-                    emitted.Add(id);
-                    result.Add(members[id]);
-                    foreach (var next in outgoing[id].OrderBy(
-                                 value => value,
-                                 StringComparer.Ordinal
-                             ))
-                    {
-                        incoming[next].Remove(id);
-                        if (incoming[next].Count == 0)
-                            ready.Add(next);
-                    }
-                }
-
-                var cyclic = members.Keys
-                    .Where(id => !emitted.Contains(id))
-                    .OrderBy(id => id, StringComparer.Ordinal)
-                    .ToArray();
-                if (cyclic.Length > 0)
-                {
-                    Add(
-                        plan,
-                        PrefabPatchDiagnosticSeverity.Error,
-                        "PM-PREFAB-ORDER-CYCLE",
-                        null,
-                        null,
-                        "Ordering cycle among prefab patches: "
-                            + string.Join(", ", cyclic) + "."
-                    );
-                    fatal = true;
-                }
             }
+        }
+
+        return result;
+    }
+
+    private static IEnumerable<PrefabPatchManifest> OrderBucket(
+        IReadOnlyDictionary<string, PrefabPatchManifest> byId,
+        ISet<string> enabled,
+        PrefabPatchPass pass,
+        PrefabPatchOrdering bucket,
+        PrefabPatchResolvedPlan plan,
+        ref bool fatal
+    )
+    {
+        var members = enabled
+            .Select(id => byId[id])
+            .Where(manifest => manifest.Pass == pass && manifest.Ordering == bucket)
+            .ToDictionary(manifest => manifest.PatchId, StringComparer.Ordinal);
+        var incoming = CreateEdgeMap(members.Keys);
+        var outgoing = CreateEdgeMap(members.Keys);
+
+        foreach (var manifest in members.Values)
+        {
+            AddDependencyEdges(
+                manifest,
+                byId,
+                enabled,
+                members,
+                incoming,
+                outgoing,
+                plan,
+                ref fatal
+            );
+            AddOrderingEdges(manifest, members, incoming, outgoing, plan);
+        }
+
+        return TopologicalSort(members, incoming, outgoing, plan, ref fatal);
+    }
+
+    private static Dictionary<string, HashSet<string>> CreateEdgeMap(
+        IEnumerable<string> patchIds
+    ) =>
+        patchIds.ToDictionary(
+            id => id,
+            _ => new HashSet<string>(StringComparer.Ordinal),
+            StringComparer.Ordinal
+        );
+
+    private static void AddDependencyEdges(
+        PrefabPatchManifest manifest,
+        IReadOnlyDictionary<string, PrefabPatchManifest> byId,
+        ISet<string> enabled,
+        IReadOnlyDictionary<string, PrefabPatchManifest> members,
+        IDictionary<string, HashSet<string>> incoming,
+        IDictionary<string, HashSet<string>> outgoing,
+        PrefabPatchResolvedPlan plan,
+        ref bool fatal
+    )
+    {
+        foreach (var dependency in Safe(manifest.NeedsPatches))
+        {
+            if (!enabled.Contains(dependency))
+                continue;
+            if (Rank(byId[dependency]) > Rank(manifest))
+            {
+                Add(
+                    plan,
+                    PrefabPatchDiagnosticSeverity.Error,
+                    "PM-PREFAB-DEPENDENCY-ORDER",
+                    manifest.PatchId,
+                    null,
+                    $"Patch '{manifest.PatchId}' requires later patch "
+                        + $"'{dependency}'."
+                );
+                fatal = true;
+            }
+            else if (members.ContainsKey(dependency))
+            {
+                AddEdge(dependency, manifest.PatchId, incoming, outgoing);
+            }
+        }
+    }
+
+    private static void AddOrderingEdges(
+        PrefabPatchManifest manifest,
+        IReadOnlyDictionary<string, PrefabPatchManifest> members,
+        IDictionary<string, HashSet<string>> incoming,
+        IDictionary<string, HashSet<string>> outgoing,
+        PrefabPatchResolvedPlan plan
+    )
+    {
+        AddSameBucketEdges(
+            manifest,
+            manifest.AfterPatches,
+            true,
+            members,
+            incoming,
+            outgoing,
+            plan
+        );
+        AddSameBucketEdges(
+            manifest,
+            manifest.BeforePatches,
+            false,
+            members,
+            incoming,
+            outgoing,
+            plan
+        );
+        AddModEdges(
+            manifest,
+            manifest.AfterMods,
+            true,
+            members,
+            incoming,
+            outgoing
+        );
+        AddModEdges(
+            manifest,
+            manifest.BeforeMods,
+            false,
+            members,
+            incoming,
+            outgoing
+        );
+    }
+
+    private static IEnumerable<PrefabPatchManifest> TopologicalSort(
+        IReadOnlyDictionary<string, PrefabPatchManifest> members,
+        IDictionary<string, HashSet<string>> incoming,
+        IReadOnlyDictionary<string, HashSet<string>> outgoing,
+        PrefabPatchResolvedPlan plan,
+        ref bool fatal
+    )
+    {
+        var result = new List<PrefabPatchManifest>();
+        var ready = new SortedSet<string>(
+            incoming.Where(pair => pair.Value.Count == 0).Select(pair => pair.Key),
+            StringComparer.Ordinal
+        );
+        var emitted = new HashSet<string>(StringComparer.Ordinal);
+        while (ready.Count > 0)
+        {
+            var id = ready.Min;
+            ready.Remove(id);
+            emitted.Add(id);
+            result.Add(members[id]);
+            foreach (var next in outgoing[id].OrderBy(value => value, StringComparer.Ordinal))
+            {
+                incoming[next].Remove(id);
+                if (incoming[next].Count == 0)
+                    ready.Add(next);
+            }
+        }
+
+        var cyclic = members.Keys
+            .Where(id => !emitted.Contains(id))
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+        if (cyclic.Length > 0)
+        {
+            Add(
+                plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-ORDER-CYCLE",
+                null,
+                null,
+                "Ordering cycle among prefab patches: "
+                    + string.Join(", ", cyclic) + "."
+            );
+            fatal = true;
         }
 
         return result;
@@ -520,243 +576,267 @@ public static class PrefabPatchResolver
         ref bool fatal
     )
     {
-        var patchOrder = ordered
-            .Select((manifest, index) => (manifest.PatchId, index))
-            .ToDictionary(pair => pair.PatchId, pair => pair.index);
-        var introduced = new Dictionary<string, string>(StringComparer.Ordinal);
-        var introducedComponents = new Dictionary<string, string>(
-            StringComparer.Ordinal
-        );
-        var writes = new Dictionary<string, PrefabPatchOperation>(
-            StringComparer.Ordinal
-        );
-
+        var state = new OperationValidationState(ordered, plan);
         foreach (var manifest in ordered)
         {
-            var needs = new HashSet<string>(
-                Safe(manifest.NeedsPatches),
-                StringComparer.Ordinal
-            );
             foreach (
                 var operation in manifest.Operations
                     .Where(value => value != null)
             )
             {
-                operation.PatchId = manifest.PatchId;
-                if (string.IsNullOrWhiteSpace(operation.OperationId))
-                {
-                    Add(
-                        plan,
-                        PrefabPatchDiagnosticSeverity.Error,
-                        "PM-PREFAB-OPERATION-ID",
-                        manifest.PatchId,
-                        null,
-                        $"Patch '{manifest.PatchId}' contains an operation "
-                            + "without an ID."
-                    );
-                    fatal = true;
-                    continue;
-                }
-
-                if (
-                    operation.Kind != PrefabPatchOperationKind.AddObject
-                    && operation.Target == null
-                )
-                {
-                    Add(
-                        plan,
-                        PrefabPatchDiagnosticSeverity.Error,
-                        "PM-PREFAB-MISSING-TARGET",
-                        manifest.PatchId,
-                        operation.OperationId,
-                        $"Operation '{operation.OperationId}' has no target."
-                    );
-                    fatal = true;
-                    continue;
-                }
-
-                if (
-                    operation.Target?.Kind
-                        == PrefabPatchTargetKind.PatchOwned
-                    || operation.Target?.Kind
-                        == PrefabPatchTargetKind.PatchComponent
-                )
-                {
-                    var owner = operation.Target.OwnerPatchId;
-                    var isComponent =
-                        operation.Target.Kind
-                        == PrefabPatchTargetKind.PatchComponent;
-                    var ownedId = isComponent
-                        ? operation.Target.ComponentId
-                        : operation.Target.ObjectId;
-                    var objectKey = $"{owner}:{ownedId}";
-                    if (
-                        !string.Equals(
-                            owner,
-                            manifest.PatchId,
-                            StringComparison.Ordinal
-                        )
-                        && !needs.Contains(owner)
-                    )
-                    {
-                        Add(
-                            plan,
-                            PrefabPatchDiagnosticSeverity.Error,
-                            "PM-PREFAB-OWNER-NOT-REQUIRED",
-                            manifest.PatchId,
-                            operation.OperationId,
-                            $"Operation '{operation.OperationId}' targets "
-                                + $"'{objectKey}' but does not require owning "
-                                + $"patch '{owner}'."
-                        );
-                        fatal = true;
-                        continue;
-                    }
-
-                    if (
-                        !(isComponent
-                            ? introducedComponents.ContainsKey(objectKey)
-                            : introduced.ContainsKey(objectKey))
-                        || (
-                            !string.Equals(
-                                owner,
-                                manifest.PatchId,
-                                StringComparison.Ordinal
-                            )
-                            && (
-                                !patchOrder.TryGetValue(
-                                    owner,
-                                    out var ownerOrder
-                                )
-                                || ownerOrder
-                                    >= patchOrder[manifest.PatchId]
-                            )
-                        )
-                    )
-                    {
-                        Add(
-                            plan,
-                            PrefabPatchDiagnosticSeverity.Error,
-                            "PM-PREFAB-PATCH-OWNED-TARGET",
-                            manifest.PatchId,
-                            operation.OperationId,
-                            $"Patch-owned "
-                                + (isComponent ? "component" : "object")
-                                + $" target '{objectKey}' is not introduced "
-                                + "by an earlier required operation."
-                        );
-                        fatal = true;
-                        continue;
-                    }
-                }
-
-                if (operation.Kind == PrefabPatchOperationKind.AddObject)
-                {
-                    if (
-                        !RegisterFragment(
-                            operation.AddedObject,
-                            manifest.PatchId,
-                            operation.OperationId,
-                            introduced,
-                            introducedComponents,
-                            plan
-                        )
-                    )
-                        fatal = true;
-                }
-                else if (
-                    operation.Kind == PrefabPatchOperationKind.AddComponent
-                )
-                {
-                    var componentId = operation.AddedComponent?.ComponentId;
-                    var componentKey =
-                        $"{manifest.PatchId}:{componentId}";
-                    if (
-                        string.IsNullOrWhiteSpace(componentId)
-                        || string.IsNullOrWhiteSpace(
-                            operation.AddedComponent?.ComponentType
-                        )
-                    )
-                    {
-                        Add(
-                            plan,
-                            PrefabPatchDiagnosticSeverity.Error,
-                            "PM-PREFAB-ADDED-COMPONENT-ID",
-                            manifest.PatchId,
-                            operation.OperationId,
-                            $"Added component operation "
-                                + $"'{operation.OperationId}' needs a stable "
-                                + "component ID and assembly-qualified type."
-                        );
-                        fatal = true;
-                        continue;
-                    }
-                    if (
-                        !introducedComponents.TryAdd(
-                            componentKey,
-                            operation.OperationId
-                        )
-                    )
-                    {
-                        Add(
-                            plan,
-                            PrefabPatchDiagnosticSeverity.Error,
-                            "PM-PREFAB-DUPLICATE-COMPONENT-ID",
-                            manifest.PatchId,
-                            operation.OperationId,
-                            $"Patch-owned component '{componentKey}' is "
-                                + "introduced more than once."
-                        );
-                        fatal = true;
-                        continue;
-                    }
-                }
-
-                var conflictKey = operation.ConflictKey;
-                if (
-                    IsWrite(operation.Kind)
-                    && writes.TryGetValue(conflictKey, out var previous)
-                )
-                {
-                    if (
-                        string.Equals(
-                            OperationPayload(previous),
-                            OperationPayload(operation),
-                            StringComparison.Ordinal
-                        )
-                    )
-                    {
-                        Add(
-                            plan,
-                            PrefabPatchDiagnosticSeverity.Info,
-                            "PM-PREFAB-IDENTICAL-WRITE",
-                            manifest.PatchId,
-                            operation.OperationId,
-                            $"'{manifest.PatchId}' repeats the identical write "
-                                + $"from '{previous.PatchId}' to '{conflictKey}'."
-                        );
-                    }
-                    else
-                    {
-                        Add(
-                            plan,
-                            PrefabPatchDiagnosticSeverity.Warning,
-                            "PM-PREFAB-SOFT-CONFLICT",
-                            manifest.PatchId,
-                            operation.OperationId,
-                            $"Different writes target '{conflictKey}'. "
-                                + $"Deterministic order selects "
-                                + $"'{manifest.PatchId}' over "
-                                + $"'{previous.PatchId}'."
-                        );
-                    }
-                }
-
-                if (IsWrite(operation.Kind))
-                    writes[conflictKey] = operation;
-                plan.Operations.Add(operation);
+                ValidateOperation(manifest, operation, state);
             }
         }
+
+        fatal |= state.Fatal;
+    }
+
+    private sealed class OperationValidationState
+    {
+        public readonly IReadOnlyDictionary<string, int> PatchOrder;
+        public readonly Dictionary<string, string> IntroducedObjects = new(
+            StringComparer.Ordinal
+        );
+        public readonly Dictionary<string, string> IntroducedComponents = new(
+            StringComparer.Ordinal
+        );
+        public readonly Dictionary<string, PrefabPatchOperation> Writes = new(
+            StringComparer.Ordinal
+        );
+        public readonly PrefabPatchResolvedPlan Plan;
+        public bool Fatal;
+
+        public OperationValidationState(
+            IReadOnlyList<PrefabPatchManifest> ordered,
+            PrefabPatchResolvedPlan plan
+        )
+        {
+            PatchOrder = ordered
+                .Select((manifest, index) => (manifest.PatchId, index))
+                .ToDictionary(pair => pair.PatchId, pair => pair.index);
+            Plan = plan;
+        }
+    }
+
+    private static void ValidateOperation(
+        PrefabPatchManifest manifest,
+        PrefabPatchOperation operation,
+        OperationValidationState state
+    )
+    {
+        operation.PatchId = manifest.PatchId;
+        if (!ValidateOperationHeader(manifest, operation, state))
+            return;
+        if (!ValidatePatchOwnedTarget(manifest, operation, state))
+            return;
+        if (!RegisterIntroducedContent(manifest, operation, state))
+            return;
+
+        RecordWriteConflict(manifest, operation, state);
+        state.Plan.Operations.Add(operation);
+    }
+
+    private static bool ValidateOperationHeader(
+        PrefabPatchManifest manifest,
+        PrefabPatchOperation operation,
+        OperationValidationState state
+    )
+    {
+        if (string.IsNullOrWhiteSpace(operation.OperationId))
+        {
+            Add(
+                state.Plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-OPERATION-ID",
+                manifest.PatchId,
+                null,
+                $"Patch '{manifest.PatchId}' contains an operation without an ID."
+            );
+            state.Fatal = true;
+            return false;
+        }
+
+        if (
+            operation.Kind != PrefabPatchOperationKind.AddObject
+            && operation.Target == null
+        )
+        {
+            Add(
+                state.Plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-MISSING-TARGET",
+                manifest.PatchId,
+                operation.OperationId,
+                $"Operation '{operation.OperationId}' has no target."
+            );
+            state.Fatal = true;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool ValidatePatchOwnedTarget(
+        PrefabPatchManifest manifest,
+        PrefabPatchOperation operation,
+        OperationValidationState state
+    )
+    {
+        var target = operation.Target;
+        if (
+            target?.Kind != PrefabPatchTargetKind.PatchOwned
+            && target?.Kind != PrefabPatchTargetKind.PatchComponent
+        )
+        {
+            return true;
+        }
+
+        var owner = target.OwnerPatchId;
+        var isComponent = target.Kind == PrefabPatchTargetKind.PatchComponent;
+        var ownedId = isComponent ? target.ComponentId : target.ObjectId;
+        var targetKey = $"{owner}:{ownedId}";
+        var ownerIsCurrentPatch = string.Equals(
+            owner,
+            manifest.PatchId,
+            StringComparison.Ordinal
+        );
+        var needs = new HashSet<string>(
+            Safe(manifest.NeedsPatches),
+            StringComparer.Ordinal
+        );
+        if (!ownerIsCurrentPatch && !needs.Contains(owner))
+        {
+            Add(
+                state.Plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-OWNER-NOT-REQUIRED",
+                manifest.PatchId,
+                operation.OperationId,
+                $"Operation '{operation.OperationId}' targets '{targetKey}' but "
+                    + $"does not require owning patch '{owner}'."
+            );
+            state.Fatal = true;
+            return false;
+        }
+
+        var introduced = isComponent
+            ? state.IntroducedComponents.ContainsKey(targetKey)
+            : state.IntroducedObjects.ContainsKey(targetKey);
+        var ownerRunsEarlier = ownerIsCurrentPatch
+            || (
+                state.PatchOrder.TryGetValue(owner, out var ownerOrder)
+                && ownerOrder < state.PatchOrder[manifest.PatchId]
+            );
+        if (introduced && ownerRunsEarlier)
+            return true;
+
+        Add(
+            state.Plan,
+            PrefabPatchDiagnosticSeverity.Error,
+            "PM-PREFAB-PATCH-OWNED-TARGET",
+            manifest.PatchId,
+            operation.OperationId,
+            "Patch-owned "
+                + (isComponent ? "component" : "object")
+                + $" target '{targetKey}' is not introduced by an earlier "
+                + "required operation."
+        );
+        state.Fatal = true;
+        return false;
+    }
+
+    private static bool RegisterIntroducedContent(
+        PrefabPatchManifest manifest,
+        PrefabPatchOperation operation,
+        OperationValidationState state
+    )
+    {
+        if (operation.Kind == PrefabPatchOperationKind.AddObject)
+        {
+            var valid = RegisterFragment(
+                operation.AddedObject,
+                manifest.PatchId,
+                operation.OperationId,
+                state.IntroducedObjects,
+                state.IntroducedComponents,
+                state.Plan
+            );
+            state.Fatal |= !valid;
+            return true;
+        }
+
+        if (operation.Kind != PrefabPatchOperationKind.AddComponent)
+            return true;
+
+        var componentId = operation.AddedComponent?.ComponentId;
+        var componentKey = $"{manifest.PatchId}:{componentId}";
+        if (
+            string.IsNullOrWhiteSpace(componentId)
+            || string.IsNullOrWhiteSpace(operation.AddedComponent?.ComponentType)
+        )
+        {
+            Add(
+                state.Plan,
+                PrefabPatchDiagnosticSeverity.Error,
+                "PM-PREFAB-ADDED-COMPONENT-ID",
+                manifest.PatchId,
+                operation.OperationId,
+                $"Added component operation '{operation.OperationId}' needs a "
+                    + "stable component ID and assembly-qualified type."
+            );
+            state.Fatal = true;
+            return false;
+        }
+        if (state.IntroducedComponents.TryAdd(componentKey, operation.OperationId))
+            return true;
+
+        Add(
+            state.Plan,
+            PrefabPatchDiagnosticSeverity.Error,
+            "PM-PREFAB-DUPLICATE-COMPONENT-ID",
+            manifest.PatchId,
+            operation.OperationId,
+            $"Patch-owned component '{componentKey}' is introduced more than once."
+        );
+        state.Fatal = true;
+        return false;
+    }
+
+    private static void RecordWriteConflict(
+        PrefabPatchManifest manifest,
+        PrefabPatchOperation operation,
+        OperationValidationState state
+    )
+    {
+        if (!IsWrite(operation.Kind))
+            return;
+
+        var conflictKey = operation.ConflictKey;
+        if (state.Writes.TryGetValue(conflictKey, out var previous))
+        {
+            var identical = string.Equals(
+                OperationPayload(previous),
+                OperationPayload(operation),
+                StringComparison.Ordinal
+            );
+            Add(
+                state.Plan,
+                identical
+                    ? PrefabPatchDiagnosticSeverity.Info
+                    : PrefabPatchDiagnosticSeverity.Warning,
+                identical ? "PM-PREFAB-IDENTICAL-WRITE" : "PM-PREFAB-SOFT-CONFLICT",
+                manifest.PatchId,
+                operation.OperationId,
+                identical
+                    ? $"'{manifest.PatchId}' repeats the identical write from "
+                        + $"'{previous.PatchId}' to '{conflictKey}'."
+                    : $"Different writes target '{conflictKey}'. Deterministic "
+                        + $"order selects '{manifest.PatchId}' over "
+                        + $"'{previous.PatchId}'."
+            );
+        }
+
+        state.Writes[conflictKey] = operation;
     }
 
     private static string BuildInputHash(

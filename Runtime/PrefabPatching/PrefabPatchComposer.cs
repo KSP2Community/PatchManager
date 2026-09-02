@@ -15,6 +15,14 @@ namespace PatchManager.PrefabPatching;
 /// Applies a validated resolved plan once to a loaded external prefab asset.
 /// The caller owns and retains the Addressables handles.
 /// </summary>
+/// <remarks>
+/// Composition runs in three phases: create every patch-owned object and
+/// component under an inactive safety root, apply serialized values in resolved
+/// order, then restore deferred Unity object references. This prevents Unity
+/// lifecycle callbacks from observing a partially hydrated hierarchy. The
+/// supplied prefab is mutated in place only after structural compatibility has
+/// been verified.
+/// </remarks>
 public static class PrefabPatchComposer
 {
     private sealed class PendingReference
@@ -39,20 +47,32 @@ public static class PrefabPatchComposer
         public int Mode;
     }
 
+    /// <summary>Describes the outcome and objects created by one composition.</summary>
     public sealed class Result
     {
+        /// <summary>Whether every operation completed successfully.</summary>
         public bool Success;
+        /// <summary>The failure message when <see cref="Success" /> is false.</summary>
         public string Failure;
+        /// <summary>Total synchronous composition time.</summary>
         public long ElapsedMilliseconds;
+        /// <summary>The number of operations applied before completion or failure.</summary>
         public int AppliedOperationCount;
+        /// <summary>Patch-owned GameObjects keyed by namespaced patch and object ID.</summary>
         public Dictionary<string, GameObject> PatchOwnedObjects = new(
             StringComparer.Ordinal
         );
+        /// <summary>Patch-owned components keyed by namespaced patch and component ID.</summary>
         public Dictionary<string, Component> PatchOwnedComponents = new(
             StringComparer.Ordinal
         );
     }
 
+    /// <summary>Applies a validated resolved plan to a loaded prefab immediately.</summary>
+    /// <param name="prefab">The mutable prefab template.</param>
+    /// <param name="plan">A valid plan produced by <see cref="PrefabPatchResolver" />.</param>
+    /// <param name="references">Preloaded Addressable objects keyed by address.</param>
+    /// <returns>A result containing diagnostics and introduced-object maps.</returns>
     public static Result ApplySynchronously(
         GameObject prefab,
         PrefabPatchResolvedPlan plan,

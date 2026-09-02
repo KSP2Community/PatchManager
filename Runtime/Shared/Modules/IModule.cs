@@ -23,6 +23,16 @@ namespace PatchManager.Shared.Modules
         /// Implementations typically use this to register actions with the FlowManager.
         /// </remarks>
         public void Init();
+
+        /// <summary>
+        /// Registers callbacks in host-owned collections that are recreated for every Play Mode session.
+        /// </summary>
+        /// <remarks>
+        /// With Domain Reload disabled, module instances survive between editor Play Mode sessions while
+        /// SpaceWarp resets its loading-action registries. Implementations must only register per-session
+        /// callbacks here; one-time type discovery and other persistent initialization belongs in <see cref="Init" />.
+        /// </remarks>
+        public void RegisterPlaySessionActions();
     
         /// <summary>
         /// Called from the host mod's OnPreInitialized, the first SpaceWarp init stage, before the game is loaded.

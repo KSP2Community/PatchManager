@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace PatchManager.Shared.Modules
 {
@@ -11,6 +12,26 @@ namespace PatchManager.Shared.Modules
     internal static class ModuleManager
     {
         internal static readonly List<IModule> Modules = new();
+
+        private static bool _playSessionActionsRegistered;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetPlaySessionState()
+        {
+            _playSessionActionsRegistered = false;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void RestorePlaySessionActions()
+        {
+            // On the first run the modules do not exist until PatchManager.Awake, which calls InitAll below.
+            // On later editor runs with Domain Reload disabled the module instances persist, but SpaceWarp's
+            // loading registries have just been reset and must be populated again before its loading flow is built.
+            if (Modules.Count > 0)
+            {
+                RegisterPlaySessionActionsAll();
+            }
+        }
 
         /// <summary>
         /// Registers a PatchManager module DLL to be loaded. The module must contain a single class that inherits
@@ -38,6 +59,23 @@ namespace PatchManager.Shared.Modules
             {
                 module.Init();
             }
+
+            RegisterPlaySessionActionsAll();
+        }
+
+        private static void RegisterPlaySessionActionsAll()
+        {
+            if (_playSessionActionsRegistered)
+            {
+                return;
+            }
+
+            foreach (var module in Modules)
+            {
+                module.RegisterPlaySessionActions();
+            }
+
+            _playSessionActionsRegistered = true;
         }
 
         internal static void LoadAll()

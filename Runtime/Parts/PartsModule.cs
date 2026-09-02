@@ -12,11 +12,18 @@ namespace PatchManager.Parts
     public class PartsModule : BaseModule
     {
         /// <summary>
-        /// Snapshots the available module-data adapters and registers the saved-vessel part-definition update flow action.
+        /// Snapshots the available module-data adapters.
         /// </summary>
         public override void Init()
         {
             PartsUtilities.GrabModuleDataAdapters();
+        }
+
+        /// <summary>
+        /// Registers the saved-vessel part-definition update action for the current play session.
+        /// </summary>
+        public override void RegisterPlaySessionActions()
+        {
             SaveLoad.AddFlowActionToCampaignLoadAfter<UpdateSavedVesselPartDefinitions>("Parsing parts text assets");
         }
     }

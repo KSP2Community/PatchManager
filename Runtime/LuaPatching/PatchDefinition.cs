@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using MoonSharp.Interpreter;
 using Newtonsoft.Json.Linq;
 using PatchManager.LuaPatching.Utility;
+using PatchManager.PrefabPatching;
 using PatchManager.Shared;
 
 namespace PatchManager.LuaPatching;
@@ -13,7 +14,7 @@ namespace PatchManager.LuaPatching;
 /// A registered patch operation: which converter, which addressables target, what callback to run, and at which stage.
 /// </summary>
 [MoonSharpUserData]
-public class PatchDefinition
+public class PatchDefinition : IPatchRelationships
 {
     /// <summary>
     /// The pass a patch runs in.
@@ -513,6 +514,15 @@ public class PatchDefinition
     /// The patch's precomputed run-order index across all registered patches.
     /// </summary>
     [MoonSharpHidden] public int Order;
+
+    IEnumerable<string> IPatchRelationships.NeedsMods => NeedsMods;
+    IEnumerable<string> IPatchRelationships.ConflictsMods => ConflictsMods;
+    IEnumerable<string> IPatchRelationships.NeedsPatches => NeedsPatches;
+    IEnumerable<string> IPatchRelationships.ConflictsPatches => ConflictsPatches;
+    IEnumerable<string> IPatchRelationships.BeforePatches => BeforePatches;
+    IEnumerable<string> IPatchRelationships.AfterPatches => AfterPatches;
+    IEnumerable<string> IPatchRelationships.BeforeMods => BeforeMods;
+    IEnumerable<string> IPatchRelationships.AfterMods => AfterMods;
 
     /// <summary>
     /// Applies the patch to <paramref name="value" />, recording the outcome in <paramref name="summary" />.

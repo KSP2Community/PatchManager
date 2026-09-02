@@ -12,6 +12,11 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public static class PrefabPatchStructure
 {
+    /// <summary>
+    /// Calculates a stable hierarchy fingerprint for a prefab root.
+    /// </summary>
+    /// <param name="root">Prefab root.</param>
+    /// <returns>The structural hash, or null for a null root.</returns>
     public static string Calculate(GameObject root)
     {
         var description = Describe(root);
@@ -20,6 +25,11 @@ public static class PrefabPatchStructure
             : PrefabPatchJson.Sha256(description);
     }
 
+    /// <summary>
+    /// Describes hierarchy names, sibling indices, active states, and component types.
+    /// </summary>
+    /// <param name="root">Prefab root.</param>
+    /// <returns>The canonical description, or null for a null root.</returns>
     public static string Describe(GameObject root)
     {
         if (root == null)
@@ -29,6 +39,12 @@ public static class PrefabPatchStructure
         return builder.ToString();
     }
 
+    /// <summary>
+    /// Gets the sibling-index path from a root to a descendant transform.
+    /// </summary>
+    /// <param name="root">Ancestor transform.</param>
+    /// <param name="target">Descendant transform.</param>
+    /// <returns>The sibling-index path relative to <paramref name="root"/>.</returns>
     public static int[] GetSiblingPath(Transform root, Transform target)
     {
         var reverse = new List<int>();
@@ -47,6 +63,12 @@ public static class PrefabPatchStructure
         return reverse.ToArray();
     }
 
+    /// <summary>
+    /// Resolves a sibling-index path beneath a root transform.
+    /// </summary>
+    /// <param name="root">Starting transform.</param>
+    /// <param name="path">Sibling indices to traverse.</param>
+    /// <returns>The resolved transform, or null when the path is invalid.</returns>
     public static Transform Resolve(Transform root, IEnumerable<int> path)
     {
         var current = root;
@@ -60,6 +82,12 @@ public static class PrefabPatchStructure
         return current;
     }
 
+    /// <summary>
+    /// Resolves an unambiguous slash-separated hierarchy path.
+    /// </summary>
+    /// <param name="root">Starting transform.</param>
+    /// <param name="hierarchyPath">Path of GameObject names.</param>
+    /// <returns>The resolved transform, or null when no object matches.</returns>
     public static Transform ResolveHierarchyPath(
         Transform root,
         string hierarchyPath

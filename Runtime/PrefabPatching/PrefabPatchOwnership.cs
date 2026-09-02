@@ -11,6 +11,12 @@ namespace PatchManager.PrefabPatching;
 /// </summary>
 public static class PrefabPatchOwnership
 {
+    /// <summary>
+    /// Binds a locally named manifest and its patch-owned references to a mod ID.
+    /// </summary>
+    /// <param name="manifest">Ownership-free authored manifest.</param>
+    /// <param name="modId">Runtime ID of the containing mod.</param>
+    /// <returns>The same manifest after ownership and hashes are applied.</returns>
     public static PrefabPatchManifest Bind(
         PrefabPatchManifest manifest,
         string modId
@@ -86,6 +92,12 @@ public static class PrefabPatchOwnership
         return manifest;
     }
 
+    /// <summary>
+    /// Qualifies a local patch name with its owning mod ID.
+    /// </summary>
+    /// <param name="modId">Owning mod ID.</param>
+    /// <param name="patchNameOrId">Local name or already-qualified patch ID.</param>
+    /// <returns>A qualified patch ID, or the original blank value.</returns>
     public static string Qualify(string modId, string patchNameOrId)
     {
         if (string.IsNullOrWhiteSpace(patchNameOrId))

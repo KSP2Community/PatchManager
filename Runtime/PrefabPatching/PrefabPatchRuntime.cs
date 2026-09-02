@@ -24,6 +24,7 @@ public static class PatchManagerSummaryLog
     private static string _coreSummary;
     private static string _prefabSummary;
 
+    /// <summary>Replaces the ordinary JSON-patch section of the summary.</summary>
     public static void UpdateCoreSummary(string summary)
     {
         lock (Gate)
@@ -33,6 +34,7 @@ public static class PatchManagerSummaryLog
         }
     }
 
+    /// <summary>Replaces the prefab-patch section of the summary.</summary>
     public static void UpdatePrefabSummary(string summary)
     {
         lock (Gate)
@@ -42,6 +44,7 @@ public static class PatchManagerSummaryLog
         }
     }
 
+    /// <summary>Clears both in-memory summary sections for a new play session.</summary>
     public static void Reset()
     {
         lock (Gate)
@@ -73,23 +76,45 @@ public static class PatchManagerSummaryLog
 /// <summary>
 /// Public registry and lazy effective-prefab runtime for the prefab domain.
 /// </summary>
+/// <remarks>
+/// C# manifests are accepted until <see cref="CloseRegistration" />. During the
+/// loading flow, Addressables manifests are discovered by mod-owned labels,
+/// grouped by stock prefab, resolved through the plan cache, and exposed through
+/// a resource locator. Effective prefabs are composed on first request and kept
+/// alive with their Addressables handles until the play session ends.
+/// </remarks>
 public static class PrefabPatchRuntime
 {
+    /// <summary>Measurements and counts for the current discovery/composition session.</summary>
     public sealed class Metrics
     {
+        /// <summary>Total registered and Addressables-discovered manifests.</summary>
         public int DiscoveredManifestCount;
+        /// <summary>Manifests registered directly through the C# API.</summary>
         public int RegisteredManifestCount;
+        /// <summary>Manifests loaded from Addressables labels.</summary>
         public int AddressableManifestCount;
+        /// <summary>Normalized owner-and-label descriptions used for discovery.</summary>
         public string[] ManifestSources = Array.Empty<string>();
+        /// <summary>Valid resolved plans exposed by the resource locator.</summary>
         public int ResolvedPlanCount;
+        /// <summary>Plans loaded from the on-disk cache.</summary>
         public int CacheHitCount;
+        /// <summary>Plans resolved because no valid cache entry existed.</summary>
         public int CacheMissCount;
+        /// <summary>Total manifest discovery and resolution time.</summary>
         public long StartupMilliseconds;
+        /// <summary>Total time spent on first-time prefab composition.</summary>
         public long FirstCompositionMilliseconds;
+        /// <summary>Total time spent serving already-composed prefabs.</summary>
         public long RepeatedRequestMilliseconds;
+        /// <summary>Requests served from an already-composed prefab.</summary>
         public int RepeatedRequestCount;
+        /// <summary>Unity's allocated-memory measurement before discovery.</summary>
         public long MemoryBeforeBytes;
+        /// <summary>Unity's allocated-memory measurement after the latest operation.</summary>
         public long MemoryAfterBytes;
+        /// <summary>Addressables handles retained for effective-prefab lifetime.</summary>
         public int RetainedAddressablesHandles;
     }
 
@@ -123,8 +148,11 @@ public static class PrefabPatchRuntime
     private static PrefabPatchResourceLocator _locator;
     private static GameObject _effectivePrefabRoot;
 
+    /// <summary>Gets whether direct C# manifest registration is still accepted.</summary>
     public static bool RegistrationOpen { get; private set; } = true;
+    /// <summary>Gets measurements for the current play session.</summary>
     public static Metrics CurrentMetrics { get; private set; } = new();
+    /// <summary>Gets valid resolved plans keyed by stock prefab address.</summary>
     public static IReadOnlyDictionary<string, PrefabPatchResolvedPlan> Plans =>
         Entries.ToDictionary(pair => pair.Key, pair => pair.Value.Plan);
 
@@ -132,6 +160,7 @@ public static class PrefabPatchRuntime
     /// Registers a fluent or generated C# manifest before registration closes.
     /// Visual manifests are normally discovered through the public label.
     /// </summary>
+    /// <param name="manifest">The owned manifest to register.</param>
     public static void Register(PrefabPatchManifest manifest)
     {
         if (!RegistrationOpen)
@@ -143,6 +172,7 @@ public static class PrefabPatchRuntime
         Registered.Add(manifest);
     }
 
+    /// <summary>Closes direct C# registration before dependency resolution starts.</summary>
     public static void CloseRegistration()
     {
         RegistrationOpen = false;
@@ -152,6 +182,9 @@ public static class PrefabPatchRuntime
     /// Discovers independently built TextAsset manifests, resolves per-prefab
     /// plans through the atomic cache, and writes a deterministic summary.
     /// </summary>
+    /// <param name="activeModIds">The active SpaceWarp mod IDs.</param>
+    /// <param name="resolve">Called after successful resolution.</param>
+    /// <param name="reject">Called with a diagnostic when discovery fails.</param>
     public static void DiscoverAndResolve(
         ISet<string> activeModIds,
         Action resolve,
@@ -164,6 +197,11 @@ public static class PrefabPatchRuntime
             reject
         );
 
+    /// <summary>Discovers and resolves manifests from explicit mod-owned labels.</summary>
+    /// <param name="activeModIds">The active SpaceWarp mod IDs.</param>
+    /// <param name="manifestSources">Mod ownership and Addressables label pairs.</param>
+    /// <param name="resolve">Called after successful resolution.</param>
+    /// <param name="reject">Called with a diagnostic when discovery fails.</param>
     public static void DiscoverAndResolve(
         ISet<string> activeModIds,
         IReadOnlyCollection<PrefabPatchManifestSource> manifestSources,
@@ -180,77 +218,10 @@ public static class PrefabPatchRuntime
         {
             var manifests = new List<PrefabPatchManifest>(Registered);
             CurrentMetrics.RegisteredManifestCount = Registered.Count;
-            CurrentMetrics.ManifestSources = (manifestSources
-                    ?? Array.Empty<PrefabPatchManifestSource>())
-                .Where(source =>
-                    source != null
-                    && !string.IsNullOrWhiteSpace(source.OwnerModId)
-                    && !string.IsNullOrWhiteSpace(
-                        source.AddressablesLabel
-                    )
-                )
-                .Select(source =>
-                    source.OwnerModId.Trim()
-                    + ": "
-                    + source.AddressablesLabel.Trim()
-                )
-                .Distinct(StringComparer.Ordinal)
-                .OrderBy(value => value, StringComparer.Ordinal)
-                .ToArray();
+            CurrentMetrics.ManifestSources = DescribeManifestSources(manifestSources);
             var locations = FindManifestLocations(manifestSources);
             CurrentMetrics.AddressableManifestCount = locations.Count;
-            if (locations.Count > 0)
-            {
-                foreach (var source in locations)
-                {
-                    AsyncOperationHandle<TextAsset> manifestHandle = default;
-                    try
-                    {
-                        manifestHandle = Addressables.LoadAssetAsync<TextAsset>(
-                            source.Location
-                        );
-                        var asset = manifestHandle.WaitForCompletion();
-                        if (
-                            manifestHandle.Status
-                                != AsyncOperationStatus.Succeeded
-                            || asset == null
-                        )
-                        {
-                            throw manifestHandle.OperationException
-                                ?? new InvalidOperationException(
-                                    "Prefab patch manifest load failed."
-                                );
-                        }
-
-                        var manifest =
-                            PrefabPatchJson.Deserialize<PrefabPatchManifest>(
-                                asset.text
-                            );
-                        manifests.Add(
-                            PrefabPatchOwnership.Bind(
-                                manifest,
-                                source.OwnerModId
-                            )
-                        );
-                    }
-                    catch (Exception exception)
-                    {
-                        throw new InvalidDataException(
-                            $"Could not load prefab patch manifest "
-                                + $"'{source.Location.PrimaryKey}' from "
-                                + $"label '{source.Label}' owned by "
-                                + $"'{source.OwnerModId}' in catalog "
-                                + $"'{source.LocatorId}'.",
-                            exception
-                        );
-                    }
-                    finally
-                    {
-                        if (manifestHandle.IsValid())
-                            Addressables.Release(manifestHandle);
-                    }
-                }
-            }
+            manifests.AddRange(LoadAddressableManifests(locations));
 
             ResolveDiscoveredManifests(
                 manifests,
@@ -262,6 +233,72 @@ public static class PrefabPatchRuntime
         catch (Exception exception)
         {
             RejectDiscovery(stopwatch, reject, exception);
+        }
+    }
+
+    private static string[] DescribeManifestSources(
+        IEnumerable<PrefabPatchManifestSource> manifestSources
+    ) =>
+        (manifestSources ?? Array.Empty<PrefabPatchManifestSource>())
+            .Where(source =>
+                source != null
+                && !string.IsNullOrWhiteSpace(source.OwnerModId)
+                && !string.IsNullOrWhiteSpace(source.AddressablesLabel)
+            )
+            .Select(source =>
+                source.OwnerModId.Trim() + ": " + source.AddressablesLabel.Trim()
+            )
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(value => value, StringComparer.Ordinal)
+            .ToArray();
+
+    private static IEnumerable<PrefabPatchManifest> LoadAddressableManifests(
+        IEnumerable<ManifestLocation> locations
+    )
+    {
+        foreach (var source in locations)
+            yield return LoadAddressableManifest(source);
+    }
+
+    private static PrefabPatchManifest LoadAddressableManifest(
+        ManifestLocation source
+    )
+    {
+        AsyncOperationHandle<TextAsset> manifestHandle = default;
+        try
+        {
+            manifestHandle = Addressables.LoadAssetAsync<TextAsset>(source.Location);
+            var asset = manifestHandle.WaitForCompletion();
+            if (
+                manifestHandle.Status != AsyncOperationStatus.Succeeded
+                || asset == null
+            )
+            {
+                throw manifestHandle.OperationException
+                    ?? new InvalidOperationException(
+                        "Prefab patch manifest load failed."
+                    );
+            }
+
+            var manifest = PrefabPatchJson.Deserialize<PrefabPatchManifest>(
+                asset.text
+            );
+            return PrefabPatchOwnership.Bind(manifest, source.OwnerModId);
+        }
+        catch (Exception exception)
+        {
+            throw new InvalidDataException(
+                $"Could not load prefab patch manifest "
+                    + $"'{source.Location.PrimaryKey}' from label "
+                    + $"'{source.Label}' owned by '{source.OwnerModId}' in "
+                    + $"catalog '{source.LocatorId}'.",
+                exception
+            );
+        }
+        finally
+        {
+            if (manifestHandle.IsValid())
+                Addressables.Release(manifestHandle);
         }
     }
 
@@ -492,6 +529,7 @@ public static class PrefabPatchRuntime
     /// Adds the public GameObject provider and locator to Patch Manager's
     /// supported KSP AssetProvider interception boundary.
     /// </summary>
+    /// <returns>The resource locator that substitutes patched prefab locations.</returns>
     public static UnityEngine.AddressableAssets.ResourceLocators.IResourceLocator
         RegisterResourceProvider()
     {
@@ -527,120 +565,149 @@ public static class PrefabPatchRuntime
 
         var stopwatch = Stopwatch.StartNew();
         entry.RequestCount++;
-        if (entry.EffectivePrefab != null)
-        {
-            stopwatch.Stop();
-            CurrentMetrics.RepeatedRequestCount++;
-            CurrentMetrics.RepeatedRequestMilliseconds +=
-                stopwatch.ElapsedMilliseconds;
-            prefab = entry.EffectivePrefab;
-            return true;
-        }
-
-        if (entry.Failed)
-        {
-            failure = entry.Failure;
-            return false;
-        }
+        if (TryUseCompletedEntry(entry, stopwatch, out prefab, out failure))
+            return failure == null;
 
         try
         {
-            var stockLocation = ResolveOriginalLocation(
-                address,
-                typeof(GameObject)
-            );
-            entry.StockHandle =
-                Addressables.LoadAssetAsync<GameObject>(stockLocation);
-            var stock = entry.StockHandle.WaitForCompletion();
-            if (
-                entry.StockHandle.Status != AsyncOperationStatus.Succeeded
-                || stock == null
-            )
-            {
-                throw entry.StockHandle.OperationException
-                    ?? new InvalidOperationException(
-                        $"Could not load stock prefab '{address}'."
-                    );
-            }
-
-            foreach (
-                var reference in entry.Plan.Operations
-                    .SelectMany(GetReferences)
-                    .Where(
-                        value =>
-                            value != null
-                            && value.Kind
-                            == PrefabPatchObjectReferenceKind.Addressable
-                            && !string.IsNullOrWhiteSpace(value.Address)
-                    )
-                    .GroupBy(value => value.Address, StringComparer.Ordinal)
-                    .Select(group => group.First())
-                    .OrderBy(value => value.Address, StringComparer.Ordinal)
-            )
-            {
-                var location = ResolveOriginalLocation(
-                    reference.Address,
-                    typeof(Object)
-                );
-                var handle = Addressables.LoadAssetAsync<Object>(location);
-                var value = handle.WaitForCompletion();
-                if (
-                    handle.Status != AsyncOperationStatus.Succeeded
-                    || value == null
-                )
-                {
-                    throw handle.OperationException
-                        ?? new InvalidOperationException(
-                            $"Could not load prefab patch reference "
-                                + $"'{reference.Address}'."
-                        );
-                }
-
-                entry.ReferenceHandles.Add(handle);
-                entry.References.Add(reference.Address, value);
-            }
-
-            var effectivePrefab = CreateEffectivePrefab(stock);
-            var result = PrefabPatchComposer.ApplySynchronously(
-                effectivePrefab,
-                entry.Plan,
-                entry.References
-            );
-            if (!result.Success)
-            {
-                Object.DestroyImmediate(effectivePrefab);
-                throw new InvalidOperationException(result.Failure);
-            }
-
+            var stock = LoadStockPrefab(address, entry);
+            LoadAddressableReferences(entry);
+            var effectivePrefab = ComposeEffectivePrefab(stock, entry);
             entry.EffectivePrefab = effectivePrefab;
-            stopwatch.Stop();
-            CurrentMetrics.FirstCompositionMilliseconds +=
-                stopwatch.ElapsedMilliseconds;
-            CurrentMetrics.RetainedAddressablesHandles =
-                Entries.Values.Sum(
-                    value =>
-                        (value.StockHandle.IsValid() ? 1 : 0)
-                        + value.ReferenceHandles.Count(
-                            handle => handle.IsValid()
-                        )
-                );
-            CurrentMetrics.MemoryAfterBytes =
-                Profiler.GetTotalAllocatedMemoryLong();
+            RecordCompositionMetrics(stopwatch);
             prefab = effectivePrefab;
             return true;
         }
         catch (Exception exception)
         {
-            stopwatch.Stop();
-            entry.Failed = true;
-            entry.Failure = exception;
+            RecordCompositionFailure(address, entry, stopwatch, exception);
             failure = exception;
-            UnityEngine.Debug.LogError(
-                $"Prefab composition failed for '{address}': {exception}"
-            );
-            WriteSummary();
             return false;
         }
+    }
+
+    private static bool TryUseCompletedEntry(
+        Entry entry,
+        Stopwatch stopwatch,
+        out GameObject prefab,
+        out Exception failure
+    )
+    {
+        prefab = null;
+        failure = null;
+        if (entry.EffectivePrefab != null)
+        {
+            stopwatch.Stop();
+            CurrentMetrics.RepeatedRequestCount++;
+            CurrentMetrics.RepeatedRequestMilliseconds += stopwatch.ElapsedMilliseconds;
+            prefab = entry.EffectivePrefab;
+            return true;
+        }
+
+        if (!entry.Failed)
+            return false;
+
+        failure = entry.Failure;
+        return true;
+    }
+
+    private static GameObject LoadStockPrefab(string address, Entry entry)
+    {
+        var stockLocation = ResolveOriginalLocation(address, typeof(GameObject));
+        entry.StockHandle = Addressables.LoadAssetAsync<GameObject>(stockLocation);
+        var stock = entry.StockHandle.WaitForCompletion();
+        if (
+            entry.StockHandle.Status == AsyncOperationStatus.Succeeded
+            && stock != null
+        )
+        {
+            return stock;
+        }
+
+        throw entry.StockHandle.OperationException
+            ?? new InvalidOperationException(
+                $"Could not load stock prefab '{address}'."
+            );
+    }
+
+    private static void LoadAddressableReferences(Entry entry)
+    {
+        foreach (var reference in GetDistinctAddressableReferences(entry.Plan))
+        {
+            var location = ResolveOriginalLocation(reference.Address, typeof(Object));
+            var handle = Addressables.LoadAssetAsync<Object>(location);
+            var value = handle.WaitForCompletion();
+            if (handle.Status != AsyncOperationStatus.Succeeded || value == null)
+            {
+                var failure = handle.OperationException
+                    ?? new InvalidOperationException(
+                        $"Could not load prefab patch reference "
+                            + $"'{reference.Address}'."
+                    );
+                if (handle.IsValid())
+                    Addressables.Release(handle);
+                throw failure;
+            }
+
+            entry.ReferenceHandles.Add(handle);
+            entry.References.Add(reference.Address, value);
+        }
+    }
+
+    private static IEnumerable<PrefabPatchObjectReference>
+        GetDistinctAddressableReferences(PrefabPatchResolvedPlan plan) =>
+            plan.Operations
+                .SelectMany(GetReferences)
+                .Where(value =>
+                    value != null
+                    && value.Kind == PrefabPatchObjectReferenceKind.Addressable
+                    && !string.IsNullOrWhiteSpace(value.Address)
+                )
+                .GroupBy(value => value.Address, StringComparer.Ordinal)
+                .Select(group => group.First())
+                .OrderBy(value => value.Address, StringComparer.Ordinal);
+
+    private static GameObject ComposeEffectivePrefab(GameObject stock, Entry entry)
+    {
+        var effectivePrefab = CreateEffectivePrefab(stock);
+        var result = PrefabPatchComposer.ApplySynchronously(
+            effectivePrefab,
+            entry.Plan,
+            entry.References
+        );
+        if (result.Success)
+            return effectivePrefab;
+
+        Object.DestroyImmediate(effectivePrefab);
+        throw new InvalidOperationException(result.Failure);
+    }
+
+    private static void RecordCompositionMetrics(Stopwatch stopwatch)
+    {
+        stopwatch.Stop();
+        CurrentMetrics.FirstCompositionMilliseconds += stopwatch.ElapsedMilliseconds;
+        CurrentMetrics.RetainedAddressablesHandles = Entries.Values.Sum(
+            value =>
+                (value.StockHandle.IsValid() ? 1 : 0)
+                + value.ReferenceHandles.Count(handle => handle.IsValid())
+        );
+        CurrentMetrics.MemoryAfterBytes = Profiler.GetTotalAllocatedMemoryLong();
+    }
+
+    private static void RecordCompositionFailure(
+        string address,
+        Entry entry,
+        Stopwatch stopwatch,
+        Exception exception
+    )
+    {
+        stopwatch.Stop();
+        entry.Failed = true;
+        entry.Failure = exception;
+        UnityEngine.Debug.LogError(
+            $"Prefab composition failed for '{address}': {exception}"
+        );
+        WriteSummary();
     }
 
     private static GameObject CreateEffectivePrefab(GameObject stock)
