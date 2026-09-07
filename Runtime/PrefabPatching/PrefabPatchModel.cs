@@ -260,11 +260,9 @@ public sealed class PrefabPatchObjectTarget
             if (Kind == PrefabPatchTargetKind.PatchOwned)
                 return $"patch:{OwnerPatchId}:{ObjectId}";
 
-            var path = !string.IsNullOrWhiteSpace(
-                RuntimeLocator?.HierarchyPath
-            )
-                ? RuntimeLocator.HierarchyPath
-                : RuntimeLocator?.DisplayPath;
+            // Match runtime traversal. Display names are diagnostic only and
+            // can repeat between siblings, particularly in engine clusters.
+            var path = RuntimeLocator?.HierarchyPath;
             if (!string.IsNullOrWhiteSpace(path))
                 return $"path:{path}:{RuntimeLocator.TargetKind}:"
                     + $"{RuntimeLocator.ComponentType}:"

@@ -1100,6 +1100,10 @@ public static class PrefabPatchComposer
             if (index == segments.Count - 1)
             {
                 list[segment.Index] = ConvertForType(value, elementType);
+                // Unity collection properties can return a copy (materials,
+                // mesh data, and similar native-backed arrays).
+                if (member is PropertyInfo)
+                    SetMemberValue(member, current, memberValue);
                 return current;
             }
 
@@ -1112,6 +1116,8 @@ public static class PrefabPatchComposer
             );
             if (elementType.IsValueType)
                 list[segment.Index] = updatedElement;
+            if (member is PropertyInfo)
+                SetMemberValue(member, current, memberValue);
             return current;
         }
 
@@ -1165,20 +1171,19 @@ public static class PrefabPatchComposer
         {
             var serializedName =
                 char.ToLowerInvariant(name[2]) + name.Substring(3);
-            var property = type.GetProperty(serializedName, flags);
-            if (property != null && property.CanRead && property.CanWrite)
-                return property;
-
             var alias = name switch
             {
                 "m_Mesh" => "sharedMesh",
                 "m_Material" => "sharedMaterial",
                 "m_Materials" => "sharedMaterials",
+                "m_AABB" when typeof(SkinnedMeshRenderer).IsAssignableFrom(type)
+                    => "localBounds",
+                "m_Extent" when type == typeof(Bounds) => "extents",
                 _ => null
             };
             if (alias != null)
             {
-                property = type.GetProperty(alias, flags);
+                var property = type.GetProperty(alias, flags);
                 if (
                     property != null
                     && property.CanRead
@@ -1186,6 +1191,10 @@ public static class PrefabPatchComposer
                 )
                     return property;
             }
+            var inferredProperty = type.GetProperty(serializedName, flags);
+            if (inferredProperty != null
+                && inferredProperty.CanRead && inferredProperty.CanWrite)
+                return inferredProperty;
         }
 
         return null;
