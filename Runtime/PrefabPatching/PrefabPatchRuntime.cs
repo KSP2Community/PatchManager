@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -123,7 +124,7 @@ public static class PrefabPatchRuntime
         public PrefabPatchResolvedPlan Plan;
         public GameObject EffectivePrefab;
         public AsyncOperationHandle<GameObject> StockHandle;
-        public List<AsyncOperationHandle<Object>> ReferenceHandles = new();
+        public List<AsyncOperationHandle> ReferenceHandles = new();
         public Dictionary<string, Object> References = new(
             StringComparer.Ordinal
         );
@@ -630,13 +631,31 @@ public static class PrefabPatchRuntime
             );
     }
 
+    private static readonly MethodInfo _loadTypedReferenceMethod =
+        typeof(PrefabPatchRuntime).GetMethod(
+            nameof(LoadTypedReference),
+            BindingFlags.NonPublic | BindingFlags.Static
+        );
+
+    private static AsyncOperationHandle LoadTypedReference<T>(IResourceLocation location)
+        where T : Object => Addressables.LoadAssetAsync<T>(location);
+
     private static void LoadAddressableReferences(Entry entry)
     {
         foreach (var reference in GetDistinctAddressableReferences(entry.Plan))
         {
-            var location = ResolveOriginalLocation(reference.Address, typeof(Object));
-            var handle = Addressables.LoadAssetAsync<Object>(location);
-            var value = handle.WaitForCompletion();
+            var expectedType = string.IsNullOrWhiteSpace(reference.ExpectedType)
+                ? typeof(Object)
+                : Type.GetType(reference.ExpectedType, true);
+            var location = ResolveOriginalLocation(
+                reference.Address,
+                expectedType
+            );
+            // Providers use the requested type to select the referenced subasset.
+            var handle = (AsyncOperationHandle)_loadTypedReferenceMethod
+                .MakeGenericMethod(expectedType)
+                .Invoke(null, new object[] { location });
+            var value = handle.WaitForCompletion() as Object;
             if (handle.Status != AsyncOperationStatus.Succeeded || value == null)
             {
                 var failure = handle.OperationException
