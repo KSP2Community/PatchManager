@@ -957,6 +957,18 @@ internal sealed class PrefabPatchResourceLocator :
     public string LocatorId => GetType().FullName;
     public IEnumerable<object> Keys => _entries.Keys;
 
+    /// <inheritdoc />
+    public IEnumerable<IResourceLocation> AllLocations
+    {
+        get
+        {
+            foreach (string address in _entries.Keys)
+            {
+                yield return CreatePatchLocation(address);
+            }
+        }
+    }
+
     public bool Locate(
         object key,
         Type type,

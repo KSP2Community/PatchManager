@@ -21,6 +21,24 @@ namespace PatchManager.Core.Assets
         public IEnumerable<object> Keys => CacheManager.Inventory.CacheEntries.Keys;
 
         /// <inheritdoc />
+        public IEnumerable<IResourceLocation> AllLocations
+        {
+            get
+            {
+                foreach (object key in Keys)
+                {
+                    if (!Locate(key, typeof(TextAsset), out IList<IResourceLocation> locations))
+                        continue;
+
+                    foreach (IResourceLocation location in locations)
+                    {
+                        yield return location;
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc />
         public bool Locate(object key, Type type, out IList<IResourceLocation> locations)
         {
             var label = key.ToString();
