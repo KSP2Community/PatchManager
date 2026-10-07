@@ -73,6 +73,8 @@ namespace PatchManager.Parts.Patchers
                         }
                     }
 
+                    // A part saved before its definition gained any resource container has no resource dictionary.
+                    part.partState.resources ??= new Dictionary<string, ContainedResourceState>();
                     foreach (var resource in def.data.resourceContainers)
                     {
                         if (!part.partState.resources.ContainsKey(resource.name))
