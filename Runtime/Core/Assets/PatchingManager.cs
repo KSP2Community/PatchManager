@@ -38,6 +38,27 @@ namespace PatchManager.Core.Assets
 
         internal static bool UseIndentedOutput;
 
+        // Assets loaded into a label's rebuild by their own key, for stock assets that carry no label of their own
+        private static readonly Dictionary<string, HashSet<string>> LabelMembers = new();
+
+        /// <summary>
+        /// Makes the asset with the given key part of a label's rebuild, so patches and duplicates on the label reach it.
+        /// </summary>
+        /// <remarks>
+        /// The asset is still loaded by its own key afterwards, since the archive keeps it under its own name.
+        /// </remarks>
+        /// <param name="label">The label whose rebuild loads the asset.</param>
+        /// <param name="key">The asset's addressables key.</param>
+        internal static void AddLabelMember(string label, string key)
+        {
+            if (!LabelMembers.TryGetValue(label, out var members))
+            {
+                LabelMembers[label] = members = new HashSet<string>();
+            }
+
+            members.Add(key);
+        }
+
         /// <summary>
         /// Total patches successfully applied this run.
         /// </summary>
@@ -317,16 +338,9 @@ namespace PatchManager.Core.Assets
 
         private static Dictionary<string, LabelRebuildState> _rebuildStates;
 
-        private static readonly PatchDefinition.PatchPass[] OrderedPasses =
-        {
-            PatchDefinition.PatchPass.Early,
-            PatchDefinition.PatchPass.Default,
-            PatchDefinition.PatchPass.Late
-        };
-
         /// <summary>
-        /// Schedules per-(pass, label) flow actions in pass-major order (every label's Early before any
-        /// Default, every label's Default before any Late).
+        /// Schedules per-(pass, label) flow actions in pass-major order: every label's actions for one pass come
+        /// before any label's actions for the next, in the order the passes sort into.
         /// </summary>
         /// <remarks>
         /// A label only receives an action for a pass if it has a patch in that pass. The first action a label
@@ -347,7 +361,7 @@ namespace PatchManager.Core.Assets
 
             InitRebuildStates(labels);
 
-            var activePassesPerLabel = new Dictionary<string, List<PatchDefinition.PatchPass>>(labels.Count);
+            var activePassesPerLabel = new Dictionary<string, List<string>>(labels.Count);
             foreach (var label in labels)
             {
                 activePassesPerLabel[label] = ActivePassesFor(label);
@@ -356,7 +370,7 @@ namespace PatchManager.Core.Assets
             var insertIdx = GameManager.Instance.LoadingFlow.flowIndex + 1;
             var actions = new List<GenericFlowAction>();
 
-            foreach (var pass in OrderedPasses)
+            foreach (var pass in Universe.OrderedPasses)
             {
                 foreach (var label in labels)
                 {
@@ -414,10 +428,10 @@ namespace PatchManager.Core.Assets
             }
         }
 
-        private static List<PatchDefinition.PatchPass> ActivePassesFor(string label)
+        private static List<string> ActivePassesFor(string label)
         {
-            var result = new List<PatchDefinition.PatchPass>();
-            foreach (var pass in OrderedPasses)
+            var result = new List<string>();
+            foreach (var pass in Universe.OrderedPasses)
             {
                 if (HasPatchesInPass(label, pass)) result.Add(pass);
             }
@@ -425,12 +439,12 @@ namespace PatchManager.Core.Assets
                 && _rebuildStates.TryGetValue(label, out var state)
                 && state.CreatedAssets.Count > 0)
             {
-                result.Add(PatchDefinition.PatchPass.Default);
+                result.Add(PassDefinition.DEFAULT);
             }
             return result;
         }
 
-        private static bool HasPatchesInPass(string label, PatchDefinition.PatchPass pass)
+        private static bool HasPatchesInPass(string label, string pass)
         {
             if (!Universe.AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
             if (!perPass.TryGetValue(pass, out var buckets)) return false;
@@ -439,18 +453,14 @@ namespace PatchManager.Core.Assets
                 || buckets.Exact.Count > 0;
         }
 
-        private static GenericFlowAction MakePassAction(string label, PatchDefinition.PatchPass pass, bool loadFirst, bool writeLast)
+        private static GenericFlowAction MakePassAction(string label, string pass, bool loadFirst, bool writeLast)
         {
             var labelCopy = label;
             var passCopy = pass;
             var loadCopy = loadFirst;
             var writeCopy = writeLast;
 
-            var passSuffix = pass switch
-            {
-                PatchDefinition.PatchPass.Default => "",
-                _ => $" [{pass.ToString().ToUpperInvariant()}]"
-            };
+            var passSuffix = pass == PassDefinition.DEFAULT ? "" : $" [{pass.ToUpperInvariant()}]";
 
             return new GenericFlowAction(
                 $"Patching: {label}{passSuffix}",
@@ -461,7 +471,7 @@ namespace PatchManager.Core.Assets
 
         private static IEnumerator RunPassActionCoroutine(
             string label,
-            PatchDefinition.PatchPass pass,
+            string pass,
             bool loadFirst,
             bool writeLast,
             Action resolve
@@ -505,6 +515,29 @@ namespace PatchManager.Core.Assets
                 }
             }
 
+            if (LabelMembers.TryGetValue(label, out var members))
+            {
+                foreach (var key in members)
+                {
+                    var memberHandle = Addressables.LoadAssetAsync<TextAsset>(key);
+                    while (!memberHandle.IsDone)
+                    {
+                        UpdateLoadingBarData();
+                        yield return null;
+                    }
+
+                    // The text is copied out, so the handle is released at once rather than held to the archive write
+                    if (memberHandle.Status == AsyncOperationStatus.Succeeded && memberHandle.Result != null
+                        && !string.IsNullOrEmpty(memberHandle.Result.text))
+                    {
+                        state.RawTexts[memberHandle.Result.name] = memberHandle.Result.text;
+                        state.PrimaryKeyMap[memberHandle.Result.name] = key;
+                    }
+
+                    Addressables.Release(memberHandle);
+                }
+            }
+
             if (state.CreatedAssets.Count > 0)
             {
                 Universe.Summary.BeginLabel(label);
@@ -516,13 +549,14 @@ namespace PatchManager.Core.Assets
             }
         }
 
-        private static void RunPassForLabel(string label, PatchDefinition.PatchPass pass)
+        private static void RunPassForLabel(string label, string pass)
         {
             if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
 
             Universe.Summary.BeginPass(pass);
             Universe.Summary.BeginLabel(label);
 
+            var duplicates = new List<Universe.DuplicatedAsset>();
             var assetNames = state.RawTexts.Keys.Concat(state.Tokens.Keys).Distinct().ToList();
             foreach (var assetName in assetNames)
             {
@@ -534,7 +568,7 @@ namespace PatchManager.Core.Assets
                 var address = state.PrimaryKeyMap.TryGetValue(assetName, out var a) ? a : "<unknown>";
                 Universe.Summary.BeginAsset(assetName, address);
 
-                var result = Universe.RunAllPatchesFor(label, assetName, token, pass, out var pc, out var ec);
+                var result = Universe.RunAllPatchesFor(label, assetName, token, pass, duplicates, -1, out var pc, out var ec);
                 TotalPatchCount += pc;
                 TotalErrorCount += ec;
                 if (pc > 0)
@@ -559,13 +593,52 @@ namespace PatchManager.Core.Assets
             {
                 state.AddressAliases.TryGetValue(name, out var alias);
                 Universe.Summary.BeginAsset(name, alias);
-                Universe.RunAllPatchesFor(luaAsset, pass, out var pc, out var ec);
+                Universe.RunAllPatchesFor(luaAsset, pass, duplicates, out var pc, out var ec);
                 TotalPatchCount += pc;
                 TotalErrorCount += ec;
             }
 
+            AddDuplicates(state, label, pass, duplicates);
             UpdateLoadingBarData();
         }
+
+        // Keeps the copies a pass's duplicate patches made, each patched by the rest of that pass. The list grows
+        // while it is walked, so a copy that is itself duplicated later in the pass is handled the same way.
+        private static void AddDuplicates(LabelRebuildState state, string label, string pass,
+            List<Universe.DuplicatedAsset> duplicates)
+        {
+            for (var i = 0; i < duplicates.Count; i++)
+            {
+                var duplicate = duplicates[i];
+                if (HasAsset(state, duplicate.Name))
+                {
+                    TotalErrorCount++;
+                    Universe.Summary.BeginAsset(duplicate.Name, null);
+                    Universe.Summary.Error(duplicate.PatchName,
+                        $"an asset named {duplicate.Name} already exists in {label}, so the copy was dropped");
+                    continue;
+                }
+
+                var alias = duplicate.Name.EndsWith(".json") ? null : duplicate.Name + ".json";
+                if (alias != null) state.AddressAliases[duplicate.Name] = alias;
+                Universe.Summary.BeginNewAsset(duplicate.Name, alias);
+                state.Unchanged = false;
+
+                var result = Universe.RunAllPatchesFor(label, duplicate.Name, duplicate.Data, pass, duplicates,
+                    duplicate.AfterOrder, out var pc, out var ec);
+                TotalPatchCount += pc;
+                TotalErrorCount += ec;
+                if (result != null)
+                {
+                    state.Tokens[duplicate.Name] = result;
+                }
+            }
+        }
+
+        private static bool HasAsset(LabelRebuildState state, string assetName) =>
+            state.Tokens.ContainsKey(assetName) ||
+            state.RawTexts.ContainsKey(assetName) ||
+            state.CreatedAssets.Any(created => created.name == assetName);
 
         private static JToken EnsureParsed(LabelRebuildState state, string assetName)
         {
@@ -655,6 +728,17 @@ namespace PatchManager.Core.Assets
                     assetsCacheEntries[address] = new CacheEntry
                     {
                         Label = address,
+                        ArchiveFilename = state.ArchiveFilename,
+                        Assets = new List<string> { assetName }
+                    };
+                }
+
+                // Copies made by duplicate patches have no address of their own, so they take the alias created assets get
+                if (state.AddressAliases.TryGetValue(assetName, out var alias))
+                {
+                    assetsCacheEntries[alias] = new CacheEntry
+                    {
+                        Label = alias,
                         ArchiveFilename = state.ArchiveFilename,
                         Assets = new List<string> { assetName }
                     };

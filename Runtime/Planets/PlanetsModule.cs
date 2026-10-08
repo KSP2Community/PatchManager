@@ -1,8 +1,11 @@
 using KSP.Game;
 using KSP.IO;
+using KSP.Sim;
 using Newtonsoft.Json;
+using PatchManager.Core.Assets;
 using PatchManager.Shared.Modules;
 using PatchManager.Planets.Overrides;
+using Redux.Packs;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -23,6 +26,18 @@ namespace PatchManager.Planets
         {
             var volumeCloud = IOProvider.FromJson<VolumeCloudConfigurationOverride>(volumeCloudOverride.text);
             OverrideManager.VolumeCloudOverrides[volumeCloud.bodyName.ToLowerInvariant()] = volumeCloud;
+        }
+
+        /// <summary>
+        /// Makes the stock galaxy, which ships under its key alone, part of the galaxy definition label's rebuild.
+        /// </summary>
+        /// <remarks>
+        /// Every galaxy then shares one label, so a copy of the stock galaxy is patched and loaded like any other.
+        /// </remarks>
+        public override void Init()
+        {
+            PatchingManager.AddLabelMember(GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL,
+                SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY);
         }
 
         /// <summary>

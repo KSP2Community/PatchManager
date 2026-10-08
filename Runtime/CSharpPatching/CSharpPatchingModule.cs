@@ -78,6 +78,11 @@ namespace PatchManager.CSharpPatching
                 PatchModId = modId
             };
 
+            if (target.Names != null)
+            {
+                patch.Named(target.Names);
+            }
+
             foreach (var modifier in method.GetCustomAttributes().OfType<IPatchModifier>())
             {
                 modifier.Apply(patch, owner);

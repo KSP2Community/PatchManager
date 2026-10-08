@@ -32,5 +32,9 @@ namespace PatchManager.Generic
         /// <summary>Registers a JSON patch against the given addressables label.</summary>
         public static PatchBuilder<JsonUserData> PatchJson(this PmScope scope, string label, string name)
             => Patching.Build<JsonUserData>(scope.ModId, "JSON", label, name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<JsonUserData> DuplicateJson(this PmScope scope, string label, string source, string newName)
+            => Patching.Duplicate<JsonUserData>(scope.ModId, "JSON", label, source, newName);
     }
 }

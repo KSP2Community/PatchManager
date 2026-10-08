@@ -23,5 +23,9 @@ namespace PatchManager.CampaignPacks
         /// <summary>Registers a campaign pack patch.</summary>
         public static PatchBuilder<JsonUserData> PatchCampaignPack(this PmScope scope, string name)
             => Patching.Build<JsonUserData>(scope.ModId, "JSON", CampaignPackManager.CAMPAIGN_PACK_LABEL, name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<JsonUserData> DuplicateCampaignPack(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<JsonUserData>(scope.ModId, "JSON", CampaignPackManager.CAMPAIGN_PACK_LABEL, source, newName);
     }
 }

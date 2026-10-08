@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MoonSharp.Interpreter;
 
 namespace PatchManager.LuaPatching.Builtin;
@@ -83,6 +84,56 @@ public sealed class PatchManagerCore
         };
         _universe.AddPatch(newPatch);
         return newPatch;
+    }
+
+    /// <summary>
+    /// Registers a patch that copies each asset it matches under a new name in the same label, then runs
+    /// <paramref name="patchMethod" /> on the copy.
+    /// </summary>
+    /// <remarks>
+    /// The duplicate is a patch like any other: it takes a pass, ordering and requirements, and the copy is patched
+    /// by everything ordered after it. Internal ID fields are left alone. The patch is named
+    /// <c>Duplicate(source -> newName)</c> under the host mod, with the source and new name filled in.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="converter">The name of the converter to use, as registered via <see cref="Attributes.ConverterAttribute" />.</param>
+    /// <param name="label">The addressables label whose assets to copy, which the copies keep.</param>
+    /// <param name="source">The name of the asset to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source asset's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch, suitable for chaining.</returns>
+    /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
+    public PatchDefinition Duplicate(ScriptExecutionContext context, string converter, string label, string source,
+        string newName, [CanBeNull] Func<DynValue, string> patchMethod = null)
+    {
+        var patch = Patch(context, converter, label, $"Duplicate({source} -> {newName})").Named(source);
+        patch.DuplicateNameTemplate = newName;
+        if (patchMethod != null)
+        {
+            patch.Do(patchMethod);
+        }
+
+        return patch;
+    }
+
+    /// <summary>
+    /// Returns the pass with the given name, declaring it when it does not exist yet.
+    /// </summary>
+    /// <remarks>
+    /// A declared pass runs after Early and before Late until <see cref="PassDefinition.ClearOrdering" /> removes
+    /// those constraints.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="name">The pass name, namespaced to the host mod when it is not built-in and does not already carry a namespace.</param>
+    /// <returns>The pass, for chaining its ordering.</returns>
+    public PassDefinition Pass(ScriptExecutionContext context, string name)
+    {
+        if (!_universe.RegistrationOpen)
+        {
+            throw new ScriptRuntimeException($"PM:Pass('{name}') can only be called during patch registration, not from a Do callback or at runtime.");
+        }
+
+        return _universe.GetOrAddPass(context.CurrentGlobalEnv.Get("ModId").CastToString(), name);
     }
 
     /// <summary>

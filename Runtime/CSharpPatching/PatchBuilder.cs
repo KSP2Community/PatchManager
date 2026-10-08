@@ -19,8 +19,17 @@ namespace PatchManager.CSharpPatching
 
         internal PatchBuilder(PatchDefinition patch) => _patch = patch;
 
+        /// <summary>Runs the patch in the given pass, namespaced to the mod unless built-in or already namespaced.</summary>
+        public PatchBuilder<T> Pass(string name) { _patch.Pass(name); return this; }
+
         /// <summary>Runs the patch in the Early pass.</summary>
         public PatchBuilder<T> Early() { _patch.Early(); return this; }
+
+        /// <summary>Runs the patch in the Default pass.</summary>
+        public PatchBuilder<T> Default() { _patch.Default(); return this; }
+
+        /// <summary>Runs the patch in the Default pass, the same as Default.</summary>
+        public PatchBuilder<T> None() { _patch.None(); return this; }
 
         /// <summary>Runs the patch in the Late pass.</summary>
         public PatchBuilder<T> Late() { _patch.Late(); return this; }

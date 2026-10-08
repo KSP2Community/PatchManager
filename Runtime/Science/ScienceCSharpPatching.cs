@@ -57,16 +57,32 @@ namespace PatchManager.Science
         public static PatchBuilder<DiscoverablesUserData> PatchDiscoverables(this PmScope scope, string name)
             => Patching.Build<DiscoverablesUserData>(scope.ModId, "Discoverables", "science_region_discoverables", name);
 
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<DiscoverablesUserData> DuplicateDiscoverables(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<DiscoverablesUserData>(scope.ModId, "Discoverables", "science_region_discoverables", source, newName);
+
         /// <summary>Registers a science-experiment patch.</summary>
         public static PatchBuilder<ExperimentUserData> PatchExperiment(this PmScope scope, string name)
             => Patching.Build<ExperimentUserData>(scope.ModId, "Experiment", "scienceExperiment", name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<ExperimentUserData> DuplicateExperiment(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<ExperimentUserData>(scope.ModId, "Experiment", "scienceExperiment", source, newName);
 
         /// <summary>Registers a science-region patch.</summary>
         public static PatchBuilder<ScienceRegionsUserData> PatchScienceRegion(this PmScope scope, string name)
             => Patching.Build<ScienceRegionsUserData>(scope.ModId, "ScienceRegions", "science_region", name);
 
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<ScienceRegionsUserData> DuplicateScienceRegion(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<ScienceRegionsUserData>(scope.ModId, "ScienceRegions", "science_region", source, newName);
+
         /// <summary>Registers a tech-tree node patch.</summary>
         public static PatchBuilder<JsonUserData> PatchTechNode(this PmScope scope, string name)
             => Patching.Build<JsonUserData>(scope.ModId, "JSON", "techNodeData", name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<JsonUserData> DuplicateTechNode(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<JsonUserData>(scope.ModId, "JSON", "techNodeData", source, newName);
     }
 }

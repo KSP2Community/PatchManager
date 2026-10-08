@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using PatchManager.LuaPatching;
 
 namespace PatchManager.CSharpPatching
 {
@@ -39,6 +40,24 @@ namespace PatchManager.CSharpPatching
         /// <returns>A typed fluent builder for the queued patch.</returns>
         public static PatchBuilder<T> Build<T>(string modId, string converter, string label, string name)
             => new(FluentPatchRegistry.Build(modId, converter, label, name));
+
+        /// <summary>
+        /// Builds a typed fluent patch that copies each matching asset under a new name in the same label.
+        /// </summary>
+        /// <remarks>
+        /// The callback given to Do runs on the copy. Without one the asset is copied unchanged. The patch is named
+        /// Duplicate(source -> newName) under the mod ID, with the source and new name filled in.
+        /// </remarks>
+        /// <param name="modId">The mod ID the patch is namespaced under.</param>
+        /// <param name="converter">The name of the converter that produces the asset wrapper.</param>
+        /// <param name="label">The label whose assets to copy, which the copies keep.</param>
+        /// <param name="source">The name of the asset to copy. Supports * and ? wildcards.</param>
+        /// <param name="newName">The name of the copy, with {name} standing in for the source asset's name.</param>
+        /// <typeparam name="T">The asset wrapper type the patch's converter produces.</typeparam>
+        /// <returns>A typed fluent builder for the queued patch.</returns>
+        public static PatchBuilder<T> Duplicate<T>(string modId, string converter, string label, string source,
+            string newName)
+            => new(FluentPatchRegistry.Duplicate(modId, converter, label, source, newName));
     }
 
     /// <summary>
@@ -54,5 +73,12 @@ namespace PatchManager.CSharpPatching
         public readonly string ModId;
 
         internal PmScope(string modId) => ModId = modId;
+
+        /// <summary>
+        /// Declares a pass under this scope's mod ID, for chaining its ordering.
+        /// </summary>
+        /// <param name="name">The pass name, namespaced to the mod unless built-in or already namespaced.</param>
+        /// <returns>The pass, for chaining its ordering.</returns>
+        public PassDefinition Pass(string name) => FluentPatchRegistry.Pass(ModId, name);
     }
 }

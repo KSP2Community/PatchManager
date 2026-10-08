@@ -22,5 +22,9 @@ namespace PatchManager.Parts
         /// <summary>Registers a part patch.</summary>
         public static PatchBuilder<PartUserData> PatchPart(this PmScope scope, string name)
             => Patching.Build<PartUserData>(scope.ModId, "Part", "parts_data", name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<PartUserData> DuplicatePart(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<PartUserData>(scope.ModId, "Part", "parts_data", source, newName);
     }
 }

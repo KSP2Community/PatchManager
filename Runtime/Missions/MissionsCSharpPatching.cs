@@ -22,5 +22,9 @@ namespace PatchManager.Missions
         /// <summary>Registers a mission patch.</summary>
         public static PatchBuilder<MissionUserData> PatchMission(this PmScope scope, string name)
             => Patching.Build<MissionUserData>(scope.ModId, "Mission", "missions", name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<MissionUserData> DuplicateMission(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<MissionUserData>(scope.ModId, "Mission", "missions", source, newName);
     }
 }

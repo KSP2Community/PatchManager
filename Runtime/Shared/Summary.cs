@@ -9,7 +9,7 @@ using PatchManager.LuaPatching;
 namespace PatchManager.Shared;
 
 /// <summary>
-/// Per-run summary of patch loading and application across the Early, Default, and Late passes.
+/// Per-run summary of patch loading and application across every pass.
 /// </summary>
 public class Summary
 {
@@ -51,7 +51,7 @@ public class Summary
         public string Name;
 
         /// <summary>The pass the patch ran in.</summary>
-        public PatchDefinition.PatchPass Pass;
+        public string Pass;
 
         /// <summary>The application state of the patch.</summary>
         public ApplicationState State;
@@ -78,7 +78,7 @@ public class Summary
         /// <summary>
         /// Patch entries recorded for this asset, keyed by the pass they ran in.
         /// </summary>
-        public Dictionary<PatchDefinition.PatchPass, List<SummaryEntry>> EntriesByPass = new();
+        public Dictionary<string, List<SummaryEntry>> EntriesByPass = new();
 
         /// <summary>
         /// True if any pass recorded at least one entry for this asset, false otherwise.
@@ -103,7 +103,7 @@ public class Summary
 
     [CanBeNull] private List<AssetSummary> _currentLabel;
     [CanBeNull] private AssetSummary _currentAsset;
-    private PatchDefinition.PatchPass _currentPass = PatchDefinition.PatchPass.Default;
+    private string _currentPass = PassDefinition.DEFAULT;
 
     /// <summary>
     /// Marks a patch as removed during setup (failed mod or patch constraint, or caught in a cycle).
@@ -117,11 +117,32 @@ public class Summary
     }
 
     /// <summary>
+    /// Passes that never run, because an ordering cycle held them back.
+    /// </summary>
+    public List<(string passName, string status, string context)> RemovedPasses = new();
+
+    /// <summary>
+    /// The names of the passes that run, in the order they run. Set once the passes are sorted.
+    /// </summary>
+    public List<string> PassOrder = new() { PassDefinition.EARLY, PassDefinition.DEFAULT, PassDefinition.LATE };
+
+    /// <summary>
+    /// Marks a pass as removed during setup.
+    /// </summary>
+    /// <param name="name">The pass name.</param>
+    /// <param name="status">Short status reason, such as <c>CYCLE</c>.</param>
+    /// <param name="context">Optional detail describing the status.</param>
+    public void RemovePass(string name, string status, [CanBeNull] string context = null)
+    {
+        RemovedPasses.Add((name, status, context));
+    }
+
+    /// <summary>
     /// Sets the pass that subsequent <see cref="Apply" />, <see cref="Skip" />,
     /// <see cref="Error(string, string)" />, and <see cref="RemovedAsset" /> calls are stamped with.
     /// </summary>
     /// <param name="pass">The pass currently being run.</param>
-    public void BeginPass(PatchDefinition.PatchPass pass)
+    public void BeginPass(string pass)
     {
         _currentPass = pass;
     }
@@ -330,7 +351,7 @@ public class Summary
         sb.AppendLine("");
 
         sb.AppendLine("Per-Pass Statistics:");
-        foreach (PatchDefinition.PatchPass pass in Enum.GetValues(typeof(PatchDefinition.PatchPass)))
+        foreach (var pass in PassOrder)
         {
             var passEntries = allEntries.Where(p => p.Pass == pass).ToList();
             if (passEntries.Count == 0) continue;
@@ -378,6 +399,24 @@ public class Summary
         }
         sb.AppendLine("");
 
+        if (RemovedPasses.Count > 0)
+        {
+            sb.AppendLine("Removed Passes:");
+            var passNameWidth = RemovedPasses.Max(x => x.passName.Length);
+            foreach (var (name, status, context) in RemovedPasses)
+            {
+                sb.Append("    ");
+                sb.Append(name.PadRight(passNameWidth));
+                sb.Append("    ");
+                sb.AppendLine(status);
+                if (!string.IsNullOrEmpty(context))
+                {
+                    AppendContext(sb, context, "        ");
+                }
+            }
+            sb.AppendLine("");
+        }
+
         if (RemovedPatches.Count > 0)
         {
             sb.AppendLine("Removed Patches:");
@@ -406,7 +445,7 @@ public class Summary
             foreach (var asset in assets.Where(a => a.HasEntries))
             {
                 sb.AppendLine($"    Asset - {asset.AssetName}:");
-                foreach (var pass in asset.EntriesByPass.Keys.OrderBy(p => (int)p))
+                foreach (var pass in asset.EntriesByPass.Keys.OrderBy(p => PassOrder.IndexOf(p)))
                 {
                     var entries = asset.EntriesByPass[pass];
                     if (entries.Count == 0) continue;

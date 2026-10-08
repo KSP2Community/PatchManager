@@ -47,6 +47,24 @@ public class ScienceLuaModule
     {
         return _core.Patch(context, "Discoverables", "science_region_discoverables", name);
     }
+
+    /// <summary>
+    /// Registers a patch that copies each discoverables set it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the discoverables set to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateDiscoverables(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "Discoverables", "science_region_discoverables", source, newName, patchMethod);
+    }
     #endregion
 
     #region Experiments
@@ -63,6 +81,24 @@ public class ScienceLuaModule
     public PatchDefinition PatchExperiments(ScriptExecutionContext context, string name)
     {
         return _core.Patch(context, "Experiment", "scienceExperiment", name);
+    }
+
+    /// <summary>
+    /// Registers a patch that copies each experiment it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the experiment to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateExperiments(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "Experiment", "scienceExperiment", source, newName, patchMethod);
     }
 
     /// <summary>
@@ -102,6 +138,24 @@ public class ScienceLuaModule
     {
         return _core.Patch(context, "ScienceRegions", "science_region", name);
     }
+
+    /// <summary>
+    /// Registers a patch that copies each science region set it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the science region set to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateRegions(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "ScienceRegions", "science_region", source, newName, patchMethod);
+    }
     #endregion
 
     #region Tech Nodes
@@ -119,6 +173,24 @@ public class ScienceLuaModule
     public PatchDefinition PatchTechNodes(ScriptExecutionContext context, string name)
     {
         return _core.Patch(context, "JSON", "techNodeData", name);
+    }
+
+    /// <summary>
+    /// Registers a patch that copies each tech node it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the tech node to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateTechNodes(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "JSON", "techNodeData", source, newName, patchMethod);
     }
 
     /// <summary>

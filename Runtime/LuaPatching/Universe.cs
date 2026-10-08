@@ -158,6 +158,29 @@ namespace PatchManager.LuaPatching
             PatchedLabels.Add(asset.Label);
         }
 
+        /// <summary>
+        /// Every declared pass keyed by namespaced name, the built-in Early, Default and Late passes included.
+        /// </summary>
+        public Dictionary<string, PassDefinition> Passes =
+            PassDefinition.CreateBuiltInPasses().ToDictionary(pass => pass.Name);
+
+        /// <summary>
+        /// Returns the pass with the given name, declaring it for the given mod when it does not exist yet.
+        /// </summary>
+        /// <param name="modId">The ID of the mod declaring the pass.</param>
+        /// <param name="name">The pass name, namespaced to <paramref name="modId" /> when it is not built-in and does not already carry a namespace.</param>
+        /// <returns>The pass, for chaining its ordering.</returns>
+        public PassDefinition GetOrAddPass(string modId, string name)
+        {
+            var passName = PassDefinition.NormalizeName(modId, name);
+            if (Passes.TryGetValue(passName, out var existing))
+                return existing;
+
+            var pass = new PassDefinition { Name = passName, PassModId = modId };
+            Passes[passName] = pass;
+            return pass;
+        }
+
         #endregion
 
         #region Patch Running
@@ -177,7 +200,12 @@ namespace PatchManager.LuaPatching
         /// Per-label, per-pass bucket maps. Each pass holds its own <see cref="LabelPatchBuckets" /> so
         /// pass execution iterates only the patches in that pass.
         /// </summary>
-        public Dictionary<string, Dictionary<PatchDefinition.PatchPass, LabelPatchBuckets>> AllPatchesBuckets = new();
+        public Dictionary<string, Dictionary<string, LabelPatchBuckets>> AllPatchesBuckets = new();
+
+        /// <summary>
+        /// The names of the passes that run, in the order they run. Filled by <see cref="SetupPatchesForRun" />.
+        /// </summary>
+        public List<string> OrderedPasses = new();
 
         private static readonly char[] WildcardChars = { '*', '?' };
 
@@ -190,6 +218,9 @@ namespace PatchManager.LuaPatching
         /// </remarks>
         public void SetupPatchesForRun()
         {
+            SortPasses();
+            var runnablePasses = new HashSet<string>(OrderedPasses);
+
             // Two-phase setup so :Needs/:Conflicts can resolve patches in any label and any pass.
             // Phase 1: run mod-constraint filtering on every label's patches and union the surviving
             // names into a global existence set.
@@ -197,7 +228,7 @@ namespace PatchManager.LuaPatching
             var globalAllPatches = new HashSet<string>();
             foreach (var (label, patches) in AllPatches)
             {
-                var modConstrained = ApplyModConstraints(patches);
+                var modConstrained = ApplyModConstraints(patches, runnablePasses);
                 perLabelModFiltered[label] = modConstrained;
                 foreach (var p in modConstrained)
                 {
@@ -212,11 +243,77 @@ namespace PatchManager.LuaPatching
             }
         }
 
-        private List<PatchDefinition> ApplyModConstraints(List<PatchDefinition> patches)
+        // Sorts the declared passes by their constraints. A pass caught in a cycle never runs, and is reported along
+        // with every other pass the cycle held back.
+        private void SortPasses()
+        {
+            var inDegree = new Dictionary<string, int>(Passes.Count);
+            var outEdges = new Dictionary<string, HashSet<string>>(Passes.Count);
+            foreach (var name in Passes.Keys)
+            {
+                inDegree[name] = 0;
+                outEdges[name] = new HashSet<string>();
+            }
+
+            // Constraints naming a pass nobody declared are ignored, as patch ordering ignores missing patches
+            foreach (var (name, pass) in Passes)
+            {
+                foreach (var after in pass.AfterPasses)
+                {
+                    if (after != name && outEdges.TryGetValue(after, out var afterEdges) && afterEdges.Add(name))
+                    {
+                        inDegree[name]++;
+                    }
+                }
+
+                foreach (var before in pass.BeforePasses)
+                {
+                    if (before != name && inDegree.ContainsKey(before) && outEdges[name].Add(before))
+                    {
+                        inDegree[before]++;
+                    }
+                }
+            }
+
+            var queue = new Queue<string>();
+            foreach (var (name, degree) in inDegree)
+            {
+                if (degree == 0) queue.Enqueue(name);
+            }
+
+            OrderedPasses = new List<string>(Passes.Count);
+            while (queue.Count > 0)
+            {
+                var name = queue.Dequeue();
+                OrderedPasses.Add(name);
+                foreach (var successor in outEdges[name])
+                {
+                    if (--inDegree[successor] == 0) queue.Enqueue(successor);
+                }
+            }
+
+            Summary.PassOrder = OrderedPasses;
+            if (OrderedPasses.Count == Passes.Count)
+                return;
+
+            var unsorted = Passes.Keys.Where(name => !OrderedPasses.Contains(name)).ToList();
+            foreach (var name in unsorted)
+            {
+                Summary.RemovePass(name, "CYCLE", $"pass was held back by an ordering cycle among {string.Join(", ", unsorted)}");
+            }
+        }
+
+        private List<PatchDefinition> ApplyModConstraints(List<PatchDefinition> patches, HashSet<string> runnablePasses)
         {
             var modConstrained = new List<PatchDefinition>(patches.Count);
             foreach (var patch in patches)
             {
+                if (!runnablePasses.Contains(patch.PassName))
+                {
+                    Summary.Remove(patch.Name, Passes.ContainsKey(patch.PassName) ? "CYCLE" : "MISSING", $"pass - {patch.PassName}");
+                    continue;
+                }
+
                 foreach (var mod in patch.NeedsMods)
                 {
                     if (!AllMods.Contains(mod))
@@ -271,14 +368,14 @@ namespace PatchManager.LuaPatching
                 continue_patch:;
             }
 
-            var perPassBuckets = new Dictionary<PatchDefinition.PatchPass, LabelPatchBuckets>();
+            var perPassBuckets = new Dictionary<string, LabelPatchBuckets>();
             AllPatchesBuckets[label] = perPassBuckets;
 
             // Within each pass, sort each ordering bucket independently. Before/After targets in other
             // buckets are silently filtered out (treated as if the target did not exist).
-            foreach (PatchDefinition.PatchPass pass in Enum.GetValues(typeof(PatchDefinition.PatchPass)))
+            foreach (var pass in OrderedPasses)
             {
-                var passPatches = patchConstrained.Where(p => p.Pass == pass).ToList();
+                var passPatches = patchConstrained.Where(p => p.PassName == pass).ToList();
                 if (passPatches.Count == 0)
                 {
                     perPassBuckets[pass] = new LabelPatchBuckets();
@@ -468,21 +565,30 @@ namespace PatchManager.LuaPatching
         /// <param name="name">The asset's addressables address.</param>
         /// <param name="data">The asset's parsed JSON.</param>
         /// <param name="pass">The pass to run.</param>
+        /// <param name="duplicates">Receives the copies duplicate patches make of the asset, for the caller to patch and keep.</param>
+        /// <param name="afterOrder">Only patches ordered after this run, so a copy picks up its pass where its duplicate patch left off.</param>
         /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
         /// <param name="errorCount">Set to the number of patches that threw.</param>
         /// <returns>The patched JSON, or <c>null</c> when the asset was removed.</returns>
-        public JToken RunAllPatchesFor(string label, string name, JToken data, PatchDefinition.PatchPass pass, out int patchCount, out int errorCount)
+        public JToken RunAllPatchesFor(string label, string name, JToken data, string pass, List<DuplicatedAsset> duplicates,
+            int afterOrder, out int patchCount, out int errorCount)
         {
             patchCount = 0;
             errorCount = 0;
             IConverter? previousConverter = null;
             DynValue? previousInstance = null;
-            foreach (var patch in GetAllSortedPatchesFor(label, name, pass))
+            foreach (var patch in GetAllSortedPatchesFor(label, name, pass, afterOrder))
             {
                 if (previousInstance == null)
                 {
                     previousConverter = patch.ConverterInstance;
                     previousInstance = previousConverter.FromJson(data);
+                }
+
+                if (patch.DuplicateNameTemplate != null)
+                {
+                    Duplicate(patch, name, previousConverter.ToJson(previousInstance), duplicates, ref patchCount, ref errorCount);
+                    continue;
                 }
 
                 if (!ReferenceEquals(previousConverter, patch.ConverterInstance))
@@ -513,15 +619,23 @@ namespace PatchManager.LuaPatching
         /// </summary>
         /// <param name="asset">The new asset to patch.</param>
         /// <param name="pass">The pass to run.</param>
+        /// <param name="duplicates">Receives the copies duplicate patches make of the asset, for the caller to patch and keep.</param>
         /// <param name="patchCount">Set to the number of patches that ran successfully.</param>
         /// <param name="errorCount">Set to the number of patches that threw.</param>
         /// <returns>The patched JSON for the asset.</returns>
-        public JToken RunAllPatchesFor(LuaAsset asset, PatchDefinition.PatchPass pass, out int patchCount, out int errorCount)
+        public JToken RunAllPatchesFor(LuaAsset asset, string pass, List<DuplicatedAsset> duplicates, out int patchCount,
+            out int errorCount)
         {
             patchCount = 0;
             errorCount = 0;
             foreach (var patch in GetAllSortedPatchesFor(asset.Label, asset.Name, pass))
             {
+                if (patch.DuplicateNameTemplate != null)
+                {
+                    Duplicate(patch, asset.Name, asset.ConverterInstance.ToJson(asset.CurrentValue), duplicates,
+                        ref patchCount, ref errorCount);
+                    continue;
+                }
 
                 if (!ReferenceEquals(asset.ConverterInstance, patch.ConverterInstance))
                 {
@@ -545,6 +659,26 @@ namespace PatchManager.LuaPatching
             return asset.ConverterInstance.ToJson(asset.CurrentValue);
         }
 
+        // Runs a duplicate patch: the copy takes the source's JSON as it stands at this point in the pass, and the
+        // patch's predicates and callback run against the copy only.
+        private void Duplicate(PatchDefinition patch, string sourceName, JToken sourceJson,
+            List<DuplicatedAsset> duplicates, ref int patchCount, ref int errorCount)
+        {
+            // Converters hand back the wrapper's live token, so the copy is cloned to keep the two assets apart
+            var copy = patch.ConverterInstance.FromJson(sourceJson.DeepClone());
+            if (patch.Apply(copy, Summary, out var removed, out var errored))
+            {
+                patchCount++;
+                if (!removed)
+                {
+                    duplicates.Add(new DuplicatedAsset(patch.DuplicateNameFor(sourceName), patch.Name,
+                        patch.ConverterInstance.ToJson(copy), patch.Order));
+                }
+            }
+
+            if (errored) errorCount++;
+        }
+
 
         /// <summary>
         /// Returns the patches registered for <paramref name="label" /> in <paramref name="pass" />, in
@@ -553,8 +687,9 @@ namespace PatchManager.LuaPatching
         /// <param name="label">The addressables label to look up.</param>
         /// <param name="name">The asset's addressables address, matched against each patch's name pattern.</param>
         /// <param name="pass">The pass to look up.</param>
+        /// <param name="afterOrder">Only patches ordered after this are returned. The default returns every patch.</param>
         /// <returns>The matching patches, or an empty sequence when no patches are registered for the label in this pass.</returns>
-        public IEnumerable<PatchDefinition> GetAllSortedPatchesFor(string label, string name, PatchDefinition.PatchPass pass)
+        public IEnumerable<PatchDefinition> GetAllSortedPatchesFor(string label, string name, string pass, int afterOrder = -1)
         {
             if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) yield break;
             if (!perPass.TryGetValue(pass, out var buckets)) yield break;
@@ -588,7 +723,10 @@ namespace PatchManager.LuaPatching
                 else if (ReferenceEquals(best, matchAllPatch)) matchAllI++;
                 else wildCardI++;
 
-                if (alreadyYielded.Add(best) && !best.DisallowedNames.Any(x => x.Matches(name))) yield return best;
+                if (best.Order > afterOrder && alreadyYielded.Add(best) && !best.DisallowedNames.Any(x => x.Matches(name)))
+                {
+                    yield return best;
+                }
             }
         }
 
@@ -617,7 +755,7 @@ namespace PatchManager.LuaPatching
         /// <param name="name">The asset's addressables address.</param>
         /// <param name="pass">The pass to check.</param>
         /// <returns>True if any patch in <paramref name="pass" /> matches, false otherwise.</returns>
-        public bool HasAnyPatchInPass(string label, string name, PatchDefinition.PatchPass pass)
+        public bool HasAnyPatchInPass(string label, string name, string pass)
         {
             if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
             if (!perPass.TryGetValue(pass, out var buckets)) return false;
@@ -657,6 +795,47 @@ namespace PatchManager.LuaPatching
         #endregion
 
         #region utilities
+
+        /// <summary>
+        /// A copy a duplicate patch made, waiting for the rest of its pass.
+        /// </summary>
+        public readonly struct DuplicatedAsset
+        {
+            /// <summary>
+            /// The name of the copy.
+            /// </summary>
+            public readonly string Name;
+
+            /// <summary>
+            /// The name of the duplicate patch that made the copy.
+            /// </summary>
+            public readonly string PatchName;
+
+            /// <summary>
+            /// The copy's JSON.
+            /// </summary>
+            public readonly JToken Data;
+
+            /// <summary>
+            /// The order of the duplicate patch, after which the copy's own patching resumes.
+            /// </summary>
+            public readonly int AfterOrder;
+
+            /// <summary>
+            /// Creates a new duplicated asset.
+            /// </summary>
+            /// <param name="name">The name of the copy.</param>
+            /// <param name="patchName">The name of the duplicate patch that made the copy.</param>
+            /// <param name="data">The copy's JSON.</param>
+            /// <param name="afterOrder">The order of the duplicate patch.</param>
+            public DuplicatedAsset(string name, string patchName, JToken data, int afterOrder)
+            {
+                Name = name;
+                PatchName = patchName;
+                Data = data;
+                AfterOrder = afterOrder;
+            }
+        }
 
         /// <summary>
         /// A wildcard patch paired with the compiled name pattern it matches against.

@@ -17,29 +17,6 @@ namespace PatchManager.LuaPatching;
 public class PatchDefinition : IPatchRelationships
 {
     /// <summary>
-    /// The pass a patch runs in.
-    /// </summary>
-    /// <remarks>
-    /// Passes are full sweeps over every patched label: the <see cref="Early" /> pass runs across
-    /// every label first, then <see cref="Default" />, then <see cref="Late" />. JToken state is held
-    /// in memory between passes so later passes see the output of earlier ones.
-    /// </remarks>
-    public enum PatchPass {
-        /// <summary>
-        /// Runs first, typically reserved for reading created or existing assets into shared state.
-        /// </summary>
-        Early,
-        /// <summary>
-        /// Runs second, the default pass where most patches apply their changes.
-        /// </summary>
-        Default,
-        /// <summary>
-        /// Runs third, typically reserved for final writeback from shared state.
-        /// </summary>
-        Late
-    }
-
-    /// <summary>
     /// Ordering bucket within a single pass.
     /// </summary>
     /// <remarks>
@@ -486,29 +463,66 @@ public class PatchDefinition : IPatchRelationships
     }
 
     /// <summary>
-    /// The pass the patch runs in.
+    /// The namespaced name of the pass the patch runs in.
     /// </summary>
-    [MoonSharpHidden] public PatchPass Pass = PatchPass.Default;
+    /// <remarks>
+    /// Passes are full sweeps over every patched label, in the order <see cref="PassDefinition" /> constraints
+    /// sort into. JToken state is held in memory between passes so later passes see the output of earlier ones.
+    /// </remarks>
+    [MoonSharpHidden] public string PassName = PassDefinition.DEFAULT;
+
+    /// <summary>
+    /// Makes the patch run in the given pass.
+    /// </summary>
+    /// <param name="name">The pass name, namespaced to the host mod when it is not built-in and does not already carry a namespace.</param>
+    /// <returns>The patch instance for chaining.</returns>
+    public PatchDefinition Pass(string name)
+    {
+        PassName = PassDefinition.NormalizeName(PatchModId, name);
+        return this;
+    }
 
     /// <summary>
     /// Makes the patch run in the Early pass.
     /// </summary>
     /// <returns>The patch instance for chaining.</returns>
-    public PatchDefinition Early()
-    {
-        Pass = PatchPass.Early;
-        return this;
-    }
+    public PatchDefinition Early() => Pass(PassDefinition.EARLY);
+
+    /// <summary>
+    /// Makes the patch run in the Default pass.
+    /// </summary>
+    /// <returns>The patch instance for chaining.</returns>
+    public PatchDefinition Default() => Pass(PassDefinition.DEFAULT);
+
+    /// <summary>
+    /// Makes the patch run in the Default pass, the same as <see cref="Default" />.
+    /// </summary>
+    /// <returns>The patch instance for chaining.</returns>
+    public PatchDefinition None() => Pass(PassDefinition.DEFAULT);
 
     /// <summary>
     /// Makes the patch run in the Late pass.
     /// </summary>
     /// <returns>The patch instance for chaining.</returns>
-    public PatchDefinition Late()
-    {
-        Pass = PatchPass.Late;
-        return this;
-    }
+    public PatchDefinition Late() => Pass(PassDefinition.LATE);
+
+    /// <summary>
+    /// The name a duplicate patch gives each copy, with <c>{name}</c> standing in for the source asset's name, or
+    /// <c>null</c> for a patch that edits assets in place.
+    /// </summary>
+    /// <remarks>
+    /// A duplicate patch copies each asset it matches under the new name in the same label, then runs its
+    /// callback on the copy and leaves the source alone. Internal ID fields are not touched.
+    /// </remarks>
+    [MoonSharpHidden] [CanBeNull] public string DuplicateNameTemplate;
+
+    /// <summary>
+    /// Gets the name a duplicate patch gives the copy of the named asset.
+    /// </summary>
+    /// <param name="sourceName">The name of the asset being copied.</param>
+    /// <returns>The name of the copy.</returns>
+    [MoonSharpHidden]
+    public string DuplicateNameFor(string sourceName) => DuplicateNameTemplate!.Replace("{name}", sourceName);
     
     /// <summary>
     /// The patch's precomputed run-order index across all registered patches.
@@ -530,7 +544,7 @@ public class PatchDefinition : IPatchRelationships
     /// <param name="value">The value to patch.</param>
     /// <param name="summary">The summary to record application, skip, or error events into.</param>
     /// <param name="removed">Set to <c>true</c> when the callback signals deletion by returning <c>"remove"</c>.</param>
-    /// <param name="errored">Set to <c>true</c> when the callback or a predicate threw, or when no <c>:Do(...)</c> block was registered.</param>
+    /// <param name="errored">Set to <c>true</c> when the callback or a predicate threw, or when a patch that is not a duplicate has no <c>:Do(...)</c> block.</param>
     /// <returns>True if the patch ran without error or predicate failure, false otherwise.</returns>
     public bool Apply(DynValue value, Summary summary, out bool removed, out bool errored)
     {
@@ -542,7 +556,8 @@ public class PatchDefinition : IPatchRelationships
             return false;
         }
 
-        if (PatchMethod == null)
+        // A duplicate needs no Do block, since copying is the whole patch when there is nothing to change
+        if (PatchMethod == null && DuplicateNameTemplate == null)
         {
             errored = true;
             summary.Error(Name, "no :Do(...) block exists for this patch");

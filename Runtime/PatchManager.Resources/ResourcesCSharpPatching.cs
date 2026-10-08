@@ -28,5 +28,9 @@ namespace PatchManager.Resources
         /// <summary>Registers a resource or recipe patch.</summary>
         public static PatchBuilder<JsonUserData> PatchResource(this PmScope scope, string name)
             => Patching.Build<JsonUserData>(scope.ModId, "Resource", "resources", name);
+
+        /// <summary>Registers a patch that copies each matching asset under a new name in the same label. Do runs on the copy.</summary>
+        public static PatchBuilder<JsonUserData> DuplicateResource(this PmScope scope, string source, string newName)
+            => Patching.Duplicate<JsonUserData>(scope.ModId, "Resource", "resources", source, newName);
     }
 }

@@ -16,13 +16,53 @@ namespace PatchManager.CSharpPatching
     internal static class FluentPatchRegistry
     {
         private static readonly List<PatchDefinition> Pending = new();
+        private static readonly List<PassDefinition> PendingPasses = new();
         private static bool _closed;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticState()
         {
             Pending.Clear();
+            PendingPasses.Clear();
             _closed = false;
+        }
+
+        /// <summary>
+        /// Declares a pass, queues it for registration, and returns it for chaining its ordering.
+        /// </summary>
+        /// <param name="modId">The mod ID the pass is namespaced under.</param>
+        /// <param name="name">The pass name, namespaced to <paramref name="modId" /> unless built-in or already namespaced.</param>
+        /// <returns>The queued pass, for fluent chaining.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when registration has already closed.</exception>
+        public static PassDefinition Pass(string modId, string name)
+        {
+            if (_closed)
+            {
+                throw new InvalidOperationException(
+                    $"Fluent C# pass '{modId}:{name}' was declared too late. Passes must be declared during " +
+                    "pre-initialization, before PatchManager runs its patch flow.");
+            }
+
+            var pass = new PassDefinition { Name = PassDefinition.NormalizeName(modId, name), PassModId = modId };
+            PendingPasses.Add(pass);
+            return pass;
+        }
+
+        /// <summary>
+        /// Builds a duplicate patch that copies each matching asset under a new name in the same label, queues it
+        /// for registration, and returns it for chaining.
+        /// </summary>
+        /// <param name="modId">The mod ID the patch is namespaced under.</param>
+        /// <param name="converter">The name of the converter that produces the asset wrapper.</param>
+        /// <param name="label">The label whose assets to copy, which the copies keep.</param>
+        /// <param name="source">The name of the asset to copy. Supports * and ? wildcards.</param>
+        /// <param name="newName">The name of the copy, with {name} standing in for the source asset's name.</param>
+        /// <returns>The queued patch, for fluent chaining.</returns>
+        public static PatchDefinition Duplicate(string modId, string converter, string label, string source, string newName)
+        {
+            var patch = Build(modId, converter, label, $"Duplicate({source} -> {newName})").Named(source);
+            patch.DuplicateNameTemplate = newName;
+            return patch;
         }
 
         /// <summary>
@@ -72,6 +112,17 @@ namespace PatchManager.CSharpPatching
         public static void Flush(Universe universe)
         {
             _closed = true;
+
+            // A pass declared from both C# and Lua keeps the constraints of both
+            foreach (var pass in PendingPasses)
+            {
+                var registered = universe.GetOrAddPass(pass.PassModId, pass.Name);
+                registered.AfterPasses.UnionWith(pass.AfterPasses);
+                registered.BeforePasses.UnionWith(pass.BeforePasses);
+            }
+
+            PendingPasses.Clear();
+
             foreach (var patch in Pending)
             {
                 universe.AddPatch(patch);

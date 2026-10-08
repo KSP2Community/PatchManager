@@ -14,5 +14,8 @@ namespace PatchManager.CSharpPatching.Attributes
 
         /// <summary>The addressables label whose assets this patch targets.</summary>
         public abstract string Label { get; }
+
+        /// <summary>The asset names the patch is restricted to before any other modifier, or <c>null</c> for none.</summary>
+        public virtual string[] Names => null;
     }
 }

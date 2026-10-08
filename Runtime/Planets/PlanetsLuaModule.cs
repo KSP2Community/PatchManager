@@ -50,22 +50,43 @@ public class PlanetsLuaModule
     }
 
     /// <summary>
+    /// Registers a patch that copies each celestial body it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the celestial body to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition Duplicate(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "Planet", "celestial_bodies", source, newName, patchMethod);
+    }
+
+    /// <summary>
     /// Registers a patch against the default galaxy definition.
     /// </summary>
+    /// <remarks>
+    /// Every galaxy shares the galaxy definition label, so the patch is restricted to the stock galaxy and leaves its
+    /// copies alone.
+    /// </remarks>
     /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
     /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchDefaultGalaxy(ScriptExecutionContext context, string name)
     {
-        return _core.Patch(context, "Galaxy", "GalaxyDefinition_Default", name);
+        return PatchGalaxy(context, SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY, name);
     }
 
     /// <summary>
     /// Registers a patch against the galaxy definition with the given key.
     /// </summary>
     /// <remarks>
-    /// The stock galaxy is only reachable by its own key. Every other galaxy shares the galaxy definition label, so the
-    /// patch is restricted to the one asset named by the key.
+    /// Every galaxy shares the galaxy definition label, so the patch is restricted to the one asset named by the key.
     /// </remarks>
     /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
     /// <param name="galaxyDefinitionKey">The key of the galaxy definition to patch.</param>
@@ -73,10 +94,28 @@ public class PlanetsLuaModule
     /// <returns>The registered patch.</returns>
     public PatchDefinition PatchGalaxy(ScriptExecutionContext context, string galaxyDefinitionKey, string name)
     {
-        return galaxyDefinitionKey == SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY
-            ? _core.Patch(context, "Galaxy", galaxyDefinitionKey, name)
-            : _core.Patch(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, name)
-                .Named(galaxyDefinitionKey);
+        return _core.Patch(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, name)
+            .Named(galaxyDefinitionKey);
+    }
+
+    /// <summary>
+    /// Registers a patch that copies the galaxy definition with the given key under a new key, then runs
+    /// <paramref name="patchMethod" /> on the copy.
+    /// </summary>
+    /// <remarks>
+    /// The copy joins every other galaxy in the galaxy definition label, so <see cref="PatchGalaxy" /> reaches it by its
+    /// new key. Patches ordered after the duplicate that name the source do not reach the copy.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="galaxyDefinitionKey">The key of the galaxy definition to copy.</param>
+    /// <param name="newGalaxyDefinitionKey">The key of the copy.</param>
+    /// <param name="patchMethod">The callback to run on the copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateGalaxy(ScriptExecutionContext context, string galaxyDefinitionKey,
+        string newGalaxyDefinitionKey, Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey,
+            newGalaxyDefinitionKey, patchMethod);
     }
 
     /// <summary>
@@ -114,6 +153,24 @@ public class PlanetsLuaModule
     }
 
     /// <summary>
+    /// Registers a patch that copies each atmosphere override it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the atmosphere override to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateAtmosphereOverride(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "JSON", "atmosphere_overrides", source, newName, patchMethod);
+    }
+
+    /// <summary>
     /// Creates a new atmosphere override for the given body and runs <paramref name="callback" /> against it
     /// for further configuration.
     /// </summary>
@@ -142,6 +199,24 @@ public class PlanetsLuaModule
     public PatchDefinition PatchCloudOverride(ScriptExecutionContext context, string name)
     {
         return _core.Patch(context, "Cloud", "volume_cloud_overrides", name);
+    }
+
+    /// <summary>
+    /// Registers a patch that copies each volume cloud override it matches under a new name, then runs <paramref name="patchMethod" />
+    /// on the copy.
+    /// </summary>
+    /// <remarks>
+    /// Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces the patch name.</param>
+    /// <param name="source">The name of the volume cloud override to copy. Supports <c>*</c> and <c>?</c> wildcards.</param>
+    /// <param name="newName">The name of the copy, with <c>{name}</c> standing in for the source's name.</param>
+    /// <param name="patchMethod">The callback to run on each copy, or <c>null</c> to copy without changes.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition DuplicateCloudOverride(ScriptExecutionContext context, string source, string newName,
+        Func<DynValue, string> patchMethod = null)
+    {
+        return _core.Duplicate(context, "Cloud", "volume_cloud_overrides", source, newName, patchMethod);
     }
 
     /// <summary>

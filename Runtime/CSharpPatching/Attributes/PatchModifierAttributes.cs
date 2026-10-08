@@ -35,6 +35,22 @@ namespace PatchManager.CSharpPatching.Attributes
         public void Apply(PatchDefinition patch, object owner) => patch.Late();
     }
 
+    /// <summary>Runs the patch in the named pass, namespaced to the mod unless built-in or already namespaced.</summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public class PassAttribute : Attribute, IPatchModifier
+    {
+        private readonly string _name;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PassAttribute" /> class.
+        /// </summary>
+        /// <param name="name">The pass the patch runs in.</param>
+        public PassAttribute(string name) => _name = name;
+
+        /// <inheritdoc />
+        public void Apply(PatchDefinition patch, object owner) => patch.Pass(_name);
+    }
+
     /// <summary>Runs the patch before Default and Last patches in its pass.</summary>
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class FirstAttribute : Attribute, IPatchModifier
