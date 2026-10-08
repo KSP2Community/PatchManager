@@ -1,10 +1,10 @@
 ---@meta
+-- AUTO-GENERATED from analysis of codebase and assets - do not edit by hand.
+-- Source: Assets/Modules/PatchManager/Runtime/Parts/AudioLuaModule.cs
 
----Lua submodule exposed as `PM.Audio`, providing stock part-audio preset helpers.
 ---@class AudioLuaModule
 local AudioLuaModule = {}
 
----Ensures the hidden PartAudioPreset module contains a binding for the given stock-audio preset.
 ---@param part PartUserData
 ---@param presetId string
 ---@param targetTransformPath? string

@@ -1,28 +1,26 @@
 ---@meta
 -- AUTO-GENERATED from analysis of codebase and assets - do not edit by hand.
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/PlanetsLuaModule.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/Converters/CelestialBodyConverter.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/Converters/GalaxyConverter.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/Converters/VolumeCloudConverter.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/UserData/CelestialBodyUserData.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/UserData/GalaxyUserData.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/UserData/VolumeCloudUserData.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/UserData/CloudUserData.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/Overrides/AtmosphereOverride.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/Overrides/CloudsDataOverride.cs
--- Source: ksp2redux/Assets/Modules/PatchManager/Runtime/Planets/Overrides/VolumeCloudConfigurationOverride.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/CelestialBodyDefinition.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/CelestialBodyProperties.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/Definitions/CelestialBodyRingData.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedCelestialBody.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedGalaxyDefinition.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedOrbitProperties.cs
--- Source: ksp2redux/Assets/Code/KSP/Sim/SerializedOribiterDefinition.cs
-
-
--- =====================================================================
--- Submodule
--- =====================================================================
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/PlanetsLuaModule.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/Converters/CelestialBodyConverter.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/Converters/GalaxyConverter.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/Converters/VolumeCloudConverter.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/UserData/CelestialBodyUserData.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/UserData/GalaxyUserData.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/UserData/VolumeCloudUserData.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/UserData/CloudUserData.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/Overrides/AtmosphereOverride.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/Overrides/VolumeCloudConfigurationOverride.cs
+-- Source: Assets/Modules/PatchManager/Runtime/Planets/Overrides/CloudsDataOverride.cs
+-- Source: Assets/Code/KSP/game/Load/LoadCelestialBodyDataFilesFlowAction.cs
+-- Source: Assets/Code/KSP/Sim/Definitions/CelestialBodyCore.cs
+-- Source: Assets/Code/KSP/Sim/Definitions/CelestialBodyData.cs
+-- Source: Assets/Code/KSP/Sim/Definitions/CelestialBodyRingData.cs
+-- Source: Assets/Code/KSP/Sim/Definitions/SerializedPredefinedSimObject.cs
+-- Source: Assets/Code/KSP/Sim/Definitions/SerializedPredefinedColonyObject.cs
+-- Source: Assets/Code/KSP/Sim/SerializedGalaxyDefinition.cs
+-- Source: Assets/Code/KSP/Sim/SerializedCelestialBody.cs
+-- Source: Assets/Code/KSP/Sim/SerializedOrbitProperties.cs
+-- Source: Assets/Code/KSP/Sim/SerializedOribiterDefinition.cs
 
 ---Lua submodule exposed as `PM.Planets`, providing patches for celestial bodies, the default galaxy,
 ---and atmosphere / cloud overrides.
@@ -30,18 +28,30 @@
 local PlanetsLuaModule = {}
 
 ---Registers a celestial-body patch with the given namespaced patch name.
----@param name string The patch's local name; namespaced with the host mod's ID.
----@return LuaPatch<CelestialBodyUserData, any> patch The registered patch.
+---@param name string The patch's local name, namespaced with the host mod's ID.
+---@return PatchDefinition<CelestialBodyUserData, any> patch The registered patch.
 function PlanetsLuaModule:Patch(name) end
 
 ---Registers a patch against the default galaxy definition.
----@param name string The patch's local name; namespaced with the host mod's ID.
----@return LuaPatch<GalaxyUserData, JsonUserData> patch The registered patch.
+---@param name string The patch's local name, namespaced with the host mod's ID.
+---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
 function PlanetsLuaModule:PatchDefaultGalaxy(name) end
 
+---Registers a patch against the galaxy definition with the given key.
+---@param galaxyDefinitionKey string The key of the galaxy definition to patch.
+---@param name string The patch's local name, namespaced with the host mod's ID.
+---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
+function PlanetsLuaModule:PatchGalaxy(galaxyDefinitionKey, name) end
+
+---Creates a new galaxy definition with no bodies under the given key and runs callback
+---against it for further configuration.
+---@param galaxyDefinitionKey string The key that saves and campaign packs load the galaxy definition by.
+---@param callback fun(galaxy: GalaxyUserData) Callback that receives the new galaxy definition for further configuration.
+function PlanetsLuaModule:CreateGalaxy(galaxyDefinitionKey, callback) end
+
 ---Registers a patch against the `atmosphere_overrides` label with the given namespaced patch name.
----@param name string The patch's local name; namespaced with the host mod's ID.
----@return LuaPatch<AtmosphereOverrideUserData, any> patch The registered patch.
+---@param name string The patch's local name, namespaced with the host mod's ID.
+---@return PatchDefinition<AtmosphereOverrideUserData, any> patch The registered patch.
 function PlanetsLuaModule:PatchAtmosphereOverride(name) end
 
 ---Creates a new atmosphere override for the given body and runs callback against it
@@ -51,8 +61,8 @@ function PlanetsLuaModule:PatchAtmosphereOverride(name) end
 function PlanetsLuaModule:CreateAtmosphereOverride(name, callback) end
 
 ---Registers a patch against the `volume_cloud_overrides` label with the given namespaced patch name.
----@param name string The patch's local name; namespaced with the host mod's ID.
----@return LuaPatch<VolumeCloudUserData, any> patch The registered patch.
+---@param name string The patch's local name, namespaced with the host mod's ID.
+---@return PatchDefinition<VolumeCloudUserData, any> patch The registered patch.
 function PlanetsLuaModule:PatchCloudOverride(name) end
 
 ---Creates a new volume-cloud override for the given body and runs callback against it
@@ -61,17 +71,9 @@ function PlanetsLuaModule:PatchCloudOverride(name) end
 ---@param callback fun(override: VolumeCloudUserData) Callback that receives the new override for further configuration.
 function PlanetsLuaModule:CreateCloudOverride(name, callback) end
 
-
--- =====================================================================
--- UserData wrappers
--- =====================================================================
-
 ---JSON UserData wrapping a celestial body's `data` subtree while preserving the full envelope for round-tripping.
----The wrapped Token is the inner `data` object (shape `CelestialBodyProperties`); the outer envelope is held
----internally for serialization round-trip.
----@class CelestialBodyUserData : _CelestialBodyProperties, JsonUserData
+---@class CelestialBodyUserData : _CelestialBodyData, JsonUserData
 
----Synthetic wrapper around a `SerializedCelestialBody` JSON entry within a galaxy definition.
 ---@class SerializedCelestialBodyUserData : _SerializedCelestialBody, JsonUserData
 
 ---@class _GalaxyUserDataBodyIndexer
@@ -91,27 +93,15 @@ function GalaxyUserData:Add(planetName, callback) end
 ---Volume-cloud configuration wrapper that exposes the `cumulusList` array as a typed
 ---CloudUserData rather than a raw JsonUserData.
 ---@class VolumeCloudUserData : _VolumeCloudConfigurationOverride, ExtensibleJsonUserData
----@field cumulusList CloudUserData The cumulus layer list, exposed as a name-indexed CloudUserData.
+---@field cumulusList CloudUserData
 
----Synthetic per-element wrapper for entries of a `CloudUserData`.
 ---@class CloudLayerUserData : _CloudsDataOverride, JsonUserData
 
 ---Indexed-list wrapper for a volume cloud's `cumulusList`, keyed by each layer's `layerName`.
 ---@class CloudUserData : IndexedListUserData<CloudLayerUserData>
 
----Synthetic wrapper around an `AtmosphereOverride` JSON entry, used by `PM.Planets:PatchAtmosphereOverride`
----and `PM.Planets:CreateAtmosphereOverride`.
 ---@class AtmosphereOverrideUserData : _AtmosphereOverride, JsonUserData
 
-
--- =====================================================================
--- Override JSON schemas (atmosphere_overrides / volume_cloud_overrides)
--- =====================================================================
-
----Override applied to a planet's AtmosphereModel. Every field except `PlanetName` is optional;
----only fields with a value are written through to the model on apply.
----This is the on-disk JSON shape stored under the `atmosphere_overrides` addressables label
----(file naming `atmosphere_override_<PlanetName>`).
 ---@class _AtmosphereOverride : _JsonUserDataBase
 ---@field PlanetName string
 ---@field IsGasGiant? boolean
@@ -138,16 +128,12 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field Absorption? Vector3
 ---@field AbsorptionMaxDensity? number
 ---@field AbsorptionHeightMinMax? Vector2
----@field TransmittanceTexture? string Addressables key of the replacement transmittance Texture2D.
----@field IrradianceTexture? string Addressables key of the replacement irradiance Texture2D.
----@field ScatteringTexture? string Addressables key of the replacement scattering Texture3D.
+---@field TransmittanceTexture? string
+---@field IrradianceTexture? string
+---@field ScatteringTexture? string
 
 ---@alias AtmosphereOverride _AtmosphereOverride | { PlanetName: string, IsGasGiant?: boolean, Exposure?: Vector2, SunAngleRadius?: number, SunZenithAngle?: number, SolarIrradiance?: Vector3, SunDirectionExposureModifier?: number, TransmittanceTint?: number, NoonColorStrength?: number, SunsetColorStrength?: number, ColorTransitionScale?: number, BottomRadius?: number, AtmosphereHeight?: number, GroundAlbedo?: Color, RayleighScattering?: Vector3, RayleighScatteringScale?: number, RayleighExponentialDistribution?: number, MieScattering?: Vector3, MieScatteringScale?: number, MieAnisotropy?: number, MieExponentialDistribution?: number, AbsorptionScale?: number, Absorption?: Vector3, AbsorptionMaxDensity?: number, AbsorptionHeightMinMax?: Vector2, TransmittanceTexture?: string, IrradianceTexture?: string, ScatteringTexture?: string }
 
----Override applied to a `VolumeCloudConfiguration`. Every field except `bodyName` is optional;
----only fields with a value are written through on apply.
----This is the on-disk JSON shape stored under the `volume_cloud_overrides` addressables label
----(file naming `volume_cloud_override_<bodyName>`).
 ---@class _VolumeCloudConfigurationOverride : _JsonUserDataBase
 ---@field bodyName string
 ---@field exclusiveLayer? boolean
@@ -159,7 +145,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field verticalColorIntensity? number
 ---@field overallSize? number
 ---@field vortexCloudHeightRange? Vector2
----@field cumulusList JsonList<CloudsDataOverride> Cumulus layer overrides; each entry is matched to the live layer with the same `layerName`.
+---@field cumulusList JsonList<CloudsDataOverride>
 ---@field cloudCoverageModifier? number
 ---@field detailVariationRange? number
 ---@field enableShadows? boolean
@@ -218,9 +204,6 @@ function GalaxyUserData:Add(planetName, callback) end
 
 ---@alias VolumeCloudConfigurationOverride _VolumeCloudConfigurationOverride | { bodyName: string, exclusiveLayer?: boolean, CloudsRotateAll?: Vector3, planetRadius?: number, enableColorMap?: boolean, enableVerticalColor?: boolean, colorMapIntensity?: number, verticalColorIntensity?: number, overallSize?: number, vortexCloudHeightRange?: Vector2, cumulusList: JsonList<CloudsDataOverride>, cloudCoverageModifier?: number, detailVariationRange?: number, enableShadows?: boolean, enableLayerShadows?: boolean, volumetricShadowDensity?: number, volumetricShadowLodBias?: number, volumetricShadowDistance?: number, shadowOpacity?: number, shadowMapStrength?: number, layerShadowDensity?: number, ambientColor?: Color, EnableCloudGI?: boolean, cloudGIIntensity?: number, cloudGITint?: number, lightPenetrateDistance?: number, multiScatteringScattering?: number, extinctionByLightPosition?: number, opticsDistanceScale?: number, silverSpreadG?: number, bloomStrengthG?: number, silverSpreadUnderCloudG?: number, bloomStrengthUnderCloudG?: number, silverSpread?: number, bloomStrength?: number, silverSpreadUnderCloud?: number, bloomStrengthUnderCloud?: number, ambientScale?: number, scatteringScale?: number, cloudsDensityScale?: number, enableGodray?: boolean, godrayIntensity?: number, godrayVisibleDistance?: number, godrayStepSize?: number, sampleLightStepSize?: number, sampleLightStepCount?: number, cloudDensityRangeEmitGodray?: Vector2, godrayAttenuation?: number, godrayFadeHeight?: number, godrayBlurSize?: number, IsBlurGodray?: boolean, antiBandingAmplify?: number, useScaleCloudsOnly?: boolean, raymarchStepSize?: number, increaseRaymarchStepByDistance?: boolean, distanceRatio?: number, maxRaymarchStepSize?: number, cullingEdgeClouds?: boolean, cullingStrength?: number, autoMipmap?: boolean, scaleCloudMaskNormalTileRate?: number, cascadedResolutionRange?: number, mipmapScale?: number, enableFadeout?: boolean, startFadeoutHeight?: number, endFadeoutHeight?: number }
 
----Override applied to a `VolumeCloudConfiguration.CloudsData` layer. Layers are matched by `layerName`;
----only fields with a value are written through on apply. The `baseTexureTile`-onwards fields apply only
----when the matched live layer is a `CumulusData`.
 ---@class _CloudsDataOverride : _JsonUserDataBase
 ---@field layerName string
 ---@field isEnable? boolean
@@ -254,185 +237,139 @@ function GalaxyUserData:Add(planetName, callback) end
 
 ---@alias CloudsDataOverride _CloudsDataOverride | { layerName: string, isEnable?: boolean, castShadow?: boolean, bakeCloudMipmap?: number, currentBakedCloudMipMap?: number, cloudsType?: CloudsLayerType, cloudHeightRange?: Vector2, bakedCloudHeight?: number, cloudsLayerRotate?: Vector3, enableWind?: boolean, windDirection?: Vector2, movementSpeed?: number, evolveSpeed?: number, topOffset?: number, isFold?: boolean, baseTexureTile?: number, coverageScale?: number, evanish?: number, detailAmount?: number, cloudsMaskBias?: number, upperFalloff?: number, lowerFalloff?: number, detailAltitudeShift?: number, enableDetailTexture?: boolean, detailTextureTile?: number, detailStrength?: number, cloudsDensity?: number, normalScale?: number, scaleCloudColor?: Color }
 
+---Represents the serialized data definition for a celestial body, including its physical, atmospheric, rotational, and decorative properties.
+---@class _CelestialBodyData : _JsonUserDataBase
+---@field bodyName string The internal identifier name of the celestial body.
+---@field assetKeyScaled string The asset key used to load the scaled-space representation of the body.
+---@field assetKeySimulation string The asset key used to load the simulation-space representation of the body.
+---@field bodyDisplayName string The localized display name shown to players for the celestial body.
+---@field bodyDescription string The localized descriptive text shown to players for the celestial body.
+---@field isStar boolean A value indicating whether this body is classified as a star.
+---@field isHomeWorld boolean A value indicating whether this body is the home world of the player's space program.
+---@field navballSwitchAltitudeHigh number The altitude above sea level, in metres, at which the navball automatically switches to orbit mode when ascending past this threshold.
+---@field navballSwitchAltitudeLow number The altitude above sea level, in metres, at which the navball automatically switches to surface mode when descending past this threshold.
+---@field hasSolidSurface boolean A value indicating whether this body has a solid surface that vessels can land on.
+---@field hasOcean boolean A value indicating whether this body has an ocean layer.
+---@field HasLocalSpace boolean A value indicating whether this body has a local physics space that activates near its surface.
+---@field radius number The mean radius of the body, in metres.
+---@field gravityASL number The gravitational acceleration at sea level on this body, in m/s^2.
+---@field oceanAltitude number The altitude of the ocean surface relative to the reference radius, in metres.
+---@field oceanDensity number The density of the body's ocean fluid, in kg/m^3.
+---@field MinTerrainHeight number The minimum terrain height offset below the reference radius, in metres.
+---@field MaxTerrainHeight number The maximum terrain height offset above the reference radius, in metres.
+---@field TerrainHeightScale number The scale factor applied to raw terrain height values when constructing the surface mesh.
+---@field TimeWarpAltitudeOffset number The additional altitude offset above the atmosphere or terrain height at which time warp rates above 4x become permitted.
+---@field SphereOfInfluenceCalculationType integer The integer code identifying which sphere-of-influence calculation method applies to this body.
+---@field ForcedSphereOfInfluence number The manually specified sphere-of-influence radius, in meters, that overrides the dynamically calculated value.
+---@field hasSolarRotationPeriod boolean A value indicating whether this body's rotation period is derived from its solar orbit rather than a fixed sidereal period.
+---@field hasInverseRotationThresholdClamp boolean A value indicating whether the inverse-rotation threshold altitude is clamped to a safe range.
+---@field hasInverseRotation boolean A value indicating whether vessels above a threshold altitude experience an inverted surface-rotation reference frame.
+---@field isRotating boolean A value indicating whether this body rotates on its axis over time.
+---@field isTidallyLocked boolean A value indicating whether this body's rotation period is locked to its orbital period around its parent.
+---@field inverseRotThresholdAltitude number The altitude above sea level, in metres, below which the inverse-rotation reference frame is not applied.
+---@field initialRotation number The initial rotation angle of the body at epoch time zero, in degrees.
+---@field rotationPeriod number The sidereal rotation period of the body, in seconds.
+---@field axialTilt Vector3d The axial tilt of the body expressed as Euler angles, in degrees.
+---@field hasAtmosphere boolean A value indicating whether this body has an atmosphere.
+---@field atmosphereContainsOxygen boolean A value indicating whether the atmosphere contains free oxygen, enabling air-breathing engines.
+---@field atmosphereDepth number The altitude above sea level, in metres, at which the atmosphere ends.
+---@field atmosphereTemperatureSeaLevel number The atmospheric temperature at sea level, in Kelvin.
+---@field atmospherePressureSeaLevel number The atmospheric pressure at sea level, in kilopascals.
+---@field atmosphereMolarMass number The mean molar mass of the atmospheric gas mixture, in kg/mol.
+---@field atmosphereAdiabaticIndex number The adiabatic index (ratio of specific heats) of the atmospheric gas mixture.
+---@field reentryHarshness number The multiplier on reentry heating in this body's atmosphere, 1 for Kerbin.
+---@field atmosphericReentryVFXGradient string The asset key of the color gradient used for the atmospheric re-entry visual effect.
+---@field useAtmospherePressureCurve boolean A value indicating whether atmospheric pressure is determined by atmospherePressureCurve rather than the analytic formula.
+---@field useAtmosphereTemperatureCurve boolean A value indicating whether atmospheric temperature is determined by BodyAltitudeTemperatureCurve rather than the analytic formula.
+---@field useAtmosphereHumidityCurve boolean A value indicating whether relative humidity is determined by BodyAltitudeRelativeHumidityCurve rather than a constant.
+---@field atmospherePressureCurve FloatCurve The curve mapping altitude to atmospheric pressure, used when useAtmospherePressureCurve is true.
+---@field BodyAltitudeTemperatureCurve FloatCurve The curve mapping altitude to atmospheric temperature, used when useAtmosphereTemperatureCurve is true.
+---@field BodyAltitudeSurfaceFluxCurve FloatCurve The curve mapping altitude to the solar flux received at the body's surface, used for thermal calculations.
+---@field BodyAltitudeFluxCurve FloatCurve The curve mapping altitude to the ambient thermal flux from the body, used for thermal calculations.
+---@field BodyAltitudeRelativeHumidityCurve FloatCurve The curve mapping altitude to relative humidity, used when useAtmosphereHumidityCurve is true.
+---@field BodySurfaceFluxMapPath string The asset path of the texture map encoding surface thermal flux values per geographic location.
+---@field BodySurfaceFluxScale number The scalar multiplier applied to values sampled from the surface flux map.
+---@field StarLuminosity number The total luminosity of the star, in watts, used to compute solar flux at orbiting bodies.
+---@field ringGroupData JsonList<CelestialBodyRingData> The list of ring group definitions that describe the body's planetary ring system.
+---@field MineDustColor Vector4 The RGBA color of the dust particle effect spawned when a vessel mines the body's surface.
+---@field LocalSimObjectsData JsonList<SerializedPredefinedSimObject> The serialized representations of predefined simulation objects located in the body's local space, used for JSON persistence.
+---@field LocalColonyObjectsData JsonList<SerializedPredefinedColonyObject> The serialized representations of predefined colony objects located in the body's local space, used for JSON persistence.
 
--- =====================================================================
--- Celestial body schema (the inner `data` subtree wrapped by CelestialBodyUserData)
--- =====================================================================
-
----Represents a celestial body definition, pairing a string key with optional CelestialBodyProperties.
----@class _CelestialBodyDefinition : _JsonUserDataBase
----@field key string
----@field properties? CelestialBodyProperties
-
----@alias CelestialBodyDefinition _CelestialBodyDefinition | { key: string, properties?: CelestialBodyProperties }
-
----Represents the definition data for a celestial body, including physical, atmospheric, ocean, rotation,
----and science parameters.
----This is the JSON shape that lives inside the celestial body envelope's `data` subtree.
----@class _CelestialBodyProperties : _JsonUserDataBase
----@field assetKeySimulation string
----@field assetKeyScaled string
----@field bodyName string
----@field bodyDisplayName string
----@field bodyDescription string
----@field gravityASL number
----@field radius number
----@field isHomeWorld boolean
----@field oceanAltitude number
----@field oceanDensity number
----@field MinTerrainHeight number
----@field MaxTerrainHeight number
----@field TerrainHeightScale number
----@field TimeWarpAltitudeOffset number
----@field SphereOfInfluenceCalculationType integer
----@field navballSwitchAltitudeHigh number
----@field navballSwitchAltitudeLow number
----@field hasOcean boolean
----@field HasLocalSpace boolean
----@field oceanUseFog boolean
----@field oceanFogPQSDepth number
----@field oceanFogPQSDepthRecip number
----@field oceanFogDensityStart number
----@field oceanFogDensityEnd number
----@field oceanFogDensityPQSMult number
----@field oceanFogDensityAltScalar number
----@field oceanFogDensityExponent number
----@field oceanFogColorStart Color
----@field oceanFogColorEnd Color
----@field oceanFogDawnFactor number
----@field oceanSkyColorMult number
----@field oceanSkyColorOpacityBase number
----@field oceanSkyColorOpacityAltMult number
----@field oceanAFGBase number
----@field oceanAFGAltMult number
----@field oceanAFGMin number
----@field oceanSunBase number
----@field oceanSunAltMult number
----@field oceanSunMin number
----@field oceanAFGLerp boolean
----@field oceanMinAlphaFogDistance number
----@field oceanMaxAlbedoFog number
----@field oceanMaxAlphaFog number
----@field oceanAlbedoDistanceScalar number
----@field oceanAlphaDistanceScalar number
----@field minOrbitalDistance number
----@field hasAtmosphere boolean
----@field atmosphereContainsOxygen boolean
----@field atmosphereDepth number
----@field atmosphereTemperatureSeaLevel number
----@field atmospherePressureSeaLevel number
----@field atmosphereMolarMass number
----@field atmosphereAdiabaticIndex number
----@field atmosphericReentryVFXGradient string
----@field atmosphereTemperatureLapseRate number
----@field atmosphereGasMassLapseRate number
----@field useAtmosphereTemperatureCurve boolean
----@field isAtmosphereTemperatureCurveNormalized boolean
----@field useAtmosphereHumidityCurve boolean
----@field BodyAltitudeTemperatureCurve FloatCurve
----@field BodyAltitudeSurfaceFluxCurve FloatCurve
----@field BodyAltitudeFluxCurve FloatCurve
----@field BodyAltitudeRelativeHumidityCurve FloatCurve
----@field BodySurfaceFluxScale number
----@field BodySurfaceFluxMapPath string
----@field StarLuminosity number
----@field albedo number
----@field emissivity number
----@field coreTemperatureOffset number
----@field convectionMultiplier number
----@field shockTemperatureMultiplier number
----@field useAtmospherePressureCurve boolean
----@field isAtmospherePressureCurveNormalized boolean
----@field atmospherePressureCurve FloatCurve
----@field hasSolidSurface boolean
----@field ringGroupData JsonList<CelestialBodyRingData>
----@field scaledElipRadMult Vector3d
----@field scaledRadiusHorizMultiplier number
----@field rotates boolean
----@field isRotating? boolean Legacy JSON field name for `rotates` (present in stock `Kerbin.bytes`); current converters read `rotates`.
----@field rotationPeriod number
----@field hasSolarRotationPeriod boolean
----@field initialRotation number
----@field axialTilt Quaternion
----@field isTidallyLocked boolean
----@field clampInverseRotThreshold boolean
----@field hasInverseRotationThresholdClamp? boolean Legacy JSON field name for `clampInverseRotThreshold` (present in stock `Kerbin.bytes`); current converters read `clampInverseRotThreshold`.
----@field hasInverseRotation boolean
----@field inverseRotThresholdAltitude number
----@field scaledShaderFadeFar number
----@field scaledShaderFadeNear number
----@field MineDustColor Vector4
----@field IsStar boolean
-
----@alias CelestialBodyProperties _CelestialBodyProperties | { assetKeySimulation: string, assetKeyScaled: string, bodyName: string, bodyDisplayName: string, bodyDescription: string, gravityASL: number, radius: number, isHomeWorld: boolean, oceanAltitude: number, oceanDensity: number, MinTerrainHeight: number, MaxTerrainHeight: number, TerrainHeightScale: number, TimeWarpAltitudeOffset: number, SphereOfInfluenceCalculationType: integer, navballSwitchAltitudeHigh: number, navballSwitchAltitudeLow: number, hasOcean: boolean, HasLocalSpace: boolean, oceanUseFog: boolean, oceanFogPQSDepth: number, oceanFogPQSDepthRecip: number, oceanFogDensityStart: number, oceanFogDensityEnd: number, oceanFogDensityPQSMult: number, oceanFogDensityAltScalar: number, oceanFogDensityExponent: number, oceanFogColorStart: Color, oceanFogColorEnd: Color, oceanFogDawnFactor: number, oceanSkyColorMult: number, oceanSkyColorOpacityBase: number, oceanSkyColorOpacityAltMult: number, oceanAFGBase: number, oceanAFGAltMult: number, oceanAFGMin: number, oceanSunBase: number, oceanSunAltMult: number, oceanSunMin: number, oceanAFGLerp: boolean, oceanMinAlphaFogDistance: number, oceanMaxAlbedoFog: number, oceanMaxAlphaFog: number, oceanAlbedoDistanceScalar: number, oceanAlphaDistanceScalar: number, minOrbitalDistance: number, hasAtmosphere: boolean, atmosphereContainsOxygen: boolean, atmosphereDepth: number, atmosphereTemperatureSeaLevel: number, atmospherePressureSeaLevel: number, atmosphereMolarMass: number, atmosphereAdiabaticIndex: number, atmosphericReentryVFXGradient: string, atmosphereTemperatureLapseRate: number, atmosphereGasMassLapseRate: number, useAtmosphereTemperatureCurve: boolean, isAtmosphereTemperatureCurveNormalized: boolean, useAtmosphereHumidityCurve: boolean, BodyAltitudeTemperatureCurve: FloatCurve, BodyAltitudeSurfaceFluxCurve: FloatCurve, BodyAltitudeFluxCurve: FloatCurve, BodyAltitudeRelativeHumidityCurve: FloatCurve, BodySurfaceFluxScale: number, BodySurfaceFluxMapPath: string, StarLuminosity: number, albedo: number, emissivity: number, coreTemperatureOffset: number, convectionMultiplier: number, shockTemperatureMultiplier: number, useAtmospherePressureCurve: boolean, isAtmospherePressureCurveNormalized: boolean, atmospherePressureCurve: FloatCurve, hasSolidSurface: boolean, ringGroupData: JsonList<CelestialBodyRingData>, scaledElipRadMult: Vector3d, scaledRadiusHorizMultiplier: number, rotates: boolean, isRotating?: boolean, rotationPeriod: number, hasSolarRotationPeriod: boolean, initialRotation: number, axialTilt: Quaternion, isTidallyLocked: boolean, clampInverseRotThreshold: boolean, hasInverseRotationThresholdClamp?: boolean, hasInverseRotation: boolean, inverseRotThresholdAltitude: number, scaledShaderFadeFar: number, scaledShaderFadeNear: number, MineDustColor: Vector4, IsStar: boolean }
-
----Represents the science data multipliers and altitude thresholds for a celestial body.
----@class _CelestialBodyProperties_ScienceParams : _JsonUserDataBase
----@field landedDataValue number
----@field splashedDataValue number
----@field flyingLowDataValue number
----@field flyingHighDataValue number
----@field inSpaceLowDataValue number
----@field inSpaceHighDataValue number
----@field recoveryValue number
----@field flyingAltitudeThreshold number
----@field spaceAltitudeThreshold number
-
----@alias CelestialBodyProperties_ScienceParams _CelestialBodyProperties_ScienceParams | { landedDataValue: number, splashedDataValue: number, flyingLowDataValue: number, flyingHighDataValue: number, inSpaceLowDataValue: number, inSpaceHighDataValue: number, recoveryValue: number, flyingAltitudeThreshold: number, spaceAltitudeThreshold: number }
+---@alias CelestialBodyData _CelestialBodyData | { bodyName: string, assetKeyScaled: string, assetKeySimulation: string, bodyDisplayName: string, bodyDescription: string, isStar: boolean, isHomeWorld: boolean, navballSwitchAltitudeHigh: number, navballSwitchAltitudeLow: number, hasSolidSurface: boolean, hasOcean: boolean, HasLocalSpace: boolean, radius: number, gravityASL: number, oceanAltitude: number, oceanDensity: number, MinTerrainHeight: number, MaxTerrainHeight: number, TerrainHeightScale: number, TimeWarpAltitudeOffset: number, SphereOfInfluenceCalculationType: integer, ForcedSphereOfInfluence: number, hasSolarRotationPeriod: boolean, hasInverseRotationThresholdClamp: boolean, hasInverseRotation: boolean, isRotating: boolean, isTidallyLocked: boolean, inverseRotThresholdAltitude: number, initialRotation: number, rotationPeriod: number, axialTilt: Vector3d, hasAtmosphere: boolean, atmosphereContainsOxygen: boolean, atmosphereDepth: number, atmosphereTemperatureSeaLevel: number, atmospherePressureSeaLevel: number, atmosphereMolarMass: number, atmosphereAdiabaticIndex: number, reentryHarshness: number, atmosphericReentryVFXGradient: string, useAtmospherePressureCurve: boolean, useAtmosphereTemperatureCurve: boolean, useAtmosphereHumidityCurve: boolean, atmospherePressureCurve: FloatCurve, BodyAltitudeTemperatureCurve: FloatCurve, BodyAltitudeSurfaceFluxCurve: FloatCurve, BodyAltitudeFluxCurve: FloatCurve, BodyAltitudeRelativeHumidityCurve: FloatCurve, BodySurfaceFluxMapPath: string, BodySurfaceFluxScale: number, StarLuminosity: number, ringGroupData: JsonList<CelestialBodyRingData>, MineDustColor: Vector4, LocalSimObjectsData: JsonList<SerializedPredefinedSimObject>, LocalColonyObjectsData: JsonList<SerializedPredefinedColonyObject> }
 
 ---Represents the ring data for a celestial body, defining inner and outer radii and a density curve.
 ---@class _CelestialBodyRingData : _JsonUserDataBase
----@field innerRadius number
----@field outerRadius number
----@field density FloatCurve
+---@field innerRadius number The inner radius of the ring, measured from the center of the celestial body.
+---@field outerRadius number The outer radius of the ring, measured from the center of the celestial body.
+---@field density FloatCurve A curve defining the density distribution of the ring across its radial extent.
 
 ---@alias CelestialBodyRingData _CelestialBodyRingData | { innerRadius: number, outerRadius: number, density: FloatCurve }
 
+---Represents the serialized form of a PredefinedSimObject.
+---@class _SerializedPredefinedSimObject : _JsonUserDataBase
+---@field Name string The name used to identify the predefined simulation object.
+---@field RelativeTo string The name of the simulation object that this object's transform is relative to.
+---@field ReferenceFrame TransformFrameType The transform frame type used to interpret the local position and rotation.
+---@field LocalPosition Vector3d The local position of the predefined simulation object, relative to its reference frame.
+---@field LocalRotation Quaternion The local rotation of the predefined simulation object, relative to its reference frame.
+---@field FixedGuid boolean Flag indicating whether the simulation object uses a fixed GUID rather than a generated one.
 
--- =====================================================================
--- Galaxy schema (wrapped by GalaxyUserData)
--- =====================================================================
+---@alias SerializedPredefinedSimObject _SerializedPredefinedSimObject | { Name: string, RelativeTo: string, ReferenceFrame: TransformFrameType, LocalPosition: Vector3d, LocalRotation: Quaternion, FixedGuid: boolean }
+
+---Represents the serialized state of a PredefinedColonyObject, capturing population fill, telemetry, and CommNet source configuration.
+---@class _SerializedPredefinedColonyObject : _JsonUserDataBase
+---@field SimObjectName string The name of the simulation object associated with this predefined colony entry.
+---@field HasPopulationComponent boolean Indicates whether the colony object includes a population component.
+---@field PopulationFillLimit integer The maximum number of population entries that the colony object may be filled with.
+---@field PopulationFillVacancyDelay integer The delay, in seconds, before a vacated population slot becomes eligible to be refilled.
+---@field PopulationFillLimitEmptySubIdOnly boolean Indicates whether the population fill limit applies only to entries with an empty sub-identifier.
+---@field PopulationReuseNonVeterans boolean Indicates whether existing non-veteran kerbals may be reused when filling this colony object.
+---@field PopulationReuseVeterans boolean Indicates whether existing veteran kerbals may be reused when filling this colony object.
+---@field PopulationCreateNewNonVeterans boolean Indicates whether new non-veteran kerbals may be generated to fill this colony object.
+---@field PopulationCreateNewVeterans boolean Indicates whether new veteran kerbals may be generated to fill this colony object.
+---@field HasTelemetryComponent boolean Indicates whether the colony object includes a telemetry component.
+---@field IsCommNetSource boolean Indicates whether the colony object acts as a communication network signal source.
+
+---@alias SerializedPredefinedColonyObject _SerializedPredefinedColonyObject | { SimObjectName: string, HasPopulationComponent: boolean, PopulationFillLimit: integer, PopulationFillVacancyDelay: integer, PopulationFillLimitEmptySubIdOnly: boolean, PopulationReuseNonVeterans: boolean, PopulationReuseVeterans: boolean, PopulationCreateNewNonVeterans: boolean, PopulationCreateNewVeterans: boolean, HasTelemetryComponent: boolean, IsCommNetSource: boolean }
 
 ---Represents a serialized galaxy definition, including its name, version, and celestial bodies.
----This is the on-disk JSON shape stored under the `Galaxy` converter (file naming `GalaxyDefinition_*`).
 ---@class _SerializedGalaxyDefinition : _JsonUserDataBase
----@field Name string
----@field Version string
----@field CelestialBodies JsonList<SerializedCelestialBody>
+---@field Name string Name of the galaxy definition.
+---@field Version string Version string of the galaxy definition.
+---@field LocalizationKey string Localization key for the display name of the galaxy definition.
+---@field CelestialBodies JsonList<SerializedCelestialBody> List of serialized celestial bodies that make up the galaxy.
 
----@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, CelestialBodies: JsonList<SerializedCelestialBody> }
+---@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, LocalizationKey: string, CelestialBodies: JsonList<SerializedCelestialBody> }
 
 ---Represents the serialized form of a celestial body, including its identity and orbital configuration.
 ---@class _SerializedCelestialBody : _JsonUserDataBase
----@field GUID string
----@field referenceBodyGuid string
----@field OrbitProperties SerializedOrbitProperties
----@field OrbiterProperties SerializedOribiterDefinition
----@field PrefabKey? string Present in stock `GalaxyDefinition_Default` JSON but not declared on the C# class. Reachable when reading existing data; not produced by `PM` or by the C# serializer.
+---@field GUID string Unique identifier for this celestial body.
+---@field referenceBodyGuid string Unique identifier of the reference body that this celestial body orbits.
+---@field OrbitProperties SerializedOrbitProperties Serialized orbital properties describing the orbit of this celestial body.
+---@field OrbiterProperties SerializedOribiterDefinition Serialized orbiter definition describing the physical and orbital characteristics of this celestial body as an orbiter.
 
----@alias SerializedCelestialBody _SerializedCelestialBody | { GUID: string, referenceBodyGuid: string, OrbitProperties: SerializedOrbitProperties, OrbiterProperties: SerializedOribiterDefinition, PrefabKey?: string }
+---@alias SerializedCelestialBody _SerializedCelestialBody | { GUID: string, referenceBodyGuid: string, OrbitProperties: SerializedOrbitProperties, OrbiterProperties: SerializedOribiterDefinition }
 
 ---Represents a serializable set of Keplerian orbital elements and the reference body for an orbit.
 ---@class _SerializedOrbitProperties : _JsonUserDataBase
----@field referenceBodyGuid string
----@field inclination number
----@field eccentricity number
----@field semiMajorAxis number
----@field longitudeOfAscendingNode number
----@field argumentOfPeriapsis number
----@field meanAnomalyAtEpoch number
----@field epoch number
+---@field referenceBodyGuid string GUID identifying the celestial body used as the gravitational reference for this orbit.
+---@field inclination number Orbital inclination in degrees, measured relative to the reference plane.
+---@field eccentricity number Orbital eccentricity describing the shape of the orbit (0 is circular, less than 1 is elliptical).
+---@field semiMajorAxis number Semi-major axis of the orbit in meters, equal to half the longest diameter of the orbital ellipse.
+---@field longitudeOfAscendingNode number Longitude of the ascending node in degrees, defining the orbit's orientation relative to the vernal direction.
+---@field argumentOfPeriapsis number Argument of periapsis in degrees, measuring the angle from the ascending node to the periapsis direction in the orbital plane.
+---@field meanAnomalyAtEpoch number Mean anomaly at the reference epoch in radians, defining the body's position along the orbit at the epoch time.
+---@field epoch number Reference time in universal seconds at which meanAnomalyAtEpoch is defined.
 
 ---@alias SerializedOrbitProperties _SerializedOrbitProperties | { referenceBodyGuid: string, inclination: number, eccentricity: number, semiMajorAxis: number, longitudeOfAscendingNode: number, argumentOfPeriapsis: number, meanAnomalyAtEpoch: number, epoch: number }
 
----Represents the serialized display configuration for an orbiter, including orbit and node colors,
----camera-to-semi-major-axis visibility ratios, and texture offset settings.
+---Represents the serialized display configuration for an orbiter, including orbit and node colors, camera-to-semi-major-axis visibility ratios, and texture offset settings.
 ---@class _SerializedOribiterDefinition : _JsonUserDataBase
----@field orbitColor Color
----@field nodeColor Color
----@field lowerCamVsSmaRatio number
----@field upperCamVsSmaRatio number
----@field autoTextureOffset boolean
----@field textureOffset number
+---@field orbitColor Color The color used to render the orbit line for this orbiter.
+---@field nodeColor Color The color used to render maneuver and orbit nodes for this orbiter.
+---@field lowerCamVsSmaRatio number The lower threshold of the camera-distance-to-semi-major-axis ratio below which the orbit renderer becomes visible.
+---@field upperCamVsSmaRatio number The upper threshold of the camera-distance-to-semi-major-axis ratio above which the orbit renderer is hidden.
+---@field autoTextureOffset boolean A value indicating whether the orbit texture offset is computed automatically based on orbital parameters.
+---@field textureOffset number The explicit texture offset applied along the orbit line when autoTextureOffset is false.
 
 ---@alias SerializedOribiterDefinition _SerializedOribiterDefinition | { orbitColor: Color, nodeColor: Color, lowerCamVsSmaRatio: number, upperCamVsSmaRatio: number, autoTextureOffset: boolean, textureOffset: number }
