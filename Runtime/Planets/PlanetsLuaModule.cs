@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using KSP.Sim;
 using MoonSharp.Interpreter;
 using Newtonsoft.Json.Linq;
 using PatchManager.LuaPatching;
@@ -7,6 +9,7 @@ using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Planets.Overrides;
 using PatchManager.Planets.UserData;
+using Redux.Packs;
 
 namespace PatchManager.Planets;
 
@@ -55,6 +58,45 @@ public class PlanetsLuaModule
     public PatchDefinition PatchDefaultGalaxy(ScriptExecutionContext context, string name)
     {
         return _core.Patch(context, "Galaxy", "GalaxyDefinition_Default", name);
+    }
+
+    /// <summary>
+    /// Registers a patch against the galaxy definition with the given key.
+    /// </summary>
+    /// <remarks>
+    /// The stock galaxy is only reachable by its own key. Every other galaxy shares the galaxy definition label, so the
+    /// patch is restricted to the one asset named by the key.
+    /// </remarks>
+    /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global namespaces <paramref name="name" />.</param>
+    /// <param name="galaxyDefinitionKey">The key of the galaxy definition to patch.</param>
+    /// <param name="name">The patch's local name, namespaced with the host mod's ID.</param>
+    /// <returns>The registered patch.</returns>
+    public PatchDefinition PatchGalaxy(ScriptExecutionContext context, string galaxyDefinitionKey, string name)
+    {
+        return galaxyDefinitionKey == SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY
+            ? _core.Patch(context, "Galaxy", galaxyDefinitionKey, name)
+            : _core.Patch(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, name)
+                .Named(galaxyDefinitionKey);
+    }
+
+    /// <summary>
+    /// Creates a new galaxy definition with no bodies under the given key and runs <paramref name="callback" />
+    /// against it for further configuration.
+    /// </summary>
+    /// <param name="galaxyDefinitionKey">The key that saves and campaign packs load the galaxy definition by.</param>
+    /// <param name="callback">Callback that receives the new galaxy definition for further configuration.</param>
+    public void CreateGalaxy(string galaxyDefinitionKey, Action<GalaxyUserData> callback)
+    {
+        var data = new SerializedGalaxyDefinition
+        {
+            Name = galaxyDefinitionKey,
+            Version = "0.0.1",
+            CelestialBodies = new List<SerializedCelestialBody>()
+        };
+        var typed = new GalaxyUserData(JObject.FromObject(data));
+        var ud = MoonSharp.Interpreter.UserData.Create(typed);
+        callback(typed);
+        _core.New("Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey, ud);
     }
 
     /// <summary>

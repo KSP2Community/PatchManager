@@ -1,8 +1,10 @@
 using System;
+using KSP.Sim;
 using PatchManager.CSharpPatching;
 using PatchManager.CSharpPatching.Attributes;
 using PatchManager.LuaPatching;
 using PatchManager.Planets.UserData;
+using Redux.Packs;
 
 namespace PatchManager.Planets
 {
@@ -26,6 +28,17 @@ namespace PatchManager.Planets
 
         /// <inheritdoc />
         public override string Label => "GalaxyDefinition_Default";
+    }
+
+    /// <summary>Patches every galaxy definition other than the stock one. Restrict it to one galaxy with its key as the name.</summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public class PatchGalaxyAttribute : PatchAttribute
+    {
+        /// <inheritdoc />
+        public override string Converter => "Galaxy";
+
+        /// <inheritdoc />
+        public override string Label => GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL;
     }
 
     /// <summary>Patches atmosphere overrides.</summary>
@@ -60,6 +73,13 @@ namespace PatchManager.Planets
         /// <summary>Registers a patch against the default galaxy definition.</summary>
         public static PatchBuilder<GalaxyUserData> PatchDefaultGalaxy(this PmScope scope, string name)
             => Patching.Build<GalaxyUserData>(scope.ModId, "Galaxy", "GalaxyDefinition_Default", name);
+
+        /// <summary>Registers a patch against the galaxy definition with the given key.</summary>
+        public static PatchBuilder<GalaxyUserData> PatchGalaxy(this PmScope scope, string galaxyDefinitionKey, string name)
+            => galaxyDefinitionKey == SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY
+                ? Patching.Build<GalaxyUserData>(scope.ModId, "Galaxy", galaxyDefinitionKey, name)
+                : Patching.Build<GalaxyUserData>(scope.ModId, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, name)
+                    .Named(galaxyDefinitionKey);
 
         /// <summary>Registers a patch against atmosphere overrides.</summary>
         public static PatchBuilder<JsonUserData> PatchAtmosphereOverride(this PmScope scope, string name)
