@@ -67,6 +67,14 @@ local MissionsLuaModule = {}
 ---@return PatchDefinition<MissionUserData, any> patch The registered patch.
 function MissionsLuaModule:Patch(name) end
 
+---Registers a patch that copies each mission it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the mission to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: MissionUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<MissionUserData, any> patch The registered patch.
+function MissionsLuaModule:Duplicate(source, newName, patchMethod) end
+
 ---Returns the assembly-qualified type name of the property watcher registered under name.
 ---@param name string The watcher's short name as registered in `MissionsTypes.PropertyWatchers`.
 ---@return string typeName The assembly-qualified type name of the watcher.

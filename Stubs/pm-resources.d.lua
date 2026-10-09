@@ -19,6 +19,14 @@ local ResourcesLuaModule = {}
 ---@return PatchDefinition<ResourceUserData | RecipeUserData, any> patch The registered patch.
 function ResourcesLuaModule:Patch(name) end
 
+---Registers a patch that copies each resource it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the resource to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: ResourceUserData | RecipeUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<ResourceUserData | RecipeUserData, any> patch The registered patch.
+function ResourcesLuaModule:Duplicate(source, newName, patchMethod) end
+
 ---Creates a new recipe-style resource definition with the given name and runs callback
 ---against it for further configuration.
 ---@param name string The recipe's resource name.

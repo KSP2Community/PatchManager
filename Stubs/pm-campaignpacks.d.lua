@@ -14,6 +14,14 @@ local CampaignPacksLuaModule = {}
 ---@return PatchDefinition<CampaignPackUserData, any> patch The registered patch.
 function CampaignPacksLuaModule:Patch(name) end
 
+---Registers a patch that copies each campaign pack it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the campaign pack to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: CampaignPackUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<CampaignPackUserData, any> patch The registered patch.
+function CampaignPacksLuaModule:Duplicate(source, newName, patchMethod) end
+
 ---Creates a new campaign pack with the given ID and runs callback against it for further
 ---configuration.
 ---@param id string The campaign pack ID, which also names the created asset.
@@ -28,6 +36,7 @@ function CampaignPacksLuaModule:CreateCampaignPack(id, callback) end
 ---@field CampaignPackLocalizationKey string This is the localization key for the campaign pack
 ---@field TechTreeLayers JsonList<string> The list of tech tree layers that this campaign pack filters for
 ---@field MissionLayers JsonList<string> The list of mission layers that this campaign pack filters for
+---@field PartLayers? JsonList<string> The part layers this campaign pack builds its parts from, in order, with the galaxy's part layers stacked on top. Defaults to { "Default" }.
 ---@field Galaxy string The key of the galaxy definition this campaign pack uses
 
----@alias CampaignPack _CampaignPack | { CampaignPackId: string, CampaignPackLocalizationKey: string, TechTreeLayers: JsonList<string>, MissionLayers: JsonList<string>, Galaxy: string }
+---@alias CampaignPack _CampaignPack | { CampaignPackId: string, CampaignPackLocalizationKey: string, TechTreeLayers: JsonList<string>, MissionLayers: JsonList<string>, PartLayers?: JsonList<string>, Galaxy: string }

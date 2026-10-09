@@ -34,6 +34,14 @@ local PlanetsLuaModule = {}
 ---@return PatchDefinition<CelestialBodyUserData, any> patch The registered patch.
 function PlanetsLuaModule:Patch(name) end
 
+---Registers a patch that copies each celestial body it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the celestial body to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: CelestialBodyUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<CelestialBodyUserData, any> patch The registered patch.
+function PlanetsLuaModule:Duplicate(source, newName, patchMethod) end
+
 ---Registers a patch against the default galaxy definition.
 ---@param name string The patch's local name, namespaced with the host mod's ID.
 ---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
@@ -44,6 +52,16 @@ function PlanetsLuaModule:PatchDefaultGalaxy(name) end
 ---@param name string The patch's local name, namespaced with the host mod's ID.
 ---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
 function PlanetsLuaModule:PatchGalaxy(galaxyDefinitionKey, name) end
+
+---Registers a patch that copies the galaxy definition with the given key under a new key, then runs patchMethod
+---on the copy.
+---The copy joins every other galaxy in the galaxy definition label, so PatchGalaxy reaches it by its new key.
+---Patches ordered after the duplicate that name the source do not reach the copy.
+---@param galaxyDefinitionKey string The key of the galaxy definition to copy.
+---@param newGalaxyDefinitionKey string The key of the copy.
+---@param patchMethod? fun(copy: GalaxyUserData): string? The callback to run on the copy, or nil to copy without changes.
+---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
+function PlanetsLuaModule:DuplicateGalaxy(galaxyDefinitionKey, newGalaxyDefinitionKey, patchMethod) end
 
 ---Creates a new galaxy definition with no bodies under the given key and runs callback
 ---against it for further configuration.
@@ -56,6 +74,14 @@ function PlanetsLuaModule:CreateGalaxy(galaxyDefinitionKey, callback) end
 ---@return PatchDefinition<AtmosphereOverrideUserData, any> patch The registered patch.
 function PlanetsLuaModule:PatchAtmosphereOverride(name) end
 
+---Registers a patch that copies each atmosphere override it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the atmosphere override to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: AtmosphereOverrideUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<AtmosphereOverrideUserData, any> patch The registered patch.
+function PlanetsLuaModule:DuplicateAtmosphereOverride(source, newName, patchMethod) end
+
 ---Creates a new atmosphere override for the given body and runs callback against it
 ---for further configuration.
 ---@param name string The body name the override applies to.
@@ -66,6 +92,14 @@ function PlanetsLuaModule:CreateAtmosphereOverride(name, callback) end
 ---@param name string The patch's local name, namespaced with the host mod's ID.
 ---@return PatchDefinition<VolumeCloudUserData, any> patch The registered patch.
 function PlanetsLuaModule:PatchCloudOverride(name) end
+
+---Registers a patch that copies each volume cloud override it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the volume cloud override to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: VolumeCloudUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<VolumeCloudUserData, any> patch The registered patch.
+function PlanetsLuaModule:DuplicateCloudOverride(source, newName, patchMethod) end
 
 ---Creates a new volume-cloud override for the given body and runs callback against it
 ---for further configuration.
@@ -346,9 +380,12 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field DescriptionLocalizationKey string Localization key for the description shown on the galaxy definition's card, or nil for none.
 ---@field ImageKey string Addressable key of the sprite shown on the galaxy definition's card, or nil to show the title and description only.
 ---@field HomeWorld SerializedHomeWorld The home world of the galaxy, and the space center placed on it.
+---@field PartLayers? JsonList<string> The part layers stacked on top of the campaign pack's, in order, so a part copied into one of them wins.
+---@field ReplacePartLayers? boolean Whether PartLayers replaces the campaign pack's part layers instead of stacking on top of them.
+---@field Hidden? boolean Whether the galaxy is left out of the galaxy picker, so it is reached only through a campaign pack that names it.
 ---@field CelestialBodies JsonList<SerializedCelestialBody> List of serialized celestial bodies that make up the galaxy.
 
----@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, LocalizationKey: string, DescriptionLocalizationKey: string, ImageKey: string, HomeWorld: SerializedHomeWorld, CelestialBodies: JsonList<SerializedCelestialBody> }
+---@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, LocalizationKey: string, DescriptionLocalizationKey: string, ImageKey: string, HomeWorld: SerializedHomeWorld, PartLayers?: JsonList<string>, ReplacePartLayers?: boolean, Hidden?: boolean, CelestialBodies: JsonList<SerializedCelestialBody> }
 
 ---Represents the serialized home world of a galaxy definition, and the space center placed on it.
 ---@class _SerializedHomeWorld : _JsonUserDataBase

@@ -51,10 +51,26 @@ local ScienceLuaModule = {}
 ---@return PatchDefinition<DiscoverablesUserData, DiscoverablePositionUserData> patch The registered patch.
 function ScienceLuaModule:PatchDiscoverables(name) end
 
+---Registers a patch that copies each discoverables set it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the discoverables set to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: DiscoverablesUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<DiscoverablesUserData, DiscoverablePositionUserData> patch The registered patch.
+function ScienceLuaModule:DuplicateDiscoverables(source, newName, patchMethod) end
+
 ---Registers a science-experiment patch with the given namespaced patch name.
 ---@param name string The patch's local name, namespaced with the host mod's ID.
 ---@return PatchDefinition<ExperimentUserData, any> patch The registered patch.
 function ScienceLuaModule:PatchExperiments(name) end
+
+---Registers a patch that copies each experiment it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the experiment to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: ExperimentUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<ExperimentUserData, any> patch The registered patch.
+function ScienceLuaModule:DuplicateExperiments(source, newName, patchMethod) end
 
 ---Creates a new science experiment with the given name and runs callback against it for
 ---further configuration.
@@ -67,10 +83,26 @@ function ScienceLuaModule:NewExperiment(name, callback) end
 ---@return PatchDefinition<ScienceRegionsUserData, ScienceRegionUserData> patch The registered patch.
 function ScienceLuaModule:PatchRegions(name) end
 
+---Registers a patch that copies each science region set it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the science region set to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: ScienceRegionsUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<ScienceRegionsUserData, ScienceRegionUserData> patch The registered patch.
+function ScienceLuaModule:DuplicateRegions(source, newName, patchMethod) end
+
 ---Registers a tech-tree-node patch with the given namespaced patch name.
 ---@param name string The patch's local name, namespaced with the host mod's ID.
 ---@return PatchDefinition<TechNodeUserData, any> patch The registered patch.
 function ScienceLuaModule:PatchTechNodes(name) end
+
+---Registers a patch that copies each tech node it matches under a new name, then runs patchMethod on the copy.
+---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
+---@param source string The name of the tech node to copy. Supports `*` and `?` wildcards.
+---@param newName string The name of the copy, with `{name}` standing in for the source's name.
+---@param patchMethod? fun(copy: TechNodeUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@return PatchDefinition<TechNodeUserData, any> patch The registered patch.
+function ScienceLuaModule:DuplicateTechNodes(source, newName, patchMethod) end
 
 ---Adds the given part IDs to the tech node named nodeName's `UnlockedPartIds` list.
 ---@param nodeName string The tech node name.
