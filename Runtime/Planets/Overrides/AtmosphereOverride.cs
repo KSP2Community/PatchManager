@@ -10,6 +10,8 @@ namespace PatchManager.Planets.Overrides
     public struct AtmosphereOverride : IOverride<AtmosphereModel>
     {
         public string PlanetName;
+        // The layer whose galaxies use this override, or null for the default layer
+        [CanBeNull] public string Layer;
         public bool? IsGasGiant;
         public Vector2? Exposure;
         public float? SunAngleRadius;

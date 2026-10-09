@@ -14,6 +14,8 @@ namespace PatchManager.Planets.Overrides
     public class VolumeCloudConfigurationOverride : IOverride<VolumeCloudConfiguration>
     {
         public string bodyName;
+        // The layer whose galaxies use this override, or null for the default layer
+        [CanBeNull] public string Layer;
         public bool? exclusiveLayer;
         public Vector3? CloudsRotateAll;
         public float? planetRadius;

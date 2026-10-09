@@ -18,6 +18,8 @@
 -- Source: Assets/Code/KSP/Sim/Definitions/SerializedPredefinedSimObject.cs
 -- Source: Assets/Code/KSP/Sim/Definitions/SerializedPredefinedColonyObject.cs
 -- Source: Assets/Code/KSP/Sim/SerializedGalaxyDefinition.cs
+-- Source: Assets/Code/KSP/Sim/SerializedHomeWorld.cs
+-- Source: Assets/Code/KSP/Sim/SerializedSpaceCenter.cs
 -- Source: Assets/Code/KSP/Sim/SerializedCelestialBody.cs
 -- Source: Assets/Code/KSP/Sim/SerializedOrbitProperties.cs
 -- Source: Assets/Code/KSP/Sim/SerializedOribiterDefinition.cs
@@ -104,6 +106,7 @@ function GalaxyUserData:Add(planetName, callback) end
 
 ---@class _AtmosphereOverride : _JsonUserDataBase
 ---@field PlanetName string
+---@field Layer? string
 ---@field IsGasGiant? boolean
 ---@field Exposure? Vector2
 ---@field SunAngleRadius? number
@@ -132,10 +135,11 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field IrradianceTexture? string
 ---@field ScatteringTexture? string
 
----@alias AtmosphereOverride _AtmosphereOverride | { PlanetName: string, IsGasGiant?: boolean, Exposure?: Vector2, SunAngleRadius?: number, SunZenithAngle?: number, SolarIrradiance?: Vector3, SunDirectionExposureModifier?: number, TransmittanceTint?: number, NoonColorStrength?: number, SunsetColorStrength?: number, ColorTransitionScale?: number, BottomRadius?: number, AtmosphereHeight?: number, GroundAlbedo?: Color, RayleighScattering?: Vector3, RayleighScatteringScale?: number, RayleighExponentialDistribution?: number, MieScattering?: Vector3, MieScatteringScale?: number, MieAnisotropy?: number, MieExponentialDistribution?: number, AbsorptionScale?: number, Absorption?: Vector3, AbsorptionMaxDensity?: number, AbsorptionHeightMinMax?: Vector2, TransmittanceTexture?: string, IrradianceTexture?: string, ScatteringTexture?: string }
+---@alias AtmosphereOverride _AtmosphereOverride | { PlanetName: string, Layer?: string, IsGasGiant?: boolean, Exposure?: Vector2, SunAngleRadius?: number, SunZenithAngle?: number, SolarIrradiance?: Vector3, SunDirectionExposureModifier?: number, TransmittanceTint?: number, NoonColorStrength?: number, SunsetColorStrength?: number, ColorTransitionScale?: number, BottomRadius?: number, AtmosphereHeight?: number, GroundAlbedo?: Color, RayleighScattering?: Vector3, RayleighScatteringScale?: number, RayleighExponentialDistribution?: number, MieScattering?: Vector3, MieScatteringScale?: number, MieAnisotropy?: number, MieExponentialDistribution?: number, AbsorptionScale?: number, Absorption?: Vector3, AbsorptionMaxDensity?: number, AbsorptionHeightMinMax?: Vector2, TransmittanceTexture?: string, IrradianceTexture?: string, ScatteringTexture?: string }
 
 ---@class _VolumeCloudConfigurationOverride : _JsonUserDataBase
 ---@field bodyName string
+---@field Layer? string
 ---@field exclusiveLayer? boolean
 ---@field CloudsRotateAll? Vector3
 ---@field planetRadius? number
@@ -202,7 +206,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field startFadeoutHeight? number
 ---@field endFadeoutHeight? number
 
----@alias VolumeCloudConfigurationOverride _VolumeCloudConfigurationOverride | { bodyName: string, exclusiveLayer?: boolean, CloudsRotateAll?: Vector3, planetRadius?: number, enableColorMap?: boolean, enableVerticalColor?: boolean, colorMapIntensity?: number, verticalColorIntensity?: number, overallSize?: number, vortexCloudHeightRange?: Vector2, cumulusList: JsonList<CloudsDataOverride>, cloudCoverageModifier?: number, detailVariationRange?: number, enableShadows?: boolean, enableLayerShadows?: boolean, volumetricShadowDensity?: number, volumetricShadowLodBias?: number, volumetricShadowDistance?: number, shadowOpacity?: number, shadowMapStrength?: number, layerShadowDensity?: number, ambientColor?: Color, EnableCloudGI?: boolean, cloudGIIntensity?: number, cloudGITint?: number, lightPenetrateDistance?: number, multiScatteringScattering?: number, extinctionByLightPosition?: number, opticsDistanceScale?: number, silverSpreadG?: number, bloomStrengthG?: number, silverSpreadUnderCloudG?: number, bloomStrengthUnderCloudG?: number, silverSpread?: number, bloomStrength?: number, silverSpreadUnderCloud?: number, bloomStrengthUnderCloud?: number, ambientScale?: number, scatteringScale?: number, cloudsDensityScale?: number, enableGodray?: boolean, godrayIntensity?: number, godrayVisibleDistance?: number, godrayStepSize?: number, sampleLightStepSize?: number, sampleLightStepCount?: number, cloudDensityRangeEmitGodray?: Vector2, godrayAttenuation?: number, godrayFadeHeight?: number, godrayBlurSize?: number, IsBlurGodray?: boolean, antiBandingAmplify?: number, useScaleCloudsOnly?: boolean, raymarchStepSize?: number, increaseRaymarchStepByDistance?: boolean, distanceRatio?: number, maxRaymarchStepSize?: number, cullingEdgeClouds?: boolean, cullingStrength?: number, autoMipmap?: boolean, scaleCloudMaskNormalTileRate?: number, cascadedResolutionRange?: number, mipmapScale?: number, enableFadeout?: boolean, startFadeoutHeight?: number, endFadeoutHeight?: number }
+---@alias VolumeCloudConfigurationOverride _VolumeCloudConfigurationOverride | { bodyName: string, Layer?: string, exclusiveLayer?: boolean, CloudsRotateAll?: Vector3, planetRadius?: number, enableColorMap?: boolean, enableVerticalColor?: boolean, colorMapIntensity?: number, verticalColorIntensity?: number, overallSize?: number, vortexCloudHeightRange?: Vector2, cumulusList: JsonList<CloudsDataOverride>, cloudCoverageModifier?: number, detailVariationRange?: number, enableShadows?: boolean, enableLayerShadows?: boolean, volumetricShadowDensity?: number, volumetricShadowLodBias?: number, volumetricShadowDistance?: number, shadowOpacity?: number, shadowMapStrength?: number, layerShadowDensity?: number, ambientColor?: Color, EnableCloudGI?: boolean, cloudGIIntensity?: number, cloudGITint?: number, lightPenetrateDistance?: number, multiScatteringScattering?: number, extinctionByLightPosition?: number, opticsDistanceScale?: number, silverSpreadG?: number, bloomStrengthG?: number, silverSpreadUnderCloudG?: number, bloomStrengthUnderCloudG?: number, silverSpread?: number, bloomStrength?: number, silverSpreadUnderCloud?: number, bloomStrengthUnderCloud?: number, ambientScale?: number, scatteringScale?: number, cloudsDensityScale?: number, enableGodray?: boolean, godrayIntensity?: number, godrayVisibleDistance?: number, godrayStepSize?: number, sampleLightStepSize?: number, sampleLightStepCount?: number, cloudDensityRangeEmitGodray?: Vector2, godrayAttenuation?: number, godrayFadeHeight?: number, godrayBlurSize?: number, IsBlurGodray?: boolean, antiBandingAmplify?: number, useScaleCloudsOnly?: boolean, raymarchStepSize?: number, increaseRaymarchStepByDistance?: boolean, distanceRatio?: number, maxRaymarchStepSize?: number, cullingEdgeClouds?: boolean, cullingStrength?: number, autoMipmap?: boolean, scaleCloudMaskNormalTileRate?: number, cascadedResolutionRange?: number, mipmapScale?: number, enableFadeout?: boolean, startFadeoutHeight?: number, endFadeoutHeight?: number }
 
 ---@class _CloudsDataOverride : _JsonUserDataBase
 ---@field layerName string
@@ -240,6 +244,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---Represents the serialized data definition for a celestial body, including its physical, atmospheric, rotational, and decorative properties.
 ---@class _CelestialBodyData : _JsonUserDataBase
 ---@field bodyName string The internal identifier name of the celestial body.
+---@field Layer? string The layer this copy of the body's data belongs to, or nil for the default copy.
 ---@field assetKeyScaled string The asset key used to load the scaled-space representation of the body.
 ---@field assetKeySimulation string The asset key used to load the simulation-space representation of the body.
 ---@field bodyDisplayName string The localized display name shown to players for the celestial body.
@@ -295,7 +300,7 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field LocalSimObjectsData JsonList<SerializedPredefinedSimObject> The serialized representations of predefined simulation objects located in the body's local space, used for JSON persistence.
 ---@field LocalColonyObjectsData JsonList<SerializedPredefinedColonyObject> The serialized representations of predefined colony objects located in the body's local space, used for JSON persistence.
 
----@alias CelestialBodyData _CelestialBodyData | { bodyName: string, assetKeyScaled: string, assetKeySimulation: string, bodyDisplayName: string, bodyDescription: string, isStar: boolean, isHomeWorld: boolean, navballSwitchAltitudeHigh: number, navballSwitchAltitudeLow: number, hasSolidSurface: boolean, hasOcean: boolean, HasLocalSpace: boolean, radius: number, gravityASL: number, oceanAltitude: number, oceanDensity: number, MinTerrainHeight: number, MaxTerrainHeight: number, TerrainHeightScale: number, TimeWarpAltitudeOffset: number, SphereOfInfluenceCalculationType: integer, ForcedSphereOfInfluence: number, hasSolarRotationPeriod: boolean, hasInverseRotationThresholdClamp: boolean, hasInverseRotation: boolean, isRotating: boolean, isTidallyLocked: boolean, inverseRotThresholdAltitude: number, initialRotation: number, rotationPeriod: number, axialTilt: Vector3d, hasAtmosphere: boolean, atmosphereContainsOxygen: boolean, atmosphereDepth: number, atmosphereTemperatureSeaLevel: number, atmospherePressureSeaLevel: number, atmosphereMolarMass: number, atmosphereAdiabaticIndex: number, reentryHarshness: number, atmosphericReentryVFXGradient: string, useAtmospherePressureCurve: boolean, useAtmosphereTemperatureCurve: boolean, useAtmosphereHumidityCurve: boolean, atmospherePressureCurve: FloatCurve, BodyAltitudeTemperatureCurve: FloatCurve, BodyAltitudeSurfaceFluxCurve: FloatCurve, BodyAltitudeFluxCurve: FloatCurve, BodyAltitudeRelativeHumidityCurve: FloatCurve, BodySurfaceFluxMapPath: string, BodySurfaceFluxScale: number, StarLuminosity: number, ringGroupData: JsonList<CelestialBodyRingData>, MineDustColor: Vector4, LocalSimObjectsData: JsonList<SerializedPredefinedSimObject>, LocalColonyObjectsData: JsonList<SerializedPredefinedColonyObject> }
+---@alias CelestialBodyData _CelestialBodyData | { bodyName: string, Layer?: string, assetKeyScaled: string, assetKeySimulation: string, bodyDisplayName: string, bodyDescription: string, isStar: boolean, isHomeWorld: boolean, navballSwitchAltitudeHigh: number, navballSwitchAltitudeLow: number, hasSolidSurface: boolean, hasOcean: boolean, HasLocalSpace: boolean, radius: number, gravityASL: number, oceanAltitude: number, oceanDensity: number, MinTerrainHeight: number, MaxTerrainHeight: number, TerrainHeightScale: number, TimeWarpAltitudeOffset: number, SphereOfInfluenceCalculationType: integer, ForcedSphereOfInfluence: number, hasSolarRotationPeriod: boolean, hasInverseRotationThresholdClamp: boolean, hasInverseRotation: boolean, isRotating: boolean, isTidallyLocked: boolean, inverseRotThresholdAltitude: number, initialRotation: number, rotationPeriod: number, axialTilt: Vector3d, hasAtmosphere: boolean, atmosphereContainsOxygen: boolean, atmosphereDepth: number, atmosphereTemperatureSeaLevel: number, atmospherePressureSeaLevel: number, atmosphereMolarMass: number, atmosphereAdiabaticIndex: number, reentryHarshness: number, atmosphericReentryVFXGradient: string, useAtmospherePressureCurve: boolean, useAtmosphereTemperatureCurve: boolean, useAtmosphereHumidityCurve: boolean, atmospherePressureCurve: FloatCurve, BodyAltitudeTemperatureCurve: FloatCurve, BodyAltitudeSurfaceFluxCurve: FloatCurve, BodyAltitudeFluxCurve: FloatCurve, BodyAltitudeRelativeHumidityCurve: FloatCurve, BodySurfaceFluxMapPath: string, BodySurfaceFluxScale: number, StarLuminosity: number, ringGroupData: JsonList<CelestialBodyRingData>, MineDustColor: Vector4, LocalSimObjectsData: JsonList<SerializedPredefinedSimObject>, LocalColonyObjectsData: JsonList<SerializedPredefinedColonyObject> }
 
 ---Represents the ring data for a celestial body, defining inner and outer radii and a density curve.
 ---@class _CelestialBodyRingData : _JsonUserDataBase
@@ -337,9 +342,30 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field Name string Name of the galaxy definition.
 ---@field Version string Version string of the galaxy definition.
 ---@field LocalizationKey string Localization key for the display name of the galaxy definition.
+---@field DescriptionLocalizationKey string Localization key for the description shown on the galaxy definition's card, or nil for none.
+---@field ImageKey string Addressable key of the sprite shown on the galaxy definition's card, or nil to show the title and description only.
+---@field HomeWorld SerializedHomeWorld The home world of the galaxy, and the space center placed on it.
 ---@field CelestialBodies JsonList<SerializedCelestialBody> List of serialized celestial bodies that make up the galaxy.
 
----@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, LocalizationKey: string, CelestialBodies: JsonList<SerializedCelestialBody> }
+---@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, LocalizationKey: string, DescriptionLocalizationKey: string, ImageKey: string, HomeWorld: SerializedHomeWorld, CelestialBodies: JsonList<SerializedCelestialBody> }
+
+---Represents the serialized home world of a galaxy definition, and the space center placed on it.
+---@class _SerializedHomeWorld : _JsonUserDataBase
+---@field Body string GUID of the celestial body that is the home world.
+---@field RemoveOtherSpaceCenters boolean Whether a space center on any other body is removed when that body's local space loads.
+---@field SpaceCenter? SerializedSpaceCenter The space center to place on the home world, or nil to keep the one its world prefab already has.
+
+---@alias SerializedHomeWorld _SerializedHomeWorld | { Body: string, RemoveOtherSpaceCenters: boolean, SpaceCenter?: SerializedSpaceCenter }
+
+---Represents the serialized placement of a space center prefab on a galaxy's home world.
+---@class _SerializedSpaceCenter : _JsonUserDataBase
+---@field Prefab string Addressable key of the space center prefab.
+---@field Latitude number Latitude of the space center's origin, in degrees.
+---@field Longitude number Longitude of the space center's origin, in degrees.
+---@field Altitude number Height of the space center's origin above the drawn terrain directly below it, in meters.
+---@field Heading number Rotation of the space center clockwise from north, in degrees. At zero the prefab's -Z axis points north.
+
+---@alias SerializedSpaceCenter _SerializedSpaceCenter | { Prefab: string, Latitude: number, Longitude: number, Altitude: number, Heading: number }
 
 ---Represents the serialized form of a celestial body, including its identity and orbital configuration.
 ---@class _SerializedCelestialBody : _JsonUserDataBase
@@ -347,8 +373,9 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@field referenceBodyGuid string Unique identifier of the reference body that this celestial body orbits.
 ---@field OrbitProperties SerializedOrbitProperties Serialized orbital properties describing the orbit of this celestial body.
 ---@field OrbiterProperties SerializedOribiterDefinition Serialized orbiter definition describing the physical and orbital characteristics of this celestial body as an orbiter.
+---@field Layer? string Layer whose copy of this body's data the galaxy uses, or nil for the default copy.
 
----@alias SerializedCelestialBody _SerializedCelestialBody | { GUID: string, referenceBodyGuid: string, OrbitProperties: SerializedOrbitProperties, OrbiterProperties: SerializedOribiterDefinition }
+---@alias SerializedCelestialBody _SerializedCelestialBody | { GUID: string, referenceBodyGuid: string, OrbitProperties: SerializedOrbitProperties, OrbiterProperties: SerializedOribiterDefinition, Layer?: string }
 
 ---Represents a serializable set of Keplerian orbital elements and the reference body for an orbit.
 ---@class _SerializedOrbitProperties : _JsonUserDataBase

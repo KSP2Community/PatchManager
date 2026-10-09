@@ -31,6 +31,15 @@ public class DiscoverablesUserData : IndexedListUserData
     /// </summary>
     public string BodyName { get => RequireString(FullToken["BodyName"], "BodyName"); }
 
+    /// <summary>
+    /// Gets or sets the layer this copy of the body's discoverables belongs to, or <c>nil</c> for the default copy.
+    /// </summary>
+    public string Layer
+    {
+        get => FullToken["Layer"]?.Type == JTokenType.String ? (string)FullToken["Layer"] : null;
+        set => FullToken["Layer"] = value;
+    }
+
     /// <inheritdoc />
     public override string Name(JToken source)
     {

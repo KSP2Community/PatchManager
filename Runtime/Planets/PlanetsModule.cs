@@ -19,13 +19,15 @@ namespace PatchManager.Planets
         private static void RegisterAtmosphereOverride(TextAsset atmosphereOverride)
         {
             var atmosphere = JsonConvert.DeserializeObject<AtmosphereOverride>(atmosphereOverride.text);
-            OverrideManager.AtmosphereOverrides[atmosphere.PlanetName] = atmosphere;
+            OverrideManager.AtmosphereOverrides[OverrideManager.GetKey(atmosphere.PlanetName, atmosphere.Layer)] =
+                atmosphere;
         }
 
         private static void RegisterVolumeCloudOverride(TextAsset volumeCloudOverride)
         {
             var volumeCloud = IOProvider.FromJson<VolumeCloudConfigurationOverride>(volumeCloudOverride.text);
-            OverrideManager.VolumeCloudOverrides[volumeCloud.bodyName.ToLowerInvariant()] = volumeCloud;
+            OverrideManager.VolumeCloudOverrides[OverrideManager.GetKey(volumeCloud.bodyName, volumeCloud.Layer)] =
+                volumeCloud;
         }
 
         /// <summary>

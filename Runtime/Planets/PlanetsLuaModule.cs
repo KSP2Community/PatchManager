@@ -174,6 +174,10 @@ public class PlanetsLuaModule
     /// Creates a new atmosphere override for the given body and runs <paramref name="callback" /> against it
     /// for further configuration.
     /// </summary>
+    /// <remarks>
+    /// Setting <c>Layer</c> in the callback limits the override to galaxies that take the body from that layer, and
+    /// names the override after the layer too, so each layer can have its own.
+    /// </remarks>
     /// <param name="name">The body name the override applies to.</param>
     /// <param name="callback">Callback that receives the new override for further configuration.</param>
     public void CreateAtmosphereOverride(string name, Action<JsonUserData> callback)
@@ -183,8 +187,9 @@ public class PlanetsLuaModule
             PlanetName = name
         };
         var ud = JsonUserData.GetFromJToken(JObject.FromObject(data));
-        callback((JsonUserData)ud.UserData.Object);
-        _core.New("JSON", "atmosphere_overrides", $"atmosphere_override_{name}", ud);
+        var json = (JsonUserData)ud.UserData.Object;
+        callback(json);
+        _core.New("JSON", "atmosphere_overrides", OverrideAssetName("atmosphere_override", name, json.Token), ud);
     }
 
     /// <summary>
@@ -223,6 +228,10 @@ public class PlanetsLuaModule
     /// Creates a new volume-cloud override for the given body and runs <paramref name="callback" /> against it
     /// for further configuration.
     /// </summary>
+    /// <remarks>
+    /// Setting <c>Layer</c> in the callback limits the override to galaxies that take the body from that layer, and
+    /// names the override after the layer too, so each layer can have its own.
+    /// </remarks>
     /// <param name="name">The body name the override applies to.</param>
     /// <param name="callback">Callback that receives the new override for further configuration.</param>
     public void CreateCloudOverride(string name, Action<VolumeCloudUserData> callback)
@@ -234,6 +243,13 @@ public class PlanetsLuaModule
         var typed = new VolumeCloudUserData(JObject.FromObject(data));
         var ud = MoonSharp.Interpreter.UserData.Create(typed);
         callback(typed);
-        _core.New("Cloud", "volume_cloud_overrides", $"volume_cloud_override_{name}", ud);
+        _core.New("Cloud", "volume_cloud_overrides", OverrideAssetName("volume_cloud_override", name, typed.Token), ud);
+    }
+
+    // A default-layer override keeps its plain name, and a layered one adds its layer
+    private static string OverrideAssetName(string prefix, string bodyName, JToken overrideToken)
+    {
+        string layer = overrideToken["Layer"]?.Type == JTokenType.String ? (string)overrideToken["Layer"] : null;
+        return CampaignPack.IsDefaultLayer(layer) ? $"{prefix}_{bodyName}" : $"{prefix}_{bodyName}_{layer}";
     }
 }

@@ -25,6 +25,7 @@
 ---preserving the full envelope for round-tripping.
 ---@class DiscoverablesUserData : IndexedListUserData<DiscoverablePositionUserData>
 ---@field BodyName string Gets the celestial body's name from the envelope's `BodyName` field.
+---@field Layer string? Gets or sets the layer this copy of the body's discoverables belongs to, or `nil` for the default copy.
 
 ---Science experiment wrapper exposing the inner `data` subtree while preserving the full envelope for round-tripping.
 ---@class ExperimentUserData : _ExperimentDefinition, JsonUserData
@@ -35,6 +36,7 @@
 ---envelope for round-tripping and exposing the body name and situation data as typed properties.
 ---@class ScienceRegionsUserData : IndexedListUserData<ScienceRegionUserData>
 ---@field BodyName string Gets the celestial body's name from the envelope's `BodyName` field.
+---@field Layer string? Gets or sets the layer this copy of the body's science regions belongs to, or `nil` for the default copy.
 ---@field SituationData CBSituationData Gets or sets the situation data wrapping the envelope's `SituationData` field.
 
 ---@class TechNodeUserData : _TechNodeData, JsonUserData
@@ -121,10 +123,11 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@class _CelestialBodyScienceRegionsData : _JsonUserDataBase
 ---@field Version string The version identifier for this science regions data record.
 ---@field BodyName string The name of the celestial body this science regions data describes.
+---@field Layer? string The layer this copy of the body's science regions belongs to, or nil for the default copy.
 ---@field SituationData CBSituationData The situation data associated with this celestial body.
 ---@field Regions JsonList<ScienceRegionDefinition> The array of science region definitions for this celestial body.
 
----@alias CelestialBodyScienceRegionsData _CelestialBodyScienceRegionsData | { Version: string, BodyName: string, SituationData: CBSituationData, Regions: JsonList<ScienceRegionDefinition> }
+---@alias CelestialBodyScienceRegionsData _CelestialBodyScienceRegionsData | { Version: string, BodyName: string, Layer?: string, SituationData: CBSituationData, Regions: JsonList<ScienceRegionDefinition> }
 
 ---Represents altitude boundaries and science scalar multipliers for the science situations of a celestial body.
 ---@class _CBSituationData : _JsonUserDataBase
@@ -154,9 +157,10 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@class _CelestialBodyBakedDiscoverables : _JsonUserDataBase
 ---@field Version string The format version of this baked discoverable data set.
 ---@field BodyName string The name of the celestial body this data set belongs to.
+---@field Layer? string The layer this copy of the body's discoverables belongs to, or nil for the default copy.
 ---@field Discoverables JsonList<CelestialBodyDiscoverablePosition> The baked discoverable positions associated with this celestial body.
 
----@alias CelestialBodyBakedDiscoverables _CelestialBodyBakedDiscoverables | { Version: string, BodyName: string, Discoverables: JsonList<CelestialBodyDiscoverablePosition> }
+---@alias CelestialBodyBakedDiscoverables _CelestialBodyBakedDiscoverables | { Version: string, BodyName: string, Layer?: string, Discoverables: JsonList<CelestialBodyDiscoverablePosition> }
 
 ---Represents a discoverable position on a celestial body, defined by a science region, a spatial location, and a detection radius.
 ---@class _CelestialBodyDiscoverablePosition : _JsonUserDataBase

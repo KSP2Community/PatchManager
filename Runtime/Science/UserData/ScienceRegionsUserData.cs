@@ -33,6 +33,15 @@ public class ScienceRegionsUserData : IndexedListUserData
     public string BodyName { get => RequireString(FullToken["BodyName"], "BodyName"); }
 
     /// <summary>
+    /// Gets or sets the layer this copy of the body's science regions belongs to, or <c>nil</c> for the default copy.
+    /// </summary>
+    public string Layer
+    {
+        get => FullToken["Layer"]?.Type == JTokenType.String ? (string)FullToken["Layer"] : null;
+        set => FullToken["Layer"] = value;
+    }
+
+    /// <summary>
     /// Gets or sets the situation data wrapping the envelope's <c>SituationData</c> field.
     /// </summary>
     public DynValue SituationData {
