@@ -34,11 +34,11 @@ local PlanetsLuaModule = {}
 ---@return PatchDefinition<CelestialBodyUserData, any> patch The registered patch.
 function PlanetsLuaModule:Patch(name) end
 
----Registers a patch that copies each celestial body it matches under a new name, then runs patchMethod on the copy.
+---Registers a patch that copies each celestial body it matches under a new name, then runs the chained `:Do` callback on the copy.
 ---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
 ---@param source string The name of the celestial body to copy. Supports `*` and `?` wildcards.
 ---@param newName string The name of the copy, with `{name}` standing in for the source's name.
----@param patchMethod? fun(copy: CelestialBodyUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: CelestialBodyUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<CelestialBodyUserData, any> patch The registered patch.
 function PlanetsLuaModule:Duplicate(source, newName, patchMethod) end
 
@@ -53,13 +53,13 @@ function PlanetsLuaModule:PatchDefaultGalaxy(name) end
 ---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
 function PlanetsLuaModule:PatchGalaxy(galaxyDefinitionKey, name) end
 
----Registers a patch that copies the galaxy definition with the given key under a new key, then runs patchMethod
----on the copy.
+---Registers a patch that copies the galaxy definition with the given key under a new key, then runs the chained `:Do`
+---callback on the copy.
 ---The copy joins every other galaxy in the galaxy definition label, so PatchGalaxy reaches it by its new key.
 ---Patches ordered after the duplicate that name the source do not reach the copy.
 ---@param galaxyDefinitionKey string The key of the galaxy definition to copy.
 ---@param newGalaxyDefinitionKey string The key of the copy.
----@param patchMethod? fun(copy: GalaxyUserData): string? The callback to run on the copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: GalaxyUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<GalaxyUserData, JsonUserData> patch The registered patch.
 function PlanetsLuaModule:DuplicateGalaxy(galaxyDefinitionKey, newGalaxyDefinitionKey, patchMethod) end
 
@@ -74,11 +74,11 @@ function PlanetsLuaModule:CreateGalaxy(galaxyDefinitionKey, callback) end
 ---@return PatchDefinition<AtmosphereOverrideUserData, any> patch The registered patch.
 function PlanetsLuaModule:PatchAtmosphereOverride(name) end
 
----Registers a patch that copies each atmosphere override it matches under a new name, then runs patchMethod on the copy.
+---Registers a patch that copies each atmosphere override it matches under a new name, then runs the chained `:Do` callback on the copy.
 ---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
 ---@param source string The name of the atmosphere override to copy. Supports `*` and `?` wildcards.
 ---@param newName string The name of the copy, with `{name}` standing in for the source's name.
----@param patchMethod? fun(copy: AtmosphereOverrideUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: AtmosphereOverrideUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<AtmosphereOverrideUserData, any> patch The registered patch.
 function PlanetsLuaModule:DuplicateAtmosphereOverride(source, newName, patchMethod) end
 
@@ -93,11 +93,11 @@ function PlanetsLuaModule:CreateAtmosphereOverride(name, callback) end
 ---@return PatchDefinition<VolumeCloudUserData, any> patch The registered patch.
 function PlanetsLuaModule:PatchCloudOverride(name) end
 
----Registers a patch that copies each volume cloud override it matches under a new name, then runs patchMethod on the copy.
+---Registers a patch that copies each volume cloud override it matches under a new name, then runs the chained `:Do` callback on the copy.
 ---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
 ---@param source string The name of the volume cloud override to copy. Supports `*` and `?` wildcards.
 ---@param newName string The name of the copy, with `{name}` standing in for the source's name.
----@param patchMethod? fun(copy: VolumeCloudUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: VolumeCloudUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<VolumeCloudUserData, any> patch The registered patch.
 function PlanetsLuaModule:DuplicateCloudOverride(source, newName, patchMethod) end
 

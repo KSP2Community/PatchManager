@@ -14,12 +14,12 @@ local GenericLuaModule = {}
 ---@return PatchDefinition<JsonUserData, any> patch The registered patch.
 function GenericLuaModule:Patch(label, name) end
 
----Registers a patch that copies each asset it matches under a new name, then runs patchMethod on the copy.
+---Registers a patch that copies each asset it matches under a new name, then runs the chained `:Do` callback on the copy.
 ---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
 ---@param label string The addressables label whose assets to copy, which the copies keep.
 ---@param source string The name of the asset to copy. Supports `*` and `?` wildcards.
 ---@param newName string The name of the copy, with `{name}` standing in for the source's name.
----@param patchMethod? fun(copy: JsonUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: JsonUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<JsonUserData, any> patch The registered patch.
 function GenericLuaModule:Duplicate(label, source, newName, patchMethod) end
 

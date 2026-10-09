@@ -37,8 +37,8 @@ PatchManagerCore = {}
 ---@error Thrown when `converter` is not registered.
 function PatchManagerCore:Patch(converter, label, name) end
 
----Registers a patch that copies each asset it matches under a new name in the same label, then runs patchMethod
----on the copy.
+---Registers a patch that copies each asset it matches under a new name in the same label, then runs the chained `:Do`
+---callback on the copy.
 ---The duplicate is a patch like any other: it takes a pass, ordering and requirements, and the copy is patched by
 ---everything ordered after it. Internal ID fields are left alone. The patch is named `Duplicate(source -> newName)`
 ---under the host mod.
@@ -46,7 +46,7 @@ function PatchManagerCore:Patch(converter, label, name) end
 ---@param label string The addressables label whose assets to copy, which the copies keep.
 ---@param source string The name of the asset to copy. Supports `*` and `?` wildcards.
 ---@param newName string The name of the copy, with `{name}` standing in for the source asset's name.
----@param patchMethod? fun(copy: JsonUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: JsonUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<JsonUserData, any> patch The registered patch, suitable for chaining.
 ---@error Thrown when converter is not registered.
 function PatchManagerCore:Duplicate(converter, label, source, newName, patchMethod) end

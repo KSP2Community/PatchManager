@@ -14,11 +14,11 @@ local CampaignPacksLuaModule = {}
 ---@return PatchDefinition<CampaignPackUserData, any> patch The registered patch.
 function CampaignPacksLuaModule:Patch(name) end
 
----Registers a patch that copies each campaign pack it matches under a new name, then runs patchMethod on the copy.
+---Registers a patch that copies each campaign pack it matches under a new name, then runs the chained `:Do` callback on the copy.
 ---Restrict the pass and ordering like any other patch. Internal ID fields in the copy are left alone.
 ---@param source string The name of the campaign pack to copy. Supports `*` and `?` wildcards.
 ---@param newName string The name of the copy, with `{name}` standing in for the source's name.
----@param patchMethod? fun(copy: CampaignPackUserData): string? The callback to run on each copy, or nil to copy without changes.
+---@param patchMethod? fun(copy: CampaignPackUserData): string? Shorthand for chaining `:Do(callback)`, which is the canonical form. Leave both off to copy without changes.
 ---@return PatchDefinition<CampaignPackUserData, any> patch The registered patch.
 function CampaignPacksLuaModule:Duplicate(source, newName, patchMethod) end
 
