@@ -376,16 +376,10 @@ function GalaxyUserData:Add(planetName, callback) end
 ---@class _SerializedGalaxyDefinition : _JsonUserDataBase
 ---@field Name string Name of the galaxy definition.
 ---@field Version string Version string of the galaxy definition.
----@field LocalizationKey string Localization key for the display name of the galaxy definition.
----@field DescriptionLocalizationKey string Localization key for the description shown on the galaxy definition's card, or nil for none.
----@field ImageKey string Addressable key of the sprite shown on the galaxy definition's card, or nil to show the title and description only.
 ---@field HomeWorld SerializedHomeWorld The home world of the galaxy, and the space center placed on it.
----@field PartLayers? JsonList<string> The part layers stacked on top of the campaign pack's, in order, so a part copied into one of them wins.
----@field ReplacePartLayers? boolean Whether PartLayers replaces the campaign pack's part layers instead of stacking on top of them.
----@field Hidden? boolean Whether the galaxy is left out of the galaxy picker, so it is reached only through a campaign pack that names it.
 ---@field CelestialBodies JsonList<SerializedCelestialBody> List of serialized celestial bodies that make up the galaxy.
 
----@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, LocalizationKey: string, DescriptionLocalizationKey: string, ImageKey: string, HomeWorld: SerializedHomeWorld, PartLayers?: JsonList<string>, ReplacePartLayers?: boolean, Hidden?: boolean, CelestialBodies: JsonList<SerializedCelestialBody> }
+---@alias SerializedGalaxyDefinition _SerializedGalaxyDefinition | { Name: string, Version: string, HomeWorld: SerializedHomeWorld, CelestialBodies: JsonList<SerializedCelestialBody> }
 
 ---Represents the serialized home world of a galaxy definition, and the space center placed on it.
 ---@class _SerializedHomeWorld : _JsonUserDataBase
