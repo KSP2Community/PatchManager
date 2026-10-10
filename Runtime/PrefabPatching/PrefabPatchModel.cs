@@ -543,6 +543,16 @@ namespace PatchManager.PrefabPatching
         public string[] NeedsFeatures = Array.Empty<string>();
         /// <summary>Qualified features that must be off.</summary>
         public string[] ConflictsFeatures = Array.Empty<string>();
+
+        // Manifests authored before features existed carry a hash of their serialized form, so the feature fields
+        // only serialize when they name something.
+        /// <summary>Gets whether <see cref="NeedsFeatures" /> is written out.</summary>
+        /// <returns>True if the manifest needs any feature, false otherwise.</returns>
+        public bool ShouldSerializeNeedsFeatures() => NeedsFeatures is { Length: > 0 };
+
+        /// <summary>Gets whether <see cref="ConflictsFeatures" /> is written out.</summary>
+        /// <returns>True if the manifest conflicts with any feature, false otherwise.</returns>
+        public bool ShouldSerializeConflictsFeatures() => ConflictsFeatures is { Length: > 0 };
         /// <summary>Required namespaced patch IDs.</summary>
         public string[] NeedsPatches = Array.Empty<string>();
         /// <summary>Conflicting namespaced patch IDs.</summary>
