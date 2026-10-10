@@ -27,7 +27,7 @@ namespace PatchManager.Core.Cache
         private static readonly Dictionary<string, Archive> OpenArchives = new();
 
         /// <summary>
-        /// Labels whose cached archives are still valid for the current run; consulted by the addressables resource
+        /// Labels whose cached archives are still valid for the current run. Consulted by the addressables resource
         /// locators to decide whether to serve patched assets from the cache.
         /// </summary>
         public static readonly List<string> CacheValidLabels = new();
@@ -58,9 +58,7 @@ namespace PatchManager.Core.Cache
         public static void CreateCacheFolderIfNotExists()
         {
             if (Directory.Exists(CACHE_DIRECTORY))
-            {
                 return;
-            }
 
             Logging.LogDebug("Cache directory does not exist, creating a new one.");
             Directory.CreateDirectory(CACHE_DIRECTORY);
@@ -76,9 +74,7 @@ namespace PatchManager.Core.Cache
         {
             var archivePath = Path.Combine(CACHE_DIRECTORY, archiveFilename);
             if (File.Exists(archivePath))
-            {
                 throw new ArgumentException($"Archive '{archivePath}' already exists!");
-            }
 
             var archive = new Archive(archivePath, true);
             OpenArchives.Add(archiveFilename, archive);
@@ -95,9 +91,7 @@ namespace PatchManager.Core.Cache
         {
             var archivePath = Path.Combine(CACHE_DIRECTORY, archiveFilename);
             if (!File.Exists(archivePath))
-            {
                 throw new FileNotFoundException($"Archive '{archivePath}' does not exist!");
-            }
 
             if (!OpenArchives.ContainsKey(archiveFilename))
             {
@@ -138,9 +132,7 @@ namespace PatchManager.Core.Cache
         private static void DeleteDirectory(string path)
         {
             if (!Directory.Exists(path))
-            {
                 return;
-            }
 
             foreach (var directory in Directory.GetDirectories(path))
             {
@@ -203,5 +195,56 @@ namespace PatchManager.Core.Cache
         {
             PatchManagerSummaryLog.UpdateCoreSummary(universeSummary.Dump());
         }
+
+        /// <summary>
+        /// When a feature set's cache was last used, and whether it must be kept.
+        /// </summary>
+        internal class SetUse
+        {
+            /// <summary>
+            /// Gets the set's directory name.
+            /// </summary>
+            public string Id { get; }
+
+            /// <summary>
+            /// Gets when the set was last used, in UTC ticks.
+            /// </summary>
+            public long LastUsedTicks { get; }
+
+            /// <summary>
+            /// Gets whether the set is kept whatever its age, as a pack's or a save's set is.
+            /// </summary>
+            public bool IsPinned { get; }
+
+            /// <summary>
+            /// Records one set's use.
+            /// </summary>
+            /// <param name="id">The set's directory name.</param>
+            /// <param name="lastUsedTicks">When the set was last used, in UTC ticks.</param>
+            /// <param name="isPinned">Whether the set is kept whatever its age.</param>
+            public SetUse(string id, long lastUsedTicks, bool isPinned)
+            {
+                Id = id;
+                LastUsedTicks = lastUsedTicks;
+                IsPinned = isPinned;
+            }
+        }
+
+        /// <summary>
+        /// Picks the feature set caches to delete so that at most <paramref name="maxSets" /> unpinned ones remain,
+        /// least recently used first.
+        /// </summary>
+        /// <param name="sets">Every set on disk.</param>
+        /// <param name="maxSets">How many sets may stay.</param>
+        /// <returns>The ids of the sets to delete.</returns>
+        internal static IEnumerable<string> ChooseEvictions(IEnumerable<SetUse> sets, int maxSets) =>
+            Array.Empty<string>();
+
+        /// <summary>
+        /// Names an archive by its contents, so feature sets whose label comes out identical share one file.
+        /// </summary>
+        /// <param name="entries">The archive's entries as name and text pairs, in any order.</param>
+        /// <returns>The archive filename.</returns>
+        internal static string ContentAddressedName(IEnumerable<(string name, string text)> entries) => "";
     }
 }

@@ -36,9 +36,7 @@ namespace PatchManager.Core.Cache
         public void Dispose()
         {
             if (_isDisposed)
-            {
                 return;
-            }
             _stream.Dispose();
             _isDisposed = true;
 
@@ -58,9 +56,7 @@ namespace PatchManager.Core.Cache
             using var archive = new ZipArchive(_stream, ZipArchiveMode.Read, true);
             var entry = archive.GetEntry(filePath);
             if (entry == null)
-            {
                 throw new FileNotFoundException($"File {filePath} does not exist in archive {_path}!");
-            }
 
             using var stream = entry.Open();
             using var reader = new StreamReader(stream);
@@ -80,9 +76,7 @@ namespace PatchManager.Core.Cache
             using var archive = new ZipArchive(_stream, ZipArchiveMode.Update, true);
 
             if (archive.GetEntry(filePath) != null)
-            {
                 throw new ArgumentException($"File {filePath} already exists in archive {_path}!");
-            }
 
             var entry = archive.CreateEntry(filePath);
             using var stream = entry.Open();
@@ -104,9 +98,7 @@ namespace PatchManager.Core.Cache
         private void AssertNotDisposed()
         {
             if (_isDisposed)
-            {
                 throw new ObjectDisposedException(nameof(Archive), "The Archive object has been disposed.");
-            }
         }
     }
 }

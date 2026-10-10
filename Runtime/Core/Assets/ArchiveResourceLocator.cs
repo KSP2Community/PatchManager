@@ -59,9 +59,7 @@ namespace PatchManager.Core.Assets
                 .ToList();
 
             if (locations.Count == 0)
-            {
                 return false;
-            }
 
             Logging.LogDebug($"Located key '{key}' with {locations.Count} locations.");
             return true;

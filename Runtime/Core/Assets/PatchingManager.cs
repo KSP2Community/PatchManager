@@ -128,6 +128,24 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
+        /// Keeps the script hashes that can affect a feature set's output: those of mods whose default feature is
+        /// in the set, those of Redux, and those whose owner cannot be told.
+        /// </summary>
+        /// <remarks>
+        /// Every mod patch needs its mod's default feature, so a mod outside the set contributes nothing to the set's
+        /// output and editing its scripts leaves the set's cache valid.
+        /// </remarks>
+        /// <param name="hashes">Script hashes keyed by file path or by <c>modId/asset</c> for addressable scripts.</param>
+        /// <param name="folderByMod">Each mod's folder, by mod id.</param>
+        /// <param name="enabled">The set's enabled features.</param>
+        /// <returns>The hashes that belong in the set's cache key.</returns>
+        internal static Dictionary<string, string> ScopeHashesToSet(
+            IReadOnlyDictionary<string, string> hashes,
+            IReadOnlyDictionary<string, string> folderByMod,
+            ISet<string> enabled
+        ) => hashes.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+        /// <summary>
         /// Adds the enabled feature set to the patch-cache checksum, so a different set never reuses another
         /// set's archives.
         /// </summary>

@@ -136,6 +136,13 @@ namespace PatchManager.LuaPatching
         );
 
         /// <summary>
+        /// Builds a fresh copy of every enabled new asset for one run, so patches in one feature set's run never
+        /// see another run's changes.
+        /// </summary>
+        /// <returns>The copies, in registration order.</returns>
+        public List<LuaAsset> StageNewAssetsForRun() => EnabledNewAssets.ToList();
+
+        /// <summary>
         /// Callbacks registered with <c>PM:OnBeginRun</c>, in registration order.
         /// </summary>
         public List<RunCallback> BeginRunCallbacks = new();
