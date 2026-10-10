@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Redux.Features;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -223,7 +224,16 @@ namespace PatchManager.PrefabPatching
                 var manifests = new List<PrefabPatchManifest>(Registered);
                 CurrentMetrics.RegisteredManifestCount = Registered.Count;
                 CurrentMetrics.ManifestSources = DescribeManifestSources(manifestSources);
-                var locations = FindManifestLocations(manifestSources);
+                // A manifest asset tagged with feature labels only takes part while one of its features is on
+                var allLocations = FindManifestLocations(manifestSources);
+                var allowed = new HashSet<string>(
+                    FeatureAssetIndex.Filter(allLocations.Select(source => source.Location), null)
+                        .Select(FeatureAssetIndex.KeyOf),
+                    StringComparer.Ordinal
+                );
+                var locations = allLocations
+                    .Where(source => allowed.Contains(FeatureAssetIndex.KeyOf(source.Location)))
+                    .ToList();
                 CurrentMetrics.AddressableManifestCount = locations.Count;
                 manifests.AddRange(LoadAddressableManifests(locations));
 
