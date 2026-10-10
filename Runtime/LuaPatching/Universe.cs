@@ -11,6 +11,7 @@ using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Shared;
 using ReduxLib.Logging;
+using SpaceWarp2.API.Features;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -116,6 +117,45 @@ namespace PatchManager.LuaPatching
         /// Assets queued for creation via <see cref="PatchManagerCore.New" />.
         /// </summary>
         public List<LuaAsset> AllNewAssets = new();
+
+        /// <summary>
+        /// The features the run is building for, or <c>null</c> to run every registration regardless of features.
+        /// </summary>
+        public ISet<string> EnabledFeatures;
+
+        /// <summary>
+        /// The registry that <c>PM:DefineFeature</c> declares features into.
+        /// </summary>
+        public FeatureRegistry FeatureRegistry = new();
+
+        /// <summary>
+        /// Gets the queued new assets whose features are on in <see cref="EnabledFeatures" />.
+        /// </summary>
+        public IEnumerable<LuaAsset> EnabledNewAssets => AllNewAssets;
+
+        /// <summary>
+        /// Callbacks registered with <c>PM:OnBeginRun</c>, in registration order.
+        /// </summary>
+        public List<RunCallback> BeginRunCallbacks = new();
+
+        /// <summary>
+        /// Callbacks registered with <c>PM:OnEndRun</c>, in registration order.
+        /// </summary>
+        public List<RunCallback> EndRunCallbacks = new();
+
+        /// <summary>
+        /// Fires every begin callback whose features are on in <see cref="EnabledFeatures" />.
+        /// </summary>
+        public void BeginRun()
+        {
+        }
+
+        /// <summary>
+        /// Fires every end callback whose features are on in <see cref="EnabledFeatures" />.
+        /// </summary>
+        public void EndRun()
+        {
+        }
 
         /// <summary>
         /// Registered patches keyed by addressables label. Sorted in <see cref="SetupPatchesForRun" /> by stage priority.
@@ -447,7 +487,8 @@ namespace PatchManager.LuaPatching
 
         private List<PatchDefinition> SortBucket(List<PatchDefinition> bucket)
         {
-            if (bucket.Count == 0) return new List<PatchDefinition>();
+            if (bucket.Count == 0)
+                return new List<PatchDefinition>();
 
             var bucketNames = new HashSet<string>(bucket.Count);
             foreach (var p in bucket) bucketNames.Add(p.Name);
@@ -511,13 +552,15 @@ namespace PatchManager.LuaPatching
             {
                 foreach (var pre in afters[patch.Name])
                 {
-                    if (pre == patch.Name) continue;
+                    if (pre == patch.Name)
+                        continue;
                     if (outEdges[pre].Add(patch.Name)) inDegree[patch.Name]++;
                 }
 
                 foreach (var suc in befores[patch.Name])
                 {
-                    if (suc == patch.Name) continue;
+                    if (suc == patch.Name)
+                        continue;
                     if (outEdges[patch.Name].Add(suc)) inDegree[suc]++;
                 }
             }
@@ -602,9 +645,7 @@ namespace PatchManager.LuaPatching
                 {
                     patchCount++;
                     if (removed)
-                    {
                         return null;
-                    }
                 }
 
                 if (errored) errorCount++;
@@ -648,9 +689,7 @@ namespace PatchManager.LuaPatching
                 {
                     patchCount++;
                     if (removed)
-                    {
                         return null;
-                    }
                 }
 
                 if (errored) errorCount++;
@@ -691,8 +730,10 @@ namespace PatchManager.LuaPatching
         /// <returns>The matching patches, or an empty sequence when no patches are registered for the label in this pass.</returns>
         public IEnumerable<PatchDefinition> GetAllSortedPatchesFor(string label, string name, string pass, int afterOrder = -1)
         {
-            if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) yield break;
-            if (!perPass.TryGetValue(pass, out var buckets)) yield break;
+            if (!AllPatchesBuckets.TryGetValue(label, out var perPass))
+                yield break;
+            if (!perPass.TryGetValue(pass, out var buckets))
+                yield break;
 
             var exact = buckets.Exact.TryGetValue(name, out var e) ? e : Array.Empty<PatchDefinition>();
             var matchAll = buckets.MatchAll;
@@ -711,7 +752,8 @@ namespace PatchManager.LuaPatching
                 var matchAllPatch = matchAllI < matchAll.Length ? matchAll[matchAllI] : null;
                 var wildcardPatch = wildCardI < wildcard.Length ? wildcard[wildCardI].Patch : null;
 
-                if (exactPatch == null && matchAllPatch == null && wildcardPatch == null) yield break;
+                if (exactPatch == null && matchAllPatch == null && wildcardPatch == null)
+                    yield break;
 
                 var best = exactPatch;
                 if (matchAllPatch != null && (best == null || matchAllPatch.Order < best.Order))
@@ -738,12 +780,16 @@ namespace PatchManager.LuaPatching
         /// <returns>True if any patch matches, false otherwise.</returns>
         public bool HasAnyPatchFor(string label, string name)
         {
-            if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
+            if (!AllPatchesBuckets.TryGetValue(label, out var perPass))
+                return false;
             foreach (var (_, buckets) in perPass)
             {
-                if (buckets.MatchAll.Length > 0) return true;
-                if (buckets.Exact.ContainsKey(name)) return true;
-                if (buckets.Wildcard.Any(w => w.Pattern.Matches(name))) return true;
+                if (buckets.MatchAll.Length > 0)
+                    return true;
+                if (buckets.Exact.ContainsKey(name))
+                    return true;
+                if (buckets.Wildcard.Any(w => w.Pattern.Matches(name)))
+                    return true;
             }
             return false;
         }
@@ -757,10 +803,14 @@ namespace PatchManager.LuaPatching
         /// <returns>True if any patch in <paramref name="pass" /> matches, false otherwise.</returns>
         public bool HasAnyPatchInPass(string label, string name, string pass)
         {
-            if (!AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
-            if (!perPass.TryGetValue(pass, out var buckets)) return false;
-            if (buckets.MatchAll.Length > 0) return true;
-            if (buckets.Exact.ContainsKey(name)) return true;
+            if (!AllPatchesBuckets.TryGetValue(label, out var perPass))
+                return false;
+            if (!perPass.TryGetValue(pass, out var buckets))
+                return false;
+            if (buckets.MatchAll.Length > 0)
+                return true;
+            if (buckets.Exact.ContainsKey(name))
+                return true;
             return buckets.Wildcard.Any(w => w.Pattern.Matches(name));
         }
 

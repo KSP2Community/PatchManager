@@ -252,7 +252,8 @@ namespace PatchManager.CSharpPatching.Attributes
         public void Apply(PatchDefinition patch, object owner)
         {
             var mi = PredicateResolver.Resolve(owner, _predicateMethod, "Requires");
-            if (mi == null) return;
+            if (mi == null)
+                return;
 
             var target = mi.IsStatic ? null : owner;
             patch.Requires(dv => (bool)mi.Invoke(target, new[] { dv.UserData?.Object }), _message);
@@ -298,7 +299,8 @@ namespace PatchManager.CSharpPatching.Attributes
             }
 
             var mi = PredicateResolver.Resolve(owner, _predicateMethod, "Has");
-            if (mi == null) return;
+            if (mi == null)
+                return;
 
             var target = mi.IsStatic ? null : owner;
             patch.Has(_key, dv => (bool)mi.Invoke(target, new[] { JsonUserData.Wrap(dv) }), Message);

@@ -132,9 +132,7 @@ namespace PatchManager.Core.Assets
                 // KSP1 mods carry no Lua and their folders are whole GameData trees, so sweeping them is a lot
                 // of directory walking for nothing.
                 if (descriptor.IsKsp1)
-                {
                     continue;
-                }
 
                 HashScriptsForMod(descriptor.Folder?.FullName, descriptor.ScriptFiles, CurrentPatchHashes);
             }
@@ -169,9 +167,7 @@ namespace PatchManager.Core.Assets
             }
 
             if (string.IsNullOrEmpty(modFolder) || !Directory.Exists(modFolder))
-            {
                 return;
-            }
 
             // Keyed by path, so a file the descriptor already declared just gets the same hash written twice.
             foreach (var file in Directory.EnumerateFiles(modFolder, "*.lua", SearchOption.AllDirectories))
@@ -213,16 +209,12 @@ namespace PatchManager.Core.Assets
             var current = GatherTaggedValues();
             var snapshot = CacheManager.Inventory.InvalidationSnapshot;
             if (current.Count != snapshot.Count)
-            {
                 return true;
-            }
 
             foreach (var pair in current)
             {
                 if (!snapshot.TryGetValue(pair.Key, out var stored) || !JToken.DeepEquals(pair.Value, stored))
-                {
                     return true;
-                }
             }
 
             return false;
@@ -248,9 +240,7 @@ namespace PatchManager.Core.Assets
             {
                 var file = descriptor.ConfigFile;
                 if (file == null)
-                {
                     continue;
-                }
 
                 foreach (var section in file.Sections)
                 {
@@ -258,9 +248,7 @@ namespace PatchManager.Core.Assets
                     {
                         var entry = section[key];
                         if (!entry.HasTag(PatchManagerCore.InvalidatesOnChangeTag))
-                        {
                             continue;
-                        }
 
                         var entryKey = $"{descriptor.Guid}:{section.Name}/{key}";
                         result[entryKey] = entry.Value == null ? JValue.CreateNull() : JToken.FromObject(entry.Value);
@@ -375,7 +363,8 @@ namespace PatchManager.Core.Assets
                 foreach (var label in labels)
                 {
                     var active = activePassesPerLabel[label];
-                    if (!active.Contains(pass)) continue;
+                    if (!active.Contains(pass))
+                        continue;
 
                     var isFirst = active[0] == pass;
                     var isLast = active[active.Count - 1] == pass;
@@ -446,8 +435,10 @@ namespace PatchManager.Core.Assets
 
         private static bool HasPatchesInPass(string label, string pass)
         {
-            if (!Universe.AllPatchesBuckets.TryGetValue(label, out var perPass)) return false;
-            if (!perPass.TryGetValue(pass, out var buckets)) return false;
+            if (!Universe.AllPatchesBuckets.TryGetValue(label, out var perPass))
+                return false;
+            if (!perPass.TryGetValue(pass, out var buckets))
+                return false;
             return buckets.MatchAll.Length > 0
                 || buckets.Wildcard.Length > 0
                 || buckets.Exact.Count > 0;
@@ -485,7 +476,8 @@ namespace PatchManager.Core.Assets
 
         private static IEnumerator LoadLabel(string label)
         {
-            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) yield break;
+            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state))
+                yield break;
 
             var locHandle = Addressables.LoadResourceLocationsAsync(label, typeof(TextAsset));
             while (!locHandle.IsDone)
@@ -503,7 +495,8 @@ namespace PatchManager.Core.Assets
                 var stateRef = state;
                 var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
                 {
-                    if (string.IsNullOrEmpty(asset.text)) return;
+                    if (string.IsNullOrEmpty(asset.text))
+                        return;
                     stateRef.RawTexts[asset.name] = asset.text;
                 });
                 state.LoadHandle = handle;
@@ -551,7 +544,8 @@ namespace PatchManager.Core.Assets
 
         private static void RunPassForLabel(string label, string pass)
         {
-            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
+            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state))
+                return;
 
             Universe.Summary.BeginPass(pass);
             Universe.Summary.BeginLabel(label);
@@ -560,10 +554,12 @@ namespace PatchManager.Core.Assets
             var assetNames = state.RawTexts.Keys.Concat(state.Tokens.Keys).Distinct().ToList();
             foreach (var assetName in assetNames)
             {
-                if (!Universe.HasAnyPatchInPass(label, assetName, pass)) continue;
+                if (!Universe.HasAnyPatchInPass(label, assetName, pass))
+                    continue;
 
                 var token = EnsureParsed(state, assetName);
-                if (token == null) continue;
+                if (token == null)
+                    continue;
 
                 var address = state.PrimaryKeyMap.TryGetValue(assetName, out var a) ? a : "<unknown>";
                 Universe.Summary.BeginAsset(assetName, address);
@@ -642,8 +638,10 @@ namespace PatchManager.Core.Assets
 
         private static JToken EnsureParsed(LabelRebuildState state, string assetName)
         {
-            if (state.Tokens.TryGetValue(assetName, out var token)) return token;
-            if (!state.RawTexts.TryGetValue(assetName, out var rawText)) return null;
+            if (state.Tokens.TryGetValue(assetName, out var token))
+                return token;
+            if (!state.RawTexts.TryGetValue(assetName, out var rawText))
+                return null;
             try
             {
                 token = JToken.Parse(rawText);
@@ -665,7 +663,8 @@ namespace PatchManager.Core.Assets
 
         private static void WriteAndReleaseLabel(string label)
         {
-            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state)) return;
+            if (_rebuildStates == null || !_rebuildStates.TryGetValue(label, out var state))
+                return;
 
             if (!state.Unchanged) WriteArchive(state);
 
@@ -747,15 +746,18 @@ namespace PatchManager.Core.Assets
 
             foreach (var (assetName, token) in state.Tokens)
             {
-                if (token == null) continue;
+                if (token == null)
+                    continue;
                 var serialized = token.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
-                if (string.IsNullOrEmpty(serialized)) continue;
+                if (string.IsNullOrEmpty(serialized))
+                    continue;
                 AddAssetEntry(assetName, serialized);
             }
 
             foreach (var (assetName, rawText) in state.RawTexts)
             {
-                if (string.IsNullOrEmpty(rawText)) continue;
+                if (string.IsNullOrEmpty(rawText))
+                    continue;
                 AddAssetEntry(assetName, rawText);
             }
 
@@ -764,9 +766,11 @@ namespace PatchManager.Core.Assets
                 try
                 {
                     var jResult = luaAsset.ConverterInstance.ToJson(luaAsset.CurrentValue);
-                    if (jResult == null) continue;
+                    if (jResult == null)
+                        continue;
                     var serialized = jResult.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
-                    if (string.IsNullOrEmpty(serialized)) continue;
+                    if (string.IsNullOrEmpty(serialized))
+                        continue;
                     archive.AddFile(name, serialized);
                     labelCacheEntry.Assets.Add(name);
                     assetsCacheEntries[name] = new CacheEntry

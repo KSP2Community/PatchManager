@@ -34,7 +34,8 @@ namespace PatchManager.CSharpPatching
                 foreach (var type in assembly.GetLoadableTypes())
                 {
                     var pmPatch = type.GetCustomAttribute<PMPatchAttribute>();
-                    if (pmPatch == null) continue;
+                    if (pmPatch == null)
+                        continue;
 
                     object owner;
                     try
@@ -53,7 +54,8 @@ namespace PatchManager.CSharpPatching
                                                            BindingFlags.Instance | BindingFlags.Static))
                     {
                         var target = method.GetCustomAttribute<PatchAttribute>();
-                        if (target == null) continue;
+                        if (target == null)
+                            continue;
                         RegisterPatch(universe, owner, method, target, modId);
                     }
                 }

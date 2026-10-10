@@ -87,9 +87,7 @@ namespace PatchManager.CSharpPatching
             }
 
             if (!Universe.Converters.TryGetValue(converter, out var converterInstance))
-            {
                 throw new InvalidOperationException($"Unknown converter '{converter}' for fluent patch '{name}'.");
-            }
 
             var patch = new PatchDefinition
             {
