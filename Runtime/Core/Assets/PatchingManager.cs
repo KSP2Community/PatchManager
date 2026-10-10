@@ -12,6 +12,7 @@ using PatchManager.Core.Utility;
 using PatchManager.LuaPatching;
 using PatchManager.LuaPatching.Builtin;
 using PatchManager.Shared;
+using Redux.Features;
 using ReduxLib.Configuration;
 using SpaceWarp2.API.Features;
 using SpaceWarp2.API.Mods;
@@ -19,6 +20,7 @@ using UniLinq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace PatchManager.Core.Assets
 {
@@ -122,6 +124,7 @@ namespace PatchManager.Core.Assets
                 StringComparer.OrdinalIgnoreCase
             );
             Logging.LogInfo($"Patching for {Universe.EnabledFeatures.Count} enabled feature(s)");
+            FeatureAssetIndex.Activate(Universe.EnabledFeatures);
         }
 
         /// <summary>
@@ -517,15 +520,16 @@ namespace PatchManager.Core.Assets
                 UpdateLoadingBarData();
                 yield return null;
             }
-            var hasLocations = locHandle.Status == AsyncOperationStatus.Succeeded
-                               && locHandle.Result != null
-                               && locHandle.Result.Count > 0;
+            // Only the locations the feature set lets in reach the patch run, so the archive holds nothing else
+            var locations = locHandle.Status == AsyncOperationStatus.Succeeded && locHandle.Result != null
+                ? FeatureAssetIndex.Filter(locHandle.Result, label)
+                : new List<IResourceLocation>();
             Addressables.Release(locHandle);
 
-            if (hasLocations)
+            if (locations.Count > 0)
             {
                 var stateRef = state;
-                var handle = Addressables.LoadAssetsAsync<TextAsset>(label, asset =>
+                var handle = Addressables.LoadAssetsAsync<TextAsset>(locations, asset =>
                 {
                     if (string.IsNullOrEmpty(asset.text))
                         return;
@@ -544,7 +548,13 @@ namespace PatchManager.Core.Assets
             {
                 foreach (var key in members)
                 {
-                    var memberHandle = Addressables.LoadAssetAsync<TextAsset>(key);
+                    // A member can have a same-named twin in another feature, so the gate picks which one loads
+                    if (FeatureAssetIndex.TryResolveKey(key, typeof(TextAsset), label, out var memberLocation) && memberLocation == null)
+                        continue;
+
+                    var memberHandle = memberLocation != null
+                        ? Addressables.LoadAssetAsync<TextAsset>(memberLocation)
+                        : Addressables.LoadAssetAsync<TextAsset>(key);
                     while (!memberHandle.IsDone)
                     {
                         UpdateLoadingBarData();

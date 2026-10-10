@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using MoonSharp.Interpreter;
+using SpaceWarp2.API.Features;
 
 namespace PatchManager.LuaPatching.Builtin
 {
@@ -12,6 +13,9 @@ namespace PatchManager.LuaPatching.Builtin
     public sealed class PatchManagerCore
     {
         private readonly Universe _universe;
+
+        // Features added by the PM:WithFeature scopes currently open, outermost first.
+        private readonly List<string> _scopedFeatures = new();
 
         /// <summary>
         /// Creates the library bound to the given universe.
@@ -78,6 +82,7 @@ namespace PatchManager.LuaPatching.Builtin
                 Name = actualName,
                 PatchModId = modId
             };
+            newPatch.NeedsFeatures.UnionWith(_scopedFeatures);
             _universe.AddPatch(newPatch);
             return newPatch;
         }
@@ -159,13 +164,13 @@ namespace PatchManager.LuaPatching.Builtin
             var identity =
                 global::PatchManager.PrefabPatching.PrefabPatchPrefabIdentity
                     .FromAddress(target.String);
-            return new PrefabPatchLuaBuilder(
-                new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
-                    modId,
-                    name,
-                    identity
-                )
+            var builder = new global::PatchManager.PrefabPatching.PrefabPatchBuilder(
+                modId,
+                name,
+                identity
             );
+            builder.NeedsFeature(_scopedFeatures.ToArray());
+            return new PrefabPatchLuaBuilder(builder);
         }
 
         /// <summary>
@@ -182,6 +187,7 @@ namespace PatchManager.LuaPatching.Builtin
         {
             var asset = New(converter, label, name, newObject);
             asset.ModId = ModIdOf(context);
+            asset.NeedsFeatures.UnionWith(_scopedFeatures);
             return asset;
         }
 
@@ -218,7 +224,15 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="body">The function whose registrations get the feature.</param>
         public void WithFeature(ScriptExecutionContext context, string id, Closure body)
         {
-            body.Call();
+            _scopedFeatures.Add(FeatureIds.Qualify(ModIdOf(context), id));
+            try
+            {
+                body.Call();
+            }
+            finally
+            {
+                _scopedFeatures.RemoveAt(_scopedFeatures.Count - 1);
+            }
         }
 
         /// <summary>
@@ -249,6 +263,7 @@ namespace PatchManager.LuaPatching.Builtin
                 ModId = ModIdOf(context),
                 Callback = features => callback.Call(UserData.Create(features))
             };
+            registered.NeedsFeatures.UnionWith(_scopedFeatures);
             into.Add(registered);
             return registered;
         }
