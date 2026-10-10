@@ -206,6 +206,22 @@ namespace PatchManager.LuaPatching.Builtin
         }
 
         /// <summary>
+        /// Runs <paramref name="body" /> with a feature added to every patch, created asset, prefab patch and run
+        /// callback it registers.
+        /// </summary>
+        /// <remarks>
+        /// Scopes nest, so a registration inside two scopes needs both features. A file whose patches all belong to one
+        /// feature wraps its body once instead of chaining <c>:Feature</c> onto every registration.
+        /// </remarks>
+        /// <param name="context">The Lua execution context.</param>
+        /// <param name="id">The feature ID, namespaced to the calling mod when it does not already carry a namespace.</param>
+        /// <param name="body">The function whose registrations get the feature.</param>
+        public void WithFeature(ScriptExecutionContext context, string id, Closure body)
+        {
+            body.Call();
+        }
+
+        /// <summary>
         /// Registers a callback that runs before each feature set's patch run.
         /// </summary>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
