@@ -193,6 +193,7 @@ namespace PatchManager.PrefabPatching
         ) =>
             DiscoverAndResolve(
                 activeModIds,
+                null,
                 Array.Empty<PrefabPatchManifestSource>(),
                 resolve,
                 reject
@@ -200,11 +201,13 @@ namespace PatchManager.PrefabPatching
 
         /// <summary>Discovers and resolves manifests from explicit mod-owned labels.</summary>
         /// <param name="activeModIds">The active SpaceWarp mod IDs.</param>
+        /// <param name="enabledFeatures">The features being built, or <c>null</c> to keep every manifest.</param>
         /// <param name="manifestSources">Mod ownership and Addressables label pairs.</param>
         /// <param name="resolve">Called after successful resolution.</param>
         /// <param name="reject">Called with a diagnostic when discovery fails.</param>
         public static void DiscoverAndResolve(
             ISet<string> activeModIds,
+            ISet<string> enabledFeatures,
             IReadOnlyCollection<PrefabPatchManifestSource> manifestSources,
             Action resolve,
             Action<string> reject
@@ -225,7 +228,7 @@ namespace PatchManager.PrefabPatching
                 manifests.AddRange(LoadAddressableManifests(locations));
 
                 ResolveDiscoveredManifests(
-                    manifests,
+                    PrefabPatchResolver.FilterByFeatures(manifests, enabledFeatures).ToList(),
                     activeModIds,
                     stopwatch,
                     resolve

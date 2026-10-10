@@ -70,12 +70,14 @@ namespace PatchManager.Generic
         /// <summary>
         /// Queues a brand-new JSON asset for creation under the given label and name.
         /// </summary>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="label">The addressables label to tag the asset with.</param>
         /// <param name="name">The asset's addressables address.</param>
         /// <param name="value">The asset's Lua-facing value (typically a <see cref="JsonUserData" /> wrapping a <c>JObject</c> or <c>JArray</c>).</param>
-        public void New(string label, string name, DynValue value)
+        /// <returns>The queued asset, for gating it with features.</returns>
+        public LuaAsset New(ScriptExecutionContext context, string label, string name, DynValue value)
         {
-            _core.New("JSON", label, name, value);
+            return _core.New(context, "JSON", label, name, value);
         }
     }
 }

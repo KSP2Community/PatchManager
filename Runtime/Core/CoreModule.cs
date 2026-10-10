@@ -71,6 +71,7 @@ namespace PatchManager.Core
             // run at this point, so CollectScriptResults finds the addressable-sourced scripts in memory.
             PatchingManager.HashScriptFiles();
             PatchingManager.CollectScriptResults();
+            PatchingManager.HashFeatureSet();
             var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
             var tail = new List<GenericFlowAction>();
@@ -107,6 +108,7 @@ namespace PatchManager.Core
         {
             PatchingManager.Universe.RegistrationOpen = false;
             PrefabPatchRuntime.CloseRegistration();
+            PatchingManager.SelectBootFeatures();
             resolve();
         }
 
@@ -133,6 +135,7 @@ namespace PatchManager.Core
                     .ToArray();
             PrefabPatchRuntime.DiscoverAndResolve(
                 PatchingManager.Universe.AllMods,
+                PatchingManager.Universe.EnabledFeatures,
                 manifestSources,
                 resolve,
                 reject

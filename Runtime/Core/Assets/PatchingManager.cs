@@ -13,6 +13,7 @@ using PatchManager.LuaPatching;
 using PatchManager.LuaPatching.Builtin;
 using PatchManager.Shared;
 using ReduxLib.Configuration;
+using SpaceWarp2.API.Features;
 using SpaceWarp2.API.Mods;
 using UniLinq;
 using UnityEngine;
@@ -104,6 +105,33 @@ namespace PatchManager.Core.Assets
             loadedPlugins.AddRange(singleFileModIds);
             Universe = new(Logging.LogError, Logging.LogMessage,
                 loadedPlugins);
+            Universe.FeatureRegistry = FeatureRegistry.Instance;
+        }
+
+        /// <summary>
+        /// Picks the feature set this boot patches for: the main menu umbrella plus every installed mod's default.
+        /// </summary>
+        /// <remarks>
+        /// Runs once registration has closed, so features declared from Lua are in the registry.
+        /// </remarks>
+        public static void SelectBootFeatures()
+        {
+            var installed = PluginList.AllEnabledAndActivePlugins.Select(descriptor => descriptor.Guid);
+            Universe.EnabledFeatures = new HashSet<string>(
+                FeatureGate.BootSet(Universe.FeatureRegistry, installed),
+                StringComparer.OrdinalIgnoreCase
+            );
+            Logging.LogInfo($"Patching for {Universe.EnabledFeatures.Count} enabled feature(s)");
+        }
+
+        /// <summary>
+        /// Adds the enabled feature set to the patch-cache checksum, so a different set never reuses another
+        /// set's archives.
+        /// </summary>
+        public static void HashFeatureSet()
+        {
+            var ordered = Universe.EnabledFeatures.OrderBy(id => id, StringComparer.Ordinal);
+            CurrentPatchHashes.Patches["<features>"] = Hash.FromString(string.Join("\n", ordered));
         }
 
         /// <summary>
@@ -290,7 +318,8 @@ namespace PatchManager.Core.Assets
         /// <param name="reject">Reject callback (currently unused).</param>
         public static void CreateNewAssets(Action resolve, Action<string> reject)
         {
-            foreach (var generator in Universe.AllNewAssets)
+            var enabledAssets = Universe.EnabledNewAssets.ToList();
+            foreach (var generator in enabledAssets)
             {
                 try
                 {
@@ -317,7 +346,7 @@ namespace PatchManager.Core.Assets
                 }
             }
 
-            TotalNewAssetCount = Universe.AllNewAssets.Count;
+            TotalNewAssetCount = enabledAssets.Count;
             UpdateLoadingBarData();
 
             resolve();
@@ -339,10 +368,12 @@ namespace PatchManager.Core.Assets
         /// <param name="reject">Reject callback (currently unused).</param>
         public static void RebuildAllCache(Action resolve, Action<string> reject)
         {
+            Universe.BeginRun();
             var labels = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
 
             if (labels.Count == 0)
             {
+                Universe.EndRun();
                 resolve();
                 return;
             }
@@ -377,6 +408,7 @@ namespace PatchManager.Core.Assets
                 (r, _) =>
                 {
                     FinalizeRebuild();
+                    Universe.EndRun();
                     r();
                 }
             ));

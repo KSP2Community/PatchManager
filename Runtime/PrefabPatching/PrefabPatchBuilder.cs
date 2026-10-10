@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpaceWarp2.API.Features;
 
 namespace PatchManager.PrefabPatching
 {
@@ -23,6 +24,8 @@ namespace PatchManager.PrefabPatching
         private readonly HashSet<string> _conflictsMods = new(
             StringComparer.Ordinal
         );
+        private readonly HashSet<string> _needsFeatures = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _conflictsFeatures = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _needsPatches = new(StringComparer.Ordinal);
         private readonly HashSet<string> _conflictsPatches = new(
             StringComparer.Ordinal
@@ -114,6 +117,14 @@ namespace PatchManager.PrefabPatching
         /// <summary>Disables the patch when any supplied mod ID is active.</summary>
         public PrefabPatchBuilder ConflictsMod(params string[] ids) =>
             Add(_conflictsMods, ids);
+
+        /// <summary>Applies the patch only when the supplied features are on, bare IDs namespaced to the owning mod.</summary>
+        public PrefabPatchBuilder NeedsFeature(params string[] ids) =>
+            Add(_needsFeatures, QualifyFeatures(ids));
+
+        /// <summary>Applies the patch only when the supplied features are off, bare IDs namespaced to the owning mod.</summary>
+        public PrefabPatchBuilder ConflictsFeature(params string[] ids) =>
+            Add(_conflictsFeatures, QualifyFeatures(ids));
 
         /// <summary>Requires the supplied patch IDs to be enabled.</summary>
         public PrefabPatchBuilder NeedsPatch(params string[] ids) =>
@@ -378,6 +389,8 @@ namespace PatchManager.PrefabPatching
         {
             _manifest.NeedsMods = Sorted(_needsMods);
             _manifest.ConflictsMods = Sorted(_conflictsMods);
+            _manifest.NeedsFeatures = Sorted(_needsFeatures);
+            _manifest.ConflictsFeatures = Sorted(_conflictsFeatures);
             _manifest.NeedsPatches = Sorted(_needsPatches);
             _manifest.ConflictsPatches = Sorted(_conflictsPatches);
             _manifest.BeforePatches = Sorted(_beforePatches);
@@ -420,6 +433,11 @@ namespace PatchManager.PrefabPatching
 
         private static IEnumerable<string> Normalize(IEnumerable<string> ids) =>
             ids ?? Array.Empty<string>();
+
+        private IEnumerable<string> QualifyFeatures(IEnumerable<string> ids) =>
+            Normalize(ids)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => FeatureIds.Qualify(_modId, id.Trim()));
 
         private static string[] Sorted(IEnumerable<string> values) =>
             values.OrderBy(value => value, StringComparer.Ordinal).ToArray();

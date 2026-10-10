@@ -131,6 +131,38 @@ namespace PatchManager.CSharpPatching.Attributes
         public void Apply(PatchDefinition patch, object owner) => patch.Conflicts(_ids);
     }
 
+    /// <summary>Runs the patch only when these features are on, bare IDs namespaced to the mod.</summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class NeedsFeatureAttribute : Attribute, IPatchModifier
+    {
+        private readonly string[] _ids;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NeedsFeatureAttribute" /> class.
+        /// </summary>
+        /// <param name="ids">The required feature IDs.</param>
+        public NeedsFeatureAttribute(params string[] ids) => _ids = ids;
+
+        /// <inheritdoc />
+        public void Apply(PatchDefinition patch, object owner) => patch.Feature(_ids);
+    }
+
+    /// <summary>Runs the patch only when these features are off, bare IDs namespaced to the mod.</summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class NoFeatureAttribute : Attribute, IPatchModifier
+    {
+        private readonly string[] _ids;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NoFeatureAttribute" /> class.
+        /// </summary>
+        /// <param name="ids">The feature IDs that turn the patch off.</param>
+        public NoFeatureAttribute(params string[] ids) => _ids = ids;
+
+        /// <inheritdoc />
+        public void Apply(PatchDefinition patch, object owner) => patch.NoFeature(_ids);
+    }
+
     /// <summary>Requires these other patches to run.</summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class NeedsPatchAttribute : Attribute, IPatchModifier

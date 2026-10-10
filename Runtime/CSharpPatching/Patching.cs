@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using PatchManager.LuaPatching;
+using SpaceWarp2.API.Features;
 
 namespace PatchManager.CSharpPatching
 {
@@ -80,5 +83,34 @@ namespace PatchManager.CSharpPatching
         /// <param name="name">The pass name, namespaced to the mod unless built-in or already namespaced.</param>
         /// <returns>The pass, for chaining its ordering.</returns>
         public PassDefinition Pass(string name) => FluentPatchRegistry.Pass(ModId, name);
+
+        /// <summary>
+        /// Declares a feature of this scope's mod.
+        /// </summary>
+        /// <param name="id">The feature ID, namespaced to the mod when it does not already carry a namespace.</param>
+        /// <param name="requires">The required feature IDs, bare ones namespaced to the mod.</param>
+        /// <param name="conflicts">The conflicting feature IDs, bare ones namespaced to the mod.</param>
+        /// <returns>The declared feature.</returns>
+        public FeatureDefinition DefineFeature(
+            string id,
+            IEnumerable<string> requires = null,
+            IEnumerable<string> conflicts = null
+        ) => FeatureRegistry.Instance.Define(ModId, id, requires, conflicts);
+
+        /// <summary>
+        /// Registers a callback that runs before each feature set's patch run.
+        /// </summary>
+        /// <param name="callback">The callback, handed the set being built.</param>
+        /// <returns>The registered callback, for gating it with features.</returns>
+        public RunCallback OnBeginRun(Action<RunFeatures> callback) =>
+            FluentPatchRegistry.RunCallback(ModId, callback, isBegin: true);
+
+        /// <summary>
+        /// Registers a callback that runs after each feature set's patch run.
+        /// </summary>
+        /// <param name="callback">The callback, handed the set that was built.</param>
+        /// <returns>The registered callback, for gating it with features.</returns>
+        public RunCallback OnEndRun(Action<RunFeatures> callback) =>
+            FluentPatchRegistry.RunCallback(ModId, callback, isBegin: false);
     }
 }

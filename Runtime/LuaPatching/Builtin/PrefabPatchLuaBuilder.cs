@@ -64,14 +64,22 @@ namespace PatchManager.LuaPatching.Builtin
         /// </summary>
         /// <param name="ids">The feature IDs, namespaced to the owning mod when they do not already carry a namespace.</param>
         /// <returns>The builder for chaining.</returns>
-        public PrefabPatchLuaBuilder Feature(params string[] ids) => this;
+        public PrefabPatchLuaBuilder Feature(params string[] ids)
+        {
+            _builder.NeedsFeature(ids);
+            return this;
+        }
 
         /// <summary>
         /// Applies the patch only when these features are off.
         /// </summary>
         /// <param name="ids">The feature IDs, namespaced to the owning mod when they do not already carry a namespace.</param>
         /// <returns>The builder for chaining.</returns>
-        public PrefabPatchLuaBuilder NoFeature(params string[] ids) => this;
+        public PrefabPatchLuaBuilder NoFeature(params string[] ids)
+        {
+            _builder.ConflictsFeature(ids);
+            return this;
+        }
 
         public PrefabPatchLuaBuilder NeedsPatch(params string[] ids)
         {

@@ -182,7 +182,15 @@ namespace PatchManager.LuaPatching
         /// </summary>
         /// <param name="ids">The feature IDs, namespaced to the host mod when they do not already carry a namespace.</param>
         /// <returns>The patch instance for chaining.</returns>
-        public PatchDefinition Feature(params string[] ids) => this;
+        public PatchDefinition Feature(params string[] ids)
+        {
+            foreach (var id in ids)
+            {
+                NeedsFeatures.Add(NormalizeId(id));
+            }
+
+            return this;
+        }
 
         /// <summary>
         /// The qualified features that must be off for this patch to run.
@@ -194,7 +202,15 @@ namespace PatchManager.LuaPatching
         /// </summary>
         /// <param name="ids">The feature IDs, namespaced to the host mod when they do not already carry a namespace.</param>
         /// <returns>The patch instance for chaining.</returns>
-        public PatchDefinition NoFeature(params string[] ids) => this;
+        public PatchDefinition NoFeature(params string[] ids)
+        {
+            foreach (var id in ids)
+            {
+                ConflictsFeatures.Add(NormalizeId(id));
+            }
+
+            return this;
+        }
 
         /// <summary>
         /// The patch IDs that must also run for this patch to run.

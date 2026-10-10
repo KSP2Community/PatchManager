@@ -105,9 +105,11 @@ namespace PatchManager.Science
         /// Creates a new science experiment with the given name and runs <paramref name="callback" /> against it for
         /// further configuration.
         /// </summary>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="name">The experiment name.</param>
         /// <param name="callback">Callback that receives the new experiment for further configuration.</param>
-        public void NewExperiment(string name, Action<ExperimentUserData> callback)
+        /// <returns>The queued asset, for gating it with features.</returns>
+        public LuaAsset NewExperiment(ScriptExecutionContext context, string name, Action<ExperimentUserData> callback)
         {
             var core = new ExperimentCore
             {
@@ -119,7 +121,7 @@ namespace PatchManager.Science
             var typed = new ExperimentUserData(JObject.FromObject(core));
             var ud = MoonSharp.Interpreter.UserData.Create(typed);
             callback(typed);
-            _core.New("Experiment", "scienceExperiment", name, ud);
+            return _core.New(context, "Experiment", "scienceExperiment", name, ud);
         }
         #endregion
 

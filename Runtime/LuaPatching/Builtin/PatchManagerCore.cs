@@ -178,8 +178,12 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="newObject">The Lua-facing value for the new asset.</param>
         /// <returns>The queued asset, for gating it with features.</returns>
         /// <exception cref="ScriptRuntimeException">Thrown when <paramref name="converter" /> is not registered.</exception>
-        public LuaAsset New(ScriptExecutionContext context, string converter, string label, string name, DynValue newObject) =>
-            New(converter, label, name, newObject);
+        public LuaAsset New(ScriptExecutionContext context, string converter, string label, string name, DynValue newObject)
+        {
+            var asset = New(converter, label, name, newObject);
+            asset.ModId = ModIdOf(context);
+            return asset;
+        }
 
         /// <summary>
         /// Declares a feature of the calling mod.
@@ -187,8 +191,18 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the declaring mod.</param>
         /// <param name="id">The feature ID, namespaced to the mod when it does not already carry a namespace.</param>
         /// <param name="options">An optional table with <c>requires</c> and <c>conflicts</c> lists of feature IDs.</param>
+        /// <exception cref="ScriptRuntimeException">Thrown when called after patch registration has closed.</exception>
         public void DefineFeature(ScriptExecutionContext context, string id, Table options = null)
         {
+            if (!_universe.RegistrationOpen)
+                throw new ScriptRuntimeException($"PM:DefineFeature('{id}') can only be called during patch registration.");
+
+            _universe.FeatureRegistry.Define(
+                ModIdOf(context),
+                id,
+                StringsIn(options?.Get("requires")),
+                StringsIn(options?.Get("conflicts"))
+            );
         }
 
         /// <summary>
@@ -197,7 +211,8 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
         /// <param name="callback">The callback, handed the set being built.</param>
         /// <returns>The registered callback, for gating it with features.</returns>
-        public RunCallback OnBeginRun(ScriptExecutionContext context, Closure callback) => new();
+        public RunCallback OnBeginRun(ScriptExecutionContext context, Closure callback) =>
+            AddRunCallback(_universe.BeginRunCallbacks, context, callback);
 
         /// <summary>
         /// Registers a callback that runs after each feature set's patch run.
@@ -205,7 +220,37 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
         /// <param name="callback">The callback, handed the set that was built.</param>
         /// <returns>The registered callback, for gating it with features.</returns>
-        public RunCallback OnEndRun(ScriptExecutionContext context, Closure callback) => new();
+        public RunCallback OnEndRun(ScriptExecutionContext context, Closure callback) =>
+            AddRunCallback(_universe.EndRunCallbacks, context, callback);
+
+        private RunCallback AddRunCallback(List<RunCallback> into, ScriptExecutionContext context, Closure callback)
+        {
+            if (!_universe.RegistrationOpen)
+                throw new ScriptRuntimeException("Run callbacks can only be registered during patch registration.");
+
+            var registered = new RunCallback
+            {
+                ModId = ModIdOf(context),
+                Callback = features => callback.Call(UserData.Create(features))
+            };
+            into.Add(registered);
+            return registered;
+        }
+
+        private static string ModIdOf(ScriptExecutionContext context) =>
+            context.CurrentGlobalEnv.Get("ModId").CastToString();
+
+        private static IEnumerable<string> StringsIn(DynValue list)
+        {
+            if (list == null || list.Type != DataType.Table)
+                yield break;
+
+            foreach (var value in list.Table.Values)
+            {
+                if (value.Type == DataType.String)
+                    yield return value.String;
+            }
+        }
 
         /// <summary>
         /// Queues a brand-new asset for creation under the given label and address, without an owning mod.

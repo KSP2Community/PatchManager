@@ -122,9 +122,11 @@ namespace PatchManager.Planets
         /// Creates a new galaxy definition with no bodies under the given key and runs <paramref name="callback" />
         /// against it for further configuration.
         /// </summary>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="galaxyDefinitionKey">The key that saves and campaign packs load the galaxy definition by.</param>
         /// <param name="callback">Callback that receives the new galaxy definition for further configuration.</param>
-        public void CreateGalaxy(string galaxyDefinitionKey, Action<GalaxyUserData> callback)
+        /// <returns>The queued asset, for gating it with features.</returns>
+        public LuaAsset CreateGalaxy(ScriptExecutionContext context, string galaxyDefinitionKey, Action<GalaxyUserData> callback)
         {
             var data = new SerializedGalaxyDefinition
             {
@@ -135,7 +137,7 @@ namespace PatchManager.Planets
             var typed = new GalaxyUserData(JObject.FromObject(data));
             var ud = MoonSharp.Interpreter.UserData.Create(typed);
             callback(typed);
-            _core.New("Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey, ud);
+            return _core.New(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey, ud);
         }
 
         /// <summary>
@@ -178,9 +180,11 @@ namespace PatchManager.Planets
         /// Setting <c>Layer</c> in the callback limits the override to galaxies that take the body from that layer, and
         /// names the override after the layer too, so each layer can have its own.
         /// </remarks>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="name">The body name the override applies to.</param>
         /// <param name="callback">Callback that receives the new override for further configuration.</param>
-        public void CreateAtmosphereOverride(string name, Action<JsonUserData> callback)
+        /// <returns>The queued asset, for gating it with features.</returns>
+        public LuaAsset CreateAtmosphereOverride(ScriptExecutionContext context, string name, Action<JsonUserData> callback)
         {
             var data = new AtmosphereOverride
             {
@@ -189,7 +193,7 @@ namespace PatchManager.Planets
             var ud = JsonUserData.GetFromJToken(JObject.FromObject(data));
             var json = (JsonUserData)ud.UserData.Object;
             callback(json);
-            _core.New("JSON", "atmosphere_overrides", OverrideAssetName("atmosphere_override", name, json.Token), ud);
+            return _core.New(context, "JSON", "atmosphere_overrides", OverrideAssetName("atmosphere_override", name, json.Token), ud);
         }
 
         /// <summary>
@@ -232,9 +236,11 @@ namespace PatchManager.Planets
         /// Setting <c>Layer</c> in the callback limits the override to galaxies that take the body from that layer, and
         /// names the override after the layer too, so each layer can have its own.
         /// </remarks>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="name">The body name the override applies to.</param>
         /// <param name="callback">Callback that receives the new override for further configuration.</param>
-        public void CreateCloudOverride(string name, Action<VolumeCloudUserData> callback)
+        /// <returns>The queued asset, for gating it with features.</returns>
+        public LuaAsset CreateCloudOverride(ScriptExecutionContext context, string name, Action<VolumeCloudUserData> callback)
         {
             var data = new VolumeCloudConfigurationOverride
             {
@@ -243,7 +249,7 @@ namespace PatchManager.Planets
             var typed = new VolumeCloudUserData(JObject.FromObject(data));
             var ud = MoonSharp.Interpreter.UserData.Create(typed);
             callback(typed);
-            _core.New("Cloud", "volume_cloud_overrides", OverrideAssetName("volume_cloud_override", name, typed.Token), ud);
+            return _core.New(context, "Cloud", "volume_cloud_overrides", OverrideAssetName("volume_cloud_override", name, typed.Token), ud);
         }
 
         // A default-layer override keeps its plain name, and a layered one adds its layer

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using PatchManager.Shared;
 
 namespace PatchManager.PrefabPatching
 {
@@ -26,7 +27,17 @@ namespace PatchManager.PrefabPatching
         public static IEnumerable<PrefabPatchManifest> FilterByFeatures(
             IEnumerable<PrefabPatchManifest> manifests,
             ISet<string> enabledFeatures
-        ) => manifests;
+        ) =>
+            manifests.Where(manifest =>
+                manifest != null
+                && FeatureGate.Allows(
+                    manifest.ModId,
+                    Safe(manifest.NeedsFeatures),
+                    Safe(manifest.ConflictsFeatures),
+                    enabledFeatures,
+                    out _
+                )
+            );
 
         /// <summary>Resolves manifests for one stock prefab into an executable plan.</summary>
         /// <param name="source">The owned manifests targeting the prefab.</param>

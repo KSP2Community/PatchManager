@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MoonSharp.Interpreter;
+using SpaceWarp2.API.Features;
 
 namespace PatchManager.LuaPatching
 {
@@ -56,13 +57,29 @@ namespace PatchManager.LuaPatching
         /// </summary>
         /// <param name="ids">The feature IDs, namespaced to the creating mod when they do not already carry a namespace.</param>
         /// <returns>The asset for chaining.</returns>
-        public LuaAsset Feature(params string[] ids) => this;
+        public LuaAsset Feature(params string[] ids)
+        {
+            foreach (var id in ids)
+            {
+                NeedsFeatures.Add(FeatureIds.Qualify(ModId, id));
+            }
+
+            return this;
+        }
 
         /// <summary>
         /// Creates the asset only when these features are off.
         /// </summary>
         /// <param name="ids">The feature IDs, namespaced to the creating mod when they do not already carry a namespace.</param>
         /// <returns>The asset for chaining.</returns>
-        public LuaAsset NoFeature(params string[] ids) => this;
+        public LuaAsset NoFeature(params string[] ids)
+        {
+            foreach (var id in ids)
+            {
+                ConflictsFeatures.Add(FeatureIds.Qualify(ModId, id));
+            }
+
+            return this;
+        }
     }
 }

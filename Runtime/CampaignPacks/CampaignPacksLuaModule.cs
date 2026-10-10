@@ -67,9 +67,11 @@ namespace PatchManager.CampaignPacks
         /// The new pack starts from the <see cref="CampaignPack" /> defaults, so it uses the default galaxy and layers
         /// until the callback changes them.
         /// </remarks>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="id">The campaign pack ID, which also names the created asset.</param>
         /// <param name="callback">Callback that receives the new campaign pack for further configuration.</param>
-        public void CreateCampaignPack(string id, Action<JsonUserData> callback)
+        /// <returns>The queued asset, for gating it with features.</returns>
+        public LuaAsset CreateCampaignPack(ScriptExecutionContext context, string id, Action<JsonUserData> callback)
         {
             var data = new CampaignPack
             {
@@ -78,7 +80,7 @@ namespace PatchManager.CampaignPacks
             };
             var ud = JsonUserData.GetFromJToken(JObject.FromObject(data));
             callback((JsonUserData)ud.UserData.Object);
-            _core.New("JSON", CampaignPackManager.CAMPAIGN_PACK_LABEL, id, ud);
+            return _core.New(context, "JSON", CampaignPackManager.CAMPAIGN_PACK_LABEL, id, ud);
         }
     }
 }

@@ -52,6 +52,20 @@ namespace PatchManager.CSharpPatching
         /// <summary>Refuses to run alongside these mod IDs.</summary>
         public PatchBuilder<T> Conflicts(params string[] ids) { _patch.Conflicts(ids); return this; }
 
+        /// <summary>Runs only when these features are on, bare IDs namespaced to the mod.</summary>
+        public PatchBuilder<T> Feature(params string[] ids)
+        {
+            _patch.Feature(ids);
+            return this;
+        }
+
+        /// <summary>Runs only when these features are off, bare IDs namespaced to the mod.</summary>
+        public PatchBuilder<T> NoFeature(params string[] ids)
+        {
+            _patch.NoFeature(ids);
+            return this;
+        }
+
         /// <summary>Requires these other patches to run.</summary>
         public PatchBuilder<T> NeedsPatch(params string[] ids) { _patch.NeedsPatch(ids); return this; }
 

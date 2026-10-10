@@ -38,7 +38,42 @@ namespace PatchManager.Shared
             IEnumerable<string> conflicts,
             ISet<string> enabled,
             out string reason
-        ) => throw new NotImplementedException();
+        )
+        {
+            reason = null;
+            if (enabled == null)
+                return true;
+
+            if (
+                !string.IsNullOrEmpty(modId)
+                && !string.Equals(modId, EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase)
+                && !enabled.Contains(FeatureIds.DefaultFor(modId))
+            )
+            {
+                reason = FeatureIds.DefaultFor(modId);
+                return false;
+            }
+
+            foreach (string needed in needs)
+            {
+                if (enabled.Contains(needed))
+                    continue;
+
+                reason = needed;
+                return false;
+            }
+
+            foreach (string conflicting in conflicts)
+            {
+                if (!enabled.Contains(conflicting))
+                    continue;
+
+                reason = $"not {conflicting}";
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Builds the set the main menu and a fresh boot run with: the umbrella main menu feature plus every
@@ -50,6 +85,15 @@ namespace PatchManager.Shared
         public static IReadOnlyCollection<string> BootSet(
             FeatureRegistry registry,
             IEnumerable<string> installedModIds
-        ) => throw new NotImplementedException();
+        )
+        {
+            var requested = new List<string> { MAIN_MENU_FEATURE };
+            foreach (string modId in installedModIds)
+            {
+                requested.Add(FeatureIds.DefaultFor(modId));
+            }
+
+            return registry.Resolve(requested).Enabled;
+        }
     }
 }

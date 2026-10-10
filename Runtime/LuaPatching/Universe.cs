@@ -131,7 +131,9 @@ namespace PatchManager.LuaPatching
         /// <summary>
         /// Gets the queued new assets whose features are on in <see cref="EnabledFeatures" />.
         /// </summary>
-        public IEnumerable<LuaAsset> EnabledNewAssets => AllNewAssets;
+        public IEnumerable<LuaAsset> EnabledNewAssets => AllNewAssets.Where(
+            asset => FeatureGate.Allows(asset.ModId, asset.NeedsFeatures, asset.ConflictsFeatures, EnabledFeatures, out _)
+        );
 
         /// <summary>
         /// Callbacks registered with <c>PM:OnBeginRun</c>, in registration order.
@@ -146,15 +148,32 @@ namespace PatchManager.LuaPatching
         /// <summary>
         /// Fires every begin callback whose features are on in <see cref="EnabledFeatures" />.
         /// </summary>
-        public void BeginRun()
-        {
-        }
+        public void BeginRun() => FireRunCallbacks(BeginRunCallbacks);
 
         /// <summary>
         /// Fires every end callback whose features are on in <see cref="EnabledFeatures" />.
         /// </summary>
-        public void EndRun()
+        public void EndRun() => FireRunCallbacks(EndRunCallbacks);
+
+        private void FireRunCallbacks(List<RunCallback> callbacks)
         {
+            var features = new RunFeatures(
+                EnabledFeatures ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            );
+            foreach (var callback in callbacks)
+            {
+                if (!FeatureGate.Allows(callback.ModId, callback.NeedsFeatures, callback.ConflictsFeatures, EnabledFeatures, out _))
+                    continue;
+
+                try
+                {
+                    callback.Callback(features);
+                }
+                catch (Exception exception)
+                {
+                    ErrorLogger($"Run callback from {callback.ModId} threw: {exception}");
+                }
+            }
         }
 
         /// <summary>
@@ -370,6 +389,12 @@ namespace PatchManager.LuaPatching
                         Summary.Remove(patch.Name, "CONFLICT", $"mod - {mod}");
                         goto continue_mod;
                     }
+                }
+
+                if (!FeatureGate.Allows(patch.PatchModId, patch.NeedsFeatures, patch.ConflictsFeatures, EnabledFeatures, out var unmet))
+                {
+                    Summary.Remove(patch.Name, "FEATURE", $"feature - {unmet}");
+                    continue;
                 }
 
                 modConstrained.Add(patch);

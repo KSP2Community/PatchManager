@@ -17,6 +17,7 @@ namespace PatchManager.CSharpPatching
     {
         private static readonly List<PatchDefinition> Pending = new();
         private static readonly List<PassDefinition> PendingPasses = new();
+        private static readonly List<(RunCallback callback, bool isBegin)> PendingRunCallbacks = new();
         private static bool _closed;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -24,7 +25,26 @@ namespace PatchManager.CSharpPatching
         {
             Pending.Clear();
             PendingPasses.Clear();
+            PendingRunCallbacks.Clear();
             _closed = false;
+        }
+
+        /// <summary>
+        /// Queues a callback that runs at the start or end of each feature set's patch run.
+        /// </summary>
+        /// <param name="modId">The mod the callback belongs to, whose default feature it needs.</param>
+        /// <param name="callback">The callback, handed the set being built.</param>
+        /// <param name="isBegin">True for a begin callback, false for an end callback.</param>
+        /// <returns>The queued callback, for gating it with features.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when registration has already closed.</exception>
+        public static RunCallback RunCallback(string modId, Action<RunFeatures> callback, bool isBegin)
+        {
+            if (_closed)
+                throw new InvalidOperationException($"Run callback for '{modId}' was registered after Patch Manager closed registration.");
+
+            var registered = new RunCallback { ModId = modId, Callback = callback };
+            PendingRunCallbacks.Add((registered, isBegin));
+            return registered;
         }
 
         /// <summary>
@@ -120,6 +140,13 @@ namespace PatchManager.CSharpPatching
             }
 
             PendingPasses.Clear();
+
+            foreach (var (callback, isBegin) in PendingRunCallbacks)
+            {
+                (isBegin ? universe.BeginRunCallbacks : universe.EndRunCallbacks).Add(callback);
+            }
+
+            PendingRunCallbacks.Clear();
 
             foreach (var patch in Pending)
             {
