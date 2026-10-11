@@ -13,7 +13,7 @@ namespace PatchManager.Core.Cache.Json
     /// Catalog of all patched labels and their respective archives, persisted to disk between runs.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class Inventory
+    public class Inventory
     {
         /// <summary>
         /// Dictionary of all patched labels and their respective archives and assets.
@@ -52,6 +52,16 @@ namespace PatchManager.Core.Cache.Json
         /// Total number of new assets created during the most recent rebuild.
         /// </summary>
         [JsonProperty("new_asset_count")] public int NewAssetCount { get; internal set; }
+
+        /// <summary>
+        /// When the set this inventory belongs to was last patched for or loaded, in UTC ticks.
+        /// </summary>
+        [JsonProperty("last_used")] public long LastUsedTicks { get; internal set; }
+
+        /// <summary>
+        /// The prefab patch plan files this set resolved to, relative to the plan directory.
+        /// </summary>
+        [JsonProperty("plans")] public List<string> PlanFiles { get; internal set; } = new();
 
         /// <summary>
         /// Snapshot of the values of config entries tagged <c>InvalidatesPatchManagerOnChange</c> at the last
