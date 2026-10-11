@@ -41,6 +41,9 @@ namespace PatchManager.Core.Assets
 
         private static Dictionary<string, List<(string name, LuaAsset data)>> _createdAssets = new();
 
+        // Script errors from running every mod's scripts once at boot, by mod, for each set's summary to pick from
+        private static readonly Dictionary<string, List<(string filename, string reason)>> ScriptErrorsByMod = new();
+
         internal static bool UseIndentedOutput;
 
         // Assets loaded into a label's rebuild by their own key, for stock assets that carry no label of their own
@@ -90,6 +93,7 @@ namespace PatchManager.Core.Assets
             Universe = null;
             CurrentPatchHashes = PatchHashes.CreateDefault();
             _createdAssets = new Dictionary<string, List<(string name, LuaAsset data)>>();
+            ScriptErrorsByMod.Clear();
             UseIndentedOutput = false;
             TotalPatchCount = 0;
             TotalErrorCount = 0;
@@ -133,7 +137,14 @@ namespace PatchManager.Core.Assets
             Universe.EnabledFeatures = new HashSet<string>(features, StringComparer.OrdinalIgnoreCase);
             Logging.LogInfo($"Patching for {Universe.EnabledFeatures.Count} enabled feature(s)");
             FeatureAssetIndex.Activate(Universe.EnabledFeatures);
-            CacheManager.UseSet(SetIdOf(Universe.EnabledFeatures));
+            var setId = SetIdOf(Universe.EnabledFeatures);
+            CacheManager.UseSet(setId);
+            var ordered = Universe.EnabledFeatures.OrderBy(id => id, StringComparer.OrdinalIgnoreCase);
+            PatchManagerSummaryLog.BeginSet(
+                setId,
+                $"Features: {string.Join(", ", ordered)}",
+                CacheManager.Store.SetDirectory(setId)
+            );
         }
 
         /// <summary>
@@ -180,6 +191,7 @@ namespace PatchManager.Core.Assets
         private static void SavePatchSummary(Action resolve, Action<string> reject)
         {
             Universe.Summary.RecognizedModIds = Universe.AllMods;
+            Universe.Summary.ErroredFiles = ScriptErrorsInSet(ScriptErrorsByMod, Universe.EnabledFeatures);
             CacheManager.SaveSummary(Universe.Summary);
             resolve();
         }
@@ -277,7 +289,12 @@ namespace PatchManager.Core.Assets
         internal static List<(string filename, string reason)> ScriptErrorsInSet(
             IReadOnlyDictionary<string, List<(string filename, string reason)>> errorsByMod,
             ISet<string> enabled
-        ) => errorsByMod.Values.SelectMany(errors => errors).ToList();
+        ) => errorsByMod
+            .Where(pair =>
+                string.Equals(pair.Key, FeatureGate.EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase) ||
+                enabled.Contains(FeatureIds.DefaultFor(pair.Key)))
+            .SelectMany(pair => pair.Value)
+            .ToList();
 
         /// <summary>
         /// Names a feature set's cache by its features, whatever order they come in.
@@ -377,9 +394,9 @@ namespace PatchManager.Core.Assets
                     CurrentPatchHashes.Patches[script.Key] = Hash.FromString(script.Value);
                 }
 
-                foreach (var error in descriptor.ScriptErrors)
+                if (descriptor.ScriptErrors.Count > 0)
                 {
-                    Universe.Summary.ErroredFiles.Add(error);
+                    ScriptErrorsByMod[descriptor.Guid] = descriptor.ScriptErrors.ToList();
                 }
             }
         }

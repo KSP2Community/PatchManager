@@ -128,9 +128,7 @@ namespace PatchManager.Core.Cache
 
         public static void SaveSummary(Summary universeSummary)
         {
-            var dump = universeSummary.Dump();
-            PatchManagerSummaryLog.UpdateCoreSummary(dump);
-            Store.SaveSummary(dump);
+            PatchManagerSummaryLog.UpdateCoreSummary(universeSummary.Dump());
         }
 
         /// <summary>

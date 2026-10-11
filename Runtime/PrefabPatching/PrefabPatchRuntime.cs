@@ -16,15 +16,31 @@ using Object = UnityEngine.Object;
 namespace PatchManager.PrefabPatching
 {
     /// <summary>
-    /// Coordinates the ordinary and prefab-patch sections of Patch Manager's
-    /// single human-readable summary log.
+    /// Coordinates Patch Manager's human-readable summary log: one section per feature set patched for this
+    /// session, each with its ordinary and prefab-patch parts.
     /// </summary>
+    /// <remarks>
+    /// Each set's section is also kept in the set's cache directory, along with the ordinary part of its last
+    /// rebuild, so a set whose cache is still valid in a later session shows that rebuild rather than nothing.
+    /// </remarks>
     public static class PatchManagerSummaryLog
     {
         private const string SUMMARY_PATH = "./pm_summary.log";
+        private const string SET_SUMMARY_FILENAME = "summary.log";
+        private const string SET_CORE_FILENAME = "patches.log";
+
         private static readonly object Gate = new();
-        private static string _coreSummary;
-        private static string _prefabSummary;
+        private static readonly List<SetSection> Sections = new();
+        private static SetSection _active;
+
+        private class SetSection
+        {
+            public string Id;
+            public string Header;
+            public string Directory;
+            public string Core;
+            public string Prefab;
+        }
 
         /// <summary>
         /// Starts or returns to a feature set's section of the summary, so later updates land in it.
@@ -34,36 +50,73 @@ namespace PatchManager.PrefabPatching
         /// <param name="directory">The set's cache directory, where its own summary is kept.</param>
         public static void BeginSet(string setId, string header, string directory)
         {
+            lock (Gate)
+            {
+                _active = Sections.FirstOrDefault(section => section.Id == setId);
+                if (_active == null)
+                {
+                    _active = new SetSection { Id = setId };
+                    Sections.Add(_active);
+                    var corePath = Path.Combine(directory, SET_CORE_FILENAME);
+                    if (File.Exists(corePath))
+                    {
+                        _active.Core = Normalize(File.ReadAllText(corePath));
+                    }
+                }
+
+                _active.Header = Normalize(header);
+                _active.Directory = directory;
+                Write();
+            }
         }
 
-        /// <summary>Replaces the ordinary JSON-patch section of the summary.</summary>
+        /// <summary>Replaces the ordinary JSON-patch part of the active set's section.</summary>
         public static void UpdateCoreSummary(string summary)
         {
             lock (Gate)
             {
-                _coreSummary = Normalize(summary);
+                var section = Active();
+                section.Core = Normalize(summary);
+                if (section.Directory != null)
+                {
+                    Directory.CreateDirectory(section.Directory);
+                    File.WriteAllText(Path.Combine(section.Directory, SET_CORE_FILENAME), section.Core ?? "");
+                }
+
                 Write();
             }
         }
 
-        /// <summary>Replaces the prefab-patch section of the summary.</summary>
+        /// <summary>Replaces the prefab-patch part of the active set's section.</summary>
         public static void UpdatePrefabSummary(string summary)
         {
             lock (Gate)
             {
-                _prefabSummary = Normalize(summary);
+                Active().Prefab = Normalize(summary);
                 Write();
             }
         }
 
-        /// <summary>Clears both in-memory summary sections for a new play session.</summary>
+        /// <summary>Forgets every section for a new play session.</summary>
         public static void Reset()
         {
             lock (Gate)
             {
-                _coreSummary = null;
-                _prefabSummary = null;
+                Sections.Clear();
+                _active = null;
             }
+        }
+
+        // Updates before any set begins land in a section with no header, which is what a log of one run reads as
+        private static SetSection Active()
+        {
+            if (_active == null)
+            {
+                _active = new SetSection();
+                Sections.Add(_active);
+            }
+
+            return _active;
         }
 
         private static string Normalize(string summary)
@@ -73,15 +126,34 @@ namespace PatchManager.PrefabPatching
                 : summary.TrimEnd();
         }
 
+        private static string Join(params string[] parts) =>
+            string.Join(
+                Environment.NewLine + Environment.NewLine,
+                parts.Where(value => !string.IsNullOrEmpty(value))
+            );
+
+        private static string Body(SetSection section) => Join(section.Header, section.Core, section.Prefab);
+
         private static void Write()
         {
-            var sections = new[] { _coreSummary, _prefabSummary }
-                .Where(value => !string.IsNullOrEmpty(value));
-            File.WriteAllText(
-                SUMMARY_PATH,
-                string.Join(Environment.NewLine + Environment.NewLine, sections)
-                    + Environment.NewLine
+            var sections = Sections.Select(section =>
+                section.Id == null
+                    ? Body(section)
+                    : Join(
+                        $"==== Feature set {section.Id}{(section == _active ? " (active)" : "")} ====",
+                        Body(section)
+                    )
             );
+            File.WriteAllText(SUMMARY_PATH, Join(sections.ToArray()) + Environment.NewLine);
+
+            if (_active?.Directory != null)
+            {
+                Directory.CreateDirectory(_active.Directory);
+                File.WriteAllText(
+                    Path.Combine(_active.Directory, SET_SUMMARY_FILENAME),
+                    Body(_active) + Environment.NewLine
+                );
+            }
         }
     }
 
