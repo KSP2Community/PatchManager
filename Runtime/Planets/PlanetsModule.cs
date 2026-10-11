@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using KSP.Game;
 using KSP.IO;
 using KSP.Sim;
@@ -40,6 +42,37 @@ namespace PatchManager.Planets
         {
             PatchingManager.AddLabelMember(GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL,
                 SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY);
+        }
+
+        /// <summary>
+        /// Replaces the registered overrides with those of the active feature set.
+        /// </summary>
+        /// <remarks>
+        /// Boot registers the main menu set's overrides through <see cref="Load" />. A set switched to afterwards
+        /// can patch them differently or leave some out.
+        /// </remarks>
+        /// <param name="done">Called once both override labels have loaded.</param>
+        internal static void ReloadOverrides(Action done)
+        {
+            OverrideManager.AtmosphereOverrides.Clear();
+            OverrideManager.VolumeCloudOverrides.Clear();
+            var pending = 2;
+
+            void Finish(IList<TextAsset> assets)
+            {
+                if (assets != null)
+                {
+                    Addressables.Release(assets);
+                }
+
+                if (--pending == 0)
+                {
+                    done();
+                }
+            }
+
+            GameManager.Instance.Assets.LoadByLabel<TextAsset>("atmosphere_overrides", RegisterAtmosphereOverride, Finish, false);
+            GameManager.Instance.Assets.LoadByLabel<TextAsset>("volume_cloud_overrides", RegisterVolumeCloudOverride, Finish, false);
         }
 
         /// <summary>

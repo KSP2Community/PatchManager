@@ -22,6 +22,11 @@ namespace PatchManager.Core
         /// </summary>
         public static bool IsRunning { get; private set; }
 
+        /// <summary>
+        /// Gets the id of the set patched for and loaded from, which content cached across loads is keyed on.
+        /// </summary>
+        public static string ActiveSetId => Cache.CacheManager.Store.ActiveSet;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticState()
         {
@@ -48,8 +53,24 @@ namespace PatchManager.Core
                 return;
             }
 
+            var set = features.ToList();
+            if (!forceRebuild && PatchingManager.IsActive(set))
+            {
+                onDone?.Invoke(null);
+                return;
+            }
+
             IsRunning = true;
-            CoroutineUtil.Instance.DoCoroutine(RunSteps(features.ToList(), forceRebuild, onStep, onDone));
+            CoroutineUtil.Instance.DoCoroutine(RunSteps(set, forceRebuild, onStep, onDone));
+        }
+
+        /// <summary>
+        /// Starts switching back to the set the main menu runs with.
+        /// </summary>
+        /// <param name="onDone">Called with null on success or the failure reason, or null.</param>
+        public static void RunMainMenu(Action<string> onDone)
+        {
+            Run(PatchingManager.MainMenuFeatures(), false, null, onDone);
         }
 
         private static IEnumerator RunSteps(
@@ -67,6 +88,12 @@ namespace PatchManager.Core
                 PatchingManager.ActivateSet(features);
                 steps.AddRange(
                     PatchingManager.SetRunSteps(forceRebuild, next => steps.InsertRange(index + 1, next), out _)
+                );
+                steps.Add(
+                    new GenericFlowAction(
+                        "Patch Manager: Loading planet overrides",
+                        (resolve, _) => Planets.PlanetsModule.ReloadOverrides(resolve)
+                    )
                 );
             }
             catch (Exception e)

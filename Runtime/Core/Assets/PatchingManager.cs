@@ -124,9 +124,26 @@ namespace PatchManager.Core.Assets
         /// </remarks>
         public static void SelectBootFeatures()
         {
-            var installed = PluginList.AllEnabledAndActivePlugins.Select(descriptor => descriptor.Guid);
-            ActivateSet(FeatureGate.BootSet(Universe.FeatureRegistry, installed));
+            ActivateSet(MainMenuFeatures());
         }
+
+        /// <summary>
+        /// Gets the set the main menu runs with: the main menu umbrella plus every installed mod's default.
+        /// </summary>
+        /// <returns>The enabled feature ids.</returns>
+        internal static IReadOnlyCollection<string> MainMenuFeatures()
+        {
+            var installed = PluginList.AllEnabledAndActivePlugins.Select(descriptor => descriptor.Guid);
+            return FeatureGate.BootSet(Universe.FeatureRegistry, installed);
+        }
+
+        /// <summary>
+        /// Checks whether a set is the one already patched for and loaded from.
+        /// </summary>
+        /// <param name="features">The set's enabled features.</param>
+        /// <returns>True if the set is active, false otherwise.</returns>
+        internal static bool IsActive(IEnumerable<string> features) =>
+            CacheManager.Store.ActiveSet == SetIdOf(features);
 
         /// <summary>
         /// Makes a feature set the one patched for and loaded from: gates assets by it and opens its cache.
