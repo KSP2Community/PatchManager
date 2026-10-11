@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using KSP.Game;
 using KSP.IO;
 using KSP.Sim;
@@ -8,6 +6,7 @@ using PatchManager.Core.Assets;
 using PatchManager.Shared.Modules;
 using PatchManager.Planets.Overrides;
 using Redux.Packs;
+using SpaceWarp2.API.Loading;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -18,6 +17,8 @@ namespace PatchManager.Planets
     /// </summary>
     public class PlanetsModule : BaseModule
     {
+        private const string MOD_ID = "PatchManager";
+
         private static void RegisterAtmosphereOverride(TextAsset atmosphereOverride)
         {
             var atmosphere = JsonConvert.DeserializeObject<AtmosphereOverride>(atmosphereOverride.text);
@@ -45,52 +46,24 @@ namespace PatchManager.Planets
         }
 
         /// <summary>
-        /// Replaces the registered overrides with those of the active feature set.
+        /// Registers the atmosphere and volume-cloud overrides as data kept per feature set, so each set's patched
+        /// overrides replace the last set's whenever the set changes.
         /// </summary>
-        /// <remarks>
-        /// Boot registers the main menu set's overrides through <see cref="Load" />. A set switched to afterwards
-        /// can patch them differently or leave some out.
-        /// </remarks>
-        /// <param name="done">Called once both override labels have loaded.</param>
-        internal static void ReloadOverrides(Action done)
+        public override void RegisterPlaySessionActions()
         {
-            OverrideManager.AtmosphereOverrides.Clear();
-            OverrideManager.VolumeCloudOverrides.Clear();
-            var pending = 2;
-
-            void Finish(IList<TextAsset> assets)
-            {
-                if (assets != null)
-                {
-                    Addressables.Release(assets);
-                }
-
-                if (--pending == 0)
-                {
-                    done();
-                }
-            }
-
-            GameManager.Instance.Assets.LoadByLabel<TextAsset>("atmosphere_overrides", RegisterAtmosphereOverride, Finish, false);
-            GameManager.Instance.Assets.LoadByLabel<TextAsset>("volume_cloud_overrides", RegisterVolumeCloudOverride, Finish, false);
-        }
-
-        /// <summary>
-        /// Loads the atmosphere and volume-cloud override addressables and registers them with <c>OverrideManager</c>.
-        /// </summary>
-        public override void Load()
-        {
-            GameManager.Instance.Assets.LoadByLabel<TextAsset>(
+            Loading.AddSetLoadingAction<TextAsset>(
+                MOD_ID,
+                "Loading atmosphere overrides",
                 "atmosphere_overrides",
                 RegisterAtmosphereOverride,
-                Addressables.Release,
-                false
+                OverrideManager.AtmosphereOverrides.Clear
             );
-            GameManager.Instance.Assets.LoadByLabel<TextAsset>(
+            Loading.AddSetLoadingAction<TextAsset>(
+                MOD_ID,
+                "Loading volume cloud overrides",
                 "volume_cloud_overrides",
                 RegisterVolumeCloudOverride,
-                Addressables.Release,
-                false
+                OverrideManager.VolumeCloudOverrides.Clear
             );
         }
     }

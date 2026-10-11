@@ -1,12 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
-using KSP.Game;
 using Newtonsoft.Json.Linq;
-using PatchManager.Shared;
 using PatchManager.Shared.Modules;
-using Unity.VisualScripting;
-using UnityEngine.AddressableAssets;
+using SpaceWarp2.API.Loading;
 using UnityEngine;
 
 namespace PatchManager.Resources
@@ -24,31 +20,29 @@ namespace PatchManager.Resources
 
 
         /// <summary>
-        /// Loads the <c>resource_units</c> addressables (when registered) into <see cref="ResourceUnits" /> and
-        /// adds the non-stageable resources UI controller.
+        /// Registers the <c>resource_units</c> addressables as data kept per feature set, so each set's patched
+        /// units replace the last set's.
+        /// </summary>
+        public override void RegisterPlaySessionActions()
+        {
+            Loading.AddSetLoadingAction<TextAsset>(
+                "PatchManager",
+                "Loading resource units",
+                "resource_units",
+                RegisterUnits,
+                ResourceUnits.Clear
+            );
+        }
+
+        /// <summary>
+        /// Adds the non-stageable resources UI controller.
         /// </summary>
         public override void Load()
         {
-            if (GameManager.Instance.Assets.RegisteredResourceLocators.Any(x => x.Keys.Contains("resource_units")))
-            {
-                GameManager.Instance.Assets.LoadByLabel("resource_units", RegisterUnits,
-                    delegate(IList<TextAsset> assetLocations)
-                    {
-                        if (assetLocations != null)
-                        {
-                            Addressables.Release(assetLocations);
-                        }
-                    });
-            }
-            else
-            {
-                Logging.LogInfo("No custom resource units were defined");
-            }
-
             // Host on a dedicated persistent GameObject rather than PatchManager.Instance: PatchManager is
             // a KerbalMod whose GameObject is destroyed between Play Mode sessions when Domain Reload is
             // disabled, so AddComponent on it throws MissingReferenceException on a later play. The
-            // controller is standalone; guard against adding a duplicate within a session.
+            // controller is standalone. Guard against adding a duplicate within a session.
             if (Object.FindAnyObjectByType<NonStageableResourcesUIController>() == null)
             {
                 var host = new GameObject(nameof(NonStageableResourcesUIController));
@@ -63,7 +57,9 @@ namespace PatchManager.Resources
             var dict = JObject.Parse(textAsset.text);
             foreach (var value in dict)
             {
-                if (value.Value is not { Type: JTokenType.String }) continue;
+                if (value.Value is not { Type: JTokenType.String })
+                    continue;
+
                 ResourceUnits[value.Key] = value.Value.Value<string>()!;
             }
         }

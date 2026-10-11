@@ -65,6 +65,36 @@ namespace PatchManager.Core
         }
 
         /// <summary>
+        /// Loads the data mods keep per feature set for the active set, one step after another.
+        /// </summary>
+        /// <remarks>
+        /// Boot calls this once every mod has registered, and switching sets runs the same steps itself.
+        /// </remarks>
+        /// <param name="done">Called once every step has finished.</param>
+        public static void LoadSetData(Action done)
+        {
+            var steps = PatchingManager.SetLoadingSteps().ToList();
+            var index = 0;
+
+            void Next()
+            {
+                if (index >= steps.Count)
+                {
+                    done();
+                    return;
+                }
+
+                steps[index++].Do(_ => Next(), (_, reason) =>
+                {
+                    UnityEngine.Debug.LogError($"[Features] Loading per-set data failed: {reason}");
+                    Next();
+                });
+            }
+
+            Next();
+        }
+
+        /// <summary>
         /// Starts switching back to the set the main menu runs with.
         /// </summary>
         /// <param name="onDone">Called with null on success or the failure reason, or null.</param>
@@ -89,12 +119,7 @@ namespace PatchManager.Core
                 steps.AddRange(
                     PatchingManager.SetRunSteps(forceRebuild, next => steps.InsertRange(index + 1, next), out _)
                 );
-                steps.Add(
-                    new GenericFlowAction(
-                        "Patch Manager: Loading planet overrides",
-                        (resolve, _) => Planets.PlanetsModule.ReloadOverrides(resolve)
-                    )
-                );
+                steps.AddRange(PatchingManager.SetLoadingSteps());
             }
             catch (Exception e)
             {
