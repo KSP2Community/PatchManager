@@ -149,12 +149,70 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
+        /// Gets the id of the set patched for and loaded from, which content cached across loads is keyed on.
+        /// </summary>
+        public static string ActiveSetId => CacheManager.ActiveSet;
+
+        /// <summary>
+        /// Switches to a feature set from inside a running flow, the way boot patches for its own set: the set's
+        /// cache steps, its per-set data and the loading screen's patch counts run as the flow's next steps.
+        /// </summary>
+        /// <remarks>
+        /// Does nothing when the set is already active.
+        /// </remarks>
+        /// <param name="flow">The flow running the calling step.</param>
+        /// <param name="features">The set's enabled features, already closed over their requirements.</param>
+        internal static void SwitchToSet(SequentialFlow flow, IEnumerable<string> features)
+        {
+            var set = features.ToList();
+            if (IsActive(set))
+                return;
+
+            ActivateSet(set);
+            var steps = SetRunSteps(next => InsertNext(flow, next), out _);
+            steps.AddRange(SetLoadingSteps());
+            steps.Add(new GenericFlowAction("Patch Manager: Showing patch counts", (resolve, _) =>
+            {
+                ShowInventoryOnLoadingScreen();
+                resolve();
+            }));
+            InsertNext(flow, steps);
+        }
+
+        /// <summary>
+        /// Splices steps into a running flow straight after the step running now.
+        /// </summary>
+        /// <param name="flow">The running flow.</param>
+        /// <param name="actions">The steps, in order.</param>
+        internal static void InsertNext(SequentialFlow flow, List<GenericFlowAction> actions)
+        {
+            // Inserted back to front so each insert at the same index pushes the previous one down
+            var insertIndex = flow.flowIndex + 1;
+            for (var i = actions.Count - 1; i >= 0; i--)
+            {
+                flow.FlowActions.Insert(insertIndex, actions[i]);
+            }
+        }
+
+        /// <summary>
+        /// Shows the active set's patch counts on the loading screen.
+        /// </summary>
+        internal static void ShowInventoryOnLoadingScreen()
+        {
+            var data = GameManager.Instance.Game.UI.UitkLoadingCurtain.Data;
+            data.PatchManagerDefinitionsModifiedCount = CacheManager.Inventory.DefinitionCount;
+            data.PatchManagerNewAssetCount = CacheManager.Inventory.NewAssetCount;
+            data.PatchManagerPatchCount = CacheManager.Inventory.PatchCount;
+            data.PatchManagerErrorCount = CacheManager.Inventory.ErrorCount;
+        }
+
+        /// <summary>
         /// Checks whether a set is the one already patched for and loaded from.
         /// </summary>
         /// <param name="features">The set's enabled features.</param>
         /// <returns>True if the set is active, false otherwise.</returns>
         internal static bool IsActive(IEnumerable<string> features) =>
-            CacheManager.Store.ActiveSet == SetIdOf(features);
+            CacheManager.ActiveSet == SetIdOf(features);
 
         /// <summary>
         /// Makes a feature set the one patched for and loaded from: gates assets by it and opens its cache.
@@ -172,7 +230,7 @@ namespace PatchManager.Core.Assets
             PatchManagerSummaryLog.BeginSet(
                 setId,
                 $"Features: {string.Join(", ", ordered)}",
-                CacheManager.Store.SetDirectory(setId)
+                CacheManager.SetDirectory(setId)
             );
         }
 
@@ -180,12 +238,11 @@ namespace PatchManager.Core.Assets
         /// Decides whether patching for a set rebuilds its cache, and counts it as rebuilt this session if so.
         /// </summary>
         /// <param name="setId">The set's id.</param>
-        /// <param name="forceRebuild">Whether the caller asks for a rebuild regardless.</param>
         /// <returns>True if the set's cache is rebuilt even when valid, false otherwise.</returns>
-        internal static bool RebuildsSet(string setId, bool forceRebuild)
+        internal static bool RebuildsSet(string setId)
         {
             bool firstThisSession = SetsBuiltThisSession.Add(setId);
-            return forceRebuild || (AlwaysInvalidate && firstThisSession);
+            return AlwaysInvalidate && firstThisSession;
         }
 
         /// <summary>
@@ -195,17 +252,15 @@ namespace PatchManager.Core.Assets
         /// The rebuild step learns its labels only once patches are set up, so it hands its per-label steps to
         /// <paramref name="insertNext" />, which must run them straight after the step itself.
         /// </remarks>
-        /// <param name="forceRebuild">Whether to rebuild even a valid cache.</param>
         /// <param name="insertNext">Schedules steps to run right after the one running now.</param>
         /// <param name="rebuilds">Whether the steps rebuild the cache.</param>
         /// <returns>The steps, in order.</returns>
         internal static List<GenericFlowAction> SetRunSteps(
-            bool forceRebuild,
             Action<List<GenericFlowAction>> insertNext,
             out bool rebuilds
         )
         {
-            if (RebuildsSet(CacheManager.Store.ActiveSet, forceRebuild))
+            if (RebuildsSet(CacheManager.ActiveSet))
             {
                 CacheManager.InvalidateCache();
             }
@@ -960,7 +1015,7 @@ namespace PatchManager.Core.Assets
             }
 
             // Named by content, so a set whose label patches out the same as another set's reuses its file
-            var archiveFilename = CacheManager.Store.WriteArchive(entries);
+            var archiveFilename = CacheManager.WriteArchive(entries);
 
             var labelCacheEntry = new CacheEntry
             {

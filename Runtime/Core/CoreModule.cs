@@ -65,25 +65,14 @@ namespace PatchManager.Core
             PatchingManager.HashScriptFiles();
             PatchingManager.CollectScriptResults();
             PatchingManager.AlwaysInvalidate = Application.isEditor || _shouldAlwaysInvalidate;
+            var flow = GameManager.Instance.LoadingFlow;
             var tail = PatchingManager.SetRunSteps(
-                false,
-                InsertNextInLoadingFlow,
+                next => PatchingManager.InsertNext(flow, next),
                 out _wasCacheInvalidated
             );
             tail.Add(new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
-            InsertNextInLoadingFlow(tail);
+            PatchingManager.InsertNext(flow, tail);
             resolve();
-        }
-
-        // Splices actions in right after the running step. Inserted back-to-front so each Insert at the same index
-        // pushes the previous one down, leaving the actions in their original order.
-        private static void InsertNextInLoadingFlow(List<GenericFlowAction> actions)
-        {
-            var insertIndex = GameManager.Instance.LoadingFlow.flowIndex + 1;
-            for (var i = actions.Count - 1; i >= 0; i--)
-            {
-                GameManager.Instance.LoadingFlow.FlowActions.Insert(insertIndex, actions[i]);
-            }
         }
 
         private static void CloseRegistration(Action resolve, Action<string> reject)
@@ -128,14 +117,7 @@ namespace PatchManager.Core
 
             Locators.Register(new ArchiveResourceLocator());
             Locators.Register(PrefabPatchRuntime.RegisterResourceProvider());
-            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerDefinitionsModifiedCount =
-                CacheManager.Inventory.DefinitionCount;
-            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerNewAssetCount =
-                CacheManager.Inventory.NewAssetCount;
-            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerPatchCount =
-                CacheManager.Inventory.PatchCount;
-            GameManager.Instance.Game.UI.UitkLoadingCurtain.Data.PatchManagerErrorCount =
-                CacheManager.Inventory.ErrorCount;
+            PatchingManager.ShowInventoryOnLoadingScreen();
             resolve();
         }
 

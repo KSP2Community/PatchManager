@@ -410,7 +410,7 @@ namespace PatchManager.PrefabPatching
         )
         {
             CurrentMetrics.DiscoveredManifestCount = manifests.Count;
-            var cache = new PrefabPatchPlanCache(Core.Cache.CacheManager.Store.PlansDirectory);
+            var cache = new PrefabPatchPlanCache(Core.Cache.CacheManager.PlansDirectory);
             Entries.Clear();
             UsedPlanFiles.Clear();
             foreach (
