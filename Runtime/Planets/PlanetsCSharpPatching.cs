@@ -4,7 +4,6 @@ using PatchManager.CSharpPatching;
 using PatchManager.CSharpPatching.Attributes;
 using PatchManager.LuaPatching;
 using PatchManager.Planets.UserData;
-using Redux.Packs;
 
 namespace PatchManager.Planets
 {
@@ -27,7 +26,7 @@ namespace PatchManager.Planets
         public override string Converter => "Galaxy";
 
         /// <inheritdoc />
-        public override string Label => GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL;
+        public override string Label => SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL;
 
         /// <inheritdoc />
         public override string[] Names => new[] { SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY };
@@ -41,7 +40,7 @@ namespace PatchManager.Planets
         public override string Converter => "Galaxy";
 
         /// <inheritdoc />
-        public override string Label => GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL;
+        public override string Label => SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL;
     }
 
     /// <summary>Patches atmosphere overrides.</summary>
@@ -83,13 +82,13 @@ namespace PatchManager.Planets
 
         /// <summary>Registers a patch against the galaxy definition with the given key.</summary>
         public static PatchBuilder<GalaxyUserData> PatchGalaxy(this PmScope scope, string galaxyDefinitionKey, string name)
-            => Patching.Build<GalaxyUserData>(scope.ModId, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, name)
+            => Patching.Build<GalaxyUserData>(scope.ModId, "Galaxy", SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL, name)
                 .Named(galaxyDefinitionKey);
 
         /// <summary>Registers a patch that copies the galaxy definition with the given key under a new key. Do runs on the copy.</summary>
         public static PatchBuilder<GalaxyUserData> DuplicateGalaxy(this PmScope scope, string galaxyDefinitionKey,
             string newGalaxyDefinitionKey)
-            => Patching.Duplicate<GalaxyUserData>(scope.ModId, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL,
+            => Patching.Duplicate<GalaxyUserData>(scope.ModId, "Galaxy", SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL,
                 galaxyDefinitionKey, newGalaxyDefinitionKey);
 
         /// <summary>Registers a patch against atmosphere overrides.</summary>

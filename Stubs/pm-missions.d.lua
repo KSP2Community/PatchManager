@@ -122,7 +122,6 @@ function MissionsLuaModule:Action(type, callback) end
 ---@field name string The display name of the mission.
 ---@field description string The description text of the mission.
 ---@field GameModeFeatureId string The game mode feature identifier that gates availability of this mission.
----@field Layer string The mission layer this mission belongs to, which a campaign pack selects missions by.
 ---@field type MissionType The classification type of this mission.
 ---@field Owner MissionOwner The owner category assigned to this mission.
 ---@field state MissionState The current lifecycle state of this mission.
@@ -143,7 +142,7 @@ function MissionsLuaModule:Action(type, callback) end
 ---@field MissionSaveAssetKey string The asset key for the save file loaded when starting a tutorial mission that requires a pre-built save state.
 ---@field MissionVariables JsonTable<string> Mission-scoped string values captured while the mission is running.
 
----@alias MissionData _MissionData | { ID: string, MissionGroup: string, name: string, description: string, GameModeFeatureId: string, Layer: string, type: MissionType, Owner: MissionOwner, state: MissionState, missionScript: string, missionStages: JsonList<MissionStage>, currentStageIndex: integer, Hidden: boolean, MissionGranterKey: string, TriumphLoopVideoKey: string, VisibleRewards: boolean, RequiresNewVessel: boolean, pendingCompletionTest: boolean, maxStageID: integer, uiDisplayType: UIDisplayType, ExceptionBranches: JsonList<MissionBranch>, PreRequisiteBranches: JsonList<MissionBranch>, ContentBranches: JsonList<MissionContentBranch>, MissionSaveAssetKey: string, MissionVariables: JsonTable<string> }
+---@alias MissionData _MissionData | { ID: string, MissionGroup: string, name: string, description: string, GameModeFeatureId: string, type: MissionType, Owner: MissionOwner, state: MissionState, missionScript: string, missionStages: JsonList<MissionStage>, currentStageIndex: integer, Hidden: boolean, MissionGranterKey: string, TriumphLoopVideoKey: string, VisibleRewards: boolean, RequiresNewVessel: boolean, pendingCompletionTest: boolean, maxStageID: integer, uiDisplayType: UIDisplayType, ExceptionBranches: JsonList<MissionBranch>, PreRequisiteBranches: JsonList<MissionBranch>, ContentBranches: JsonList<MissionContentBranch>, MissionSaveAssetKey: string, MissionVariables: JsonTable<string> }
 
 ---Represents a single stage within a mission definition, including its actions, branches, conditions, and reward configuration.
 ---@class _MissionStage : _JsonUserDataBase

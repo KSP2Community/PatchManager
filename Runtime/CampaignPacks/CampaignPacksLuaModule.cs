@@ -64,7 +64,7 @@ namespace PatchManager.CampaignPacks
         /// configuration.
         /// </summary>
         /// <remarks>
-        /// The new pack starts from the <see cref="CampaignPack" /> defaults, so it uses the default galaxy and layers
+        /// The new pack starts from the <see cref="CampaignPack" /> defaults, so it uses the default galaxy
         /// until the callback changes them.
         /// </remarks>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>

@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using PatchManager.Core.Assets;
 using PatchManager.Shared.Modules;
 using PatchManager.Planets.Overrides;
-using Redux.Packs;
 using SpaceWarp2.API.Loading;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -22,15 +21,13 @@ namespace PatchManager.Planets
         private static void RegisterAtmosphereOverride(TextAsset atmosphereOverride)
         {
             var atmosphere = JsonConvert.DeserializeObject<AtmosphereOverride>(atmosphereOverride.text);
-            OverrideManager.AtmosphereOverrides[OverrideManager.GetKey(atmosphere.PlanetName, atmosphere.Layer)] =
-                atmosphere;
+            OverrideManager.AtmosphereOverrides[atmosphere.PlanetName.ToLowerInvariant()] = atmosphere;
         }
 
         private static void RegisterVolumeCloudOverride(TextAsset volumeCloudOverride)
         {
             var volumeCloud = IOProvider.FromJson<VolumeCloudConfigurationOverride>(volumeCloudOverride.text);
-            OverrideManager.VolumeCloudOverrides[OverrideManager.GetKey(volumeCloud.bodyName, volumeCloud.Layer)] =
-                volumeCloud;
+            OverrideManager.VolumeCloudOverrides[volumeCloud.bodyName.ToLowerInvariant()] = volumeCloud;
         }
 
         /// <summary>
@@ -41,7 +38,7 @@ namespace PatchManager.Planets
         /// </remarks>
         public override void Init()
         {
-            PatchingManager.AddLabelMember(GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL,
+            PatchingManager.AddLabelMember(SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL,
                 SerializedSavedGame.DEFAULT_GALAXY_DEFINITION_KEY);
         }
 

@@ -9,7 +9,6 @@ using PatchManager.LuaPatching.Builtin;
 using PatchManager.LuaPatching.Utility;
 using PatchManager.Planets.Overrides;
 using PatchManager.Planets.UserData;
-using Redux.Packs;
 
 namespace PatchManager.Planets
 {
@@ -94,7 +93,7 @@ namespace PatchManager.Planets
         /// <returns>The registered patch.</returns>
         public PatchDefinition PatchGalaxy(ScriptExecutionContext context, string galaxyDefinitionKey, string name)
         {
-            return _core.Patch(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, name)
+            return _core.Patch(context, "Galaxy", SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL, name)
                 .Named(galaxyDefinitionKey);
         }
 
@@ -114,7 +113,7 @@ namespace PatchManager.Planets
         public PatchDefinition DuplicateGalaxy(ScriptExecutionContext context, string galaxyDefinitionKey,
             string newGalaxyDefinitionKey, Func<DynValue, string> patchMethod = null)
         {
-            return _core.Duplicate(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey,
+            return _core.Duplicate(context, "Galaxy", SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey,
                 newGalaxyDefinitionKey, patchMethod);
         }
 
@@ -137,7 +136,7 @@ namespace PatchManager.Planets
             var typed = new GalaxyUserData(JObject.FromObject(data));
             var ud = MoonSharp.Interpreter.UserData.Create(typed);
             callback(typed);
-            return _core.New(context, "Galaxy", GalaxyDefinitionManager.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey, ud);
+            return _core.New(context, "Galaxy", SerializedGalaxyDefinition.GALAXY_DEFINITION_LABEL, galaxyDefinitionKey, ud);
         }
 
         /// <summary>
@@ -176,10 +175,6 @@ namespace PatchManager.Planets
         /// Creates a new atmosphere override for the given body and runs <paramref name="callback" /> against it
         /// for further configuration.
         /// </summary>
-        /// <remarks>
-        /// Setting <c>Layer</c> in the callback limits the override to galaxies that take the body from that layer, and
-        /// names the override after the layer too, so each layer can have its own.
-        /// </remarks>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="name">The body name the override applies to.</param>
         /// <param name="callback">Callback that receives the new override for further configuration.</param>
@@ -193,7 +188,7 @@ namespace PatchManager.Planets
             var ud = JsonUserData.GetFromJToken(JObject.FromObject(data));
             var json = (JsonUserData)ud.UserData.Object;
             callback(json);
-            return _core.New(context, "JSON", "atmosphere_overrides", OverrideAssetName("atmosphere_override", name, json.Token), ud);
+            return _core.New(context, "JSON", "atmosphere_overrides", $"atmosphere_override_{name}", ud);
         }
 
         /// <summary>
@@ -232,10 +227,6 @@ namespace PatchManager.Planets
         /// Creates a new volume-cloud override for the given body and runs <paramref name="callback" /> against it
         /// for further configuration.
         /// </summary>
-        /// <remarks>
-        /// Setting <c>Layer</c> in the callback limits the override to galaxies that take the body from that layer, and
-        /// names the override after the layer too, so each layer can have its own.
-        /// </remarks>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the creating mod.</param>
         /// <param name="name">The body name the override applies to.</param>
         /// <param name="callback">Callback that receives the new override for further configuration.</param>
@@ -249,14 +240,7 @@ namespace PatchManager.Planets
             var typed = new VolumeCloudUserData(JObject.FromObject(data));
             var ud = MoonSharp.Interpreter.UserData.Create(typed);
             callback(typed);
-            return _core.New(context, "Cloud", "volume_cloud_overrides", OverrideAssetName("volume_cloud_override", name, typed.Token), ud);
-        }
-
-        // A default-layer override keeps its plain name, and a layered one adds its layer
-        private static string OverrideAssetName(string prefix, string bodyName, JToken overrideToken)
-        {
-            string layer = overrideToken["Layer"]?.Type == JTokenType.String ? (string)overrideToken["Layer"] : null;
-            return CampaignPack.IsDefaultLayer(layer) ? $"{prefix}_{bodyName}" : $"{prefix}_{bodyName}_{layer}";
+            return _core.New(context, "Cloud", "volume_cloud_overrides", $"volume_cloud_override_{name}", ud);
         }
     }
 }

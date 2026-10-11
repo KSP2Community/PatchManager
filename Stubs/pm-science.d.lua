@@ -25,7 +25,6 @@
 ---preserving the full envelope for round-tripping.
 ---@class DiscoverablesUserData : IndexedListUserData<DiscoverablePositionUserData>
 ---@field BodyName string Gets the celestial body's name from the envelope's `BodyName` field.
----@field Layer string? Gets or sets the layer this copy of the body's discoverables belongs to, or `nil` for the default copy.
 
 ---Science experiment wrapper exposing the inner `data` subtree while preserving the full envelope for round-tripping.
 ---@class ExperimentUserData : _ExperimentDefinition, JsonUserData
@@ -36,7 +35,6 @@
 ---envelope for round-tripping and exposing the body name and situation data as typed properties.
 ---@class ScienceRegionsUserData : IndexedListUserData<ScienceRegionUserData>
 ---@field BodyName string Gets the celestial body's name from the envelope's `BodyName` field.
----@field Layer string? Gets or sets the layer this copy of the body's science regions belongs to, or `nil` for the default copy.
 ---@field SituationData CBSituationData Gets or sets the situation data wrapping the envelope's `SituationData` field.
 
 ---@class TechNodeUserData : _TechNodeData, JsonUserData
@@ -155,11 +153,10 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@class _CelestialBodyScienceRegionsData : _JsonUserDataBase
 ---@field Version string The version identifier for this science regions data record.
 ---@field BodyName string The name of the celestial body this science regions data describes.
----@field Layer? string The layer this copy of the body's science regions belongs to, or nil for the default copy.
 ---@field SituationData CBSituationData The situation data associated with this celestial body.
 ---@field Regions JsonList<ScienceRegionDefinition> The array of science region definitions for this celestial body.
 
----@alias CelestialBodyScienceRegionsData _CelestialBodyScienceRegionsData | { Version: string, BodyName: string, Layer?: string, SituationData: CBSituationData, Regions: JsonList<ScienceRegionDefinition> }
+---@alias CelestialBodyScienceRegionsData _CelestialBodyScienceRegionsData | { Version: string, BodyName: string, SituationData: CBSituationData, Regions: JsonList<ScienceRegionDefinition> }
 
 ---Represents altitude boundaries and science scalar multipliers for the science situations of a celestial body.
 ---@class _CBSituationData : _JsonUserDataBase
@@ -189,10 +186,9 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@class _CelestialBodyBakedDiscoverables : _JsonUserDataBase
 ---@field Version string The format version of this baked discoverable data set.
 ---@field BodyName string The name of the celestial body this data set belongs to.
----@field Layer? string The layer this copy of the body's discoverables belongs to, or nil for the default copy.
 ---@field Discoverables JsonList<CelestialBodyDiscoverablePosition> The baked discoverable positions associated with this celestial body.
 
----@alias CelestialBodyBakedDiscoverables _CelestialBodyBakedDiscoverables | { Version: string, BodyName: string, Layer?: string, Discoverables: JsonList<CelestialBodyDiscoverablePosition> }
+---@alias CelestialBodyBakedDiscoverables _CelestialBodyBakedDiscoverables | { Version: string, BodyName: string, Discoverables: JsonList<CelestialBodyDiscoverablePosition> }
 
 ---Represents a discoverable position on a celestial body, defined by a science region, a spatial location, and a detection radius.
 ---@class _CelestialBodyDiscoverablePosition : _JsonUserDataBase
@@ -219,9 +215,8 @@ function ScienceLuaModule:AddPartsToTechNode(nodeName, ...) end
 ---@field TierToUnlock integer The tech tree tier at which this node becomes available to unlock.
 ---@field TechTreePosition Vector2 The 2D position of this tech node within the tech tree layout.
 ---@field MysteryTech boolean When true, the node name and description are hidden until all prerequisites are fulfilled.
----@field Layer string The tech tree layer this node belongs to, which a campaign pack selects nodes by.
 
----@alias TechNodeData _TechNodeData | { Version: integer, ID: string, NameLocKey: string, IconID: string, CategoryID: string, HiddenByNodeID: string, DescriptionLocKey: string, RequiredSciencePoints: integer, UnlockedPartsIDs: JsonList<string>, RequiredTechNodeIDs: JsonList<string>, RequiredMissionIDs: JsonList<string>, RequiredResearchData: JsonList<TechRequiredResearchData>, TierToUnlock: integer, TechTreePosition: Vector2, MysteryTech: boolean, Layer: string }
+---@alias TechNodeData _TechNodeData | { Version: integer, ID: string, NameLocKey: string, IconID: string, CategoryID: string, HiddenByNodeID: string, DescriptionLocKey: string, RequiredSciencePoints: integer, UnlockedPartsIDs: JsonList<string>, RequiredTechNodeIDs: JsonList<string>, RequiredMissionIDs: JsonList<string>, RequiredResearchData: JsonList<TechRequiredResearchData>, TierToUnlock: integer, TechTreePosition: Vector2, MysteryTech: boolean }
 
 ---Represents research conditions required to unlock a technology node, including experiment, location, and report type.
 ---Leave ExperimentID nil or empty to match any experiment.

@@ -34,9 +34,6 @@ function CampaignPacksLuaModule:CreateCampaignPack(id, callback) end
 ---@class _CampaignPack : _JsonUserDataBase
 ---@field CampaignPackId string This is the internal identifier for the campaign pack
 ---@field CampaignPackLocalizationKey string This is the localization key for the campaign pack
----@field TechTreeLayers JsonList<string> The list of tech tree layers that this campaign pack filters for
----@field MissionLayers JsonList<string> The list of mission layers that this campaign pack filters for
----@field PartLayers? JsonList<string> The part layers this campaign pack builds its parts from, in order, with the galaxy's part layers stacked on top. Defaults to { "Default" }.
 ---@field Galaxy string The key of the galaxy definition this campaign pack uses
 
----@alias CampaignPack _CampaignPack | { CampaignPackId: string, CampaignPackLocalizationKey: string, TechTreeLayers: JsonList<string>, MissionLayers: JsonList<string>, PartLayers?: JsonList<string>, Galaxy: string }
+---@alias CampaignPack _CampaignPack | { CampaignPackId: string, CampaignPackLocalizationKey: string, Galaxy: string }
