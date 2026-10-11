@@ -210,7 +210,7 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="body">The function whose registrations get the feature.</param>
         public void WithFeature(ScriptExecutionContext context, string id, Closure body)
         {
-            _scopedFeatures.Add(FeatureIds.Qualify(ModIdOf(context), id));
+            _scopedFeatures.Add(FeatureRegistry.Qualify(ModIdOf(context), id));
             try
             {
                 body.Call();
@@ -225,18 +225,18 @@ namespace PatchManager.LuaPatching.Builtin
         /// Registers a callback that runs before each feature set's patch run.
         /// </summary>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
-        /// <param name="callback">The callback, handed the set being built.</param>
+        /// <param name="callback">The callback, handed the set being built as a table of each id mapped to true.</param>
         /// <returns>The registered callback, for gating it with features.</returns>
-        public RunCallback OnBeginRun(ScriptExecutionContext context, Closure callback) =>
+        public FeatureGatedAction OnBeginRun(ScriptExecutionContext context, Closure callback) =>
             AddRunCallback(_universe.BeginRunCallbacks, context, callback);
 
         /// <summary>
         /// Registers a callback that runs after each feature set's patch run.
         /// </summary>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
-        /// <param name="callback">The callback, handed the set that was built.</param>
+        /// <param name="callback">The callback, handed the set that was built as a table of each id mapped to true.</param>
         /// <returns>The registered callback, for gating it with features.</returns>
-        public RunCallback OnEndRun(ScriptExecutionContext context, Closure callback) =>
+        public FeatureGatedAction OnEndRun(ScriptExecutionContext context, Closure callback) =>
             AddRunCallback(_universe.EndRunCallbacks, context, callback);
 
         /// <summary>
@@ -247,25 +247,22 @@ namespace PatchManager.LuaPatching.Builtin
         /// same set, and only while the mod and the callback's selected features are on.
         /// </remarks>
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
-        /// <param name="callback">The callback, handed the set just activated.</param>
+        /// <param name="callback">The callback, handed the set just activated as a table of each id mapped to true.</param>
         /// <returns>The registered action, for gating it with features.</returns>
-        public SetLoadingAction OnSetActivated(ScriptExecutionContext context, Closure callback)
+        public FeatureGatedAction OnSetActivated(ScriptExecutionContext context, Closure callback)
         {
             string modId = ModIdOf(context);
-            SetLoadingAction action = Loading.AddSetAction(
+            Script script = context.GetScript();
+            FeatureGatedAction action = Loading.AddSetAction(
                 modId,
-                $"Activating features for {modId}",
+                $"{modId} set data",
                 () => { },
                 done =>
                 {
-                    var enabled = new HashSet<string>(
-                        ActiveFeatures.Enabled ?? Array.Empty<string>(),
-                        StringComparer.OrdinalIgnoreCase
-                    );
                     // One mod's failing callback must not stop the others from loading their data
                     try
                     {
-                        callback.Call(UserData.Create(new RunFeatures(enabled)));
+                        callback.Call(SetTable(script, ActiveFeatures.Enabled ?? Array.Empty<string>()));
                     }
                     catch (InterpreterException e)
                     {
@@ -283,19 +280,41 @@ namespace PatchManager.LuaPatching.Builtin
             return action;
         }
 
-        private RunCallback AddRunCallback(List<RunCallback> into, ScriptExecutionContext context, Closure callback)
+        private FeatureGatedAction AddRunCallback(
+            List<FeatureGatedAction> into,
+            ScriptExecutionContext context,
+            Closure callback
+        )
         {
             if (!_universe.RegistrationOpen)
                 throw new ScriptRuntimeException("Run callbacks can only be registered during patch registration.");
 
-            var registered = new RunCallback
+            string modId = ModIdOf(context);
+            Script script = context.GetScript();
+            var registered = new FeatureGatedAction(modId, $"{modId} run callback", done =>
             {
-                ModId = ModIdOf(context),
-                Callback = features => callback.Call(UserData.Create(features))
-            };
-            registered.NeedsFeatures.UnionWith(_scopedFeatures);
+                callback.Call(SetTable(script, _universe.EnabledFeatures ?? new HashSet<string>()));
+                done();
+            });
+            foreach (string feature in _scopedFeatures)
+            {
+                registered.Feature(feature);
+            }
+
             into.Add(registered);
             return registered;
+        }
+
+        // A set as Lua sees it, which is how the Features global hands it out too
+        private static DynValue SetTable(Script script, IEnumerable<string> ids)
+        {
+            var set = new Table(script);
+            foreach (string id in ids)
+            {
+                set[id] = true;
+            }
+
+            return DynValue.NewTable(set);
         }
 
         private static string ModIdOf(ScriptExecutionContext context) =>

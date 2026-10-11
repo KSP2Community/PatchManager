@@ -53,14 +53,14 @@ namespace PatchManager.Planets
         {
             Loading.AddSetLoadingAction<TextAsset>(
                 MOD_ID,
-                "Loading atmosphere overrides",
+                "atmosphere overrides",
                 "atmosphere_overrides",
                 RegisterAtmosphereOverride,
                 OverrideManager.AtmosphereOverrides.Clear
             );
             Loading.AddSetLoadingAction<TextAsset>(
                 MOD_ID,
-                "Loading volume cloud overrides",
+                "volume cloud overrides",
                 "volume_cloud_overrides",
                 RegisterVolumeCloudOverride,
                 OverrideManager.VolumeCloudOverrides.Clear

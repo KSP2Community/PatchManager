@@ -437,7 +437,7 @@ namespace PatchManager.PrefabPatching
         private IEnumerable<string> QualifyFeatures(IEnumerable<string> ids) =>
             Normalize(ids)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Select(id => FeatureIds.Qualify(_modId, id.Trim()));
+                .Select(id => FeatureRegistry.Qualify(_modId, id.Trim()));
 
         private static string[] Sorted(IEnumerable<string> values) =>
             values.OrderBy(value => value, StringComparer.Ordinal).ToArray();

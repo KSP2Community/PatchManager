@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using PatchManager.LuaPatching;
 using PatchManager.Shared;
 
 namespace PatchManager.PrefabPatching
@@ -30,7 +31,7 @@ namespace PatchManager.PrefabPatching
         ) =>
             manifests.Where(manifest =>
                 manifest != null
-                && FeatureGate.Allows(
+                && Universe.Allows(
                     manifest.ModId,
                     Safe(manifest.NeedsFeatures),
                     Safe(manifest.ConflictsFeatures),

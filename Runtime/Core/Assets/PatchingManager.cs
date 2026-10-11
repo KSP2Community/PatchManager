@@ -47,6 +47,9 @@ namespace PatchManager.Core.Assets
 
         internal static bool UseIndentedOutput;
 
+        // The umbrella feature the main menu set starts from
+        private const string MAIN_MENU_FEATURE = "Ksp2Redux:All";
+
         /// <summary>
         /// Whether each set's cache is rebuilt the first time it is patched for in a play session, as in the editor.
         /// </summary>
@@ -145,7 +148,21 @@ namespace PatchManager.Core.Assets
         internal static IReadOnlyCollection<string> MainMenuFeatures()
         {
             var installed = PluginList.AllEnabledAndActivePlugins.Select(descriptor => descriptor.Guid);
-            return FeatureGate.BootSet(Universe.FeatureRegistry, installed);
+            return MainMenuSet(Universe.FeatureRegistry, installed);
+        }
+
+        /// <summary>
+        /// Builds the set the main menu and a fresh boot run with: the main menu umbrella plus every installed mod's
+        /// default feature, closed over their requirements.
+        /// </summary>
+        /// <param name="registry">The feature registry.</param>
+        /// <param name="installedModIds">The ids of the installed, enabled mods.</param>
+        /// <returns>The enabled feature ids.</returns>
+        internal static IReadOnlyCollection<string> MainMenuSet(FeatureRegistry registry, IEnumerable<string> installedModIds)
+        {
+            var requested = new List<string> { MAIN_MENU_FEATURE };
+            requested.AddRange(installedModIds.Select(FeatureRegistry.DefaultFor));
+            return registry.Resolve(requested).Enabled;
         }
 
         /// <summary>
@@ -289,7 +306,7 @@ namespace PatchManager.Core.Assets
         /// </summary>
         /// <returns>The steps, in order.</returns>
         internal static IEnumerable<GenericFlowAction> SetLoadingSteps() =>
-            SetLoading.Steps(SetLoading.Actions)
+            Loading.SetActionSteps(Loading.RegisteredSetActions)
                 .Select(step => new GenericFlowAction(step.name, (resolve, _) => step.work(resolve)));
 
         private static void SavePatchSummary(Action resolve, Action<string> reject)
@@ -350,8 +367,8 @@ namespace PatchManager.Core.Assets
             {
                 var owner = OwnerOf(key, folderByMod);
                 if (owner == null ||
-                    string.Equals(owner, FeatureGate.EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase) ||
-                    enabled.Contains(FeatureIds.DefaultFor(owner)))
+                    string.Equals(owner, Universe.EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase) ||
+                    enabled.Contains(FeatureRegistry.DefaultFor(owner)))
                 {
                     scoped[key] = hash;
                 }
@@ -395,8 +412,8 @@ namespace PatchManager.Core.Assets
             ISet<string> enabled
         ) => errorsByMod
             .Where(pair =>
-                string.Equals(pair.Key, FeatureGate.EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase) ||
-                enabled.Contains(FeatureIds.DefaultFor(pair.Key)))
+                string.Equals(pair.Key, Universe.EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase) ||
+                enabled.Contains(FeatureRegistry.DefaultFor(pair.Key)))
             .SelectMany(pair => pair.Value)
             .ToList();
 

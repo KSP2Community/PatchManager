@@ -27,7 +27,7 @@ namespace PatchManager.Resources
         {
             Loading.AddSetLoadingAction<TextAsset>(
                 "PatchManager",
-                "Loading resource units",
+                "resource units",
                 "resource_units",
                 RegisterUnits,
                 ResourceUnits.Clear

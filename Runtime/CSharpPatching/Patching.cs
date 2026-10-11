@@ -102,7 +102,7 @@ namespace PatchManager.CSharpPatching
         /// </summary>
         /// <param name="callback">The callback, handed the set being built.</param>
         /// <returns>The registered callback, for gating it with features.</returns>
-        public RunCallback OnBeginRun(Action<RunFeatures> callback) =>
+        public FeatureGatedAction OnBeginRun(Action<IReadOnlyCollection<string>> callback) =>
             FluentPatchRegistry.RunCallback(ModId, callback, isBegin: true);
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace PatchManager.CSharpPatching
         /// </summary>
         /// <param name="callback">The callback, handed the set that was built.</param>
         /// <returns>The registered callback, for gating it with features.</returns>
-        public RunCallback OnEndRun(Action<RunFeatures> callback) =>
+        public FeatureGatedAction OnEndRun(Action<IReadOnlyCollection<string>> callback) =>
             FluentPatchRegistry.RunCallback(ModId, callback, isBegin: false);
     }
 }

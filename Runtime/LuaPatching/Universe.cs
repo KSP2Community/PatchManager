@@ -33,6 +33,83 @@ namespace PatchManager.LuaPatching
     public class Universe
     {
         /// <summary>
+        /// The mod whose registrations carry no implicit default feature. Redux's patches each state the feature
+        /// they belong to.
+        /// </summary>
+        public const string EXPLICIT_MOD_ID = "Ksp2Redux";
+
+        // Packs, game modes and difficulty options are chosen before a set exists, so every set sees all of them
+        private static readonly HashSet<string> GlobalLabels = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "campaign_pack",
+            "game_mode",
+            "difficulty",
+            "difficulty_definition"
+        };
+
+        /// <summary>
+        /// Checks whether a label's content is the same in every feature set, so nothing in it is gated.
+        /// </summary>
+        /// <param name="label">The addressables label.</param>
+        /// <returns>True if the label is global, false otherwise.</returns>
+        public static bool IsGlobalLabel(string label) => label != null && GlobalLabels.Contains(label);
+
+        /// <summary>
+        /// Checks whether a patch, created asset or prefab manifest takes part in the feature set being built.
+        /// </summary>
+        /// <remarks>
+        /// Everything a mod registers needs that mod's default feature, except Redux's.
+        /// </remarks>
+        /// <param name="modId">The registering mod.</param>
+        /// <param name="needs">The qualified features that must be on.</param>
+        /// <param name="conflicts">The qualified features that must be off.</param>
+        /// <param name="enabled">The enabled features, or <c>null</c> to let everything through.</param>
+        /// <param name="reason">The first unmet requirement, when the registration is dropped.</param>
+        /// <returns>True if the registration takes part, false otherwise.</returns>
+        public static bool Allows(
+            string modId,
+            IEnumerable<string> needs,
+            IEnumerable<string> conflicts,
+            ISet<string> enabled,
+            out string reason
+        )
+        {
+            reason = null;
+            if (enabled == null)
+                return true;
+
+            if (
+                !string.IsNullOrEmpty(modId)
+                && !string.Equals(modId, EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase)
+                && !enabled.Contains(FeatureRegistry.DefaultFor(modId))
+            )
+            {
+                reason = FeatureRegistry.DefaultFor(modId);
+                return false;
+            }
+
+            foreach (string needed in needs)
+            {
+                if (enabled.Contains(needed))
+                    continue;
+
+                reason = needed;
+                return false;
+            }
+
+            foreach (string conflicting in conflicts)
+            {
+                if (!enabled.Contains(conflicting))
+                    continue;
+
+                reason = $"not {conflicting}";
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Logs an error from patch loading or execution. Supplied by the host.
         /// </summary>
         public readonly Action<string> ErrorLogger;
@@ -132,8 +209,8 @@ namespace PatchManager.LuaPatching
         /// Gets the queued new assets whose features are on in <see cref="EnabledFeatures" />.
         /// </summary>
         public IEnumerable<LuaAsset> EnabledNewAssets => AllNewAssets.Where(
-            asset => FeatureGate.IsGlobalLabel(asset.Label) ||
-                FeatureGate.Allows(asset.ModId, asset.NeedsFeatures, asset.ConflictsFeatures, EnabledFeatures, out _)
+            asset => IsGlobalLabel(asset.Label) ||
+                Allows(asset.ModId, asset.NeedsFeatures, asset.ConflictsFeatures, EnabledFeatures, out _)
         );
 
         /// <summary>
@@ -159,12 +236,12 @@ namespace PatchManager.LuaPatching
         /// <summary>
         /// Callbacks registered with <c>PM:OnBeginRun</c>, in registration order.
         /// </summary>
-        public List<RunCallback> BeginRunCallbacks = new();
+        public List<FeatureGatedAction> BeginRunCallbacks = new();
 
         /// <summary>
         /// Callbacks registered with <c>PM:OnEndRun</c>, in registration order.
         /// </summary>
-        public List<RunCallback> EndRunCallbacks = new();
+        public List<FeatureGatedAction> EndRunCallbacks = new();
 
         /// <summary>
         /// Fires every begin callback whose features are on in <see cref="EnabledFeatures" />.
@@ -176,19 +253,20 @@ namespace PatchManager.LuaPatching
         /// </summary>
         public void EndRun() => FireRunCallbacks(EndRunCallbacks);
 
-        private void FireRunCallbacks(List<RunCallback> callbacks)
+        private void FireRunCallbacks(List<FeatureGatedAction> callbacks)
         {
-            var features = new RunFeatures(
-                EnabledFeatures ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            );
+            var enabled = (EnabledFeatures ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase)).ToList();
             foreach (var callback in callbacks)
             {
-                if (!FeatureGate.Allows(callback.ModId, callback.NeedsFeatures, callback.ConflictsFeatures, EnabledFeatures, out _))
+                // Redux's registrations carry no implicit default feature, so its own counts as on for them
+                bool isExplicit = string.Equals(callback.ModId, EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase);
+                var seen = isExplicit ? enabled.Append(FeatureRegistry.DefaultFor(callback.ModId)).ToList() : enabled;
+                if (!callback.AppliesIn(seen))
                     continue;
 
                 try
                 {
-                    callback.Callback(features);
+                    callback.Run(() => { });
                 }
                 catch (Exception exception)
                 {
@@ -416,8 +494,8 @@ namespace PatchManager.LuaPatching
                     }
                 }
 
-                if (!FeatureGate.IsGlobalLabel(patch.Label) &&
-                    !FeatureGate.Allows(patch.PatchModId, patch.NeedsFeatures, patch.ConflictsFeatures, EnabledFeatures, out var unmet))
+                if (!IsGlobalLabel(patch.Label) &&
+                    !Allows(patch.PatchModId, patch.NeedsFeatures, patch.ConflictsFeatures, EnabledFeatures, out var unmet))
                 {
                     Summary.Remove(patch.Name, "FEATURE", $"feature - {unmet}");
                     continue;

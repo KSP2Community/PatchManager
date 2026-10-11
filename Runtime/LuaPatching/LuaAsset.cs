@@ -61,7 +61,7 @@ namespace PatchManager.LuaPatching
         {
             foreach (var id in ids)
             {
-                NeedsFeatures.Add(FeatureIds.Qualify(ModId, id));
+                NeedsFeatures.Add(FeatureRegistry.Qualify(ModId, id));
             }
 
             return this;
@@ -76,7 +76,7 @@ namespace PatchManager.LuaPatching
         {
             foreach (var id in ids)
             {
-                ConflictsFeatures.Add(FeatureIds.Qualify(ModId, id));
+                ConflictsFeatures.Add(FeatureRegistry.Qualify(ModId, id));
             }
 
             return this;

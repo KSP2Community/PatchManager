@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PatchManager.LuaPatching;
 using PatchManager.Shared;
+using SpaceWarp2.API.Features;
 using UnityEngine;
 
 namespace PatchManager.CSharpPatching
@@ -17,7 +19,7 @@ namespace PatchManager.CSharpPatching
     {
         private static readonly List<PatchDefinition> Pending = new();
         private static readonly List<PassDefinition> PendingPasses = new();
-        private static readonly List<(RunCallback callback, bool isBegin)> PendingRunCallbacks = new();
+        private static readonly List<(FeatureGatedAction callback, bool isBegin)> PendingRunCallbacks = new();
         private static bool _closed;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -37,12 +39,20 @@ namespace PatchManager.CSharpPatching
         /// <param name="isBegin">True for a begin callback, false for an end callback.</param>
         /// <returns>The queued callback, for gating it with features.</returns>
         /// <exception cref="InvalidOperationException">Thrown when registration has already closed.</exception>
-        public static RunCallback RunCallback(string modId, Action<RunFeatures> callback, bool isBegin)
+        public static FeatureGatedAction RunCallback(
+            string modId,
+            Action<IReadOnlyCollection<string>> callback,
+            bool isBegin
+        )
         {
             if (_closed)
                 throw new InvalidOperationException($"Run callback for '{modId}' was registered after Patch Manager closed registration.");
 
-            var registered = new RunCallback { ModId = modId, Callback = callback };
+            var registered = new FeatureGatedAction(modId, $"{modId} run callback", done =>
+            {
+                callback(Core.Assets.PatchingManager.Universe.EnabledFeatures.ToList());
+                done();
+            });
             PendingRunCallbacks.Add((registered, isBegin));
             return registered;
         }
