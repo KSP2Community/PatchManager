@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using MoonSharp.Interpreter;
 using SpaceWarp2.API.Features;
+using SpaceWarp2.API.Loading;
 
 namespace PatchManager.LuaPatching.Builtin
 {
@@ -237,6 +238,19 @@ namespace PatchManager.LuaPatching.Builtin
         /// <returns>The registered callback, for gating it with features.</returns>
         public RunCallback OnEndRun(ScriptExecutionContext context, Closure callback) =>
             AddRunCallback(_universe.EndRunCallbacks, context, callback);
+
+        /// <summary>
+        /// Registers a callback that runs whenever a feature set becomes active, for data a mod keeps per set.
+        /// </summary>
+        /// <remarks>
+        /// Runs at boot for the main menu set and on every switch to another set, never on a reload into the
+        /// same set, and only while the mod and the callback's selected features are on.
+        /// </remarks>
+        /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
+        /// <param name="callback">The callback, handed the set just activated.</param>
+        /// <returns>The registered action, for gating it with features.</returns>
+        public SetLoadingAction OnSetActivated(ScriptExecutionContext context, Closure callback) =>
+            new(ModIdOf(context), "Lua set activation", () => { }, done => done());
 
         private RunCallback AddRunCallback(List<RunCallback> into, ScriptExecutionContext context, Closure callback)
         {
