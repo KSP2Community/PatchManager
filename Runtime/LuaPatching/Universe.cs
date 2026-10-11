@@ -140,7 +140,20 @@ namespace PatchManager.LuaPatching
         /// see another run's changes.
         /// </summary>
         /// <returns>The copies, in registration order.</returns>
-        public List<LuaAsset> StageNewAssetsForRun() => EnabledNewAssets.ToList();
+        public List<LuaAsset> StageNewAssetsForRun() =>
+            EnabledNewAssets
+                .Select(asset => new LuaAsset
+                {
+                    ConverterInstance = asset.ConverterInstance,
+                    Label = asset.Label,
+                    Name = asset.Name,
+                    ModId = asset.ModId,
+                    NeedsFeatures = asset.NeedsFeatures,
+                    ConflictsFeatures = asset.ConflictsFeatures,
+                    // A run patches its copy in place, so the copy is rebuilt from the registered value's JSON
+                    CurrentValue = asset.ConverterInstance.FromJson(asset.ConverterInstance.ToJson(asset.CurrentValue)?.DeepClone())
+                })
+                .ToList();
 
         /// <summary>
         /// Callbacks registered with <c>PM:OnBeginRun</c>, in registration order.
@@ -284,6 +297,10 @@ namespace PatchManager.LuaPatching
         /// </remarks>
         public void SetupPatchesForRun()
         {
+            // The same registrations serve one feature set's run after another, so nothing from the last run may
+            // survive into this one
+            Summary.ResetForRun();
+            AllPatchesBuckets.Clear();
             SortPasses();
             var runnablePasses = new HashSet<string>(OrderedPasses);
 

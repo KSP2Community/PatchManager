@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using JetBrains.Annotations;
 using KSP.Game;
 using KSP.Game.Flow;
 using Newtonsoft.Json;
@@ -143,7 +144,45 @@ namespace PatchManager.Core.Assets
             IReadOnlyDictionary<string, string> hashes,
             IReadOnlyDictionary<string, string> folderByMod,
             ISet<string> enabled
-        ) => hashes.ToDictionary(pair => pair.Key, pair => pair.Value);
+        )
+        {
+            var scoped = new Dictionary<string, string>();
+            foreach (var (key, hash) in hashes)
+            {
+                var owner = OwnerOf(key, folderByMod);
+                if (owner == null ||
+                    string.Equals(owner, FeatureGate.EXPLICIT_MOD_ID, StringComparison.OrdinalIgnoreCase) ||
+                    enabled.Contains(FeatureIds.DefaultFor(owner)))
+                {
+                    scoped[key] = hash;
+                }
+            }
+
+            return scoped;
+        }
+
+        // A file path is owned by the mod whose folder holds it, and an addressable script by the mod its key names
+        [CanBeNull]
+        private static string OwnerOf(string key, IReadOnlyDictionary<string, string> folderByMod)
+        {
+            var path = key.Replace('\\', '/');
+            foreach (var (modId, folder) in folderByMod)
+            {
+                if (string.IsNullOrEmpty(folder))
+                    continue;
+
+                var prefix = folder.Replace('\\', '/').TrimEnd('/') + "/";
+                if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    return modId;
+            }
+
+            var slash = path.IndexOf('/');
+            if (slash <= 0)
+                return null;
+
+            var head = path.Substring(0, slash);
+            return folderByMod.Keys.FirstOrDefault(modId => string.Equals(modId, head, StringComparison.OrdinalIgnoreCase));
+        }
 
         /// <summary>
         /// Adds the enabled feature set to the patch-cache checksum, so a different set never reuses another

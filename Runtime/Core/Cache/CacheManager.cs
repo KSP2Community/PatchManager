@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using PatchManager.Core.Cache.Json;
 using PatchManager.PrefabPatching;
 using PatchManager.Shared;
@@ -237,14 +240,40 @@ namespace PatchManager.Core.Cache
         /// <param name="sets">Every set on disk.</param>
         /// <param name="maxSets">How many sets may stay.</param>
         /// <returns>The ids of the sets to delete.</returns>
-        internal static IEnumerable<string> ChooseEvictions(IEnumerable<SetUse> sets, int maxSets) =>
-            Array.Empty<string>();
+        internal static IEnumerable<string> ChooseEvictions(IEnumerable<SetUse> sets, int maxSets)
+        {
+            var all = sets.ToList();
+            var unpinnedRoom = Math.Max(0, maxSets - all.Count(set => set.IsPinned));
+            return all
+                .Where(set => !set.IsPinned)
+                .OrderByDescending(set => set.LastUsedTicks)
+                .Skip(unpinnedRoom)
+                .Select(set => set.Id)
+                .ToList();
+        }
 
         /// <summary>
         /// Names an archive by its contents, so feature sets whose label comes out identical share one file.
         /// </summary>
         /// <param name="entries">The archive's entries as name and text pairs, in any order.</param>
         /// <returns>The archive filename.</returns>
-        internal static string ContentAddressedName(IEnumerable<(string name, string text)> entries) => "";
+        internal static string ContentAddressedName(IEnumerable<(string name, string text)> entries)
+        {
+            using var sha = SHA256.Create();
+            using var stream = new MemoryStream();
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                // BinaryWriter prefixes every string with its length, so no name and text pair can run into the next
+                foreach (var (name, text) in entries.OrderBy(entry => entry.name, StringComparer.Ordinal))
+                {
+                    writer.Write(name);
+                    writer.Write(text);
+                }
+            }
+
+            stream.Position = 0;
+            var digest = sha.ComputeHash(stream);
+            return $"{BitConverter.ToString(digest).Replace("-", "").ToLowerInvariant()}.zip";
+        }
     }
 }
