@@ -142,8 +142,8 @@ namespace PatchManager.PrefabPatching
             public string Label;
         }
 
-        private const string PLAN_CACHE_DIRECTORY = "./pm_cache/prefabs";
         private static readonly List<PrefabPatchManifest> Registered = new();
+        private static readonly List<string> UsedPlanFiles = new();
         private static readonly Dictionary<string, Entry> Entries = new(
             StringComparer.Ordinal
         );
@@ -157,6 +157,8 @@ namespace PatchManager.PrefabPatching
         /// <summary>Gets valid resolved plans keyed by stock prefab address.</summary>
         public static IReadOnlyDictionary<string, PrefabPatchResolvedPlan> Plans =>
             Entries.ToDictionary(pair => pair.Key, pair => pair.Value.Plan);
+        /// <summary>Gets the plan cache files the last resolve read or wrote, relative to the plan directory.</summary>
+        public static IReadOnlyList<string> PlanFiles => UsedPlanFiles;
 
         /// <summary>
         /// Registers a fluent or generated C# manifest before registration closes.
@@ -326,8 +328,9 @@ namespace PatchManager.PrefabPatching
         )
         {
             CurrentMetrics.DiscoveredManifestCount = manifests.Count;
-            var cache = new PrefabPatchPlanCache(PLAN_CACHE_DIRECTORY);
+            var cache = new PrefabPatchPlanCache(Core.Cache.CacheManager.Store.PlansDirectory);
             Entries.Clear();
+            UsedPlanFiles.Clear();
             foreach (
                 var group in manifests
                     .Where(value => value?.TargetPrefab != null)
@@ -348,6 +351,8 @@ namespace PatchManager.PrefabPatching
                     CurrentMetrics.CacheHitCount++;
                 else
                     CurrentMetrics.CacheMissCount++;
+                if (result.Path != null)
+                    UsedPlanFiles.Add(Path.GetFileName(result.Path));
                 if (
                     result.Plan?.TargetPrefab != null
                     && result.Plan.IsValid
@@ -927,6 +932,7 @@ namespace PatchManager.PrefabPatching
             ReleaseSessionResources();
             Registered.Clear();
             Entries.Clear();
+            UsedPlanFiles.Clear();
             _locator = null;
             RegistrationOpen = true;
             CurrentMetrics = new Metrics();

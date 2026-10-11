@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PatchManager.Core.Assets;
 using PatchManager.Shared;
 using UniLinq;
@@ -24,13 +23,13 @@ namespace PatchManager.Core.Cache.Json
         /// <summary>
         /// Checksum hash of the patch_hashes field.
         /// </summary>
-        [JsonProperty("checksum", Required = Required.Always)]
+        [JsonProperty("checksum")]
         public string Checksum { get; internal set; }
 
         /// <summary>
         /// Dictionary of all patches and their hashes.
         /// </summary>
-        [JsonProperty("patch_hashes", Required = Required.Always)]
+        [JsonProperty("patch_hashes")]
         public PatchHashes Patches { get; internal set; }
 
         /// <summary>
@@ -62,14 +61,6 @@ namespace PatchManager.Core.Cache.Json
         /// The prefab patch plan files this set resolved to, relative to the plan directory.
         /// </summary>
         [JsonProperty("plans")] public List<string> PlanFiles { get; internal set; } = new();
-
-        /// <summary>
-        /// Snapshot of the values of config entries tagged <c>InvalidatesPatchManagerOnChange</c> at the last
-        /// cache build, keyed <c>{modId}:{section}/{name}</c>. The next launch diffs current values against this
-        /// to decide whether the cache is stale - the successor to the per-binding ranWith tracking.
-        /// </summary>
-        [JsonProperty("invalidation_snapshot")]
-        public Dictionary<string, JToken> InvalidationSnapshot { get; internal set; } = new();
 
         /// <summary>
         /// Gets a <see cref="CacheEntry" /> by its label.
@@ -114,7 +105,6 @@ namespace PatchManager.Core.Cache.Json
         /// <returns>The loaded inventory, or a fresh one on error.</returns>
         internal static Inventory Load(string path)
         {
-            CacheManager.CreateCacheFolderIfNotExists();
             if (!File.Exists(path))
             {
                 Logging.LogDebug("Inventory file does not exist, creating new inventory.");
@@ -141,7 +131,7 @@ namespace PatchManager.Core.Cache.Json
         /// <param name="path">Path to write the inventory JSON file to.</param>
         internal void Save(string path)
         {
-            CacheManager.CreateCacheFolderIfNotExists();
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             var formatting = PatchingManager.UseIndentedOutput ? Formatting.Indented : Formatting.None;
             var inventoryText = JsonConvert.SerializeObject(this, formatting);
             File.WriteAllText(path, inventoryText);

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using PatchManager.Core.Cache.Json;
@@ -12,22 +11,15 @@ using PatchManager.Shared;
 namespace PatchManager.Core.Cache
 {
     /// <summary>
-    /// Cache directory and on-disk inventory of patched-asset archives. Manages archive open/create lifetimes,
-    /// invalidation, and the singleton <see cref="Inventory" /> instance.
+    /// The patch cache of the feature set being patched for: its inventory, the archives it reads, and the labels
+    /// still valid for this run.
     /// </summary>
     internal static class CacheManager
     {
-        /*
-        private static readonly string CacheDirectory = Path.Combine(
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-            "cache"
-        );
-        */
         private const string CACHE_DIRECTORY = "./pm_cache";
 
-        private static readonly string InventoryPath = Path.Combine(CACHE_DIRECTORY, "inventory.json");
-
-        private static readonly Dictionary<string, Archive> OpenArchives = new();
+        // Set caches kept beyond the pinned ones, least recently used evicted first
+        private const int MAX_SETS = 10;
 
         /// <summary>
         /// Labels whose cached archives are still valid for the current run. Consulted by the addressables resource
@@ -35,119 +27,59 @@ namespace PatchManager.Core.Cache
         /// </summary>
         public static readonly List<string> CacheValidLabels = new();
 
-        private static Inventory _inventory;
+        private static CacheStore _store;
 
         [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticState()
         {
-            foreach (var archive in OpenArchives.Values)
-            {
-                archive.Dispose();
-            }
-
-            OpenArchives.Clear();
+            _store?.Dispose();
+            _store = null;
             CacheValidLabels.Clear();
-            _inventory = null;
         }
 
         /// <summary>
-        /// Singleton <see cref="Json.Inventory" /> for the current run, lazily loaded from disk on first access.
+        /// Gets the cache on disk.
         /// </summary>
-        public static Inventory Inventory => _inventory ??= Inventory.Load(InventoryPath);
+        public static CacheStore Store => _store ??= new CacheStore(CACHE_DIRECTORY);
 
         /// <summary>
-        /// Creates the cache directory on disk if it does not already exist.
+        /// Gets the inventory of the set being patched for.
         /// </summary>
-        public static void CreateCacheFolderIfNotExists()
+        public static Inventory Inventory => Store.Inventory;
+
+        /// <summary>
+        /// Opens the cache of the set being patched for.
+        /// </summary>
+        /// <param name="setId">The set's id.</param>
+        public static void UseSet(string setId)
         {
-            if (Directory.Exists(CACHE_DIRECTORY))
-                return;
-
-            Logging.LogDebug("Cache directory does not exist, creating a new one.");
-            Directory.CreateDirectory(CACHE_DIRECTORY);
+            CacheValidLabels.Clear();
+            Store.UseSet(setId);
         }
 
         /// <summary>
-        /// Creates a new cache archive at the given filename and tracks it as open.
+        /// Opens a stored archive, or returns the copy already open.
         /// </summary>
-        /// <param name="archiveFilename">The archive's filename, relative to the cache directory.</param>
-        /// <returns>The newly created archive.</returns>
-        /// <exception cref="ArgumentException">Thrown when an archive with that filename already exists on disk.</exception>
-        public static Archive CreateArchive(string archiveFilename)
-        {
-            var archivePath = Path.Combine(CACHE_DIRECTORY, archiveFilename);
-            if (File.Exists(archivePath))
-                throw new ArgumentException($"Archive '{archivePath}' already exists!");
-
-            var archive = new Archive(archivePath, true);
-            OpenArchives.Add(archiveFilename, archive);
-            return archive;
-        }
-
-        /// <summary>
-        /// Loads (or returns the already-loaded copy of) the cache archive with the given filename.
-        /// </summary>
-        /// <param name="archiveFilename">The archive's filename, relative to the cache directory.</param>
+        /// <param name="archiveFilename">The archive's filename.</param>
         /// <returns>The loaded archive.</returns>
         /// <exception cref="FileNotFoundException">Thrown when the archive does not exist on disk.</exception>
-        public static Archive GetArchive(string archiveFilename)
-        {
-            var archivePath = Path.Combine(CACHE_DIRECTORY, archiveFilename);
-            if (!File.Exists(archivePath))
-                throw new FileNotFoundException($"Archive '{archivePath}' does not exist!");
-
-            if (!OpenArchives.ContainsKey(archiveFilename))
-            {
-                OpenArchives.Add(archiveFilename, new Archive(archivePath));
-            }
-
-            return OpenArchives[archiveFilename];
-        }
+        public static Archive GetArchive(string archiveFilename) => Store.GetArchive(archiveFilename);
 
         /// <summary>
-        /// Discards all cached archives, resets the inventory, and clears the cache directory.
+        /// Discards the cache of the set being patched for, leaving every other set's alone.
         /// </summary>
         public static void InvalidateCache()
         {
             CacheValidLabels.Clear();
-
-            _inventory = Inventory.Create();
-
-            foreach (var archive in OpenArchives.Values)
-            {
-                archive.Dispose();
-            }
-
-            OpenArchives.Clear();
-
-            try
-            {
-                DeleteDirectory(CACHE_DIRECTORY);
-            }
-            catch (Exception e)
-            {
-                Logging.LogError($"Failed to clear the patch cache: {e}");
-            }
-
-            CreateCacheFolderIfNotExists();
+            Store.InvalidateSet();
         }
 
-        private static void DeleteDirectory(string path)
+        /// <summary>
+        /// Deletes the least recently used set caches above the limit, and whatever only they used.
+        /// </summary>
+        public static void EvictStaleSets()
         {
-            if (!Directory.Exists(path))
-                return;
-
-            foreach (var directory in Directory.GetDirectories(path))
-            {
-                DeleteDirectory(directory);
-            }
-
-            foreach (var file in Directory.GetFiles(path))
-            {
-                File.Delete(file);
-            }
-
-            Directory.Delete(path, false);
+            Store.Evict(MAX_SETS, new HashSet<string>());
         }
 
         /// <summary>
@@ -191,7 +123,7 @@ namespace PatchManager.Core.Cache
         /// </summary>
         public static void SaveInventory()
         {
-            Inventory.Save(InventoryPath);
+            Store.SaveInventory();
         }
 
         public static void SaveSummary(Summary universeSummary)

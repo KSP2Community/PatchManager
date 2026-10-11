@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -185,13 +185,22 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Adds the enabled feature set to the patch-cache checksum, so a different set never reuses another
-        /// set's archives.
+        /// Opens the cache of the enabled feature set, which no other set reads or invalidates.
         /// </summary>
-        public static void HashFeatureSet()
+        public static void OpenSetCache()
         {
-            var ordered = Universe.EnabledFeatures.OrderBy(id => id, StringComparer.Ordinal);
-            CurrentPatchHashes.Patches["<features>"] = Hash.FromString(string.Join("\n", ordered));
+            CacheManager.UseSet(SetIdOf(Universe.EnabledFeatures));
+        }
+
+        /// <summary>
+        /// Names a feature set's cache by its features, whatever order they come in.
+        /// </summary>
+        /// <param name="features">The set's enabled features.</param>
+        /// <returns>The set's id.</returns>
+        internal static string SetIdOf(IEnumerable<string> features)
+        {
+            var ordered = features.Select(id => id.ToLowerInvariant()).OrderBy(id => id, StringComparer.Ordinal);
+            return Hash.FromString(string.Join("\n", ordered));
         }
 
         /// <summary>
@@ -285,74 +294,26 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Determines whether any config value tagged <c>InvalidatesPatchManagerOnChange</c> differs from the
-        /// snapshot taken at the last cache build.
+        /// Decides whether the set's cache still holds what patching would produce now, and starts it afresh
+        /// when it does not.
         /// </summary>
         /// <remarks>
-        /// Must run after mod bodies have bound their config.
+        /// Only scripts and mod manifests of mods in the set count, so changing a mod the set leaves out keeps
+        /// the set's cache.
         /// </remarks>
-        /// <returns>True if a tagged value changed (or was added or removed) since the snapshot.</returns>
-        public static bool TaggedConfigChanged()
-        {
-            var current = GatherTaggedValues();
-            var snapshot = CacheManager.Inventory.InvalidationSnapshot;
-            if (current.Count != snapshot.Count)
-                return true;
-
-            foreach (var pair in current)
-            {
-                if (!snapshot.TryGetValue(pair.Key, out var stored) || !JToken.DeepEquals(pair.Value, stored))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Snapshots the current values of <c>InvalidatesPatchManagerOnChange</c>-tagged config into the
-        /// inventory, so the next launch can detect a change. Runs as part of a cache rebuild.
-        /// </summary>
-        /// <param name="resolve">Flow success callback.</param>
-        /// <param name="reject">Flow failure callback.</param>
-        public static void SaveInvalidationSnapshot(Action resolve, Action<string> reject)
-        {
-            CacheManager.Inventory.InvalidationSnapshot = GatherTaggedValues();
-            CacheManager.SaveInventory();
-            resolve();
-        }
-
-        private static Dictionary<string, JToken> GatherTaggedValues()
-        {
-            var result = new Dictionary<string, JToken>();
-            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
-            {
-                var file = descriptor.ConfigFile;
-                if (file == null)
-                    continue;
-
-                foreach (var section in file.Sections)
-                {
-                    foreach (var key in section.Keys)
-                    {
-                        var entry = section[key];
-                        if (!entry.HasTag(PatchManagerCore.InvalidatesOnChangeTag))
-                            continue;
-
-                        var entryKey = $"{descriptor.Guid}:{section.Name}/{key}";
-                        result[entryKey] = entry.Value == null ? JValue.CreateNull() : JToken.FromObject(entry.Value);
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Invalidates the cache if the checksum is different.
-        /// </summary>
         /// <returns>True if the cache is valid, false if it was invalidated.</returns>
         public static bool InvalidateCacheIfNeeded()
         {
+            var folderByMod = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var descriptor in PluginList.AllEnabledAndActivePlugins)
+            {
+                folderByMod[descriptor.Guid] = descriptor.Folder?.FullName;
+                // A mod's manifest stands in for its content assets, whose versions it names
+                CurrentPatchHashes.Patches[$"{descriptor.Guid}/<swinfo>"] =
+                    Hash.FromString(JsonConvert.SerializeObject(descriptor.SWInfo));
+            }
+
+            CurrentPatchHashes.Patches = ScopeHashesToSet(CurrentPatchHashes.Patches, folderByMod, Universe.EnabledFeatures);
             var checksum = Hash.FromJsonObject(CurrentPatchHashes);
 
             if (CacheManager.Inventory.Checksum == checksum)
@@ -378,7 +339,7 @@ namespace PatchManager.Core.Assets
         /// <param name="reject">Reject callback (currently unused).</param>
         public static void CreateNewAssets(Action resolve, Action<string> reject)
         {
-            var enabledAssets = Universe.EnabledNewAssets.ToList();
+            var enabledAssets = Universe.StageNewAssetsForRun();
             foreach (var generator in enabledAssets)
             {
                 try
@@ -489,7 +450,6 @@ namespace PatchManager.Core.Assets
                 var state = new LabelRebuildState
                 {
                     Label = label,
-                    ArchiveFilename = $"{label.Replace("/", "")}.zip",
                     PrimaryKeyMap = Universe.BuildPrimaryKeyMapForLabel(label)
                 };
                 _rebuildStates[label] = state;
@@ -802,90 +762,34 @@ namespace PatchManager.Core.Assets
 
         private static void WriteArchive(LabelRebuildState state)
         {
-            var labelCacheEntry = new CacheEntry
-            {
-                Label = state.Label,
-                ArchiveFilename = state.ArchiveFilename,
-                Assets = new List<string>()
-            };
-            var assetsCacheEntries = new Dictionary<string, CacheEntry>();
-            var archive = CacheManager.CreateArchive(state.ArchiveFilename);
-
-            void AddAssetEntry(string assetName, string serialized)
-            {
-                archive.AddFile(assetName, serialized);
-                labelCacheEntry.Assets.Add(assetName);
-                assetsCacheEntries[assetName] = new CacheEntry
-                {
-                    Label = assetName,
-                    ArchiveFilename = state.ArchiveFilename,
-                    Assets = new List<string> { assetName }
-                };
-                if (state.PrimaryKeyMap.TryGetValue(assetName, out var address) && address != assetName)
-                {
-                    assetsCacheEntries[address] = new CacheEntry
-                    {
-                        Label = address,
-                        ArchiveFilename = state.ArchiveFilename,
-                        Assets = new List<string> { assetName }
-                    };
-                }
-
-                // Copies made by duplicate patches have no address of their own, so they take the alias created assets get
-                if (state.AddressAliases.TryGetValue(assetName, out var alias))
-                {
-                    assetsCacheEntries[alias] = new CacheEntry
-                    {
-                        Label = alias,
-                        ArchiveFilename = state.ArchiveFilename,
-                        Assets = new List<string> { assetName }
-                    };
-                }
-            }
+            var formatting = UseIndentedOutput ? Formatting.Indented : Formatting.None;
+            var entries = new List<(string name, string text)>();
 
             foreach (var (assetName, token) in state.Tokens)
             {
-                if (token == null)
-                    continue;
-                var serialized = token.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
-                if (string.IsNullOrEmpty(serialized))
-                    continue;
-                AddAssetEntry(assetName, serialized);
+                var serialized = token?.ToString(formatting);
+                if (!string.IsNullOrEmpty(serialized))
+                {
+                    entries.Add((assetName, serialized));
+                }
             }
 
             foreach (var (assetName, rawText) in state.RawTexts)
             {
-                if (string.IsNullOrEmpty(rawText))
-                    continue;
-                AddAssetEntry(assetName, rawText);
+                if (!string.IsNullOrEmpty(rawText))
+                {
+                    entries.Add((assetName, rawText));
+                }
             }
 
             foreach (var (name, luaAsset) in state.CreatedAssets)
             {
                 try
                 {
-                    var jResult = luaAsset.ConverterInstance.ToJson(luaAsset.CurrentValue);
-                    if (jResult == null)
-                        continue;
-                    var serialized = jResult.ToString(UseIndentedOutput ? Formatting.Indented : Formatting.None);
-                    if (string.IsNullOrEmpty(serialized))
-                        continue;
-                    archive.AddFile(name, serialized);
-                    labelCacheEntry.Assets.Add(name);
-                    assetsCacheEntries[name] = new CacheEntry
+                    var serialized = luaAsset.ConverterInstance.ToJson(luaAsset.CurrentValue)?.ToString(formatting);
+                    if (!string.IsNullOrEmpty(serialized))
                     {
-                        Label = name,
-                        ArchiveFilename = state.ArchiveFilename,
-                        Assets = new List<string> { name }
-                    };
-                    if (state.AddressAliases.TryGetValue(name, out var alias))
-                    {
-                        assetsCacheEntries[alias] = new CacheEntry
-                        {
-                            Label = alias,
-                            ArchiveFilename = state.ArchiveFilename,
-                            Assets = new List<string> { name }
-                        };
+                        entries.Add((name, serialized));
                     }
                 }
                 catch (Exception e)
@@ -898,17 +802,51 @@ namespace PatchManager.Core.Assets
                 }
             }
 
-            archive.Save();
+            // Named by content, so a set whose label patches out the same as another set's reuses its file
+            var archiveFilename = CacheManager.Store.WriteArchive(entries);
+
+            var labelCacheEntry = new CacheEntry
+            {
+                Label = state.Label,
+                ArchiveFilename = archiveFilename,
+                Assets = new List<string>()
+            };
+            var assetsCacheEntries = new Dictionary<string, CacheEntry>();
+
+            void AddKey(string key, string assetName)
+            {
+                assetsCacheEntries[key] = new CacheEntry
+                {
+                    Label = key,
+                    ArchiveFilename = archiveFilename,
+                    Assets = new List<string> { assetName }
+                };
+            }
+
+            foreach (var (assetName, _) in entries)
+            {
+                labelCacheEntry.Assets.Add(assetName);
+                AddKey(assetName, assetName);
+                if (state.PrimaryKeyMap.TryGetValue(assetName, out var address) && address != assetName)
+                {
+                    AddKey(address, assetName);
+                }
+
+                // Created assets and copies made by duplicate patches have no address of their own, so they take an alias
+                if (state.AddressAliases.TryGetValue(assetName, out var alias))
+                {
+                    AddKey(alias, assetName);
+                }
+            }
 
             CacheManager.CacheValidLabels.Add(state.Label);
             CacheManager.Inventory.CacheEntries.Add(state.Label, labelCacheEntry);
             CacheManager.Inventory.CacheEntries.AddRangeUnique(assetsCacheEntries);
         }
 
-        private sealed class LabelRebuildState
+        private class LabelRebuildState
         {
             public string Label;
-            public string ArchiveFilename;
             public Dictionary<string, string> RawTexts = new();
             public Dictionary<string, JToken> Tokens = new();
             public Dictionary<string, string> PrimaryKeyMap;

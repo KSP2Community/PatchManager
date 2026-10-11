@@ -17,7 +17,6 @@
 
 ---The PatchManager Lua library, exposed to scripts as the global `PM`.
 ---@class PatchManagerCore
----@field InvalidatesOnChange string The cache-invalidation tag, exposed to scripts as `PM.InvalidatesOnChange` so a config entry can be tagged with `:Tag(PM.InvalidatesOnChange)`.
 ---@field Audio AudioLuaModule
 ---@field CampaignPacks CampaignPacksLuaModule
 ---@field JSON GenericLuaModule

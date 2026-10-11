@@ -45,8 +45,9 @@ namespace PatchManager.Core
         /// Registers the post-body cache-validity decision for the current play session.
         /// </summary>
         /// <remarks>
-        /// The decision needs the config values mod bodies bind, so it runs in <see cref="DecideCacheValidity" />
-        /// (after the per-plugin body phase) rather than during one-time module initialization, which runs before any body.
+        /// The decision needs the scripts mod bodies ran and the features they declared, so it runs in
+        /// <see cref="DecideCacheValidity" /> (after the per-plugin body phase) rather than during one-time module
+        /// initialization, which runs before any body.
         /// </remarks>
         public override void RegisterPlaySessionActions()
         {
@@ -59,11 +60,9 @@ namespace PatchManager.Core
 
         private void DecideCacheValidity(Action resolve, Action<string> reject)
         {
-            if (Application.isEditor || _shouldAlwaysInvalidate ||
-                SpaceWarp2.API.Mods.PluginList.ModListChangedSinceLastRun ||
-                PatchingManager.TaggedConfigChanged())
+            PatchingManager.OpenSetCache();
+            if (Application.isEditor || _shouldAlwaysInvalidate)
             {
-                CacheManager.CreateCacheFolderIfNotExists();
                 CacheManager.InvalidateCache();
             }
 
@@ -71,7 +70,6 @@ namespace PatchManager.Core
             // run at this point, so CollectScriptResults finds the addressable-sourced scripts in memory.
             PatchingManager.HashScriptFiles();
             PatchingManager.CollectScriptResults();
-            PatchingManager.HashFeatureSet();
             var isValid = PatchingManager.InvalidateCacheIfNeeded();
 
             var tail = new List<GenericFlowAction>();
@@ -81,7 +79,6 @@ namespace PatchManager.Core
                 tail.Add(new GenericFlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
                 tail.Add(new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
                 tail.Add(new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-                tail.Add(new GenericFlowAction("Patch Manager: Saving Invalidation Snapshot", PatchingManager.SaveInvalidationSnapshot));
                 tail.Add(new GenericFlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
             }
 
@@ -137,7 +134,15 @@ namespace PatchManager.Core
                 PatchingManager.Universe.AllMods,
                 PatchingManager.Universe.EnabledFeatures,
                 manifestSources,
-                resolve,
+                () =>
+                {
+                    // The set's plans are known only now, so this is where its inventory is complete and the
+                    // caches no set uses any more can go
+                    CacheManager.Inventory.PlanFiles = PrefabPatchRuntime.PlanFiles.ToList();
+                    CacheManager.SaveInventory();
+                    CacheManager.EvictStaleSets();
+                    resolve();
+                },
                 reject
             );
         }

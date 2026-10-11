@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
 
 namespace PatchManager.PrefabPatching
 {
@@ -10,12 +12,12 @@ namespace PatchManager.PrefabPatching
     /// Atomic, recoverable, per-prefab resolved-plan cache. A cache hit avoids
     /// dependency ordering, target validation, and conflict analysis.
     /// </summary>
-    public sealed class PrefabPatchPlanCache
+    public class PrefabPatchPlanCache
     {
         /// <summary>
         /// Describes the resolved plan and how it was obtained.
         /// </summary>
-        public sealed class Result
+        public class Result
         {
             /// <summary>The resolved prefab patch plan.</summary>
             public PrefabPatchResolvedPlan Plan;
@@ -83,7 +85,7 @@ namespace PatchManager.PrefabPatching
                 unityVersion,
                 targetPlatform
             );
-            var path = GetPath(manifests[0].TargetPrefab);
+            var path = GetPath(manifests[0].TargetPrefab, sourceFingerprint);
             if (TryRead(path, sourceFingerprint, out var cached))
             {
                 stopwatch.Stop();
@@ -131,16 +133,20 @@ namespace PatchManager.PrefabPatching
         }
 
         /// <summary>
-        /// Gets the cache file path for a target prefab identity.
+        /// Gets the cache file path for a target prefab identity resolved from one set of inputs.
         /// </summary>
+        /// <remarks>
+        /// The inputs are part of the name, so feature sets that patch one prefab differently keep a plan each.
+        /// </remarks>
         /// <param name="target">Target prefab identity.</param>
+        /// <param name="sourceFingerprint">The fingerprint of the inputs the plan is resolved from.</param>
         /// <returns>The absolute plan-cache path.</returns>
-        public string GetPath(PrefabPatchPrefabIdentity target)
+        public string GetPath(PrefabPatchPrefabIdentity target, string sourceFingerprint)
         {
             var identity = target?.Address ?? target?.CanonicalKey ?? "invalid";
             return Path.Combine(
                 _directory,
-                PrefabPatchJson.Sha256(identity) + ".plan.json"
+                $"{PrefabPatchJson.Sha256(identity)}.{PrefabPatchJson.Sha256(sourceFingerprint).Substring(0, 16)}.plan.gz"
             );
         }
 
@@ -206,7 +212,7 @@ namespace PatchManager.PrefabPatching
             try
             {
                 plan = PrefabPatchJson.Deserialize<PrefabPatchResolvedPlan>(
-                    File.ReadAllText(path)
+                    ReadCompressed(path)
                 );
                 return plan != null
                     && plan.SchemaVersion == PrefabPatchSchema.Version
@@ -225,6 +231,27 @@ namespace PatchManager.PrefabPatching
             }
         }
 
+        private static string ReadCompressed(string path)
+        {
+            using var file = File.OpenRead(path);
+            using var gzip = new GZipStream(file, CompressionMode.Decompress);
+            using var reader = new StreamReader(gzip, Encoding.UTF8);
+            return reader.ReadToEnd();
+        }
+
+        // Plans are mostly repeated property paths, so they compress many times over
+        private static byte[] Compress(string contents)
+        {
+            using var buffer = new MemoryStream();
+            using (var gzip = new GZipStream(buffer, CompressionLevel.Optimal, true))
+            {
+                var bytes = Encoding.UTF8.GetBytes(contents);
+                gzip.Write(bytes, 0, bytes.Length);
+            }
+
+            return buffer.ToArray();
+        }
+
         private static void AtomicWrite(string path, string contents)
         {
             var directory = Path.GetDirectoryName(path);
@@ -237,7 +264,7 @@ namespace PatchManager.PrefabPatching
             var backupPath = path + ".bak";
             try
             {
-                var bytes = System.Text.Encoding.UTF8.GetBytes(contents);
+                var bytes = Compress(contents);
                 using (
                     var stream = new FileStream(
                         tempPath,
