@@ -23,11 +23,13 @@ namespace PatchManager.Shared
         /// </summary>
         public const string MAIN_MENU_FEATURE = "Ksp2Redux:All";
 
-        // Packs and game modes are chosen before a set exists, so every set sees all of them
+        // Packs, game modes and difficulty options are chosen before a set exists, so every set sees all of them
         private static readonly HashSet<string> GlobalLabels = new(StringComparer.OrdinalIgnoreCase)
         {
             "campaign_pack",
-            "game_mode"
+            "game_mode",
+            "difficulty",
+            "difficulty_definition"
         };
 
         /// <summary>
