@@ -64,8 +64,9 @@ namespace PatchManager.Core
             // run at this point, so CollectScriptResults finds the addressable-sourced scripts in memory.
             PatchingManager.HashScriptFiles();
             PatchingManager.CollectScriptResults();
+            PatchingManager.AlwaysInvalidate = Application.isEditor || _shouldAlwaysInvalidate;
             var tail = PatchingManager.SetRunSteps(
-                Application.isEditor || _shouldAlwaysInvalidate,
+                false,
                 InsertNextInLoadingFlow,
                 out _wasCacheInvalidated
             );

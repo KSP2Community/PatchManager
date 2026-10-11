@@ -110,6 +110,7 @@ namespace PatchManager.Core.Assets
             TotalNewAssetCount = 0;
             TotalDefinitionPatchCount = 0;
             _rebuildStates = null;
+            SetsBuiltThisSession.Clear();
         }
 
         /// <summary>
@@ -183,7 +184,8 @@ namespace PatchManager.Core.Assets
         /// <returns>True if the set's cache is rebuilt even when valid, false otherwise.</returns>
         internal static bool RebuildsSet(string setId, bool forceRebuild)
         {
-            return forceRebuild;
+            bool firstThisSession = SetsBuiltThisSession.Add(setId);
+            return forceRebuild || (AlwaysInvalidate && firstThisSession);
         }
 
         /// <summary>
@@ -203,7 +205,7 @@ namespace PatchManager.Core.Assets
             out bool rebuilds
         )
         {
-            if (forceRebuild)
+            if (RebuildsSet(CacheManager.Store.ActiveSet, forceRebuild))
             {
                 CacheManager.InvalidateCache();
             }
