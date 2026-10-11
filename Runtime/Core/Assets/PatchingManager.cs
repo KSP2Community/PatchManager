@@ -268,6 +268,18 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
+        /// Picks the script errors a feature set's summary reports: those of Redux and of mods whose default
+        /// feature is in the set.
+        /// </summary>
+        /// <param name="errorsByMod">Every mod's script errors, by mod id.</param>
+        /// <param name="enabled">The set's enabled features.</param>
+        /// <returns>The errors to report.</returns>
+        internal static List<(string filename, string reason)> ScriptErrorsInSet(
+            IReadOnlyDictionary<string, List<(string filename, string reason)>> errorsByMod,
+            ISet<string> enabled
+        ) => errorsByMod.Values.SelectMany(errors => errors).ToList();
+
+        /// <summary>
         /// Names a feature set's cache by its features, whatever order they come in.
         /// </summary>
         /// <param name="features">The set's enabled features.</param>

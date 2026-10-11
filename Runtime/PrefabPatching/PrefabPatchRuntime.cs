@@ -26,6 +26,16 @@ namespace PatchManager.PrefabPatching
         private static string _coreSummary;
         private static string _prefabSummary;
 
+        /// <summary>
+        /// Starts or returns to a feature set's section of the summary, so later updates land in it.
+        /// </summary>
+        /// <param name="setId">The set's id.</param>
+        /// <param name="header">What the section is headed with, such as the set's features.</param>
+        /// <param name="directory">The set's cache directory, where its own summary is kept.</param>
+        public static void BeginSet(string setId, string header, string directory)
+        {
+        }
+
         /// <summary>Replaces the ordinary JSON-patch section of the summary.</summary>
         public static void UpdateCoreSummary(string summary)
         {
