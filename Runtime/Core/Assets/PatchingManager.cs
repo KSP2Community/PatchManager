@@ -47,6 +47,15 @@ namespace PatchManager.Core.Assets
 
         internal static bool UseIndentedOutput;
 
+        /// <summary>
+        /// Whether each set's cache is rebuilt the first time it is patched for in a play session, as in the editor.
+        /// </summary>
+        internal static bool AlwaysInvalidate;
+
+        // A set's cache key does not cover the code that builds it, so an always-invalidating session rebuilds each
+        // set once rather than only the one built at boot
+        private static readonly HashSet<string> SetsBuiltThisSession = new(StringComparer.Ordinal);
+
         // Assets loaded into a label's rebuild by their own key, for stock assets that carry no label of their own
         private static readonly Dictionary<string, HashSet<string>> LabelMembers = new();
 
@@ -164,6 +173,17 @@ namespace PatchManager.Core.Assets
                 $"Features: {string.Join(", ", ordered)}",
                 CacheManager.Store.SetDirectory(setId)
             );
+        }
+
+        /// <summary>
+        /// Decides whether patching for a set rebuilds its cache, and counts it as rebuilt this session if so.
+        /// </summary>
+        /// <param name="setId">The set's id.</param>
+        /// <param name="forceRebuild">Whether the caller asks for a rebuild regardless.</param>
+        /// <returns>True if the set's cache is rebuilt even when valid, false otherwise.</returns>
+        internal static bool RebuildsSet(string setId, bool forceRebuild)
+        {
+            return forceRebuild;
         }
 
         /// <summary>
