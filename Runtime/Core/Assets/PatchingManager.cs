@@ -12,6 +12,7 @@ using PatchManager.Core.Cache.Json;
 using PatchManager.Core.Utility;
 using PatchManager.LuaPatching;
 using PatchManager.LuaPatching.Builtin;
+using PatchManager.PrefabPatching;
 using PatchManager.Shared;
 using Redux.Features;
 using ReduxLib.Configuration;
@@ -120,12 +121,94 @@ namespace PatchManager.Core.Assets
         public static void SelectBootFeatures()
         {
             var installed = PluginList.AllEnabledAndActivePlugins.Select(descriptor => descriptor.Guid);
-            Universe.EnabledFeatures = new HashSet<string>(
-                FeatureGate.BootSet(Universe.FeatureRegistry, installed),
-                StringComparer.OrdinalIgnoreCase
-            );
+            ActivateSet(FeatureGate.BootSet(Universe.FeatureRegistry, installed));
+        }
+
+        /// <summary>
+        /// Makes a feature set the one patched for and loaded from: gates assets by it and opens its cache.
+        /// </summary>
+        /// <param name="features">The set's enabled features.</param>
+        public static void ActivateSet(IEnumerable<string> features)
+        {
+            Universe.EnabledFeatures = new HashSet<string>(features, StringComparer.OrdinalIgnoreCase);
             Logging.LogInfo($"Patching for {Universe.EnabledFeatures.Count} enabled feature(s)");
             FeatureAssetIndex.Activate(Universe.EnabledFeatures);
+            CacheManager.UseSet(SetIdOf(Universe.EnabledFeatures));
+        }
+
+        /// <summary>
+        /// Lists the steps that bring the active set's cache up to date, rebuilding it when it is stale.
+        /// </summary>
+        /// <remarks>
+        /// The rebuild step learns its labels only once patches are set up, so it hands its per-label steps to
+        /// <paramref name="insertNext" />, which must run them straight after the step itself.
+        /// </remarks>
+        /// <param name="forceRebuild">Whether to rebuild even a valid cache.</param>
+        /// <param name="insertNext">Schedules steps to run right after the one running now.</param>
+        /// <param name="rebuilds">Whether the steps rebuild the cache.</param>
+        /// <returns>The steps, in order.</returns>
+        internal static List<GenericFlowAction> SetRunSteps(
+            bool forceRebuild,
+            Action<List<GenericFlowAction>> insertNext,
+            out bool rebuilds
+        )
+        {
+            if (forceRebuild)
+            {
+                CacheManager.InvalidateCache();
+            }
+
+            var steps = new List<GenericFlowAction>();
+            rebuilds = !InvalidateCacheIfNeeded();
+            if (rebuilds)
+            {
+                steps.Add(new GenericFlowAction("Patch Manager: Registering all patches", (resolve, _) =>
+                {
+                    RegisterPatches();
+                    resolve();
+                }));
+                steps.Add(new GenericFlowAction("Patch Manager: Creating New Assets", CreateNewAssets));
+                steps.Add(new GenericFlowAction("Patch Manager: Rebuilding Cache",
+                    (resolve, reject) => RebuildAllCache(insertNext, resolve)));
+                steps.Add(new GenericFlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
+            }
+
+            steps.Add(new GenericFlowAction("Patch Manager: Resolving Prefab Patch Plans", ResolvePrefabPatchPlans));
+            return steps;
+        }
+
+        private static void SavePatchSummary(Action resolve, Action<string> reject)
+        {
+            Universe.Summary.RecognizedModIds = Universe.AllMods;
+            CacheManager.SaveSummary(Universe.Summary);
+            resolve();
+        }
+
+        private static void ResolvePrefabPatchPlans(Action resolve, Action<string> reject)
+        {
+            var manifestSources = PluginList.AllEnabledAndActivePlugins
+                .Where(descriptor => !string.IsNullOrWhiteSpace(descriptor.AddressablePrefabPatchLabel))
+                .Select(descriptor => new PrefabPatchManifestSource
+                {
+                    OwnerModId = descriptor.Guid,
+                    AddressablesLabel = descriptor.AddressablePrefabPatchLabel
+                })
+                .ToArray();
+            PrefabPatchRuntime.DiscoverAndResolve(
+                Universe.AllMods,
+                Universe.EnabledFeatures,
+                manifestSources,
+                () =>
+                {
+                    // The set's plans are known only now, so this is where its inventory is complete and the
+                    // caches no set uses any more can go
+                    CacheManager.Inventory.PlanFiles = PrefabPatchRuntime.PlanFiles.ToList();
+                    CacheManager.SaveInventory();
+                    CacheManager.EvictStaleSets();
+                    resolve();
+                },
+                reject
+            );
         }
 
         /// <summary>
@@ -185,14 +268,6 @@ namespace PatchManager.Core.Assets
         }
 
         /// <summary>
-        /// Opens the cache of the enabled feature set, which no other set reads or invalidates.
-        /// </summary>
-        public static void OpenSetCache()
-        {
-            CacheManager.UseSet(SetIdOf(Universe.EnabledFeatures));
-        }
-
-        /// <summary>
         /// Names a feature set's cache by its features, whatever order they come in.
         /// </summary>
         /// <param name="features">The set's enabled features.</param>
@@ -209,6 +284,10 @@ namespace PatchManager.Core.Assets
         public static void RegisterPatches()
         {
             Logging.LogInfo("Registering all patches!");
+            TotalPatchCount = 0;
+            TotalErrorCount = 0;
+            TotalNewAssetCount = 0;
+            TotalDefinitionPatchCount = 0;
             CSharpPatching.FluentPatchRegistry.Flush(Universe);
             Universe.SetupPatchesForRun();
             Logging.LogInfo($"{Universe.TotalPatchCount} patchers registered!");
@@ -313,8 +392,10 @@ namespace PatchManager.Core.Assets
                     Hash.FromString(JsonConvert.SerializeObject(descriptor.SWInfo));
             }
 
-            CurrentPatchHashes.Patches = ScopeHashesToSet(CurrentPatchHashes.Patches, folderByMod, Universe.EnabledFeatures);
-            var checksum = Hash.FromJsonObject(CurrentPatchHashes);
+            // Every set scopes the same full hashes, so the full ones are kept for the next set's run
+            var setHashes = PatchHashes.CreateDefault();
+            setHashes.Patches = ScopeHashesToSet(CurrentPatchHashes.Patches, folderByMod, Universe.EnabledFeatures);
+            var checksum = Hash.FromJsonObject(setHashes);
 
             if (CacheManager.Inventory.Checksum == checksum)
             {
@@ -326,7 +407,7 @@ namespace PatchManager.Core.Assets
             Logging.LogInfo("Cache is invalid, rebuilding.");
             CacheManager.InvalidateCache();
             CacheManager.Inventory.Checksum = checksum;
-            CacheManager.Inventory.Patches = CurrentPatchHashes;
+            CacheManager.Inventory.Patches = setHashes;
 
             return false;
         }
@@ -385,9 +466,9 @@ namespace PatchManager.Core.Assets
         /// receives lazily loads its addressables. The last action writes the label's archive and releases its
         /// load handle. A final action persists totals and inventory.
         /// </remarks>
+        /// <param name="insertNext">Schedules the per-label actions to run straight after this one.</param>
         /// <param name="resolve">Callback invoked once scheduling finishes.</param>
-        /// <param name="reject">Reject callback (currently unused).</param>
-        public static void RebuildAllCache(Action resolve, Action<string> reject)
+        public static void RebuildAllCache(Action<List<GenericFlowAction>> insertNext, Action resolve)
         {
             Universe.BeginRun();
             var labels = Universe.PatchedLabels.Concat(_createdAssets.Keys).Distinct().ToList();
@@ -407,7 +488,6 @@ namespace PatchManager.Core.Assets
                 activePassesPerLabel[label] = ActivePassesFor(label);
             }
 
-            var insertIdx = GameManager.Instance.LoadingFlow.flowIndex + 1;
             var actions = new List<GenericFlowAction>();
 
             foreach (var pass in Universe.OrderedPasses)
@@ -434,11 +514,7 @@ namespace PatchManager.Core.Assets
                 }
             ));
 
-            for (var i = actions.Count - 1; i >= 0; i--)
-            {
-                GameManager.Instance.LoadingFlow.FlowActions.Insert(insertIdx, actions[i]);
-            }
-
+            insertNext(actions);
             resolve();
         }
 

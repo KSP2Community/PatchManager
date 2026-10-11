@@ -23,6 +23,20 @@ namespace PatchManager.Shared
         /// </summary>
         public const string MAIN_MENU_FEATURE = "Ksp2Redux:All";
 
+        // Packs and game modes are chosen before a set exists, so every set sees all of them
+        private static readonly HashSet<string> GlobalLabels = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "campaign_pack",
+            "game_mode"
+        };
+
+        /// <summary>
+        /// Checks whether a label's content is the same in every feature set, so nothing in it is gated.
+        /// </summary>
+        /// <param name="label">The addressables label.</param>
+        /// <returns>True if the label is global, false otherwise.</returns>
+        public static bool IsGlobalLabel(string label) => label != null && GlobalLabels.Contains(label);
+
         /// <summary>
         /// Checks a registration against the enabled features.
         /// </summary>

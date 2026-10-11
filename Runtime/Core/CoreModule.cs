@@ -60,45 +60,29 @@ namespace PatchManager.Core
 
         private void DecideCacheValidity(Action resolve, Action<string> reject)
         {
-            PatchingManager.OpenSetCache();
-            if (Application.isEditor || _shouldAlwaysInvalidate)
-            {
-                CacheManager.InvalidateCache();
-            }
-
             // Both passes feed the checksum, so both run before the decision reads it. Mod bodies have already
             // run at this point, so CollectScriptResults finds the addressable-sourced scripts in memory.
             PatchingManager.HashScriptFiles();
             PatchingManager.CollectScriptResults();
-            var isValid = PatchingManager.InvalidateCacheIfNeeded();
-
-            var tail = new List<GenericFlowAction>();
-            if (!isValid)
-            {
-                _wasCacheInvalidated = true;
-                tail.Add(new GenericFlowAction("Patch Manager: Registering all patches", RegisterAllPatches));
-                tail.Add(new GenericFlowAction("Patch Manager: Creating New Assets", PatchingManager.CreateNewAssets));
-                tail.Add(new GenericFlowAction("Patch Manager: Rebuilding Cache", PatchingManager.RebuildAllCache));
-                tail.Add(new GenericFlowAction("Patch Manager: Saving Patch Summary", SavePatchSummary));
-            }
-
-            tail.Add(
-                new GenericFlowAction(
-                    "Patch Manager: Resolving Prefab Patch Plans",
-                    ResolvePrefabPatchPlans
-                )
+            var tail = PatchingManager.SetRunSteps(
+                Application.isEditor || _shouldAlwaysInvalidate,
+                InsertNextInLoadingFlow,
+                out _wasCacheInvalidated
             );
             tail.Add(new GenericFlowAction("Patch Manager: Registering Resource Locator", RegisterResourceLocator));
-
-            // Splice the tail in right after this step. Insert back-to-front so each Insert at the same index
-            // pushes the previous one down, leaving the tail in its original order.
-            var insertIndex = GameManager.Instance.LoadingFlow.flowIndex + 1;
-            for (var i = tail.Count - 1; i >= 0; i--)
-            {
-                GameManager.Instance.LoadingFlow.FlowActions.Insert(insertIndex, tail[i]);
-            }
-
+            InsertNextInLoadingFlow(tail);
             resolve();
+        }
+
+        // Splices actions in right after the running step. Inserted back-to-front so each Insert at the same index
+        // pushes the previous one down, leaving the actions in their original order.
+        private static void InsertNextInLoadingFlow(List<GenericFlowAction> actions)
+        {
+            var insertIndex = GameManager.Instance.LoadingFlow.flowIndex + 1;
+            for (var i = actions.Count - 1; i >= 0; i--)
+            {
+                GameManager.Instance.LoadingFlow.FlowActions.Insert(insertIndex, actions[i]);
+            }
         }
 
         private static void CloseRegistration(Action resolve, Action<string> reject)
@@ -106,57 +90,6 @@ namespace PatchManager.Core
             PatchingManager.Universe.RegistrationOpen = false;
             PrefabPatchRuntime.CloseRegistration();
             PatchingManager.SelectBootFeatures();
-            resolve();
-        }
-
-        private static void ResolvePrefabPatchPlans(
-            Action resolve,
-            Action<string> reject
-        )
-        {
-            var manifestSources =
-                PluginList.AllEnabledAndActivePlugins
-                    .Where(descriptor =>
-                        !string.IsNullOrWhiteSpace(
-                            descriptor.AddressablePrefabPatchLabel
-                        )
-                    )
-                    .Select(descriptor =>
-                        new PrefabPatchManifestSource
-                        {
-                            OwnerModId = descriptor.Guid,
-                            AddressablesLabel =
-                                descriptor.AddressablePrefabPatchLabel
-                        }
-                    )
-                    .ToArray();
-            PrefabPatchRuntime.DiscoverAndResolve(
-                PatchingManager.Universe.AllMods,
-                PatchingManager.Universe.EnabledFeatures,
-                manifestSources,
-                () =>
-                {
-                    // The set's plans are known only now, so this is where its inventory is complete and the
-                    // caches no set uses any more can go
-                    CacheManager.Inventory.PlanFiles = PrefabPatchRuntime.PlanFiles.ToList();
-                    CacheManager.SaveInventory();
-                    CacheManager.EvictStaleSets();
-                    resolve();
-                },
-                reject
-            );
-        }
-
-        private void SavePatchSummary(Action resolve, Action<string> reject)
-        {
-            PatchingManager.Universe.Summary.RecognizedModIds = PatchingManager.Universe.AllMods;
-            CacheManager.SaveSummary(PatchingManager.Universe.Summary);
-            resolve();
-        }
-
-        private static void RegisterAllPatches(Action resolve, Action<string> reject)
-        {
-            PatchingManager.RegisterPatches();
             resolve();
         }
 

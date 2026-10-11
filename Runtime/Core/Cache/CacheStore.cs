@@ -17,6 +17,7 @@ namespace PatchManager.Core.Cache
     internal class CacheStore : IDisposable
     {
         private const string INVENTORY_FILENAME = "inventory.json";
+        private const string SUMMARY_FILENAME = "summary.log";
 
         private readonly Dictionary<string, Archive> _openArchives = new();
 
@@ -99,6 +100,17 @@ namespace PatchManager.Core.Cache
         public void SaveInventory()
         {
             Inventory.Save(InventoryPath(ActiveSet));
+        }
+
+        /// <summary>
+        /// Keeps the summary of the open set's last rebuild beside its inventory, since the shared summary log
+        /// only ever holds the latest set's.
+        /// </summary>
+        /// <param name="summary">The summary text.</param>
+        public void SaveSummary(string summary)
+        {
+            Directory.CreateDirectory(SetDirectory(ActiveSet));
+            File.WriteAllText(Path.Combine(SetDirectory(ActiveSet), SUMMARY_FILENAME), summary);
         }
 
         /// <summary>

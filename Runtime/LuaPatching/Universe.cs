@@ -132,7 +132,8 @@ namespace PatchManager.LuaPatching
         /// Gets the queued new assets whose features are on in <see cref="EnabledFeatures" />.
         /// </summary>
         public IEnumerable<LuaAsset> EnabledNewAssets => AllNewAssets.Where(
-            asset => FeatureGate.Allows(asset.ModId, asset.NeedsFeatures, asset.ConflictsFeatures, EnabledFeatures, out _)
+            asset => FeatureGate.IsGlobalLabel(asset.Label) ||
+                FeatureGate.Allows(asset.ModId, asset.NeedsFeatures, asset.ConflictsFeatures, EnabledFeatures, out _)
         );
 
         /// <summary>
@@ -415,7 +416,8 @@ namespace PatchManager.LuaPatching
                     }
                 }
 
-                if (!FeatureGate.Allows(patch.PatchModId, patch.NeedsFeatures, patch.ConflictsFeatures, EnabledFeatures, out var unmet))
+                if (!FeatureGate.IsGlobalLabel(patch.Label) &&
+                    !FeatureGate.Allows(patch.PatchModId, patch.NeedsFeatures, patch.ConflictsFeatures, EnabledFeatures, out var unmet))
                 {
                     Summary.Remove(patch.Name, "FEATURE", $"feature - {unmet}");
                     continue;
