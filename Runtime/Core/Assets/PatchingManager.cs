@@ -320,7 +320,7 @@ namespace PatchManager.Core.Assets
                     // caches no set uses any more can go
                     CacheManager.Inventory.PlanFiles = PrefabPatchRuntime.PlanFiles.ToList();
                     CacheManager.SaveInventory();
-                    CacheManager.EvictStaleSets(PinnedFeatureSets.Ids());
+                    CacheManager.EvictStaleSets(PinnedSetIds());
                     resolve();
                 },
                 reject
@@ -412,6 +412,42 @@ namespace PatchManager.Core.Assets
             using var sha = System.Security.Cryptography.SHA256.Create();
             var digest = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(string.Join("\n", ordered)));
             return BitConverter.ToString(digest).Replace("-", "").ToLowerInvariant();
+        }
+
+        // Every pack's and every single-player save's set, whose caches eviction keeps whatever their age
+        private static ISet<string> PinnedSetIds()
+        {
+            var installed = PluginList.AllEnabledAndActivePlugins.Select(descriptor => descriptor.Guid);
+            var packs = GameManager.Instance?.CampaignPacks?.AllCampaignPacks()
+                    .Select(pack => (IReadOnlyCollection<string>)pack.Features)
+                ?? Enumerable.Empty<IReadOnlyCollection<string>>();
+            var saves = GameManager.Instance?.Game?.SaveLoadManager?.FeaturesOfSaves()
+                ?? Enumerable.Empty<IReadOnlyCollection<string>>();
+            return new HashSet<string>(PinnedSets(FeatureRegistry.Instance, packs, saves, installed).Select(SetIdOf));
+        }
+
+        /// <summary>
+        /// Lists the sets whose patch caches are kept whatever their age: the set a new campaign of each pack starts
+        /// with, and the set each save plays with.
+        /// </summary>
+        /// <param name="registry">The feature registry.</param>
+        /// <param name="packFeatures">Each installed pack's features.</param>
+        /// <param name="saveFeatures">Each save's requested features.</param>
+        /// <param name="installedModIds">The installed, enabled mods.</param>
+        /// <returns>Each pinned set's enabled features.</returns>
+        internal static List<IReadOnlyList<string>> PinnedSets(
+            FeatureRegistry registry,
+            IEnumerable<IReadOnlyCollection<string>> packFeatures,
+            IEnumerable<IReadOnlyCollection<string>> saveFeatures,
+            IEnumerable<string> installedModIds
+        )
+        {
+            var installed = installedModIds.ToList();
+            return packFeatures
+                .Select(features => (IReadOnlyCollection<string>)SessionManager.ForNewCampaign(features, installed))
+                .Concat(saveFeatures)
+                .Select(requested => registry.Resolve(requested).Enabled)
+                .ToList();
         }
 
         /// <summary>
