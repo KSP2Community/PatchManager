@@ -77,9 +77,10 @@ namespace PatchManager.Core.Cache
         /// <summary>
         /// Deletes the least recently used set caches above the limit, and whatever only they used.
         /// </summary>
-        public static void EvictStaleSets()
+        /// <param name="pinned">The ids of sets kept whatever their age, such as those packs and saves use.</param>
+        public static void EvictStaleSets(ISet<string> pinned)
         {
-            Store.Evict(MAX_SETS, new HashSet<string>());
+            Store.Evict(MAX_SETS, pinned);
         }
 
         /// <summary>

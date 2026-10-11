@@ -234,7 +234,7 @@ namespace PatchManager.Core.Assets
                     // caches no set uses any more can go
                     CacheManager.Inventory.PlanFiles = PrefabPatchRuntime.PlanFiles.ToList();
                     CacheManager.SaveInventory();
-                    CacheManager.EvictStaleSets();
+                    CacheManager.EvictStaleSets(PinnedFeatureSets.Ids());
                     resolve();
                 },
                 reject
