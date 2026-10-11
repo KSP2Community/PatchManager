@@ -154,6 +154,7 @@ namespace PatchManager.Core.Assets
             Universe.EnabledFeatures = new HashSet<string>(features, StringComparer.OrdinalIgnoreCase);
             Logging.LogInfo($"Patching for {Universe.EnabledFeatures.Count} enabled feature(s)");
             FeatureAssetIndex.Activate(Universe.EnabledFeatures);
+            ActiveFeatures.Activate(Universe.EnabledFeatures);
             var setId = SetIdOf(Universe.EnabledFeatures);
             CacheManager.UseSet(setId);
             var ordered = Universe.EnabledFeatures.OrderBy(id => id, StringComparer.OrdinalIgnoreCase);
@@ -321,7 +322,10 @@ namespace PatchManager.Core.Assets
         internal static string SetIdOf(IEnumerable<string> features)
         {
             var ordered = features.Select(id => id.ToLowerInvariant()).OrderBy(id => id, StringComparer.Ordinal);
-            return Hash.FromString(string.Join("\n", ordered));
+            // A collision would serve one set's content to another without a word, so the id is a full SHA-256
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var digest = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(string.Join("\n", ordered)));
+            return BitConverter.ToString(digest).Replace("-", "").ToLowerInvariant();
         }
 
         /// <summary>
