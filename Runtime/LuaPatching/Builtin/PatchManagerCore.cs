@@ -249,8 +249,39 @@ namespace PatchManager.LuaPatching.Builtin
         /// <param name="context">The Lua execution context. Its env's <c>ModId</c> global names the registering mod.</param>
         /// <param name="callback">The callback, handed the set just activated.</param>
         /// <returns>The registered action, for gating it with features.</returns>
-        public SetLoadingAction OnSetActivated(ScriptExecutionContext context, Closure callback) =>
-            new(ModIdOf(context), "Lua set activation", () => { }, done => done());
+        public SetLoadingAction OnSetActivated(ScriptExecutionContext context, Closure callback)
+        {
+            string modId = ModIdOf(context);
+            SetLoadingAction action = Loading.AddSetAction(
+                modId,
+                $"Activating features for {modId}",
+                () => { },
+                done =>
+                {
+                    var enabled = new HashSet<string>(
+                        ActiveFeatures.Enabled ?? Array.Empty<string>(),
+                        StringComparer.OrdinalIgnoreCase
+                    );
+                    // One mod's failing callback must not stop the others from loading their data
+                    try
+                    {
+                        callback.Call(UserData.Create(new RunFeatures(enabled)));
+                    }
+                    catch (InterpreterException e)
+                    {
+                        Shared.Logging.LogError($"{modId}'s set activation callback failed: {e.DecoratedMessage}");
+                    }
+
+                    done();
+                }
+            );
+            foreach (string feature in _scopedFeatures)
+            {
+                action.Feature(feature);
+            }
+
+            return action;
+        }
 
         private RunCallback AddRunCallback(List<RunCallback> into, ScriptExecutionContext context, Closure callback)
         {
