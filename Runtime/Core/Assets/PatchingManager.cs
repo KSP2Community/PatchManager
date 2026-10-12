@@ -461,7 +461,7 @@ namespace PatchManager.Core.Assets
         {
             var installed = installedModIds.ToList();
             return packFeatures
-                .Select(features => (IReadOnlyCollection<string>)SessionManager.ForNewCampaign(features, installed))
+                .Select(features => (IReadOnlyCollection<string>)SessionManager.ForNewCampaign(features, installed, SpaceWarp2.API.ModList.FeatureDefaults, registry))
                 .Concat(saveFeatures)
                 .Select(requested => registry.Resolve(requested).Enabled)
                 .ToList();
