@@ -21,6 +21,16 @@ namespace PatchManager.Planets
         }
 
         /// <summary>
+        /// Records how much the active set's data scales a body against its prefab.
+        /// </summary>
+        /// <param name="bodyName">The body's name, in any case.</param>
+        /// <param name="ratio">The set's radius over the prefab's.</param>
+        public static void RecordScale(string bodyName, double ratio)
+        {
+            Scales.TryAdd(bodyName.ToLowerInvariant(), ratio);
+        }
+
+        /// <summary>
         /// Gets the atmosphere override for a body.
         /// </summary>
         /// <param name="bodyName">The body's name, in any case.</param>
