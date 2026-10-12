@@ -43,8 +43,8 @@ namespace PatchManager.Planets
         }
 
         /// <summary>
-        /// Registers the atmosphere and volume-cloud overrides as data kept per feature set, so each set's patched
-        /// overrides replace the last set's whenever the set changes.
+        /// Registers the atmosphere and volume-cloud overrides and the body scales as data kept per feature set, so each
+        /// set's replace the last set's whenever the set changes.
         /// </summary>
         public override void RegisterPlaySessionActions()
         {
@@ -62,6 +62,8 @@ namespace PatchManager.Planets
                 RegisterVolumeCloudOverride,
                 OverrideManager.VolumeCloudOverrides.Clear
             );
+            // Bodies record their scale as they are created, so a body the next set lacks must not keep this set's
+            Loading.AddSetAction(MOD_ID, "body scales", () => OverrideManager.Scales.Clear(), done => done());
         }
     }
 }

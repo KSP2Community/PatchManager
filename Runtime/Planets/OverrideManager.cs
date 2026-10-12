@@ -27,7 +27,7 @@ namespace PatchManager.Planets
         /// <param name="ratio">The set's radius over the prefab's.</param>
         public static void RecordScale(string bodyName, double ratio)
         {
-            Scales.TryAdd(bodyName.ToLowerInvariant(), ratio);
+            Scales[bodyName.ToLowerInvariant()] = ratio;
         }
 
         /// <summary>
